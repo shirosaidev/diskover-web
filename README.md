@@ -40,50 +40,7 @@ $ composer install
 
 ### User Guide
 
-#### Getting Started
-
-Edit diskover web settings in `src/diskover/Constants.php`.
-
-```
-<?php
-
-namespace diskover;
-
-class Constants {
-    // set to your Elasticearch host or ip
-    const ES_HOST = 'localhost';
-    // don't change following two lines
-    const ES_INDEX = 'diskover-*';
-    const ES_TYPE = 'file';
-    // set following two lines if using X-Pack http-auth
-    const ES_USER = '';
-    const ES_PASS = '';
-}
-```
-
-Create index.php symlink.
-
-```sh
-$ cd public
-$ ln -s dashboard.php index.php
-```
-
-Start diskover web using PHP's built-in web server.
-
-```sh
-$ cd public
-$ php -S <IP>:8000
-```
-
-By default diskover web will communicate with the Elasticsearch API at `http://<ES_HOST>:9200`. If you are running ES 
-on a different port than default 9200, you will need to pass this information to diskover web when starting
-it up via an environment variable:
-
-```sh
-$ APP_ES_PORT=<PORT> php -S <IP>:8000
-```
-
-Open your web browser and visit `http://<IP>:8000`.
+[Read the wiki](https://github.com/shirosaidev/diskover-web/wiki).
 
 
 ## License
