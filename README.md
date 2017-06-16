@@ -2,7 +2,7 @@
 
 diskover web is the front-end for [diskover](https://github.com/shirosaidev/diskover), allowing you to search your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
 
-### Screenshots
+## Screenshots
 
 ![diskover web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=True)
 ![diskover web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=True)
@@ -10,9 +10,9 @@ diskover web is the front-end for [diskover](https://github.com/shirosaidev/disk
 ![diskover web search results](docs/diskover-web-searchresults-screenshot.png?raw=True)
 ![diskover web file view](docs/diskover-web-fileview-screenshot.png?raw=True)
 
-### Installation Guide
+## Installation Guide
 
-#### Requirements
+### Requirements
 
 * `Linux` (tested on Ubuntu 16.04)
 * `PHP 7.0` (tested on PHP 7.0.15)
@@ -21,16 +21,14 @@ diskover web is the front-end for [diskover](https://github.com/shirosaidev/disk
 * `Elasticsearch` (tested on Elasticsearch 5.3.0)
 * `Apache or Nginx` (if you don't want to use PHP built-in web server)
 
-#### Download
-
-Download diskover-web if you haven't already.
+### Download
 
 ```sh
 $ git clone https://github.com/shirosaidev/diskover-web.git
 $ cd diskover-web
 ```
 
-#### Install application dependencies
+### Install application dependencies
 
 ```sh
 $ cd diskover-web
@@ -38,7 +36,7 @@ $ composer install
 ```
 
 
-### User Guide
+## User Guide
 
 [Read the wiki](https://github.com/shirosaidev/diskover-web/wiki).
 
