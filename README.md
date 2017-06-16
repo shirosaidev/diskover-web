@@ -1,6 +1,6 @@
 # diskover web
 
-diskover web is the front-end for [diskover](../README.md), allowing you to search your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
+diskover web is the front-end for [diskover](https://github.com/shirosaidev/diskover), allowing you to search your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
 
 ### Screenshots
 
@@ -23,17 +23,17 @@ diskover web is the front-end for [diskover](../README.md), allowing you to sear
 
 #### Download
 
-Download diskover if you haven't already.
+Download diskover-web if you haven't already.
 
 ```sh
-$ git clone https://github.com/shirosaidev/diskover.git
-$ cd diskover
+$ git clone https://github.com/shirosaidev/diskover-web.git
+$ cd diskover-web
 ```
 
 #### Install application dependencies
 
 ```sh
-$ cd diskover_web
+$ cd diskover-web
 $ composer install
 ```
 
