@@ -48,7 +48,7 @@
       <button type="submit" class="btn btn-default">Search</button>
     </form>
     <ul class="nav navbar-nav navbar-right">
-      <li><a href="https://github.com/shirosaidev/diskover">View on Github</a></li>
+      <li><a href="https://github.com/shirosaidev/diskover-web">View on Github</a></li>
     </ul>
   </div>
 </div>

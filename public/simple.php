@@ -16,22 +16,55 @@ if (!empty($_REQUEST['submitted'])) {
   // Connect to Elasticsearch
   $client = connectES();
 
+  // current page
+  $p = $_REQUEST['p'];
+
   // Setup search query
   $searchParams['index'] = Constants::ES_INDEX; // which index to search
   $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
-  $searchParams['body']['query']['query_string']['query'] = $_REQUEST['q']; // what to search for
-  $searchParams['size']  = 100; // limit results
-  $p = $_REQUEST['p'];
-  $searchParams['from'] = $p * $searchParams['size'] - $searchParams['size']; // start from for results
 
+  // Scroll parameter alive time
+  $searchParams['scroll'] = "1m";
+
+  // number of results to return per page
+  $searchParams['size'] = "100";
+
+  // match all if search field empty
   if (empty($_REQUEST['q'])) {
     $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
+  // match what's in the search field
+  } else {
+    $searchParams['body']['query']['query_string']['query'] = $_REQUEST['q'];
   }
 
-  // Send search query to Elasticsearch and get results
+  // Send search query to Elasticsearch and get tag scroll id and first page of results
   $queryResponse = $client->search($searchParams);
-  $results = $queryResponse['hits']['hits'];
+
+  // total hits
   $total = $queryResponse['hits']['total'];
+
+  $i = 1;
+  // Loop until the scroll "cursors" are exhausted
+  while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
+
+      // Get results for the page we are on
+      if ($i == $p) {
+        $results = $queryResponse['hits']['hits'];
+        // we've got our results so let's get out of here
+        break;
+      }
+
+      // Get the new scroll_id
+      $scroll_id = $queryResponse['_scroll_id'];
+
+      // Execute a Scroll request and repeat
+      $queryResponse = $client->scroll([
+              "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+              "scroll" => "1m"           // and the same timeout window
+          ]
+      );
+      $i += 1;
+  }
 }
 ?>
 <!DOCTYPE html>

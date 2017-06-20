@@ -12,15 +12,21 @@ if (!empty($_REQUEST['submitted'])) {
   // Connect to Elasticsearch
   $client = connectES();
 
+  // curent page
+  $p = $_REQUEST['p'];
+
   // Setup search query
   $searchParams['index'] = Constants::ES_INDEX; // which index to search
   $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
-  $searchParams['body'] = [];
-  $searchParams['size']  = 100; // limit results
-  $p = $_REQUEST['p'];
-  $searchParams['from'] = $p * $searchParams['size'] - $searchParams['size']; // start from for results
 
+  $searchParams['body'] = [];
   $filterClauses = [];
+
+  // Scroll parameter alive time
+  $searchParams['scroll'] = "1m";
+
+  $searchParams['size']  = 100; // limit results
+
 
   if ($_REQUEST['filename']) {
     $filterClauses[] = [ 'term' => [ 'filename' => $_REQUEST['filename'] ] ];
@@ -145,11 +151,42 @@ if (!empty($_REQUEST['submitted'])) {
       $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
     }
   }
+  // Check if we need to sort search
+  if ($_REQUEST['sort']) {
+    $searchParams['body']['sort'] = $_REQUEST['sort'];
+    if ($_REQUEST['sortorder']) {
+      $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
+    }
+  }
 
-  // Send search query to Elasticsearch and get results
+  // Send search query to Elasticsearch and get tag scroll id and first page of results
   $queryResponse = $client->search($searchParams);
-  $results = $queryResponse['hits']['hits'];
+
+  // total hits
   $total = $queryResponse['hits']['total'];
+
+  $i = 1;
+  // Loop until the scroll "cursors" are exhausted
+  while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
+
+      // Get results for the page we are on
+      if ($i == $p) {
+        $results = $queryResponse['hits']['hits'];
+        // we've got our results so let's get out of here
+        break;
+      }
+
+      // Get the new scroll_id
+      $scroll_id = $queryResponse['_scroll_id'];
+
+      // Execute a Scroll request and repeat
+      $queryResponse = $client->scroll([
+              "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+              "scroll" => "1m"           // and the same timeout window
+          ]
+      );
+      $i += 1;
+  }
 }
 ?>
 <!DOCTYPE html>
@@ -201,7 +238,7 @@ if (!empty($_REQUEST['submitted'])) {
   <div class="form-group">
     <div class="row">
       <div class="col-xs-10">
-        <label for="path_parent">Directory is...  </label>
+        <label for="path_parent">Parent path is...  </label>
         <input name="path_parent" value="<?php echo $_REQUEST['path_parent']; ?>" placeholder="/Users/shirosai/Music" class="form-control"/>
       </div>
     </div>
@@ -266,9 +303,31 @@ if (!empty($_REQUEST['submitted'])) {
   </div>
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-10">
+      <div class="col-xs-2">
         <label for="tags">Show request JSON?</label>
         <input type="checkbox" name="debug" value="true"<?php echo ($_REQUEST['debug'] ? " checked" : ""); ?> />
+      </div>
+      <div class="col-xs-2">
+        <label for="sort">Sort by...</label>
+        <select class="form-control" name="sort">
+          <option value="<?php echo $_REQUEST['sort']; ?>" selected><?php echo $_REQUEST['sort']; ?></option>
+          <option value="filename">filename</option>
+          <option value="path_parent">path_parent</option>
+          <option value="filesize">filesize</option>
+          <option value="owner">owner</option>
+          <option value="group">group</option>
+          <option value="last_modified">last_modified</option>
+          <option value="last_access">last_access</option>
+          <option value="tag">tag</option>
+        </select>
+      </div>
+      <div class="col-xs-2">
+        <label for="sortorder">Sort order...</label>
+        <select class="form-control" name="sortorder">
+          <option value="<?php echo $_REQUEST['sortorder']; ?>" selected><?php echo $_REQUEST['sortorder']; ?></option>
+          <option value="asc">asc</option>
+          <option value="desc">desc</option>
+        </select>
       </div>
     </div>
   </div>
