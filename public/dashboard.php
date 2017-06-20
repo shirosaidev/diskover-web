@@ -59,6 +59,9 @@ $totalFilesizeDupes = 0;
 $searchParams['index'] = Constants::ES_INDEX; // which index to search
 $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
+// Scroll parameter alive time
+$searchParams['scroll'] = "1m";
+
 // Setup search query for dupes count
 $searchParams['body'] = [
    'size' => 0,
@@ -67,12 +70,12 @@ $searchParams['body'] = [
        'terms' => [
          'field' => 'filehash',
          'min_doc_count' => 2,
-         'size' => 10,
+         'size' => 100,
        ],
     'aggs' => [
       'duplicateDocuments' => [
         'top_hits' => [
-          'size' => 10
+          'size' => 100
         ]
       ]
     ]
