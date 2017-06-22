@@ -8,6 +8,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 function connectES() {
   // Connect to Elasticsearch node
   $esPort = getenv('APP_ES_PORT') ?: 9200;
+  $esIndex = getenv('APP_ES_INDEX') ?: Constants::ES_INDEX;
   $hosts = [
       [
     'host' => Constants::ES_HOST,
@@ -21,7 +22,7 @@ function connectES() {
   // Check connection to Elasticsearch
   try {
     $params = [
-      'index' => Constants::ES_INDEX,
+      'index' => $esIndex,
       'type' => Constants::ES_TYPE,
       'id' => 1,
       'client' => [ 'ignore' => [400, 404, 500] ]
