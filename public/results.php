@@ -116,7 +116,7 @@ if (count($results) > 0) {
         ?>
         <?php if ($querystring['p'] == 1) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $prevpage . '">'; } ?>&laquo;</a></li>
         <?php
-        for ($pn=1; $pn<=$total/$searchParams['size']+1; $pn++) {
+        for ($pn=$querystring['p']; $pn<=$querystring['p']+9; $pn++) {
           $qs = $querystring;
           $qs['p'] = $pn;
           $qs1 = http_build_query($qs);
