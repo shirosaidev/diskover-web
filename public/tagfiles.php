@@ -6,7 +6,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
 // Update files if any were submitted
-if (count($_POST) > 0) {
+if (count($_POST['ids']) > 0) {
   // Connect to Elasticsearch
   $client = connectES();
 
