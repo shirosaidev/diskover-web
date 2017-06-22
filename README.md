@@ -1,6 +1,6 @@
 # diskover web
 
-diskover web is the web panel for [diskover](https://github.com/shirosaidev/diskover), allowing you to search your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
+diskover web is the web panel for [diskover](/diskover), allowing you to search your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
 
 ## Screenshots
 
@@ -38,9 +38,9 @@ $ composer install
 
 ## User Guide
 
-[Read the wiki](https://github.com/shirosaidev/diskover-web/wiki).
+[Read the wiki](/wiki).
 
 
 ## License
 
-See the [license file](https://github.com/shirosaidev/diskover-web/blob/master/LICENSE).
+See the [license file](/LICENSE).
