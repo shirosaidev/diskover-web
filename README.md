@@ -4,11 +4,11 @@ diskover web is the web panel for [diskover](https://github.com/shirosaidev/disk
 
 ## Screenshots
 
-![diskover web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=True)
-![diskover web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=True)
-![diskover web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=True)
-![diskover web search results](docs/diskover-web-searchresults-screenshot.png?raw=True)
-![diskover web file view](docs/diskover-web-fileview-screenshot.png?raw=True)
+![diskover web dashboard](https://raw.githubusercontent.com/shirosaidev/diskover/master/docs/diskover-web-dashboard-screenshot.png)
+![diskover web simple search](https://raw.githubusercontent.com/shirosaidev/diskover/master/docs/diskover-web-simplesearch-screenshot.png)
+![diskover web advanced file view](https://raw.githubusercontent.com/shirosaidev/diskover/master/docs/diskover-web-advancedsearch-screenshot.png)
+![diskover web search results](https://raw.githubusercontent.com/shirosaidev/diskover/master/docs/diskover-web-searchresults-screenshot.png)
+![diskover web file view](https://raw.githubusercontent.com/shirosaidev/diskover/master/docs/diskover-web-fileview-screenshot.png)
 
 ## Installation Guide
 
