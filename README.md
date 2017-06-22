@@ -1,14 +1,14 @@
-# diskover web
+# diskover-web
 
-diskover web is the web panel for [diskover](https://github.com/shirosaidev/diskover), allowing you to search your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
+diskover-web is the web panel for [diskover](https://github.com/shirosaidev/diskover), allowing you to search Elasticsearch for your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
 
 ## Screenshots
 
-![diskover web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=true)
-![diskover web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
-![diskover web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
-![diskover web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
-![diskover web file view](docs/diskover-web-fileview-screenshot.png?raw=true)
+![diskover-web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=true)
+![diskover-web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
+![diskover-web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
+![diskover-web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
+![diskover-web file view](docs/diskover-web-fileview-screenshot.png?raw=true)
 
 ## Installation Guide
 

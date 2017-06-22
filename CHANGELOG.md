@@ -1,5 +1,11 @@
 # Diskover Web Change Log
 
+## [1.0.3] - 2017-06-22
+### added
+- can change es index using env variable or in Constants.php
+### changed
+- limited page buttons to 10 per search results page
+
 ## [1.0.2] - 2017-06-20
 ### added
 - sort by/order in advanced search
