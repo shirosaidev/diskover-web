@@ -45,10 +45,11 @@ if (count($results) > 0) {
       <tbody>
       <?php
         error_reporting(E_ALL ^ E_NOTICE);
-        $i = $p * 100 - 100;
+        $limit = $searchParams['size'];
+        $i = $p * $limit - $limit;
         foreach ($results as $result) {
-            $file = $result['_source'];
-            $i += 1;
+          $file = $result['_source'];
+          $i += 1;
       ?>
       <input type="hidden" name="<?php echo $result['_id']; ?>" value="<?php echo $result['_index']; ?>" />
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'warning'; } elseif ($file['tag'] == 'archive') { echo 'success'; } elseif ($file['tag'] == 'keep') { echo 'info'; }?>">
@@ -96,35 +97,47 @@ if (count($results) > 0) {
     <div class="col-xs-12 text-right">
       <?php
       // pagination
-      if ($total > $searchParams['size']) {
+      if ($total > $limit) {
       ?>
       <ul class="pagination">
         <?php
         parse_str($_SERVER["QUERY_STRING"], $querystring);
-        $qsp = $querystring;
-        $qsn = $querystring;
+        $links = 7;
+        $page = $querystring['p'];
+        $last = ceil($total / $limit);
+        $start = (($page - $links) > 0) ? $page - $links : 1;
+        $end = (($page + $links) < $last) ? $page + $links : $last;
+        $qsfp = $qslp = $qsp = $qsn = $querystring;
+        $qsfp['p'] = 1;
+        $qslp['p'] = $last;
         if ($qsp['p'] > 1) {
           $qsp['p'] -= 1;
         }
-        if ($qsn['p'] < $total/$searchParams['size']+1) {
+        if ($qsn['p'] < $last) {
           $qsn['p'] += 1;
         }
+        $qsfp = http_build_query($qsfp);
+        $qslp = http_build_query($qslp);
         $qsn = http_build_query($qsn);
         $qsp = http_build_query($qsp);
-        $prevpage = $_SERVER['PHP_SELF'] . "?" . $qsp;
-        $nextpage = $_SERVER['PHP_SELF'] . "?" . $qsn;
+        $firstpageurl = $_SERVER['PHP_SELF'] . "?" . $qsfp;
+        $lastpageurl = $_SERVER['PHP_SELF'] . "?" . $qslp;
+        $prevpageurl = $_SERVER['PHP_SELF'] . "?" . $qsp;
+        $nextpageurl = $_SERVER['PHP_SELF'] . "?" . $qsn;
         ?>
-        <?php if ($querystring['p'] == 1) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $prevpage . '">'; } ?>&laquo;</a></li>
+        <?php if ($start > 1) { echo '<li><a href="' . $firstpageurl . '">1</a></li>'; } ?>
+        <?php if ($page == 1) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $prevpageurl . '">'; } ?>&laquo;</a></li>
         <?php
-        for ($pn=$querystring['p']; $pn<=$querystring['p']+9; $pn++) {
+        for ($i=$start; $i<=$end; $i++) {
           $qs = $querystring;
-          $qs['p'] = $pn;
+          $qs['p'] = $i;
           $qs1 = http_build_query($qs);
           $url = $_SERVER['PHP_SELF'] . "?" . $qs1;
         ?>
-        <li<?php if ($querystring['p'] == $pn) { echo ' class="active"'; } ?>><a href="<?php echo $url; ?>"><?php echo $pn; ?></a></li>
+        <li<?php if ($page == $i) { echo ' class="active"'; } ?>><a href="<?php echo $url; ?>"><?php echo $i; ?></a></li>
         <?php } ?>
-        <?php if ($querystring['p'] >= $total/$searchParams['size']) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpage . '">'; } ?>&raquo;</a></li>
+        <?php if ($page >= $last) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpageurl . '">'; } ?>&raquo;</a></li>
+        <?php if ($end < $last) { echo '<li><a href="' . $lastpageurl . '">' . $last . '</a></li>'; } ?>
       </ul>
       <?php } ?>
     </div>
