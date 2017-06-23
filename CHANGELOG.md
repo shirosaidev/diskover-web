@@ -4,7 +4,9 @@
 ### added
 - can change es index using env variable or in Constants.php
 ### changed
-- limited page buttons to 10 per search results page
+- improved pagination on search results page
+### fixed
+- error when clicking tag button with no files selected
 
 ## [1.0.2] - 2017-06-20
 ### added
