@@ -8,15 +8,11 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
 
-if (empty($_REQUEST['q'])) {
-        $_REQUEST['q']="";
-}
-
 if (!empty($_REQUEST['submitted'])) {
   // Connect to Elasticsearch
   $client = connectES();
 
-  // current page
+  // curent page
   $p = $_REQUEST['p'];
 
   // Setup search query
@@ -27,7 +23,7 @@ if (!empty($_REQUEST['submitted'])) {
   $searchParams['scroll'] = "1m";
 
   // number of results to return per page
-  $searchParams['size'] = "100";
+  $searchParams['size'] = 100;
 
   // match all if search field empty
   if (empty($_REQUEST['q'])) {
@@ -37,33 +33,40 @@ if (!empty($_REQUEST['submitted'])) {
     $searchParams['body']['query']['query_string']['query'] = $_REQUEST['q'];
   }
 
-  // Send search query to Elasticsearch and get tag scroll id and first page of results
+  // sort by filename
+  $searchParams['body']['sort'] = "filename";
+
+  // Send search query to Elasticsearch and get scroll id and first page of results
   $queryResponse = $client->search($searchParams);
 
-  // total hits
+  // set total hits
   $total = $queryResponse['hits']['total'];
 
+  // Get the first scroll_id
+  $scroll_id = $queryResponse['_scroll_id'];
+
   $i = 1;
-  // Loop until the scroll "cursors" are exhausted
-  while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
+  // Loop through all the pages of results
+  while ($i <= ceil($total/$searchParams['size'])) {
 
-      // Get results for the page we are on
-      if ($i == $p) {
-        $results = $queryResponse['hits']['hits'];
-        // we've got our results so let's get out of here
-        break;
-      }
+    // check if we have the results for the page we are on
+    if ($i == $p) {
+      // Get results
+      $results[$i] = $queryResponse['hits']['hits'];
+      // end loop
+      break;
+    }
 
-      // Get the new scroll_id
-      $scroll_id = $queryResponse['_scroll_id'];
+    // Execute a Scroll request and repeat
+    $queryResponse = $client->scroll([
+            "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+            "scroll" => "1m"           // and the same timeout window
+        ]
+    );
 
-      // Execute a Scroll request and repeat
-      $queryResponse = $client->scroll([
-              "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-              "scroll" => "1m"           // and the same timeout window
-          ]
-      );
-      $i += 1;
+    // Get the scroll_id for next page of results
+    $scroll_id = $queryResponse['_scroll_id'];
+    $i += 1;
   }
 }
 ?>

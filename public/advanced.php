@@ -55,13 +55,13 @@ if (!empty($_REQUEST['submitted'])) {
     $filterClauses[] = [ 'range' => [ 'last_modified' => $rangeFilter ] ];
   }
 
-  if ($_REQUEST['last_acces_time_low'] || $_REQUEST['last_acces_time_high']) {
+  if ($_REQUEST['last_access_time_low'] || $_REQUEST['last_access_time_high']) {
     $rangeFilter = [];
-    if ($_REQUEST['last_acces_time_low']) {
-      $rangeFilter['gte'] = (string) $_REQUEST['last_acces_time_low'];
+    if ($_REQUEST['last_access_time_low']) {
+      $rangeFilter['gte'] = (string) $_REQUEST['last_access_time_low'];
     }
-    if ($_REQUEST['last_acces_time_high']) {
-      $rangeFilter['lte'] = (string) $_REQUEST['last_acces_time_high'];
+    if ($_REQUEST['last_access_time_high']) {
+      $rangeFilter['lte'] = (string) $_REQUEST['last_access_time_high'];
     }
     $filterClauses[] = [ 'range' => [ 'last_access' => $rangeFilter ] ];
   }
@@ -151,12 +151,15 @@ if (!empty($_REQUEST['submitted'])) {
       $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
     }
   }
-  // Check if we need to sort search
+  // Check if we need to sort search differently
   if ($_REQUEST['sort']) {
     $searchParams['body']['sort'] = $_REQUEST['sort'];
     if ($_REQUEST['sortorder']) {
       $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
     }
+  } else {
+    // sort by filename
+    $searchParams['body']['sort'] = "filename";
   }
 
   // Send search query to Elasticsearch and get tag scroll id and first page of results
@@ -165,27 +168,31 @@ if (!empty($_REQUEST['submitted'])) {
   // total hits
   $total = $queryResponse['hits']['total'];
 
+  // Get the first scroll_id
+  $scroll_id = $queryResponse['_scroll_id'];
+
   $i = 1;
-  // Loop until the scroll "cursors" are exhausted
-  while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
+  // Loop through all the pages of results
+  while ($i <= ceil($total/$searchParams['size'])) {
 
-      // Get results for the page we are on
-      if ($i == $p) {
-        $results = $queryResponse['hits']['hits'];
-        // we've got our results so let's get out of here
-        break;
-      }
+    // check if we have the results for the page we are on
+    if ($i == $p) {
+      // Get results
+      $results[$i] = $queryResponse['hits']['hits'];
+      // end loop
+      break;
+    }
 
-      // Get the new scroll_id
-      $scroll_id = $queryResponse['_scroll_id'];
+    // Execute a Scroll request and repeat
+    $queryResponse = $client->scroll([
+            "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+            "scroll" => "1m"           // and the same timeout window
+        ]
+    );
 
-      // Execute a Scroll request and repeat
-      $queryResponse = $client->scroll([
-              "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-              "scroll" => "1m"           // and the same timeout window
-          ]
-      );
-      $i += 1;
+    // Get the scroll_id for next page of results
+    $scroll_id = $queryResponse['_scroll_id'];
+    $i += 1;
   }
 }
 ?>
@@ -264,10 +271,10 @@ if (!empty($_REQUEST['submitted'])) {
         <input name="last_mod_time_high" value="<?php echo $_REQUEST['last_mod_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control"/>
       </div>
       <div class="col-xs-3">
-        <label for="last_acces_time_low">Last access time is between...</label>
-        <input name="last_acces_time_low" value="<?php echo $_REQUEST['last_acces_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control"/>
-        <label for="last_acces_time_high">and</label>
-        <input name="last_acces_time_high" value="<?php echo $_REQUEST['last_acces_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control"/>
+        <label for="last_access_time_low">Last access time is between...</label>
+        <input name="last_access_time_low" value="<?php echo $_REQUEST['last_access_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control"/>
+        <label for="last_access_time_high">and</label>
+        <input name="last_access_time_high" value="<?php echo $_REQUEST['last_access_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control"/>
       </div>
     </div>
   </div>

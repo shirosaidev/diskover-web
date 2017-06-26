@@ -1,5 +1,16 @@
 # Diskover Web Change Log
 
+## [1.0.5] - 2017-06-25
+### changed
+- improved pagination code
+- default sort order for results is now by filename
+### fixed
+- bug with scroll results
+
+## [1.0.4] - 2017-06-24
+### fixed
+- bug with quick search for last access
+
 ## [1.0.3] - 2017-06-22
 ### added
 - can change es index using env variable or in Constants.php

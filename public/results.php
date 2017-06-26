@@ -1,5 +1,5 @@
 <?php
-if (count($results) > 0) {
+if (count($results[$p]) > 0) {
 ?>
 <div class="container-fluid searchresults">
   <div class="row">
@@ -47,7 +47,7 @@ if (count($results) > 0) {
         error_reporting(E_ALL ^ E_NOTICE);
         $limit = $searchParams['size'];
         $i = $p * $limit - $limit;
-        foreach ($results as $result) {
+        foreach ($results[$p] as $result) {
           $file = $result['_source'];
           $i += 1;
       ?>
