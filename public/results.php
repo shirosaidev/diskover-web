@@ -55,7 +55,7 @@ if (count($results[$p]) > 0) {
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'warning'; } elseif ($file['tag'] == 'archive') { echo 'success'; } elseif ($file['tag'] == 'keep') { echo 'info'; }?>">
         <th scope="row" class="text-nowrap"><?php echo $i; ?></th>
         <td><a href="/view.php?id=<?php echo $result['_id'] . '&index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
-        <td><?php echo $file['path_parent']; ?></td>
+        <td><a href="/sunburst.php?path=<?php echo $file['path_parent']; ?>"><?php echo $file['path_parent']; ?></a></td>
         <td class="text-nowrap"><?php echo $file['filesize']; ?></td>
         <td class="text-nowrap"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap"><?php echo $file['group']; ?></td>

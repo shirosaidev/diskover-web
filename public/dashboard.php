@@ -28,25 +28,29 @@ foreach ($tagCounts as $tag => $value) {
   // Get total for tag
   $tagCounts[$tag] = $queryResponse['hits']['total'];
 
-  // Loop until the scroll "cursors" are exhausted
-  while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
+  if ($tagCounts[$tag] > 0) {
 
-      // Calculate total filesizes for each tag
-      $results[$tag] = $queryResponse['hits']['hits'];
-      foreach ($results[$tag] as $result) {
-        // Add filesize to total
-        $totalFilesize[$tag] += $result['_source']['filesize'];
-      }
+    // Loop until the scroll "cursors" are exhausted
+    while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
 
-      // Get the new scroll_id
-      $scroll_id = $queryResponse['_scroll_id'];
+        // Calculate total filesizes for each tag
+        $results[$tag] = $queryResponse['hits']['hits'];
+        foreach ($results[$tag] as $result) {
+          // Add filesize to total
+          $totalFilesize[$tag] += $result['_source']['filesize'];
+        }
 
-      // Execute a Scroll request and repeat
-      $queryResponse = $client->scroll([
-              "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-              "scroll" => "1m"           // and the same timeout window
-          ]
-      );
+        // Get the new scroll_id
+        $scroll_id = $queryResponse['_scroll_id'];
+
+        // Execute a Scroll request and repeat
+        $queryResponse = $client->scroll([
+                "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+                "scroll" => "1m"           // and the same timeout window
+            ]
+        );
+    }
+
   }
 }
 
@@ -91,25 +95,29 @@ $searchParams['body'] = [
 $queryResponse = $client->search($searchParams);
 $totalDupes = $queryResponse['hits']['total'];
 
-// Loop until the scroll "cursors" are exhausted
-while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
+if ($totalDupes > 0) {
 
-    // Calculate total filesizes of dupes
-    $results[$tag] = $queryResponse['hits']['hits'];
-    foreach ($results[$tag] as $result) {
-      // Add filesize to total
-      $totalFilesizeDupes += $result['_source']['filesize'];
-    }
+  // Loop until the scroll "cursors" are exhausted
+  while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
 
-    // Get the new scroll_id
-    $scroll_id = $queryResponse['_scroll_id'];
+      // Calculate total filesizes of dupes
+      $results[$tag] = $queryResponse['hits']['hits'];
+      foreach ($results[$tag] as $result) {
+        // Add filesize to total
+        $totalFilesizeDupes += $result['_source']['filesize'];
+      }
 
-    // Execute a Scroll request and repeat
-    $queryResponse = $client->scroll([
-            "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-            "scroll" => "1m"           // and the same timeout window
-        ]
-    );
+      // Get the new scroll_id
+      $scroll_id = $queryResponse['_scroll_id'];
+
+      // Execute a Scroll request and repeat
+      $queryResponse = $client->scroll([
+              "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+              "scroll" => "1m"           // and the same timeout window
+          ]
+      );
+  }
+
 }
 
 ?>

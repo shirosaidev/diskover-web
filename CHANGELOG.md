@@ -1,5 +1,13 @@
 # Diskover Web Change Log
 
+## [1.1.0] - 2017-08-05
+### added
+- d3.js directory tree and sunburst chart view when clicking on parent path links
+### changed
+- improved page load time of dashboard
+### fixed
+- bug with entering paths in search
+
 ## [1.0.5] - 2017-06-25
 ### changed
 - improved pagination code

@@ -54,7 +54,7 @@ if (!empty($message)) {
   <div class="row">
     <div class="col-xs-12">
       <h1><a href="/advanced.php?submitted=true&amp;p=1&amp;filename=<?php echo $file['filename']; ?>"><?php echo $file['filename']; ?></a></h1>
-      <h4>Full path: <?php echo $file['path_full']; ?></h4>
+      <h4>Full path: <?php echo $file['path_parent']."/".$file['filename']; ?></h4>
       <h5>Parent path: <a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo $file['path_parent']; ?>"><?php echo $file['path_parent']; ?></a></h5>
     </div>
   </div>
