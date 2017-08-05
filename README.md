@@ -5,6 +5,7 @@ diskover-web is the web panel for [diskover](https://github.com/shirosaidev/disk
 ## Screenshots
 
 ![diskover-web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=true)
+![diskover-web sunburst](docs/diskover-web-sunburst-screenshot.png?raw=true)
 ![diskover-web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
 ![diskover-web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
 ![diskover-web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
