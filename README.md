@@ -1,6 +1,6 @@
 # diskover-web
 
-diskover-web is the web panel for [diskover](https://github.com/shirosaidev/diskover), allowing you to search Elasticsearch for your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
+diskover-web is the web file manager for [diskover](https://github.com/shirosaidev/diskover), allowing you to search Elasticsearch for your indexed files and tag them for deletion, archival or keeping. It is written in PHP, [Bootstrap](http://getbootstrap.com/) and [jQuery](https://jquery.com/).
 
 ## Screenshots
 
