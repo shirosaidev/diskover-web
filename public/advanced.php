@@ -338,6 +338,7 @@ if (!empty($_REQUEST['submitted'])) {
           <option value="last_modified">last_modified</option>
           <option value="last_access">last_access</option>
           <option value="tag">tag</option>
+          <option value="tag_custom">tag_custom</option>
         </select>
       </div>
       <div class="col-xs-2">
