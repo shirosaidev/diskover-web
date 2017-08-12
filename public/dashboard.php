@@ -19,42 +19,35 @@ $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to 
 
 // Execute the search
 foreach ($tagCounts as $tag => $value) {
-  // Scroll parameter alive time
-  $searchParams['scroll'] = "1m";
-  $searchParams['size'] = "100";
-  $searchParams['body']['query']['match']['tag'] = $tag;
-  // Send search query to Elasticsearch and get tag scroll id
+  $searchParams['body'] = [
+     'size' => 0,
+     'query' => [
+       'match' => [
+         'tag' => $tag
+       ]
+     ],
+      'aggs' => [
+        'total_size' => [
+          'sum' => [
+            'field' => 'filesize'
+          ]
+        ]
+      ]
+  ];
+
+  // Send search query to Elasticsearch
   $queryResponse = $client->search($searchParams);
+
   // Get total for tag
   $tagCounts[$tag] = $queryResponse['hits']['total'];
 
-  if ($tagCounts[$tag] > 0) {
+  // Get total size of all files with tag
+  $totalFilesize[$tag] = $queryResponse['aggregations']['total_size']['value'];
 
-    // Loop until the scroll "cursors" are exhausted
-    while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
-
-        // Calculate total filesizes for each tag
-        $results[$tag] = $queryResponse['hits']['hits'];
-        foreach ($results[$tag] as $result) {
-          // Add filesize to total
-          $totalFilesize[$tag] += $result['_source']['filesize'];
-        }
-
-        // Get the new scroll_id
-        $scroll_id = $queryResponse['_scroll_id'];
-
-        // Execute a Scroll request and repeat
-        $queryResponse = $client->scroll([
-                "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-                "scroll" => "1m"           // and the same timeout window
-            ]
-        );
-    }
-
-  }
 }
 
 // Get search results from Elasticsearch for duplicate files
+$results = [];
 $searchParams = [];
 $totalDupes = 0;
 $totalFilesizeDupes = 0;
@@ -63,8 +56,6 @@ $totalFilesizeDupes = 0;
 $searchParams['index'] = Constants::ES_INDEX; // which index to search
 $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
-// Scroll parameter alive time
-$searchParams['scroll'] = "1m";
 
 // Setup search query for dupes count
 $searchParams['body'] = [
@@ -85,6 +76,13 @@ $searchParams['body'] = [
     ]
       ]
     ],
+    'aggs' => [
+      'total_size' => [
+        'sum' => [
+          'field' => 'filesize'
+        ]
+      ]
+    ],
     'query' => [
       'query_string' => [
         'analyze_wildcard' => 'true',
@@ -93,32 +91,12 @@ $searchParams['body'] = [
     ]
 ];
 $queryResponse = $client->search($searchParams);
+
+// Get total count of duplicate files
 $totalDupes = $queryResponse['hits']['total'];
 
-if ($totalDupes > 0) {
-
-  // Loop until the scroll "cursors" are exhausted
-  while (isset($queryResponse['hits']['hits']) && count($queryResponse['hits']['hits']) > 0) {
-
-      // Calculate total filesizes of dupes
-      $results[$tag] = $queryResponse['hits']['hits'];
-      foreach ($results[$tag] as $result) {
-        // Add filesize to total
-        $totalFilesizeDupes += $result['_source']['filesize'];
-      }
-
-      // Get the new scroll_id
-      $scroll_id = $queryResponse['_scroll_id'];
-
-      // Execute a Scroll request and repeat
-      $queryResponse = $client->scroll([
-              "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-              "scroll" => "1m"           // and the same timeout window
-          ]
-      );
-  }
-
-}
+// Get total size of all duplicate files
+$totalFilesizeDupes = $queryResponse['aggregations']['total_size']['value'];
 
 ?>
 <!DOCTYPE html>

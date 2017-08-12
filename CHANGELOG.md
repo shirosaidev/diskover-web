@@ -1,5 +1,11 @@
 # Diskover Web Change Log
 
+# [1.1.2] - 2017-08-12
+### changed
+- improved page load time of dashboard index page
+### fixed
+- bug with dashboard showing 0 for duplicate file size total
+
 ## [1.1.1] - 2017-08-12
 ### added
 - custom tagging
