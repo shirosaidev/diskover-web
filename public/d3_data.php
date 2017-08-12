@@ -40,8 +40,14 @@ function get_files($client, $path, $filter) {
   // set total hits
   $total = $queryResponse['hits']['total'];
 
+  // check if too many files
   if ($total > 100000) {
     echo json_encode([ "warning" => "too many files, choose a different path" ]);
+    exit;
+  }
+  // check if no files
+  if ($total == 0) {
+    echo json_encode([ "info" => "no files found, choose a different path" ]);
     exit;
   }
 

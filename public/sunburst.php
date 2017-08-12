@@ -67,12 +67,20 @@ if (!empty($_GET['filter'])) {
     </div>
   </div>
 </div>
+<div class="container" id="info" style="display:none;">
+  <div class="row">
+    <div class="alert alert-dismissible alert-warning col-xs-8">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found or all files too small (filtered) :(</strong> Choose a different path and try again.
+    </div>
+  </div>
+</div>
 <div class="container-fluid">
   <div class="row">
     <div class="col-xs-4" id="tree-container">
     </div>
     <div class="col-xs-8">
-      <div class="sunburst-container">
+      <div class="sunburst-container" id="sunburst-container" style="display:none;">
         <iframe name="sunburst" id="sunburst" src="sunburst_frame.php?path=<?php echo urlencode($path); ?>&filter=<?php echo $filter; ?>"></iframe>
       </div>
     </div>
@@ -127,7 +135,11 @@ function init() {
         // display warning if too many files
         if (data.warning) {
           document.getElementById('warning').style.display = 'block';
+        } else if (data.info) {
+            document.getElementById('info').style.display = 'block';
         } else {
+          // show iframe
+          document.getElementById('sunburst-container').style.display = 'block';
           // instantiate chart within callback
           updateTree(data, data);
           setupTree(data);

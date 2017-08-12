@@ -113,7 +113,7 @@ function init() {
         // stop spin.js loader
         spinner.stop();
 
-        if (!data.warning) {
+        if (!data.warning && !data.info) {
           // instantiate chart within callback
           createSunburst(data);
         }
