@@ -128,6 +128,10 @@ if (!empty($message)) {
             <span class="badge"><?php echo $file['tag']; ?></span>
             <a href="/advanced.php?submitted=true&amp;p=1&amp;tag=<?php echo $file['tag']; ?>">Tag</a>
           </li>
+          <li class="list-group-item">
+            <span class="badge"><?php echo $file['tag_custom']; ?></span>
+            <a href="/advanced.php?submitted=true&amp;p=1&amp;tag_custom=<?php echo $file['tag_custom']; ?>">Custom Tag</a>
+          </li>
         </ul>
       </div>
     </div>

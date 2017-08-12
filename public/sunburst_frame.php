@@ -42,16 +42,28 @@ path {
 }
 </style>
 <body>
+  <script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/bootstrap.min.js"></script>
 <script language="javascript" src="/js/d3.v3.min.js"></script>
 <script language="javascript" src="/js/d3.tip.v0.6.3.js"></script>
 <script language="javascript" src="/js/spin.min.js"></script>
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-xs-3 col-xs-offset-9">
+    <div class="col-xs-4 col-xs-offset-8">
+      <div class="pull-right">
       <div class="btn-group" data-toggle="buttons">
         <button class="btn btn-primary" id="size"> Size</button>
         <button class="btn btn-primary active" id="count"> Count</button>
+      </div>
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Filter
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=1000000" target="_parent">>1 MB (default)</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=2000000" target="_parent">>2 MB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=5000000" target="_parent">>5 MB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=10000000" target="_parent">>10 MB</a></li>
+        </ul>
       </div>
   </div>
 </div>
@@ -66,13 +78,12 @@ path {
 
 var loc = "<?php echo $_GET['path']; ?>";
 loc = encodeURIComponent(loc);
+var filter = "<?php echo $_GET['filter']; ?>";
 
 // config references
 var chartConfig = {
     target : 'sunburst-container',
-    data_url : 'd3_data.php?path='+loc+'&type=files',
-    width: 860,
-    height: 600
+    data_url : 'd3_data.php?path='+loc+'&type=files&filter='+filter
 };
 
 // loader settings
@@ -203,8 +214,10 @@ function arcTweenZoom(d) {
   };
 }
 
-var width = chartConfig.width,
-    height = chartConfig.height,
+var margin = {top: 20, right: 10, bottom: 20, left: 10},
+    width = parseInt(d3.select('#sunburst-container').style('width'), 10),
+    width = width - margin.left - margin.right,
+    height = Math.ceil((width * 3) / 4) - margin.top - margin.bottom,
     radius = Math.min(width, height) / 2;
 
 var x = d3.scale.linear()

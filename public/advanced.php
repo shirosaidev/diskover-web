@@ -40,6 +40,10 @@ if (!empty($_REQUEST['submitted'])) {
     $filterClauses[] = [ 'term' => [ 'tag' => $_REQUEST['tag'] ] ];
   }
 
+  if ($_REQUEST['tag_custom']) {
+    $filterClauses[] = [ 'term' => [ 'tag_custom' => $_REQUEST['tag_custom'] ] ];
+  }
+
   if ($_REQUEST['inode']) {
     $filterClauses[] = [ 'term' => [ 'inode' => $_REQUEST['inode'] ] ];
   }
@@ -302,6 +306,14 @@ if (!empty($_REQUEST['submitted'])) {
           <option value="keep">keep</option>
         </select>
       </div>
+      <div class="col-xs-2">
+        <label for="tag_custom">Custom Tag is...</label>
+        <input name="tag_custom" value="<?php echo $_REQUEST['tag_custom']; ?>" type="string" placeholder="version 8" class="form-control"/>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="row">
       <div class="col-xs-2">
         <label for="index">Index is...</label>
         <input name="index" value="<?php echo $_REQUEST['index']; ?>" type="string" placeholder="diskover-2017.05.24" class="form-control"/>

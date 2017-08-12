@@ -8,8 +8,8 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 // Connect to Elasticsearch
 $client = connectES();
 
-// Get search results from Elasticsearch
-function es($client, $path) {
+// Get all files in sub directories from Elasticsearch
+function get_files($client, $path, $filter) {
   $items = [];
   $searchParams['body'] = [];
 
@@ -29,7 +29,7 @@ function es($client, $path) {
       'query' => [
         'query_string' => [
           'analyze_wildcard' => 'true',
-          'query' => 'path_parent:' . $path . '*'
+          'query' => 'path_parent:' . $path . '* AND filesize:>' . $filter
         ]
       ]
   ];
@@ -40,7 +40,7 @@ function es($client, $path) {
   // set total hits
   $total = $queryResponse['hits']['total'];
 
-  if ($total > 10000) {
+  if ($total > 100000) {
     echo json_encode([ "warning" => "too many files, choose a different path" ]);
     exit;
   }
@@ -82,48 +82,69 @@ function es($client, $path) {
   return $items;
 }
 
-function get_files($client, $base_dir) {
-  $items = [];
-  $items = es($client, $base_dir);
-  return $items;
+// Get total directory size from Elasticsearch
+function get_dir_size($client, $path) {
+  $totalsize = 0;
+  $searchParams['body'] = [];
+
+  // Setup search query
+  $searchParams['index'] = Constants::ES_INDEX; // which index to search
+  $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+
+  $path = addslashes($path);
+  $path = addcslashes($path, '/ .+*?[^]($){}~');
+  $searchParams['body'] = [
+     'size' => 0,
+     'query' => [
+       'query_string' => [
+         'analyze_wildcard' => 'true',
+         'query' => 'path_parent:' . $path . '*'
+       ]
+     ],
+      'aggs' => [
+        'dir_size' => [
+          'sum' => [
+            'field' => 'filesize'
+          ]
+        ]
+      ]
+  ];
+
+  // Send search query to Elasticsearch
+  $queryResponse = $client->search($searchParams);
+
+  // Get total size of directory and all subdirs
+  $totalsize = $queryResponse['aggregations']['dir_size']['value'];
+
+  return $totalsize;
 }
 
-function get_dir_size($base_dir, $files) {
-  $total_size = 0;
-  $files2 = [];
-  $base_dir = addslashes($base_dir);
-  $base_dir = addcslashes($base_dir, '/.+*?[^]($)');
-  foreach($files as $key => $value) {
-    if (preg_match('/^' . $base_dir . '/', $value['directory'])) {
-      $files2[] = $value;
-    }
-  }
-  foreach ($files2 as $key => $value) {
-    $total_size += $value['size'];
-  }
-
-  return $total_size;
-}
-
-function get_files_by_file_size($path, $files, $type) {
+function get_files_by_file_size($client, $files, $path, $type) {
   $items = [];
-  $files2 = [];
   $dirs = [];
   $subdirs = [];
-  $dir = addslashes($path);
-  $dir = addcslashes($dir, '/.+*?[^]($)');
+
+  // find all subdirs under path
+  $path1 = addslashes($path);
+  $path1 = addcslashes($path1, '/.+*?[^]($)');
   foreach($files as $key => $value) {
-    if (preg_match('/^' . $dir . '\//', $value['directory'])) {
+    if (preg_match("/" . $path1 . "\//", $value['directory'])) {
+      // if we find a matching directory, add it to dirs array
       if (!in_array($value['directory'], $dirs)) {
         $dirs[] = $value['directory'];
       }
     }
     if ($type == "files") {
+      // add files to items if directory is same as path
       if ($value['directory'] == $path) {
-        $files2[] = $value;
+        $items[] = [
+                "name" => $value['name'],
+                "size" => $value['size']
+              ];
       }
     }
   }
+  // create array containing all subdirs of current path
   $depth = count(explode("/", $path));
   foreach ($dirs as $d) {
     $arr = explode("/", $d);
@@ -131,20 +152,15 @@ function get_files_by_file_size($path, $files, $type) {
       $subdirs[] = $arr[$depth];
     }
   }
-  if ($type == "files") {
-    foreach ($files2 as $f) {
-      $items[] = [
-              "name" => $f['name'],
-              "size" => $f['size']
-            ];
-    }
-  }
+
+  // loop through all subdirs and add to items array
   foreach ($subdirs as $d) {
     $newpath = $path."/".$d;
+
     $items[] = [
             "name" => $d,
-            "size" => get_dir_size($newpath, $files),
-            "children" => get_files_by_file_size($newpath, $files, $type)
+            "size" => get_dir_size($client, $newpath),
+            "children" => get_files_by_file_size($client, $files, $newpath, $type)
           ];
   }
 
@@ -153,14 +169,21 @@ function get_files_by_file_size($path, $files, $type) {
 
 $path = $_GET['path'];
 $type = $_GET['type'];
+$filter = $_GET['filter'];
+
+// default 1 MB min file size filter so sunburst not too heavy
+if (empty($filter)) {
+  $filter = 1000000;
+}
 
 $files = [];
-$files = get_files($client, $path);
+// get list containing directory, name, size keys of all files
+$files = get_files($client, $path, $filter);
 
 $data = [
             "name" => $path,
-            "size" => get_dir_size($path, $files),
-            "children" => get_files_by_file_size($path, $files, $type)
+            "size" => get_dir_size($client, $path),
+            "children" => get_files_by_file_size($client, $files, $path, $type)
           ];
 
 echo json_encode($data);

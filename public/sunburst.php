@@ -3,6 +3,11 @@ if (!empty($_GET['path'])) {
   $path = $_GET['path'];
   $path = rtrim($path, '/');
 }
+if (!empty($_GET['filter'])) {
+  $filter = $_GET['filter'];
+} else {
+  $filter = 1000000;
+}
 ?>
 
 <!DOCTYPE html>
@@ -34,11 +39,21 @@ if (!empty($_GET['path'])) {
   font-size: 10px;
 }
 
-iframe {
-  margin: 0 0 0 0;
+.sunburst-container {
+  position: relative;
+  padding-bottom: 75%;
+  padding-top: 35px;
+  height: 0;
+  overflow: hidden;
+}
+
+.sunburst-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
   border: 0;
   width: 100%;
-  height: 700px;
+  height: 100%;
 }
 </style>
 <body>
@@ -57,7 +72,9 @@ iframe {
     <div class="col-xs-4" id="tree-container">
     </div>
     <div class="col-xs-8">
-      <iframe name="sunburst" id="sunburst" src="sunburst_frame.php?path=<?php echo urlencode($path); ?>"></iframe>
+      <div class="sunburst-container">
+        <iframe name="sunburst" id="sunburst" src="sunburst_frame.php?path=<?php echo urlencode($path); ?>&filter=<?php echo $filter; ?>"></iframe>
+      </div>
     </div>
   </div>
 </div>
@@ -163,8 +180,9 @@ function updateTree(data, parent) {
             var loc = "<?php echo $path; ?>"+"/"+parent.name+"/"+d.name;
           }
           loc = encodeURIComponent(loc);
+          var filter = "<?php echo $filter; ?>";
           if (d.depth <=2 && loc != loc0) {
-            document.getElementById('sunburst').src = "sunburst_frame.php?path="+loc;
+            document.getElementById('sunburst').src = "sunburst_frame.php?path="+loc+"&filter="+filter;
             loc0 = loc;
           }
       })

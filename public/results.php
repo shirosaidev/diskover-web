@@ -26,6 +26,7 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">Last Modified (utc)</th>
           <th class="text-nowrap">Last Access (utc)</th>
           <th class="text-nowrap">Tag (del/arch/keep)</th>
+          <th class="text-nowrap">Custom Tag</th>
         </tr>
         <tr class="warning no-result">
           <td colspan="9"><i class="fa fa-warning"></i> No result</td>
@@ -41,6 +42,7 @@ if (count($results[$p]) > 0) {
         <th>Last Modified (utc)</th>
         <th>Last Access (utc)</th>
         <th>Tag (del/arch/keep)</th>
+        <th>Custom Tag</th>
       </tfoot>
       <tbody>
       <?php
@@ -63,15 +65,16 @@ if (count($results[$p]) > 0) {
         <td class="text-nowrap"><?php echo $file['last_access']; ?></td>
         <td class="text-nowrap"><div class="btn-group" style="white-space:nowrap;" data-toggle="buttons">
             <label class="tagDeleteLabel btn btn-warning <?php if ($file['tag'] == 'delete') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowDelete">
-              <input class="tagDeleteInput" type="radio" name="ids[<?php echo $result['_id']; ?>]" value="delete" <?php if ($file['tag'] == 'delete') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-trash"></span>
+              <input class="tagDeleteInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="delete" <?php if ($file['tag'] == 'delete') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-trash"></span>
             </label>
             <label class="tagArchiveLabel btn btn-success <?php if ($file['tag'] == 'archive') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowArchive">
-              <input class="tagArchiveInput" type="radio" name="ids[<?php echo $result['_id']; ?>]" value="archive" <?php if ($file['tag'] == 'archive') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-cloud-upload"></span>
+              <input class="tagArchiveInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="archive" <?php if ($file['tag'] == 'archive') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-cloud-upload"></span>
             </label>
             <label class="tagKeepLabel btn btn-info <?php if ($file['tag'] == 'keep') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowKeep">
-              <input class="tagKeepInput" type="radio" name="ids[<?php echo $result['_id']; ?>]" value="keep" <?php if ($file['tag'] == 'keep') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-floppy-saved"></span>
+              <input class="tagKeepInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="keep" <?php if ($file['tag'] == 'keep') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-floppy-saved"></span>
             </label>
           </div></td>
+        <td class="text-nowrap"><input type="text" name="ids_tag_custom[<?php echo $result['_id']; ?>]" value="<?php echo $file['tag_custom']; ?>" ?></td>
       </tr>
       <?php
         } // END foreach loop over results

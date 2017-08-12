@@ -1,5 +1,14 @@
 # Diskover Web Change Log
 
+## [1.1.1] - 2017-08-12
+### added
+- custom tagging
+- filesize filter for sunburst to reduce load times
+### changed
+- sunburst can handle up to 100,000 files now (previously was 10,000)
+- optimized sunburst code to improve load times
+- sunburst chart resizes better based on browser window size
+
 ## [1.1.0] - 2017-08-05
 ### added
 - d3.js directory tree and sunburst chart view when clicking on parent path links
