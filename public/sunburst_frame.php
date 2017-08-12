@@ -59,10 +59,10 @@ path {
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Filter
         <span class="caret"></span></button>
         <ul class="dropdown-menu">
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=1000000" target="_parent">>1 MB (default)</a></li>
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=2000000" target="_parent">>2 MB</a></li>
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=5000000" target="_parent">>5 MB</a></li>
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=10000000" target="_parent">>10 MB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=1048576" target="_parent">>1 MB (default)</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=2097152" target="_parent">>2 MB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=5242880" target="_parent">>5 MB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=10485760" target="_parent">>10 MB</a></li>
         </ul>
       </div>
   </div>

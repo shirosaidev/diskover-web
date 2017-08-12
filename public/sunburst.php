@@ -6,7 +6,7 @@ if (!empty($_GET['path'])) {
 if (!empty($_GET['filter'])) {
   $filter = $_GET['filter'];
 } else {
-  $filter = 1000000;
+  $filter = 1048576;
 }
 ?>
 

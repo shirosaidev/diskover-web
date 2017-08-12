@@ -179,7 +179,7 @@ $filter = $_GET['filter'];
 
 // default 1 MB min file size filter so sunburst not too heavy
 if (empty($filter)) {
-  $filter = 1000000;
+  $filter = 1048576;
 }
 
 $files = [];
