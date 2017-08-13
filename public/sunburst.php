@@ -55,6 +55,12 @@ if (!empty($_GET['filter'])) {
   width: 100%;
   height: 100%;
 }
+
+.filesize {
+    color: red;
+    font-size: 12px;
+    padding-left: 10px;
+}
 </style>
 <body>
 <?php include __DIR__ . "/nav.php"; ?>
@@ -154,6 +160,9 @@ function init() {
 <!-- d3 chart -->
 
 <script>
+    
+// format bytes to mb, gb
+function formatBytes(a,b){if(0==a)return"0 Bytes";var c=1024,d=b||2,e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"],f=Math.floor(Math.log(a)/Math.log(c));return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]}
 
 // d3 tree
 
@@ -219,6 +228,9 @@ function updateTree(data, parent) {
   //add text
   entered.append("span").attr("class", "filename")
       .html(function (d) { return d.name; });
+  //add filesize
+  entered.append("span").attr("class", "filesize")
+      .html(function (d) { return formatBytes(d.size); });
   //update caret direction
   nodeEls.select("span.caret").attr("class", function (d) {
       var icon = d.children ? " glyphicon-chevron-down"

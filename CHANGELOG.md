@@ -1,5 +1,12 @@
 # Diskover Web Change Log
 
+# [1.1.3] - 2017-08-13
+### added
+- sunburst tip shows MB, GB, etc instead of just bytes
+- directory size to file tree on sunburst page
+### changed
+- search results shows MB, GB etc instead of just bytes
+
 # [1.1.2] - 2017-08-12
 ### changed
 - improved page load time of dashboard index page

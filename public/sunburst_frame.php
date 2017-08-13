@@ -126,6 +126,9 @@ function init() {
 <!-- d3 chart -->
 
 <script>
+    
+// format bytes to mb, gb
+function formatBytes(a,b){if(0==a)return"0 Bytes";var c=1024,d=b||2,e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"],f=Math.floor(Math.log(a)/Math.log(c));return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]}
 
 // d3 sunburst
 
@@ -251,7 +254,7 @@ var tip = d3.tip()
   .attr('class', 'd3-tip')
   .html(function(d) {
     return "<strong>File:</strong> <span style='color:red'>" + d.name + "</span>" +
-      "<br><strong>Size (Bytes):</strong> <span style='color:red'>" + d.size + "</span>";
+      "<br><strong>Size:</strong> <span style='color:red'>" + formatBytes(d.size) + "</span>";
   });
 
 svg.call(tip);

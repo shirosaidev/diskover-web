@@ -62,8 +62,8 @@ if (!empty($message)) {
     <div class="col-xs-5">
       <ul class="list-group">
         <li class="list-group-item">
-          <span class="badge"><?php echo $file['filesize']; ?></span>
-          Filesize (bytes)
+          <span class="badge"><?php echo formatBytes($file['filesize']); ?></span>
+          Filesize
         </li>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['extension']; ?></span>

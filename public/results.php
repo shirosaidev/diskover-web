@@ -20,7 +20,7 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">#</th>
           <th class="text-nowrap">Filename</th>
           <th class="text-nowrap">Parent Path</th>
-          <th class="text-nowrap">Size(bytes)</th>
+          <th class="text-nowrap">Size</th>
           <th class="text-nowrap">Owner</th>
           <th class="text-nowrap">Group</th>
           <th class="text-nowrap">Last Modified (utc)</th>
@@ -36,7 +36,7 @@ if (count($results[$p]) > 0) {
         <th>#</th>
         <th>Filename</th>
         <th>Directory</th>
-        <th>Size(bytes)</th>
+        <th>Size</th>
         <th>Owner</th>
         <th>Group</th>
         <th>Last Modified (utc)</th>
@@ -58,7 +58,7 @@ if (count($results[$p]) > 0) {
         <th scope="row" class="text-nowrap"><?php echo $i; ?></th>
         <td><a href="/view.php?id=<?php echo $result['_id'] . '&index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
         <td><a href="/sunburst.php?path=<?php echo $file['path_parent']; ?>"><?php echo $file['path_parent']; ?></a></td>
-        <td class="text-nowrap"><?php echo $file['filesize']; ?></td>
+        <td class="text-nowrap"><?php echo formatBytes($file['filesize']); ?></td>
         <td class="text-nowrap"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap"><?php echo $file['group']; ?></td>
         <td class="text-nowrap"><?php echo $file['last_modified']; ?></td>
