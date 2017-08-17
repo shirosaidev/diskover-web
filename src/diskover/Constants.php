@@ -3,7 +3,7 @@
 namespace diskover;
 
 class Constants {
-    // set to your Elasticearch host or ip
+    // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // Elasticsearch index you want to use or diskover-* for all
     const ES_INDEX = 'diskover-*';
