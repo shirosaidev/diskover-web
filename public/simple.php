@@ -30,12 +30,9 @@ if (!empty($_REQUEST['submitted'])) {
     $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
   // match what's in the search field
   } else {
-    // remove any trailing slash if path
-    $req = rtrim($_REQUEST['q'], '/');
-    // escape path separators
-    $req = addcslashes($req, '/');
-    $req = addcslashes($req, '\\');
+	$req = $_REQUEST['q'];
     $searchParams['body']['query']['query_string']['query'] = $req;
+	$searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
   }
 
   // sort by filename

@@ -1,5 +1,10 @@
 # Diskover Web Change Log
 
+# [1.1.4] - 2017-08-17
+### fixed
+- improved searching for paths in simple search
+- bug with & character in path_parent causing sunburst to not display correctly
+
 # [1.1.3] - 2017-08-13
 ### added
 - sunburst tip shows MB, GB, etc instead of just bytes
