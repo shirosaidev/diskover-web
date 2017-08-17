@@ -1,7 +1,6 @@
 <?php
 if (!empty($_GET['path'])) {
   $path = $_GET['path'];
-	echo $path;
   $path = rtrim($path, '/');
 }
 if (!empty($_GET['filter'])) {
