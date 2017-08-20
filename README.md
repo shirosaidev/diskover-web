@@ -1,6 +1,6 @@
 # diskover-web
 
-diskover-web is the file manager and disk analysis web app for [diskover](https://github.com/shirosaidev/diskover). It will help you quickly search for files on your storage (using diskover Elasticsearch indices) and files can be tagged for deletion, archival or keeping. Custom file tags are also supported. It was originally designed to help vfx studios manage their data. It is written in PHP, [Bootstrap](http://getbootstrap.com/), [jQuery](https://jquery.com/) and [D3.js](https://d3js.org).
+diskover-web is the file manager and disk analysis web app for [diskover](https://github.com/shirosaidev/diskover). It will help you quickly search for files on your storage (using diskover Elasticsearch indices) and files can be tagged for deletion, archival or keeping. Custom file tags are also supported. A REST API can be used to get or update file tags in diskover indices. It was originally designed to help vfx studios manage their data. It is written in PHP, [Bootstrap](http://getbootstrap.com/), [jQuery](https://jquery.com/) and [D3.js](https://d3js.org).
 
 ## Screenshots
 
