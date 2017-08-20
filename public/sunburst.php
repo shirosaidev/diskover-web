@@ -85,9 +85,9 @@ if (!empty($_GET['filter'])) {
 </div>
 <div class="container-fluid">
   <div class="row">
-    <div class="col-xs-5" id="tree-container">
+    <div class="col-xs-4" id="tree-container">
     </div>
-    <div class="col-xs-7">
+    <div class="col-xs-8">
       <div class="sunburst-container" id="sunburst-container" style="display:none;">
         <iframe name="sunburst" id="sunburst" src="sunburst_frame.php?path=<?php echo urlencode($path); ?>&filter=<?php echo $filter; ?>" scrolling="no"></iframe>
       </div>
