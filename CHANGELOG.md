@@ -5,6 +5,7 @@
 - rest api (api.php)
 - sunburst now moves when window scrolled (long directory tree)
 - input field to change path in sunburst directory tree
+- search results "Parent Path" column now has filter by and view sunburst/dirtree buttons
 ### changed
 - sunburst directory tree now shows files as well as directories
 - sunburst directory tree is now sorted by name/type
