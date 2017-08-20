@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.1.5] - 2017-08-20
+### added
+- rest api (api.php)
+
 # [1.1.4] - 2017-08-17
 ### fixed
 - improved searching for paths in simple search
