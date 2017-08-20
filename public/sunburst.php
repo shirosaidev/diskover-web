@@ -87,11 +87,11 @@ if (!empty($_GET['filter'])) {
 }
 	
 .path { 
-	width: 400px;
+	width: 300px;
 }
 	
 .path:focus {
-	width: 400px;
+	width: 300px;
 }
 </style>
 <body>
