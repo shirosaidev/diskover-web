@@ -53,10 +53,10 @@ path {
     <div class="col-xs-4 col-xs-offset-8">
       <div class="pull-right">
       <div class="btn-group" data-toggle="buttons">
-        <button class="btn btn-primary" id="size"> Size</button>
-        <button class="btn btn-primary active" id="count"> Count</button>
+        <button class="btn btn-primary btn-sm" id="size"> Size</button>
+        <button class="btn btn-primary active btn-sm" id="count"> Count</button>
       </div>
-      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Filter
+      <button class="btn btn-primary dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Filter
         <span class="caret"></span></button>
         <ul class="dropdown-menu">
           <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=1048576" target="_parent">>1 MB (default)</a></li>

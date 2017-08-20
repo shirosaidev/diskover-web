@@ -57,20 +57,20 @@ if (count($results[$p]) > 0) {
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'warning'; } elseif ($file['tag'] == 'archive') { echo 'success'; } elseif ($file['tag'] == 'keep') { echo 'info'; }?>">
         <th scope="row" class="text-nowrap"><?php echo $i; ?></th>
         <td><a href="/view.php?id=<?php echo $result['_id'] . '&index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
-        <td><a href="/sunburst.php?path=<?php echo urlencode($file['path_parent']); ?>"><?php echo $file['path_parent']; ?></a></td>
+		  <td><a href="/sunburst.php?path=<?php echo urlencode($file['path_parent']); ?>"><label class="btn btn-default btn-xs"><span class="glyphicon glyphicon-folder-open"></span></label></a>&nbsp;<a href="/advanced.php?submitted=true&p=1&path_parent=<?php echo urlencode($file['path_parent']); ?>"><label class="btn btn-default btn-xs"><span class="glyphicon glyphicon-filter"></span></label></a>&nbsp;<?php echo $file['path_parent']; ?></td>
         <td class="text-nowrap"><?php echo formatBytes($file['filesize']); ?></td>
         <td class="text-nowrap"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap"><?php echo $file['group']; ?></td>
         <td class="text-nowrap"><?php echo $file['last_modified']; ?></td>
         <td class="text-nowrap"><?php echo $file['last_access']; ?></td>
         <td class="text-nowrap"><div class="btn-group" style="white-space:nowrap;" data-toggle="buttons">
-            <label class="tagDeleteLabel btn btn-warning <?php if ($file['tag'] == 'delete') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowDelete">
+            <label class="tagDeleteLabel btn btn-warning btn-sm <?php if ($file['tag'] == 'delete') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowDelete">
               <input class="tagDeleteInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="delete" <?php if ($file['tag'] == 'delete') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-trash"></span>
             </label>
-            <label class="tagArchiveLabel btn btn-success <?php if ($file['tag'] == 'archive') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowArchive">
+            <label class="tagArchiveLabel btn btn-success btn-sm <?php if ($file['tag'] == 'archive') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowArchive">
               <input class="tagArchiveInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="archive" <?php if ($file['tag'] == 'archive') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-cloud-upload"></span>
             </label>
-            <label class="tagKeepLabel btn btn-info <?php if ($file['tag'] == 'keep') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowKeep">
+            <label class="tagKeepLabel btn btn-info btn-sm <?php if ($file['tag'] == 'keep') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowKeep">
               <input class="tagKeepInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="keep" <?php if ($file['tag'] == 'keep') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-floppy-saved"></span>
             </label>
           </div></td>

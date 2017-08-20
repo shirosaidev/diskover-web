@@ -33,6 +33,9 @@ function get_files($client, $path, $filter) {
         ]
       ]
   ];
+	
+	// Sort by filename
+	$searchParams['sort'] = 'filename';
 
   // Send search query to Elasticsearch and get scroll id and first page of results
   $queryResponse = $client->search($searchParams);
@@ -41,7 +44,7 @@ function get_files($client, $path, $filter) {
   $total = $queryResponse['hits']['total'];
 
   // check if too many files
-  if ($total > 100000) {
+  if ($total > 1000000) {
     echo json_encode([ "warning" => "too many files, choose a different path" ]);
     exit;
   }
@@ -158,6 +161,9 @@ function get_files_by_file_size($client, $files, $path, $type) {
       $subdirs[] = $arr[$depth];
     }
   }
+	
+	// sort subdirs
+	sort($subdirs);
 
   // loop through all subdirs and add to items array
   foreach ($subdirs as $d) {

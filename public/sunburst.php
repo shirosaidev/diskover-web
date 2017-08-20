@@ -22,16 +22,20 @@ if (!empty($_GET['filter'])) {
   <link rel="stylesheet" href="/css/diskover.css" media="screen" />
 </head>
 <style>
-.selected{
+.selected {
   color: orange;
 }
+	
 .node {
   position: absolute;
   list-style: none;
   cursor: default;
-  padding-left: 20px;
-  white-space: nowrap;
+  margin-left: 20px;
+	margin-top: 40px;
+	white-space: nowrap;
+  word-wrap: break-word;
 }
+
 .node span {
   margin-right: 3px;
 }
@@ -40,7 +44,13 @@ if (!empty($_GET['filter'])) {
   font-size: 10px;
 }
 
-.sunburst-container {
+.node .filesize {
+  color: red;
+  font-size: 12px;
+  padding-left: 10px;
+}
+
+	.sunburst-container {
   position: relative;
   padding-bottom: 75%;
   padding-top: 35px;
@@ -57,11 +67,13 @@ if (!empty($_GET['filter'])) {
   height: 100%;
   overflow: hidden;
 }
-
-.filesize {
-  color: red;
-  font-size: 12px;
-  padding-left: 10px;
+	
+.path { 
+	width: 400px;
+}
+	
+.path:focus {
+	width: 400px;
 }
 </style>
 <body>
@@ -86,6 +98,14 @@ if (!empty($_GET['filter'])) {
 <div class="container-fluid">
   <div class="row">
     <div class="col-xs-4" id="tree-container">
+			<form class="form-inline">
+			<div class="form-group">
+				<div class="col-xs-12">
+					<input type="text" name="path" id="path" class="path" value="<?php echo $path; ?>">
+				</div>
+			</div>
+			<button type="submit" id="submit" class="btn btn-primary btn-sm">Go</button>
+		</form>
     </div>
     <div class="col-xs-8">
       <div class="sunburst-container" id="sunburst-container" style="display:none;">
@@ -103,6 +123,15 @@ if (!empty($_GET['filter'])) {
 <script language="javascript" src="/js/treelist.js"></script>
 
 
+<!-- path change -->
+<script>
+$('#submit').click( function() {
+	var path = $('#path').val();
+	location.href = "/sunburst.php?path="+path;
+	return false;
+});
+</script>
+		
 <!-- sunburst scroll -->	
 <script>
 $(window).scroll(function(){
@@ -118,7 +147,7 @@ var path = encodeURIComponent("<?php echo $path; ?>");
 // config references
 var chartConfig = {
     target : 'tree-container',
-    data_url : 'd3_data.php?path='+path
+    data_url : 'd3_data.php?path='+path+'&type=files'
 };
 
 // loader settings
@@ -212,7 +241,7 @@ function updateTree(data, parent) {
           }
           loc = encodeURIComponent(loc);
           var filter = "<?php echo $filter; ?>";
-          if (d.depth <=2 && loc != loc0) {
+          if (d.depth <=2 && loc != loc0 && d.children) {
             document.getElementById('sunburst').src = "sunburst_frame.php?path="+loc+"&filter="+filter;
             loc0 = loc;
           }
@@ -232,7 +261,7 @@ function updateTree(data, parent) {
   //add icons for folder for file
   entered.append("span").attr("class", function (d) {
       var icon = d.children || d._children ? "glyphicon-folder-close"
-          : "glyphicon-folder-close"; // glyphicon-file
+          : "glyphicon-file";
       return "glyphicon " + icon;
   });
   //add text

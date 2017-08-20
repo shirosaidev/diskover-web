@@ -4,6 +4,10 @@
 ### added
 - rest api (api.php)
 - sunburst now moves when window scrolled (long directory tree)
+- input field to change path in sunburst directory tree
+### changed
+- sunburst directory tree now shows files as well as directories
+- sunburst directory tree is now sorted by name/type
 ### fixed
 - removed word wrap for long paths in sunburst directory tree
 - sunburst iframe scroll bars displaying sometimes
