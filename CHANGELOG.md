@@ -3,6 +3,9 @@
 # [1.1.5] - 2017-08-20
 ### added
 - rest api (api.php)
+- sunburst now moves when window scrolled (long directory tree)
+### fixed
+- removed word wrap for long paths in sunburst directory tree
 
 # [1.1.4] - 2017-08-17
 ### fixed

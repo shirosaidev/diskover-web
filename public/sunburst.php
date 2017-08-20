@@ -30,6 +30,7 @@ if (!empty($_GET['filter'])) {
   list-style: none;
   cursor: default;
   padding-left: 20px;
+  white-space: nowrap;
 }
 .node span {
   margin-right: 3px;
@@ -54,12 +55,13 @@ if (!empty($_GET['filter'])) {
   border: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .filesize {
-    color: red;
-    font-size: 12px;
-    padding-left: 10px;
+  color: red;
+  font-size: 12px;
+  padding-left: 10px;
 }
 </style>
 <body>
@@ -83,11 +85,11 @@ if (!empty($_GET['filter'])) {
 </div>
 <div class="container-fluid">
   <div class="row">
-    <div class="col-xs-4" id="tree-container">
+    <div class="col-xs-5" id="tree-container">
     </div>
-    <div class="col-xs-8">
+    <div class="col-xs-7">
       <div class="sunburst-container" id="sunburst-container" style="display:none;">
-        <iframe name="sunburst" id="sunburst" src="sunburst_frame.php?path=<?php echo urlencode($path); ?>&filter=<?php echo $filter; ?>"></iframe>
+        <iframe name="sunburst" id="sunburst" src="sunburst_frame.php?path=<?php echo urlencode($path); ?>&filter=<?php echo $filter; ?>" scrolling="no"></iframe>
       </div>
     </div>
   </div>
@@ -100,6 +102,14 @@ if (!empty($_GET['filter'])) {
 <script language="javascript" src="/js/spin.min.js"></script>
 <script language="javascript" src="/js/treelist.js"></script>
 
+
+<!-- sunburst scroll -->	
+<script>
+$(window).scroll(function(){
+  $("#sunburst-container").stop().animate({"marginTop": ($(window).scrollTop()) + "px", "marginLeft":($(window).scrollLeft()) + "px"}, "slow" );
+});
+</script>
+	
 <!-- spin loader -->
 <script>
 
@@ -271,7 +281,7 @@ var id = 0,
     loc0;
 
 var tree = d3.layout.treelist()
-    .childIndent(20)
+    .childIndent(10)
     .nodeHeight(20);
 var ul = d3.select("#tree-container").append("ul").classed("treelist", "true");
 
