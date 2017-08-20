@@ -44,8 +44,26 @@ if (!empty($_GET['filter'])) {
   font-size: 10px;
 }
 
-.node .filesize {
+.node .filesize-red {
   color: red;
+  font-size: 12px;
+  padding-left: 10px;
+}
+	
+.node .filesize-orange {
+  color: orangered;
+  font-size: 12px;
+  padding-left: 10px;
+}
+	
+.node .filesize-yellow {
+  color: orange;
+  font-size: 12px;
+  padding-left: 10px;
+}
+	
+.node .filesize-gray {
+  color: gray;
   font-size: 12px;
   padding-left: 10px;
 }
@@ -98,7 +116,7 @@ if (!empty($_GET['filter'])) {
 <div class="container-fluid">
   <div class="row">
     <div class="col-xs-4" id="tree-container">
-			<form class="form-inline">
+			<form class="form-inline" id="path-container" style="display:none;">
 			<div class="form-group">
 				<div class="col-xs-12">
 					<input type="text" name="path" id="path" class="path" value="<?php echo $path; ?>">
@@ -183,6 +201,8 @@ function init() {
         } else if (data.info) {
             document.getElementById('info').style.display = 'block';
         } else {
+					// show path input
+					document.getElementById('path-container').style.display = 'block';
           // show iframe
           document.getElementById('sunburst-container').style.display = 'block';
           // instantiate chart within callback
@@ -267,9 +287,20 @@ function updateTree(data, parent) {
   //add text
   entered.append("span").attr("class", "filename")
       .html(function (d) { return d.name; });
-  //add filesize
-  entered.append("span").attr("class", "filesize")
-      .html(function (d) { return formatBytes(d.size); });
+	//add filesize
+  entered.append("span").attr("class", function (d) {
+				if (d.size > 10737418240) {
+						var fileclass = "filesize-red";
+				} else if (d.size > 5368709120 && d.size < 10737418240) {
+						var fileclass = "filesize-orange";
+				} else if (d.size > 1073741824 && d.size < 5368709120) {
+						var fileclass = "filesize-yellow";
+				} else {
+						var fileclass = "filesize-gray";
+				}
+				return fileclass;
+	})
+	.html(function (d) { return formatBytes(d.size); });
   //update caret direction
   nodeEls.select("span.caret").attr("class", function (d) {
       var icon = d.children ? " glyphicon-chevron-down"

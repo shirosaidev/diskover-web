@@ -6,9 +6,10 @@
 - sunburst now moves when window scrolled (long directory tree)
 - input field to change path in sunburst directory tree
 - search results "Parent Path" column now has filter by and view sunburst/dirtree buttons
+- sunburst directory tree sizes are colored based on size
 ### changed
 - sunburst directory tree now shows files as well as directories
-- sunburst directory tree is now sorted by name/type
+- sunburst directory tree directories are sorted by name, files are sorted by size
 ### fixed
 - removed word wrap for long paths in sunburst directory tree
 - sunburst iframe scroll bars displaying sometimes
