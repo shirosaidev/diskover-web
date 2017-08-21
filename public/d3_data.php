@@ -190,12 +190,19 @@ if (empty($filter)) {
   $filter = 1048576;
 }
 
+if ($path == "/") {
+	$path = "";
+	$rootpath = "/";
+} else {
+	$rootpath = $path;
+}
+
 $files = [];
 // get list containing directory, name, size keys of all files
 $files = get_files($client, $path, $filter);
 
 $data = [
-            "name" => $path,
+            "name" => $rootpath,
             "size" => get_dir_size($client, $path),
             "children" => get_files_by_file_size($client, $files, $path, $type)
           ];

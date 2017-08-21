@@ -1,7 +1,10 @@
 <?php
 if (!empty($_GET['path'])) {
   $path = $_GET['path'];
-  $path = rtrim($path, '/');
+	// remove any trailing slash unless root
+	if (! $path == "/") {
+  	$path = rtrim($path, '/');
+	}
 }
 if (!empty($_GET['filter'])) {
   $filter = $_GET['filter'];
@@ -255,15 +258,19 @@ function updateTree(data, parent) {
           if (d.depth == 0) {
             var loc = parent.name;
           } else if (d.depth == 1) {
-            var loc = parent.name+"/"+d.name;
+						if (parent.name=="/") {
+            	var loc = "/"+d.name;
+						} else {
+							var loc = parent.name+"/"+d.name;
+						}
           } else {
-            var loc = "<?php echo $path; ?>"+"/"+parent.name+"/"+d.name;
+            var loc = "<?php if($path!="/"){echo $path;}; ?>"+"/"+parent.name+"/"+d.name;
           }
           loc = encodeURIComponent(loc);
           var filter = "<?php echo $filter; ?>";
           if (d.depth <=2 && loc != loc0 && d.children) {
             document.getElementById('sunburst').src = "sunburst_frame.php?path="+loc+"&filter="+filter;
-            loc0 = loc;
+            var loc0 = loc;
           }
       })
       .on("mouseover", function (d) {
