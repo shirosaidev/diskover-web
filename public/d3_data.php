@@ -149,9 +149,12 @@ function get_dirs($files) {
 
 function get_sub_dirs($dirs, $path, $depth) {
   $subdirs = [];
+	// escape slashes and special characters
+	$path = addslashes($path);
+  $path = addcslashes($path, '/.+*?[^]($)');
   // create array containing all subdirs
-  foreach ($dirs as $key => $value) {
-    if ($value['directory'] == $path) {
+  foreach ($dirs as $d) {
+    if (preg_match("/" . $path . "\//", $d)) {
       $arr = explode("/", $d);
       if (!in_array($arr[$depth], $subdirs)) {
         $subdirs[] = $arr[$depth];
@@ -165,8 +168,6 @@ function get_sub_dirs($dirs, $path, $depth) {
 function walk_tree($client, $files, $dirs, $path, $filter, $getfiles=true, $level=0) {
   $items = [];
   $subdirs = [];
-
-  echo $path; echo "<br>";
 
   if ($getfiles) {
     foreach ($files as $key => $value) {
@@ -186,8 +187,6 @@ function walk_tree($client, $files, $dirs, $path, $filter, $getfiles=true, $leve
   // get all subdirs for current depth
   $subdirs = get_sub_dirs($dirs, $path, $depth);
 
-  print_r($subdirs); //die();
-
   // loop through all subdirs and add to items array
   foreach ($subdirs as $d) {
 
@@ -196,13 +195,8 @@ function walk_tree($client, $files, $dirs, $path, $filter, $getfiles=true, $leve
     // get dir total size and file count
     $dirinfo = get_dir_info($client, $newpath, $filter);
 
-    //print_r($dirinfo); die();
-
     // continue if get_dir_info returned no results
 		if ($dirinfo['size'] == 0 && $dirinfo['count'] == 0) continue;
-
-    // check if subdir is in dirs (in elasticsearch) and if not, skip checking for files
-		//if (!in_array($newpath, $dirs)) continue;
 
     $items[] = [
             "name" => $d,
@@ -234,12 +228,10 @@ if ($path == "/") {
 $files = [];
 // get list containing directory, name, size keys of all files
 $files = get_files($client, $path, $filter);
-//print_r($files); die();
 
 $dirs = [];
 // get just the dirs from files array
 $dirs = get_dirs($files);
-print_r($dirs); die();
 
 // get dir total size and file count
 $dirinfo = get_dir_info($client, $path, $filter);
