@@ -1,5 +1,16 @@
 # Diskover Web Change Log
 
+# [1.1.6] - 2017-08-29
+### added
+- "File Tree" top nav link
+- file count for each directory in tree and sunburst tooltip
+- 512 KB to filter list
+### changed
+- optimized d3_data.php (elasticsearch data grabber for file tree/sunburst)
+- sunburst now uses json data from file tree (previously did additional get request from d3_data.php)
+- folder/file colors in file tree
+- moved filter dropdown under path field
+
 # [1.1.5] - 2017-08-21
 ### added
 - rest api (api.php)

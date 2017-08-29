@@ -35,7 +35,7 @@ if (!empty($_REQUEST['submitted'])) {
 	$searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
   }
 
-  // sort by filename
+  // sort by name
   $searchParams['body']['sort'] = "filename";
 
   // Send search query to Elasticsearch and get scroll id and first page of results

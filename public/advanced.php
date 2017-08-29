@@ -120,12 +120,12 @@ if (!empty($_REQUEST['submitted'])) {
            'terms' => [
              'field' => 'filehash',
              'min_doc_count' => 2,
-             'size' => 1000,
+             'size' => 10000,
            ],
         'aggs' => [
           'duplicateDocuments' => [
             'top_hits' => [
-              'size' => 1000
+              'size' => 100
             ]
           ]
         ]

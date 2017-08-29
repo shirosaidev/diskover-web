@@ -8,7 +8,7 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 // Connect to Elasticsearch
 $client = connectES();
 
-// Get all files in sub directories from Elasticsearch
+// Get all files in sub directories from Elasticsearch (walk tree)
 function get_files($client, $path, $filter) {
   $items = [];
   $searchParams['body'] = [];
@@ -23,13 +23,13 @@ function get_files($client, $path, $filter) {
   // number of results to return per page
   $searchParams['size'] = 100;
 
-  $path = addslashes($path);
-  $path = addcslashes($path, '/ .+*?[^]($)');
+  //$path = addslashes($path);
+  //$path = addcslashes($path, '/ .+*?[^]($)');
   $searchParams['body'] = [
       'query' => [
         'query_string' => [
-          'analyze_wildcard' => 'true',
-          'query' => 'path_parent:' . $path . '* AND filesize:>' . $filter
+          //'analyze_wildcard' => 'true',
+          'query' => '"' . $path . '" AND filesize: >' . $filter
         ]
       ],
 			'sort' => [
@@ -93,23 +93,22 @@ function get_files($client, $path, $filter) {
   return $items;
 }
 
-// Get total directory size from Elasticsearch
-function get_dir_size($client, $path) {
+// Get total directory size and file count from Elasticsearch
+function get_dir_info($client, $path, $filter) {
   $totalsize = 0;
+  $totalcount = 0;
   $searchParams['body'] = [];
 
   // Setup search query
   $searchParams['index'] = Constants::ES_INDEX; // which index to search
   $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
-  $path = addslashes($path);
-  $path = addcslashes($path, '/ .+*?[^]($){}~');
   $searchParams['body'] = [
      'size' => 0,
      'query' => [
        'query_string' => [
          'analyze_wildcard' => 'true',
-         'query' => 'path_parent:' . $path . '*'
+         'query' => '"' . $path . '" AND filesize: >' . $filter
        ]
      ],
       'aggs' => [
@@ -124,28 +123,53 @@ function get_dir_size($client, $path) {
   // Send search query to Elasticsearch
   $queryResponse = $client->search($searchParams);
 
+  // Get total count of directory and all subdirs
+  $totalcount = $queryResponse['hits']['total'];
+
   // Get total size of directory and all subdirs
   $totalsize = $queryResponse['aggregations']['dir_size']['value'];
 
-  return $totalsize;
+  // Create dirinfo list with size and count
+	$dirinfo = ['size'=>$totalsize,'count'=>$totalcount];
+
+  return $dirinfo;
 }
 
-function get_files_by_file_size($client, $files, $path, $type) {
-  $items = [];
+function get_dirs($files) {
   $dirs = [];
-  $subdirs = [];
-
-  // find all subdirs under path
-  $path1 = addslashes($path);
-  $path1 = addcslashes($path1, '/.+*?[^]($)');
+  // get all the directories
   foreach($files as $key => $value) {
-    if (preg_match("/" . $path1 . "\//", $value['directory'])) {
-      // if we find a matching directory, add it to dirs array
-      if (!in_array($value['directory'], $dirs)) {
-        $dirs[] = $value['directory'];
+    if (!in_array($value['directory'], $dirs)) {
+      $dirs[] = $value['directory'];
+    }
+  }
+  sort($dirs);
+  return $dirs;
+}
+
+function get_sub_dirs($dirs, $path, $depth) {
+  $subdirs = [];
+  // create array containing all subdirs
+  foreach ($dirs as $key => $value) {
+    if ($value['directory'] == $path) {
+      $arr = explode("/", $d);
+      if (!in_array($arr[$depth], $subdirs)) {
+        $subdirs[] = $arr[$depth];
       }
     }
-    if ($type == "files") {
+  }
+  sort($subdirs);
+  return $subdirs;
+}
+
+function walk_tree($client, $files, $dirs, $path, $filter, $getfiles=true, $level=0) {
+  $items = [];
+  $subdirs = [];
+
+  echo $path; echo "<br>";
+
+  if ($getfiles) {
+    foreach ($files as $key => $value) {
       // add files to items if directory is same as path
       if ($value['directory'] == $path) {
         $items[] = [
@@ -155,26 +179,36 @@ function get_files_by_file_size($client, $files, $path, $type) {
       }
     }
   }
-  // create array containing all subdirs of current path
+
+  // get depth of path
   $depth = count(explode("/", $path));
-  foreach ($dirs as $d) {
-    $arr = explode("/", $d);
-    if (!in_array($arr[$depth], $subdirs)) {
-      $subdirs[] = $arr[$depth];
-    }
-  }
-	
-	// sort subdirs
-	natcasesort($subdirs);
+
+  // get all subdirs for current depth
+  $subdirs = get_sub_dirs($dirs, $path, $depth);
+
+  print_r($subdirs); //die();
 
   // loop through all subdirs and add to items array
   foreach ($subdirs as $d) {
+
     $newpath = $path."/".$d;
+
+    // get dir total size and file count
+    $dirinfo = get_dir_info($client, $newpath, $filter);
+
+    //print_r($dirinfo); die();
+
+    // continue if get_dir_info returned no results
+		if ($dirinfo['size'] == 0 && $dirinfo['count'] == 0) continue;
+
+    // check if subdir is in dirs (in elasticsearch) and if not, skip checking for files
+		//if (!in_array($newpath, $dirs)) continue;
 
     $items[] = [
             "name" => $d,
-            "size" => get_dir_size($client, $newpath),
-            "children" => get_files_by_file_size($client, $files, $newpath, $type)
+            "size" => $dirinfo['size'],
+            "count" => $dirinfo['count'],
+            "children" => walk_tree($client, $files, $dirs, $newpath, $filter, $getfiles=true, $level+=1)
           ];
   }
 
@@ -182,7 +216,7 @@ function get_files_by_file_size($client, $files, $path, $type) {
 }
 
 $path = $_GET['path'];
-$type = $_GET['type'];
+$getfiles = $_GET['getfiles'];
 $filter = $_GET['filter'];
 
 // default 1 MB min file size filter so sunburst not too heavy
@@ -200,11 +234,21 @@ if ($path == "/") {
 $files = [];
 // get list containing directory, name, size keys of all files
 $files = get_files($client, $path, $filter);
+//print_r($files); die();
+
+$dirs = [];
+// get just the dirs from files array
+$dirs = get_dirs($files);
+print_r($dirs); die();
+
+// get dir total size and file count
+$dirinfo = get_dir_info($client, $path, $filter);
 
 $data = [
             "name" => $rootpath,
-            "size" => get_dir_size($client, $path),
-            "children" => get_files_by_file_size($client, $files, $path, $type)
+            "size" => $dirinfo['size'],
+            "count" => $dirinfo['count'],
+            "children" => walk_tree($client, $files, $dirs, $path, $filter, $getfiles=true)
           ];
 
 echo json_encode($data);

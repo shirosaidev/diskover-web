@@ -22,18 +22,6 @@ path {
   color: #fff;
   border-radius: 2px;
 }
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
-  box-sizing: border-box;
-  display: inline;
-  font-size: 10px;
-  width: 100%;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.8);
-  content: "\25BC";
-  position: absolute;
-  text-align: center;
-}
 /* Style northward tooltips differently */
 .d3-tip.n:after {
   margin: -1px 0 0 0;
@@ -56,14 +44,6 @@ path {
         <button class="btn btn-primary btn-sm" id="size"> Size</button>
         <button class="btn btn-primary active btn-sm" id="count"> Count</button>
       </div>
-      <button class="btn btn-primary dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Filter
-        <span class="caret"></span></button>
-        <ul class="dropdown-menu">
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=1048576" target="_parent">>1 MB (default)</a></li>
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=2097152" target="_parent">>2 MB</a></li>
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=5242880" target="_parent">>5 MB</a></li>
-          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=10485760" target="_parent">>10 MB</a></li>
-        </ul>
       </div>
   </div>
 </div>
@@ -76,22 +56,17 @@ path {
 <!-- spin loader -->
 <script>
 
-var loc = "<?php echo $_GET['path']; ?>";
-loc = encodeURIComponent(loc);
-var filter = "<?php echo $_GET['filter']; ?>";
-
 // config references
 var chartConfig = {
-    target : 'sunburst-container',
-    data_url : 'd3_data.php?path='+loc+'&type=files&filter='+filter
+    target : 'sunburst-container'
 };
 
 // loader settings
 var opts = {
-  lines: 9, // The number of lines to draw
-  length: 9, // The length of each line
-  width: 5, // The line thickness
-  radius: 14, // The radius of the inner circle
+  lines: 12, // The number of lines to draw
+  length: 5, // The length of each line
+  width: 3, // The line thickness
+  radius: 7, // The radius of the inner circle
   color: '#EE3124', // #rgb or #rrggbb or array of colors
   speed: 1.9, // Rounds per second
   trail: 40, // Afterglow percentage
@@ -104,21 +79,13 @@ var target = document.getElementById(chartConfig.target);
 // callback function wrapped for loader in 'init' function
 function init() {
 
-    // trigger loader
-    var spinner = new Spinner(opts).spin(target);
+		// get json data from parent window
+		var data = window.parent.getJSON();
 
-    // load json data and trigger callback
-    d3.json(chartConfig.data_url, function(data) {
-
-        // stop spin.js loader
-        spinner.stop();
-
-        if (!data.warning && !data.info) {
-          // instantiate chart within callback
-          createSunburst(data);
-        }
-
-    });
+			if (!data.warning && !data.info) {
+				// instantiate chart within callback
+				createSunburst(data);
+			}
 }
 
 </script>
@@ -126,7 +93,7 @@ function init() {
 <!-- d3 chart -->
 
 <script>
-    
+
 // format bytes to mb, gb
 function formatBytes(a,b){if(0==a)return"0 Bytes";var c=1024,d=b||2,e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"],f=Math.floor(Math.log(a)/Math.log(c));return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]}
 
@@ -145,6 +112,11 @@ function createSunburst(data) {
       .on("click", click)
       .on('mouseover', tip.show)
       .on('mouseout', tip.hide)
+			.on('mousemove', function(d) {
+				return tip
+					.style("top", (d3.event.pageY-10)+"px")
+					.style("left", (d3.event.pageX+10)+"px");
+			})
       .each(stash);
 
   function stash(d) {
@@ -217,16 +189,24 @@ function arcTweenZoom(d) {
   };
 }
 
-var margin = {top: 20, right: 10, bottom: 20, left: 10},
-    width = parseInt(d3.select('#sunburst-container').style('width'), 10),
-    width = width - margin.left - margin.right,
-    height = Math.ceil((width * 3) / 4) - margin.top - margin.bottom,
-    radius = Math.min(width, height) / 2;
+// try to scale width and height of sunburst to browser window size
+var width = parseInt(document.getElementById("sunburst-container").offsetWidth, 10);
+var height = Math.ceil((width * 3) / 4);
+
+// fallback
+if (width < 960 || height < 700) {
+	var width = 960, height = 700;
+}
+
+var margin = {left: 10, right: 10, top: 20, bottom: 20},
+		width = width - margin.left - margin.right,
+    height = height - margin.top - margin.bottom,
+    radius = Math.min(width, height) / 2.1;
 
 var x = d3.scale.linear()
     .range([0, 2 * Math.PI]);
 
-var y = d3.scale.sqrt()
+var y = d3.scale.linear()
     .range([0, radius]);
 
 var color = d3.scale.category20c();
@@ -253,8 +233,9 @@ var arc = d3.svg.arc()
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .html(function(d) {
-    return "<strong>File:</strong> <span style='color:red'>" + d.name + "</span>" +
-      "<br><strong>Size:</strong> <span style='color:red'>" + formatBytes(d.size) + "</span>";
+		if(d.count){var type = "<strong><i class='glyphicon glyphicon-folder-open'></i></strong> <span style='color:red'>" + d.name + "</span><br><strong><i class='glyphicon glyphicon-duplicate'></i></strong> <span style='color:red'>" + d.count + "</span>";}else{var type = "<strong><i class='glyphicon glyphicon-file'></i></strong> <span style='color:red'>" + d.name + "</span>";};
+    return type +
+      "<br><strong><i class='glyphicon glyphicon-floppy-disk'></i></strong> <span style='color:red'>" + formatBytes(d.size) + "</span>";
   });
 
 svg.call(tip);

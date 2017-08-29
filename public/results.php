@@ -35,7 +35,7 @@ if (count($results[$p]) > 0) {
       <tfoot>
         <th>#</th>
         <th>Filename</th>
-        <th>Directory</th>
+        <th>Parent Path</th>
         <th>Size</th>
         <th>Owner</th>
         <th>Group</th>

@@ -2,14 +2,14 @@
 if (!empty($_GET['path'])) {
   $path = $_GET['path'];
 	// remove any trailing slash unless root
-	if (! $path == "/") {
+	if ($path != "/") {
   	$path = rtrim($path, '/');
 	}
 }
 if (!empty($_GET['filter'])) {
   $filter = $_GET['filter'];
 } else {
-  $filter = 1048576;
+  $filter = 1048576; // default filter 1 MB
 }
 ?>
 
@@ -28,13 +28,13 @@ if (!empty($_GET['filter'])) {
 .selected {
   color: orange;
 }
-	
+
 .node {
   position: absolute;
   list-style: none;
   cursor: default;
   margin-left: 20px;
-	margin-top: 40px;
+	margin-top: 70px;
 	white-space: nowrap;
   word-wrap: break-word;
 }
@@ -45,6 +45,19 @@ if (!empty($_GET['filter'])) {
 
 .node .caret {
   font-size: 10px;
+	color: darkgray;
+}
+
+.node .glyphicon-folder-close {
+	color: skyblue;
+}
+
+.node .glyphicon-folder-open {
+	color: skyblue;
+}
+
+.node .glyphicon-file {
+	color: dimgray;
 }
 
 .node .filesize-red {
@@ -52,26 +65,32 @@ if (!empty($_GET['filter'])) {
   font-size: 12px;
   padding-left: 10px;
 }
-	
+
 .node .filesize-orange {
   color: orangered;
   font-size: 12px;
   padding-left: 10px;
 }
-	
+
 .node .filesize-yellow {
   color: orange;
   font-size: 12px;
   padding-left: 10px;
 }
-	
+
 .node .filesize-gray {
   color: gray;
   font-size: 12px;
   padding-left: 10px;
 }
 
-	.sunburst-container {
+.node .filecount {
+  color: gray;
+  font-size: 10px;
+  padding-left: 5px;
+}
+
+.sunburst-container {
   position: relative;
   padding-bottom: 75%;
   padding-top: 35px;
@@ -88,13 +107,19 @@ if (!empty($_GET['filter'])) {
   height: 100%;
   overflow: hidden;
 }
-	
-.path { 
+
+.path {
 	width: 300px;
 }
-	
+
 .path:focus {
 	width: 300px;
+}
+
+.filter-dropdown {
+  margin-left: 15px;
+  margin-top: 2px;
+  display: none;
 }
 </style>
 <body>
@@ -104,7 +129,7 @@ if (!empty($_GET['filter'])) {
   <div class="row">
     <div class="alert alert-dismissible alert-danger col-xs-8">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, too many files :(</strong> Choose a different path and try again.
+      <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, too many sub directories :(</strong> Choose a different path and try again.
     </div>
   </div>
 </div>
@@ -126,11 +151,22 @@ if (!empty($_GET['filter'])) {
 				</div>
 			</div>
 			<button type="submit" id="submit" class="btn btn-primary btn-sm">Go</button>
-		</form>
+      </form>
+      <div class="btn-group filter-dropdown" id="filter-container">
+      <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Filter
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=524288">>512 KB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=1048576">>1 MB (default)</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=2097152">>2 MB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=5242880">>5 MB</a></li>
+          <li><a href="/sunburst.php?path=<?php echo $_GET['path']; ?>&filter=10485760">>10 MB</a></li>
+        </ul>
+      </div>
     </div>
     <div class="col-xs-8">
       <div class="sunburst-container" id="sunburst-container" style="display:none;">
-        <iframe name="sunburst" id="sunburst" src="sunburst_frame.php?path=<?php echo urlencode($path); ?>&filter=<?php echo $filter; ?>" scrolling="no"></iframe>
+        <iframe name="sunburst" id="sunburst" src="/sunburst_frame.php" scrolling="no"></iframe>
       </div>
     </div>
   </div>
@@ -143,40 +179,49 @@ if (!empty($_GET['filter'])) {
 <script language="javascript" src="/js/spin.min.js"></script>
 <script language="javascript" src="/js/treelist.js"></script>
 
-
 <!-- path change -->
 <script>
 $('#submit').click( function() {
 	var path = $('#path').val();
-	location.href = "/sunburst.php?path="+path;
+	var filter = "<?php echo $filter; ?>";
+	location.href = "/sunburst.php?path="+path+"&filter="+filter;
 	return false;
 });
 </script>
-		
-<!-- sunburst scroll -->	
+
+<!-- file toggle -->
+<script>
+$('#hidefiles').click( function() {
+
+	return false;
+});
+</script>
+
+<!-- sunburst scroll -->
 <script>
 $(window).scroll(function(){
   $("#sunburst-container").stop().animate({"marginTop": ($(window).scrollTop()) + "px", "marginLeft":($(window).scrollLeft()) + "px"}, "slow" );
 });
 </script>
-	
+
 <!-- spin loader -->
 <script>
 
 var path = encodeURIComponent("<?php echo $path; ?>");
+var filter = "<?php echo $filter; ?>";
 
 // config references
 var chartConfig = {
     target : 'tree-container',
-    data_url : 'd3_data.php?path='+path+'&type=files'
+    data_url : '/d3_data.php?path='+path+'&filter='+filter
 };
 
 // loader settings
 var opts = {
-  lines: 9, // The number of lines to draw
-  length: 9, // The length of each line
-  width: 5, // The line thickness
-  radius: 14, // The radius of the inner circle
+  lines: 12, // The number of lines to draw
+  length: 5, // The length of each line
+  width: 3, // The line thickness
+  radius: 7, // The radius of the inner circle
   color: '#EE3124', // #rgb or #rrggbb or array of colors
   speed: 1.9, // Rounds per second
   trail: 40, // Afterglow percentage
@@ -185,6 +230,8 @@ var opts = {
 
 // loader settings
 var target = document.getElementById(chartConfig.target);
+
+var jsondata;
 
 // callback function wrapped for loader in 'init' function
 function init() {
@@ -195,17 +242,23 @@ function init() {
     // load json data and trigger callback
     d3.json(chartConfig.data_url, function(data) {
 
+				// jsondata for sunburst
+				jsondata = JSON.parse(JSON.stringify(data));
+
         // stop spin.js loader
         spinner.stop();
 
         // display warning if too many files
         if (data.warning) {
           document.getElementById('warning').style.display = 'block';
+				// display warning no files
         } else if (data.info) {
             document.getElementById('info').style.display = 'block';
         } else {
 					// show path input
-					document.getElementById('path-container').style.display = 'block';
+					document.getElementById('path-container').style.display = 'inline-block';
+          // show filter dropdown
+					document.getElementById('filter-container').style.display = 'inline-block';
           // show iframe
           document.getElementById('sunburst-container').style.display = 'block';
           // instantiate chart within callback
@@ -222,7 +275,7 @@ function init() {
 <!-- d3 chart -->
 
 <script>
-    
+
 // format bytes to mb, gb
 function formatBytes(a,b){if(0==a)return"0 Bytes";var c=1024,d=b||2,e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"],f=Math.floor(Math.log(a)/Math.log(c));return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]}
 
@@ -247,6 +300,7 @@ function updateTree(data, parent) {
       d.id = d.id || ++id;
       return d.id;
   });
+
   //entered nodes
   var entered = nodeEls.enter().append("li").classed("node", true)
       .style("top", parent.y +"px")
@@ -256,21 +310,20 @@ function updateTree(data, parent) {
           toggleChildren(d),
           updateTree(data, d);
           if (d.depth == 0) {
-            var loc = parent.name;
+            loc = parent.name;
           } else if (d.depth == 1) {
 						if (parent.name=="/") {
-            	var loc = "/"+d.name;
+            	loc = "/"+d.name;
 						} else {
-							var loc = parent.name+"/"+d.name;
+							loc = parent.name+"/"+d.name;
 						}
           } else {
-            var loc = "<?php if($path!="/"){echo $path;}; ?>"+"/"+parent.name+"/"+d.name;
+						if (path!='/'){loc=path+'/'+parent.name+'/'+d.name;};
           }
           loc = encodeURIComponent(loc);
-          var filter = "<?php echo $filter; ?>";
-          if (d.depth <=2 && loc != loc0 && d.children) {
-            document.getElementById('sunburst').src = "sunburst_frame.php?path="+loc+"&filter="+filter;
-            var loc0 = loc;
+          if (d.depth <=1 && loc != loc0 && d.children) {
+						// direction changed, reload sunburst
+            document.getElementById('sunburst').contentWindow.location.reload();
           }
       })
       .on("mouseover", function (d) {
@@ -307,7 +360,10 @@ function updateTree(data, parent) {
 				}
 				return fileclass;
 	})
-	.html(function (d) { return formatBytes(d.size); });
+			.html(function (d) { return formatBytes(d.size); });
+	// add file count
+	entered.append("span").attr("class", "filecount")
+			.html(function (d) { return d.count; });
   //update caret direction
   nodeEls.select("span.caret").attr("class", function (d) {
       var icon = d.children ? " glyphicon-chevron-down"
@@ -345,7 +401,39 @@ function setupTree(data) {
 }
 
 var id = 0,
-    loc0;
+    loc,
+		loc0;
+
+var filter = "<?php echo $filter; ?>";
+var path = "<?php echo $path; ?>";
+
+loc = encodeURIComponent(path);
+loc0 = encodeURIComponent(path);
+
+// for sunburst frame to get json data
+function getJSON() {
+  // at root
+  if (loc == encodeURIComponent(path)) {
+    return jsondata;
+  }
+  // directory changed so we need to get child data
+  // gets the child array and sets json data for sunburst
+  var jsondata_child;
+  // split path by / into arr
+  var arr = loc.split('%2F');
+  // get last dir in arr
+  var dir = decodeURIComponent(arr[arr.length-1]);
+
+  jsondata.children.forEach(getChild);
+
+  function getChild(child) {
+    if (child.name == dir) {
+      loc0 = loc;
+      jsondata_child = child;
+    }
+  }
+  return jsondata_child;
+}
 
 var tree = d3.layout.treelist()
     .childIndent(10)
