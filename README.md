@@ -9,7 +9,7 @@ diskover-web was originally designed to help vfx studios manage their data. It i
 ## Screenshots
 
 ![diskover-web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=true)
-![diskover-web sunburst](docs/diskover-web-sunburst-screenshot.png?raw=true)
+![diskover-web file tree](docs/diskover-web-filetree-screenshot.png?raw=true)
 ![diskover-web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
 ![diskover-web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
 ![diskover-web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
