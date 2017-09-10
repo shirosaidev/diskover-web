@@ -4,7 +4,7 @@ diskover-web is the file manager and disk analysis web app for [diskover](https:
 
 A built-in REST API can also be used to list or update file tags in diskover indices.
 
-diskover-web was originally designed to help vfx studios manage their data. It is written in PHP, [Bootstrap](http://getbootstrap.com/), [jQuery](https://jquery.com/) and [D3.js](https://d3js.org).
+It is written in PHP, [Bootstrap](http://getbootstrap.com/), [jQuery](https://jquery.com/) and [D3.js](https://d3js.org).
 
 ## Screenshots
 
