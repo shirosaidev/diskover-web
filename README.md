@@ -24,6 +24,7 @@ diskover-web was originally designed to help vfx studios manage their data. It i
 * `PHP client for Elasticsearch` (elasticsearch-php)
 * `Elasticsearch` (tested on Elasticsearch 5.3.0)
 * `Apache or Nginx` (if you don't want to use PHP built-in web server)
+* `diskover` (Elasticsearch index created by diskover >= 1.2.0)
 
 ### Download
 
