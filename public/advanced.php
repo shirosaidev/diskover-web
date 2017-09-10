@@ -136,12 +136,7 @@ if (!empty($_REQUEST['submitted'])) {
             'analyze_wildcard' => 'true',
             'query' => 'is_dupe:true'
           ]
-        ],
-        'sort' => [
-          'filehash' => [
-             'order' => 'asc'
-           ]
-         ]
+        ]
     ];
   }
 
@@ -207,8 +202,9 @@ if (!empty($_REQUEST['submitted'])) {
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>diskover &mdash; Advanced Search</title>
-  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
-  <link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />
+  <!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
+	<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
+	<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="/css/diskover.css" media="screen" />
 </head>
 <body>

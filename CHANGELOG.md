@@ -1,5 +1,31 @@
 # Diskover Web Change Log
 
+# [1.2.0] - 2017-09-10
+### note
+- *** REQUIRES index created with diskover >= v1.2.0 which adds directory type ***
+### added
+- sunburst now has breadcrumb navigation at bottom
+- warning alert if file tree can't find any files in ES or other errors
+- better tooltip for sunburst
+- more file size filter options in file tree
+- reload button on filetree page to grab new json data from Elasticsearch
+- cacheing for json data on filetree page
+- cookies for path, filters on filetree page
+- hide threshhold dropdown on filetree page to limit items in sunburst
+- d3 pie charts on dashboard for tag counts and file sizes
+### changed
+- swithed to using bootstrap dark theme "bootswatch slate"
+- new sunburst visualization
+- removed limit on max files for filetree/sunburst, switched to using maxdepth filter
+- quick searches are now sorted
+- file tree nav link now searches ES for top level path
+- es data grabber for file tree/sunburst gets default max 3 depth from path
+- moved styles in file tree to css file
+- removed iframe for sunburst and moved to sunburst.js
+- sunburst displays by size by default
+### fixed
+- issues with sunburst width and height from browser window size
+
 # [1.1.6] - 2017-08-29
 ### added
 - "File Tree" top nav link

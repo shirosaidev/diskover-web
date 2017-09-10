@@ -65,7 +65,7 @@ $searchParams['body'] = [
        'terms' => [
          'field' => 'filehash',
          'min_doc_count' => 2,
-         'size' => 100,
+         'size' => 10000,
        ],
     'aggs' => [
       'duplicateDocuments' => [
@@ -106,9 +106,19 @@ $totalFilesizeDupes = $queryResponse['aggregations']['total_size']['value'];
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>diskover &mdash; Dashboard</title>
-  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
-  <link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />
+  <!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
+	<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
+	<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="/css/diskover.css" media="screen" />
+	<style>
+		.arc text {
+			font: 10px sans-serif;
+			text-anchor: middle;
+		}
+		.arc path {
+			stroke: #0B0C0E;
+		}
+	</style>
 </head>
 <body>
 <?php include __DIR__ . "/nav.php"; ?>
@@ -127,7 +137,7 @@ $totalFilesizeDupes = $queryResponse['aggregations']['total_size']['value'];
   </div>
 <div class="alert alert-dismissible alert-success">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong>Welcome to diskover's tag manager.</strong> This application will help you <a href="/simple.php" class="alert-link">search and tag files</a> in your diskover indices in Elasticsearch.
+  <strong>Welcome to diskover's web file manager.</strong> This application will help you <a href="/simple.php" class="alert-link">search and tag files</a> in your diskover indices in Elasticsearch.
 </div>
 <?php
 if ($totalFilesize['untagged'] == 0 AND $totalFilesize['delete'] == 0 AND $totalFilesize['archive'] == 0 AND $totalFilesize['keep'] == 0) {
@@ -147,7 +157,7 @@ if ($totalDupes > 0) {
 <div class="alert alert-dismissible alert-danger">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
   <h4><span class="glyphicon glyphicon-duplicate"></span> Duplicate files!</h4>
-  <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
+  <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
 </div>
 <?php
 }
@@ -174,7 +184,7 @@ if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFiles
 }
 ?>
 <div class="row">
-  <div class="col-xs-6">
+  <div class="col-xs-4">
     <h3><span class="glyphicon glyphicon-tag"></span> Tag Counts</h3>
     <ul class="nav nav-pills">
       <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=untagged">untagged <span class="badge"><?php echo $tagCounts['untagged']; ?></span></a></li>
@@ -183,7 +193,10 @@ if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFiles
       <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=keep">keep <span class="badge"><?php echo $tagCounts['keep']; ?></span></a></li>
     </ul>
   </div>
-  <div class="col-xs-6">
+	<div class="col-xs-2">
+		<div id="tagcountchart"></div>
+	</div>
+  <div class="col-xs-4">
     <h3><span class="glyphicon glyphicon-hdd"></span> Total File Sizes</h3>
     <ul class="list-group">
       <li class="list-group-item">
@@ -203,11 +216,153 @@ if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFiles
         keep
       </li>
     </ul>
-  </div>
+	</div>
+	<div class="col-xs-2">
+	<div id="filesizechart"></div>
+	</div>
 </div>
 </div>
 <script language="javascript" src="/js/jquery.min.js"></script>
 <script language="javascript" src="/js/bootstrap.min.js"></script>
 <script language="javascript" src="/js/diskover.js"></script>
+<script language="javascript" src="/js/d3.v3.min.js"></script>
+	<script>
+		var count_untagged = <?php echo $tagCounts['untagged'] ?>;
+		var count_delete = <?php echo $tagCounts['delete'] ?>;
+		var count_archive = <?php echo $tagCounts['archive'] ?>;
+		var count_keep = <?php echo $tagCounts['keep'] ?>;
+
+		var dataset = [{
+			label: 'untagged',
+			count: count_untagged
+		}, {
+			label: 'delete',
+			count: count_delete
+		}, {
+			label: 'archive',
+			count: count_archive
+		}, {
+			label: 'keep',
+			count: count_keep
+		}];
+
+		var width = 200;
+		var height = 200;
+		var radius = Math.min(width, height) / 2;
+
+		var color = d3.scale.ordinal()
+			.range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
+
+		var svg = d3.select("#tagcountchart")
+			.append('svg')
+			.attr('width', width)
+			.attr('height', height)
+			.append('g')
+			.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+
+		var pie = d3.layout.pie()
+			.value(function(d) {
+				return d.count;
+			})
+			.sort(null);
+
+		var path = d3.svg.arc()
+			.outerRadius(radius - 10)
+			.innerRadius(0);
+
+		var label = d3.svg.arc()
+			.outerRadius(radius - 40)
+			.innerRadius(radius - 40);
+
+		var arc = svg.selectAll('.arc')
+			.data(pie(dataset))
+			.enter().append('g')
+			.attr('class', 'arc');
+
+		arc.append('path')
+			.attr('d', path)
+			.attr('fill', function(d) {
+				return color(d.data.label);
+			});
+
+		arc.append('text')
+			.attr("transform", function(d) {
+				return "translate(" + label.centroid(d) + ")";
+			})
+			.attr("dy", "0.35em")
+			.text(function(d) {
+				return d.data.label;
+			});
+	</script>
+	
+	<script>
+		var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
+		var size_delete = <?php echo $totalFilesize['delete'] ?>;
+		var size_archive = <?php echo $totalFilesize['archive'] ?>;
+		var size_keep = <?php echo $totalFilesize['keep'] ?>;
+
+		var dataset = [{
+			label: 'untagged',
+			size: size_untagged
+		}, {
+			label: 'delete',
+			size: size_delete
+		}, {
+			label: 'archive',
+			size: size_archive
+		}, {
+			label: 'keep',
+			size: size_keep
+		}];
+
+		var width = 200;
+		var height = 200;
+		var radius = Math.min(width, height) / 2;
+
+		var color = d3.scale.ordinal()
+			//.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+		.range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
+
+		var svg = d3.select("#filesizechart")
+			.append('svg')
+			.attr('width', width)
+			.attr('height', height)
+			.append('g')
+			.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+
+		var pie = d3.layout.pie()
+			.value(function(d) {
+				return d.size;
+			})
+			.sort(null);
+
+		var path = d3.svg.arc()
+			.outerRadius(radius - 10)
+			.innerRadius(0);
+
+		var label = d3.svg.arc()
+			.outerRadius(radius - 40)
+			.innerRadius(radius - 40);
+
+		var arc = svg.selectAll('.arc')
+			.data(pie(dataset))
+			.enter().append('g')
+			.attr('class', 'arc');
+
+		arc.append('path')
+			.attr('d', path)
+			.attr('fill', function(d) {
+				return color(d.data.label);
+			});
+
+		arc.append('text')
+			.attr("transform", function(d) {
+				return "translate(" + label.centroid(d) + ")";
+			})
+			.attr("dy", "0.35em")
+			.text(function(d) {
+				return d.data.label;
+			});
+	</script>
 </body>
 </html>

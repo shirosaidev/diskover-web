@@ -14,7 +14,7 @@ if (count($results[$p]) > 0) {
         <input type="text" class="search form-control" placeholder="Search within results">
       </div>
     <span class="counter pull-right"></span>
-    <table class="table table-striped table-hover table-condensed table-bordered results" style="word-break:break-word;word-wrap:break-word;">
+    <table class="table table-striped table-hover results" style="word-break:break-word;word-wrap:break-word;">
       <thead>
         <tr>
           <th class="text-nowrap">#</th>
@@ -29,7 +29,7 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">Custom Tag</th>
         </tr>
         <tr class="warning no-result">
-          <td colspan="9"><i class="fa fa-warning"></i> No result</td>
+          <td colspan="10"><i class="fa fa-warning"></i> No result</td>
         </tr>
       </thead>
       <tfoot>
@@ -56,8 +56,8 @@ if (count($results[$p]) > 0) {
       <input type="hidden" name="<?php echo $result['_id']; ?>" value="<?php echo $result['_index']; ?>" />
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'warning'; } elseif ($file['tag'] == 'archive') { echo 'success'; } elseif ($file['tag'] == 'keep') { echo 'info'; }?>">
         <th scope="row" class="text-nowrap"><?php echo $i; ?></th>
-        <td><a href="/view.php?id=<?php echo $result['_id'] . '&index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
-		  <td><a href="/sunburst.php?path=<?php echo urlencode($file['path_parent']); ?>"><label class="btn btn-default btn-xs"><span class="glyphicon glyphicon-folder-open"></span></label></a>&nbsp;<a href="/advanced.php?submitted=true&p=1&path_parent=<?php echo urlencode($file['path_parent']); ?>"><label class="btn btn-default btn-xs"><span class="glyphicon glyphicon-filter"></span></label></a>&nbsp;<?php echo $file['path_parent']; ?></td>
+        <td><a href="/view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
+		  <td><a href="/sunburst.php?path=<?php echo urlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;maxdepth=<?php echo $_COOKIE['maxdepth']; ?>"><label class="btn btn-default btn-xs"><span class="glyphicon glyphicon-folder-open"></span></label></a>&nbsp;<a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo urlencode($file['path_parent']); ?>"><label class="btn btn-default btn-xs"><span class="glyphicon glyphicon-filter"></span></label></a>&nbsp;<?php echo $file['path_parent']; ?></td>
         <td class="text-nowrap"><?php echo formatBytes($file['filesize']); ?></td>
         <td class="text-nowrap"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap"><?php echo $file['group']; ?></td>
@@ -153,7 +153,7 @@ else {
 ?>
 <div class="container">
   <div class="row">
-    <div class="alert alert-dismissible alert-danger col-xs-8">
+    <div class="alert alert-dismissible alert-warning col-xs-8">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
       <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found :(</strong> Change a few things up and try searching again.
     </div>

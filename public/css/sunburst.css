@@ -1,0 +1,161 @@
+#sunburst-container {
+	overflow: hidden;
+	padding-top: 2px;
+}
+
+#sunburst-buttons {
+	z-index: 20;
+}
+
+path {
+	stroke: #272B30;
+	/*stroke: #fff;*/
+	fill-rule: evenodd;
+}
+
+circle,
+path {}
+
+circle {
+	fill: none;
+	pointer-events: all;
+}
+
+circle:hover {
+	fill: #999;
+	opacity: 0.5;
+}
+
+#core:hover {
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+
+/* legend */
+
+#explanation {
+	font-family: Avenir, Arial, Helvetica, sans-serif;
+	position: absolute;
+	/*top: 260px;
+  left: 305px*/
+	;
+	width: 140px;
+	height: 140px;
+	margin: auto;
+	top: 90px;
+	left: 0;
+	right: 0;
+	bottom: 0px;
+	text-align: center;
+	color: gray;
+	word-break: break-all;
+	word-wrap: break-word;
+	text-shadow: 1px 1px #000;
+	z-index: -1;
+	/*z-index: -1;*/
+}
+
+#core_top {
+	/*font-size: 2.5em;*/
+}
+
+#core_center {
+	font-size: 2em;
+}
+
+#core_tag {
+	font-size: 2.5em;
+	font-weight: bold;
+}
+
+#legend {
+	text-align: center;
+	font-family: Avenir, Arial, Helvetica, sans-serif;
+	padding-top: 20px;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 40px;
+	z-index: 50;
+	opacity: 0;
+}
+
+#legend h2 {
+	font-size: 1.2em;
+	font-style: inherit;
+	margin: 0;
+	padding: 0;
+}
+
+#legend p {
+	font-size: .9em;
+	margin: 0;
+	padding: 0;
+	text-transform: uppercase;
+	font-variant: small-caps;
+}
+
+.hmm {
+	opacity: 0.8;
+	cursor: pointer;
+}
+
+.hmm:hover {
+	stroke: #666;
+	stroke-width: 2px;
+	opacity: 1;
+}
+
+.svg-container {
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	top: 0px;
+	left: 20px;
+	/*padding-bottom: 100%;*/
+	/* aspect ratio */
+	vertical-align: top;
+	opacity: 0.9;
+}
+
+.svg-content-responsive {
+	display: inline-block;
+	position: absolute;
+	top: 10px;
+	left: 0;
+}
+
+.sequence {
+	position: absolute;
+	bottom: -20px;
+	left: 0;
+	z-index: 100;
+	/*width: 600px;
+  height: 70px;*/
+}
+
+#chart {
+	position: relative;
+	overflow: hidden;
+}
+
+.d3-tip {
+	font-size: 11px;
+	line-height: 1;
+	font-weight: bold;
+	padding: 12px;
+	background: rgba(0, 0, 0, 0.8);
+	color: #fff;
+	border-radius: 2px;
+	pointer-events: none;
+	word-break: break-all;
+	word-wrap: break-word;
+	z-index: 9999;
+}
+
+.statustext {
+	padding-top: 4px;
+	font-size: 10px;
+	color: gray;
+}
