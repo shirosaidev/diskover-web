@@ -32,6 +32,7 @@ diskover-web was originally designed to help vfx studios manage their data. It i
 $ git clone https://github.com/shirosaidev/diskover-web.git
 $ cd diskover-web
 ```
+[Download latest version](https://github.com/shirosaidev/diskover-web/releases/latest)
 
 ### Install application dependencies
 
