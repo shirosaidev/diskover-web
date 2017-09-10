@@ -13,7 +13,6 @@ diskover-web was originally designed to help vfx studios manage their data. It i
 ![diskover-web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
 ![diskover-web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
 ![diskover-web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
-![diskover-web file view](docs/diskover-web-fileview-screenshot.png?raw=true)
 
 ## Installation Guide
 
