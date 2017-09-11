@@ -1,5 +1,5 @@
 theme: jekyll-theme-hacker
 title: diskover-web
-description: Elasticsearch file system crawler and disk space analyzer.
+description: diskover's web file manager and file system search engine using Elasticsearch.
 show_downloads: true
 google_analytics: UA-98866026-1
