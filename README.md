@@ -1,6 +1,6 @@
 # diskover-web
 
-diskover-web is the file manager and disk analysis web app for [diskover](https://shirosaidev.github.io/diskover). It will help you quickly search for files on your storage (using diskover Elasticsearch indices) and files can be tagged for deletion, archival or keeping. Custom file tags are also supported.
+diskover-web is the file manager and storage analytics web app for [diskover](https://shirosaidev.github.io/diskover). It will help you quickly search Elasticsearch for files in your diskover indices and files can be tagged for deletion, archival or keeping. Custom file tags are also supported.
 
 A built-in REST API can also be used to list or update file tags in diskover indices.
 
