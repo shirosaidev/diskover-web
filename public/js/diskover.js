@@ -75,7 +75,7 @@ $(document).ready(function () {
 			$('.no-result').hide();
 		}
 	});
-	
+
 });
 
 function setCookie(cname, cvalue) {
@@ -129,10 +129,11 @@ function format(a, b) {
 function changeFileTreeLink() {
 	var path = (getCookie('path')) ? getCookie('path') : '/';
 	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;
-	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 3;
-	var url = "/sunburst.php?path=" + path + "&filter=" + filter + "&maxdepth=" + maxdepth;
+	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 1;
+	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&maxdepth=" + maxdepth;
 	document.getElementById("filetreelink").setAttribute("href", url);
 	return false;
 }
 
+// change file tree link
 changeFileTreeLink();

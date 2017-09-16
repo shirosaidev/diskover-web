@@ -187,7 +187,7 @@ function walk_tree($client, $path, $filter, $getfiles, $depth, $maxdepth) {
     // continue if directory is empty
 		if ($dirinfo[0] == 0 || $dirinfo[1] == 0) continue;
     $items[] = [
-            "name" => basename($d),
+            "name" => $d, //basename($d)
             "size" => $dirinfo[0],
             "count" => $dirinfo[1],
             "children" => walk_tree($client, $d, $filter, $getfiles, $depth+=1, $maxdepth)
@@ -206,9 +206,9 @@ if (empty($filter)) {
   $filter = 1048576;
 }
 
-// default 3 max directory depth
+// default 1 max directory depth
 if (empty($maxdepth)) {
-  $maxdepth = 3;
+  $maxdepth = 1;
 }
 
 // check if root or no path (grab one from ES)

@@ -1,5 +1,16 @@
 # Diskover Web Change Log
 
+# [1.2.1] - 2017-09-16
+### added
+- bar chart under each file name on filetree page to show size percent
+### changed
+- removed sunburst and replaced with pie chart on filetree page
+- removed maxdepth and set to load data on demand as directories traversed on filetree page
+- sunburst.php renamed to filetree.php
+### fixed
+- not using session stored json data when refreshing File Tree page and 
+path didn't change
+
 # [1.2.0] - 2017-09-10
 ### note
 - *** REQUIRES index created with diskover >= v1.2.0 which adds directory type ***
