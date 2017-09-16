@@ -1,10 +1,10 @@
 # diskover-web
 
-diskover-web is the file manager and disk analysis web app for [diskover](https://github.com/shirosaidev/diskover). It will help you quickly search for files on your storage (using diskover Elasticsearch indices) and files can be tagged for deletion, archival or keeping. Custom file tags are also supported.
+diskover-web is the file manager and storage analytics web app for [diskover](https://shirosaidev.github.io/diskover). It will help you quickly search Elasticsearch for files in your diskover indices and files can be tagged for deletion, archival or keeping. Custom file tags are also supported.
 
 A built-in REST API can also be used to list or update file tags in diskover indices.
 
-diskover-web was originally designed to help vfx studios manage their data. It is written in PHP, [Bootstrap](http://getbootstrap.com/), [jQuery](https://jquery.com/) and [D3.js](https://d3js.org).
+It is written in PHP, [Bootstrap](http://getbootstrap.com/), [jQuery](https://jquery.com/) and [D3.js](https://d3js.org).
 
 ## Screenshots
 
@@ -13,7 +13,6 @@ diskover-web was originally designed to help vfx studios manage their data. It i
 ![diskover-web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
 ![diskover-web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
 ![diskover-web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
-![diskover-web file view](docs/diskover-web-fileview-screenshot.png?raw=true)
 
 ## Installation Guide
 
@@ -25,6 +24,7 @@ diskover-web was originally designed to help vfx studios manage their data. It i
 * `PHP client for Elasticsearch` (elasticsearch-php)
 * `Elasticsearch` (tested on Elasticsearch 5.3.0)
 * `Apache or Nginx` (if you don't want to use PHP built-in web server)
+* `diskover` (Elasticsearch index created by diskover >= 1.2.0)
 
 ### Download
 
@@ -32,6 +32,7 @@ diskover-web was originally designed to help vfx studios manage their data. It i
 $ git clone https://github.com/shirosaidev/diskover-web.git
 $ cd diskover-web
 ```
+[Download latest version](https://github.com/shirosaidev/diskover-web/releases/latest)
 
 ### Install application dependencies
 
