@@ -60,22 +60,6 @@ $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to 
 // Setup search query for dupes count
 $searchParams['body'] = [
    'size' => 0,
-   'aggs' => [
-     'duplicateCount' => [
-       'terms' => [
-         'field' => 'filehash',
-         'min_doc_count' => 2,
-         'size' => 10000,
-       ],
-    'aggs' => [
-      'duplicateDocuments' => [
-        'top_hits' => [
-          'size' => 100
-        ]
-      ]
-    ]
-      ]
-    ],
     'aggs' => [
       'total_size' => [
         'sum' => [
@@ -85,7 +69,6 @@ $searchParams['body'] = [
     ],
     'query' => [
       'query_string' => [
-        'analyze_wildcard' => 'true',
         'query' => 'is_dupe:true'
       ]
     ]

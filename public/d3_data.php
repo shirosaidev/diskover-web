@@ -50,7 +50,7 @@ function get_dir_info($client, $path, $filter) {
   return $dirinfo;
 }
 
-function get_files($client, $path, $filter) {
+function get_files($client, $path, $filter, $mtime) {
 	// gets all the files in the current directory (path)
 	$items = [];
   $searchParams['body'] = [];
@@ -64,9 +64,10 @@ function get_files($client, $path, $filter) {
 
 	$path = addcslashes($path,'+-&&||!(){}[]^"~*?:\/ ');
 	$searchParams['body'] = [
+				'_source' => ["filename","filesize"],
 				'query' => [
 					'query_string' => [
-						'query' => 'path_parent: "' . $path . '" AND filesize: >' . $filter
+						'query' => 'path_parent: "' . $path . '" AND filesize: >' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
 					]
 				],
 				'sort' => [
@@ -106,6 +107,7 @@ function get_es_path($client) {
 	$searchParams['size'] = 10;
 	
 	$searchParams['body'] = [
+	'_source' => ["path"],
 	'query' => [
 			'match_all' => (object) []
 	],
@@ -142,6 +144,7 @@ function get_sub_dirs($client, $path) {
 	
 	$path = addcslashes($path,'+-&&||!(){}[]^"~*?:\/ ');
 	$searchParams['body'] = [
+	'_source' => ["path"],
 	'query' => [
 		'query_string' => [
 			'query' => 'path: ' . $path . '\/* NOT path: ' . $path . '\/*\/*'
@@ -168,14 +171,12 @@ function get_sub_dirs($client, $path) {
 
 }
 
-function walk_tree($client, $path, $filter, $getfiles, $depth, $maxdepth) {
+function walk_tree($client, $path, $filter, $mtime, $depth, $maxdepth) {
   $items = [];
   $subdirs = [];
 	if ($depth == $maxdepth) return $items;
 	// get files in current path (not recursive)
-  if ($getfiles) {
-		$items = get_files($client, $path, $filter);
-	}
+  $items = get_files($client, $path, $filter, $mtime);
 	// get directories in current path (not recursive)
 	$subdirs = get_sub_dirs($client, $path);
   // get depth of path
@@ -190,7 +191,7 @@ function walk_tree($client, $path, $filter, $getfiles, $depth, $maxdepth) {
             "name" => $d, //basename($d)
             "size" => $dirinfo[0],
             "count" => $dirinfo[1],
-            "children" => walk_tree($client, $d, $filter, $getfiles, $depth+=1, $maxdepth)
+            "children" => walk_tree($client, $d, $filter, $mtime, $depth+=1, $maxdepth)
           ];
 		$depth-=1;
 	}
@@ -198,12 +199,26 @@ function walk_tree($client, $path, $filter, $getfiles, $depth, $maxdepth) {
 }
 
 $path = $_GET['path'];
-$filter = $_GET['filter'];
+$filter = $_GET['filter']; // file size
+$mtime = $_GET['mtime']; // file mtime
 $maxdepth = $_GET['maxdepth'];
 
 // default 1 MB min file size filter
 if (empty($filter)) {
   $filter = 1048576;
+}
+
+// default 0 days mtime filter
+if (empty($mtime) || $mtime == 0) {
+  $mtime = gmdate("Y-m-d\TH:i:s", strtotime("now"));
+} elseif ($mtime == "1m") {
+	$mtime = gmdate("Y-m-d\TH:i:s", strtotime("-1 month"));
+} elseif ($mtime == "3m") {
+	$mtime = gmdate("Y-m-d\TH:i:s", strtotime("-3 months"));
+} elseif ($mtime == "6m") {
+	$mtime = gmdate("Y-m-d\TH:i:s", strtotime("-6 months"));
+} elseif ($mtime == "1y") {
+	$mtime = gmdate("Y-m-d\TH:i:s", strtotime("-12 months"));
 }
 
 // default 1 max directory depth
@@ -230,7 +245,7 @@ $data = [
             "name" => $path,
             "size" => $dirinfo[0],
             "count" => $dirinfo[1],
-            "children" => walk_tree($client, $path, $filter, $getfiles=true, $depth=0, $maxdepth)
+            "children" => walk_tree($client, $path, $filter, $mtime, $depth=0, $maxdepth)
           ];
 
 echo json_encode($data);

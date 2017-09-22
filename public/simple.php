@@ -30,13 +30,13 @@ if (!empty($_REQUEST['submitted'])) {
     $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
   // match what's in the search field
   } else {
-	$req = $_REQUEST['q'];
+		$req = $_REQUEST['q'];
     $searchParams['body']['query']['query_string']['query'] = $req;
-	$searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
+		$searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
   }
 
   // sort by name
-  $searchParams['body']['sort'] = "filename";
+  $searchParams['body']['sort'] = "path_parent";
 
   // Send search query to Elasticsearch and get scroll id and first page of results
   $queryResponse = $client->search($searchParams);

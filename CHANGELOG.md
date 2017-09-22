@@ -1,5 +1,20 @@
 # Diskover Web Change Log
 
+# [1.2.2] - 2017-09-22
+### added
+- mtime filter dropdown on file tree page
+- >1gb to size filter on file tree page
+- untag button to remove del/arch/keep tag
+- clicking file name on file tree page loads search results page with that file
+### changed
+- renamed Filter on file tree page to Size Filter
+- optimized ES queries to reduce fields returns in results
+- search results are now sorted by Parent Path by default
+### fixed
+- Directories with & in the name would not open on file tree page
+- console error when collapsing directory on file tree page
+- tag button sizes changing when clicking Select All
+
 # [1.2.1] - 2017-09-16
 ### added
 - bar chart under each file name on filetree page to show size percent

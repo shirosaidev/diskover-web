@@ -73,6 +73,9 @@ if (count($results[$p]) > 0) {
             <label class="tagKeepLabel btn btn-info btn-sm <?php if ($file['tag'] == 'keep') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowKeep">
               <input class="tagKeepInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="keep" <?php if ($file['tag'] == 'keep') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-floppy-saved"></span>
             </label>
+						<label class="tagUntaggedLabel btn btn-default btn-sm" style="display:inline-block;float:none;" id="highlightRowUntagged">
+              <input class="tagUntaggedInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="untagged" /><span class="glyphicon glyphicon-remove-sign"></span>
+            </label>
           </div></td>
         <td class="text-nowrap"><input type="text" name="ids_tag_custom[<?php echo $result['_id']; ?>]" value="<?php echo $file['tag_custom']; ?>" ?></td>
       </tr>

@@ -2,25 +2,25 @@ $(document).ready(function () {
 
 	$("#tagAllDelete").click(function () {
 		$(".tagDeleteInput").prop('checked', true);
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-warning active');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-success');
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-info');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning active');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
 		$(".tagDeleteLabel").closest('tr').attr('class', 'warning');
 	});
 
 	$("#tagAllArchive").click(function () {
 		$(".tagArchiveInput").prop('checked', true);
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-success active');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-warning');
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-info');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success active');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
 		$(".tagArchiveLabel").closest('tr').attr('class', 'success');
 	});
 
 	$("#tagAllKeep").click(function () {
 		$(".tagKeepInput").prop('checked', true);
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-info active');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-success');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-warning');
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info active');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
 		$(".tagKeepLabel").closest('tr').attr('class', 'info');
 	});
 
@@ -31,7 +31,6 @@ $(document).ready(function () {
 	$("#reload").click(function () {
 		console.log("removing json data in session storage because reload");
 		sessionStorage.removeItem("diskover-filetree");
-		sessionStorage.removeItem("diskover-filetree-root");
 		location.reload(true);
 	});
 
@@ -45,6 +44,10 @@ $(document).ready(function () {
 
 	$("#highlightRowKeep input").change(function () {
 		$(this).closest('tr').attr('class', 'info');
+	});
+	
+	$("#highlightRowUntagged input").change(function () {
+		$(this).closest('tr').attr('class', 'untagged');
 	});
 
 	$(".search").keyup(function () {
@@ -129,8 +132,9 @@ function format(a, b) {
 function changeFileTreeLink() {
 	var path = (getCookie('path')) ? getCookie('path') : '/';
 	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;
+	var mtime = (getCookie('mtime')) ? getCookie('mtime') : 0;
 	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 1;
-	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&maxdepth=" + maxdepth;
+	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
 	document.getElementById("filetreelink").setAttribute("href", url);
 	return false;
 }

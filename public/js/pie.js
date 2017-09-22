@@ -181,7 +181,8 @@ function changePie(data) {
 	
 	/* ------- TITLE LABEL -------*/
 	
-	svg.selectAll("text").remove();
+	svg.select(".label").remove();
+	svg.select(".label-percent").remove();
 	
 	var label = svg.append("text")
 		.attr("dy", "-1em")

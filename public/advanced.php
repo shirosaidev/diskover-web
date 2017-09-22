@@ -114,26 +114,8 @@ if (!empty($_REQUEST['submitted'])) {
 
   if ($_REQUEST['is_dupe']) {
     $searchParams['body'] = [
-       'size' => 0,
-       'aggs' => [
-         'duplicateCount' => [
-           'terms' => [
-             'field' => 'filehash',
-             'min_doc_count' => 2,
-             'size' => 10000,
-           ],
-        'aggs' => [
-          'duplicateDocuments' => [
-            'top_hits' => [
-              'size' => 100
-            ]
-          ]
-        ]
-          ]
-        ],
         'query' => [
           'query_string' => [
-            'analyze_wildcard' => 'true',
             'query' => 'is_dupe:true'
           ]
         ]
@@ -158,7 +140,7 @@ if (!empty($_REQUEST['submitted'])) {
     }
   } else {
     // sort by filename
-    $searchParams['body']['sort'] = "filename";
+    $searchParams['body']['sort'] = "path_parent";
   }
 
   // Send search query to Elasticsearch and get tag scroll id and first page of results

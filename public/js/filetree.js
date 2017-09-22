@@ -8,7 +8,8 @@ $(document).ready(function () {
 		console.log('changing paths');
 		var newdir = $('#path').val();
 		var filter = parseInt($_GET('filter'));
-		location.href = "/filetree.php?path=" + newdir + "&filter=" + filter;
+		var mtime = $_GET('mtime');
+		location.href = "/filetree.php?path=" + newdir + "&filter=" + filter + "&mtime=" + mtime;
 		return false;
 	});
 
@@ -35,7 +36,7 @@ function getChildJSON(d) {
 	var spinner = new Spinner(opts).spin(target);
 
 	// url for d3.json
-	var url = '/d3_data.php?path=' + d.name + '&filter=' + filter;
+	var url = '/d3_data.php?path=' + encodeURIComponent(d.name) + '&filter=' + filter + '&mtime=' + mtime;
 
 	// load json data and trigger callback
 	d3.json(url, function (error, data) {
@@ -75,9 +76,9 @@ function getJSON() {
 	}
 
 	// get new json data if filter cookies are different than current url params
-	if ($_GET('filter') != '') {
-		if ($_GET('filter') != getCookie('filter')) {
-			console.log("removing json data on local storage because filter changed");
+	if ($_GET('filter') != '' || $_GET('mtime') != '') {
+		if ($_GET('filter') != getCookie('filter') || $_GET('mtime') != getCookie('mtime')) {
+			console.log("removing json data on local storage because filters changed");
 			sessionStorage.removeItem("diskover-filetree");
 			getESJsonData();
 			return true;
@@ -140,6 +141,7 @@ function getJSON() {
 		// store cookies
 		setCookie('path', $('#path').val());
 		($_GET('filter')) ? setCookie('filter', $_GET('filter')): setCookie('filter', 1048576);
+		($_GET('mtime')) ? setCookie('mtime', $_GET('mtime')): setCookie('mtime', 0);
 
 		// update file tree link
 		changeFileTreeLink();
@@ -164,9 +166,9 @@ function updateTree(data, parent) {
 			d._children = null;
 		}
 	}
-
+	
 	var nodes = tree.nodes(data),
-		duration = 250;
+			duration = 250;
 
 	var nodeEls = ul.selectAll("li.node").data(nodes, function (d) {
 		d.id = d.id || ++id;
@@ -182,10 +184,16 @@ function updateTree(data, parent) {
 			if (d.count > 0 && !d.children && !d._children) {
 				// check if there are any children in Elasticsearch
 				getChildJSON(d);
-			} else if (d.children || d._children) {
+			} else if (d._children) {
 				toggleChildren(d);
 				updateTree(data, d);
 				changePie(d);
+			} else if (d.children) {
+				toggleChildren(d);
+				updateTree(data, d);
+			} else if (!d.count) {
+				// display file in search results
+				window.location.href = '/advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name) +'&path_parent=' + encodeURIComponent(node.name);
 			}
 		})
 		.on("mouseover", function (d) {
@@ -266,6 +274,7 @@ var tree = d3.layout.treelist()
 var ul = d3.select("#tree-container").append("ul").classed("treelist", "true");
 
 var filter = parseInt($_GET('filter'));
+var mtime = $_GET('mtime');
 var path = decodeURIComponent($_GET('path'));
 // remove any trailing slash
 if (path != '/') {
@@ -273,16 +282,19 @@ if (path != '/') {
 }
 
 console.log("PATH:" + path);
-console.log("FILTER:" + filter);
+console.log("SIZE_FILTER:" + filter);
+console.log("MTIME_FILTER:" + mtime);
 
-// add filter and maxdepth to statustext
-var status_filter = ($_GET('filter')) ? 'filter:' + format($_GET('filter')) : 'filter:1 MB';
+// add filters and maxdepth to statustext
+var status_filter = ($_GET('filter')) ? 'size:' + format($_GET('filter')) : 'size:>1 MB';
+var status_mtime = ($_GET('mtime')) ? ' mtime:' + $_GET('mtime') : ' mtime:0';
 document.getElementById('statusfilters').append(status_filter);
+document.getElementById('statusfilters').append(status_mtime);
 
 // config references
 var chartConfig = {
 	target: 'mainwindow',
-	data_url: '/d3_data.php?path=' + path + '&filter=' + filter
+	data_url: '/d3_data.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
 };
 
 // loader settings

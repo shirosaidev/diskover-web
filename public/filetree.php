@@ -52,19 +52,31 @@ if (!empty($_GET['path'])) {
 						</form>
 						<div class="buttons-container" id="buttons-container" style="display:none;">
 							<div class="btn-group">
-								<button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Filter
+								<button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Size Filter
         <span class="caret"></span></button>
 								<ul class="dropdown-menu">
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=1024">1 KB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=262144">256 KB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=524288">512 KB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=1048576">1 MB (default)</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=2097152">2 MB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=5242880">5 MB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=10485760">10 MB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=26214400">25 MB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=52428800">50 MB</a></li>
-									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=104857600">100 MB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=1024&amp;mtime=<?php echo $_GET['mtime']; ?>">>1 KB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=262144&amp;mtime=<?php echo $_GET['mtime']; ?>">>256 KB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=524288&amp;mtime=<?php echo $_GET['mtime']; ?>">>512 KB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=1048576&amp;mtime=<?php echo $_GET['mtime']; ?>">>1 MB (default)</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=2097152&amp;mtime=<?php echo $_GET['mtime']; ?>">>2 MB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=5242880&amp;mtime=<?php echo $_GET['mtime']; ?>">>5 MB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=10485760&amp;mtime=<?php echo $_GET['mtime']; ?>">>10 MB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=26214400&amp;mtime=<?php echo $_GET['mtime']; ?>">>25 MB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=52428800&amp;mtime=<?php echo $_GET['mtime']; ?>">>50 MB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=104857600&amp;mtime=<?php echo $_GET['mtime']; ?>">>100 MB</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=1073741824&amp;mtime=<?php echo $_GET['mtime']; ?>">>1 GB</a></li>
+								</ul>
+							</div>
+							<div class="btn-group">
+								<button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Mtime Filter
+        <span class="caret"></span></button>
+								<ul class="dropdown-menu">
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=0">0 (default)</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=1m">>1 month</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=3m">>3 months</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=6m">>6 months</a></li>
+									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=1y">>1 year</a></li>
 								</ul>
 							</div>
 							<button type="submit" id="reload" class="btn btn-default btn-sm">Reload</button>

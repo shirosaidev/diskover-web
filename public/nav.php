@@ -38,7 +38,7 @@
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc">All duplicate files</a></li>
 					</ul>
 				</li>
-				<li><a href="#" id="filetreelink">File Tree</a></li>
+				<li><a href="/filetree.php" id="filetreelink">File Tree</a></li>
 			</ul>
 			<form method="get" action="/simple.php" class="navbar-form navbar-left" role="search">
 				<div class="form-group">
