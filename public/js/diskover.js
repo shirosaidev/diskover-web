@@ -29,6 +29,8 @@ $(document).ready(function () {
 	});
 
 	$("#reload").click(function () {
+		console.log("removing path cookie because reload");
+		deleteCookie("path");
 		console.log("removing json data in session storage because reload");
 		sessionStorage.removeItem("diskover-filetree");
 		location.reload(true);
@@ -101,6 +103,10 @@ function getCookie(cname) {
 	return "";
 }
 
+function deleteCookie(cname) {
+  document.cookie = cname + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
 function $_GET(param) {
 	var vars = {};
 	window.location.href.replace(location.hash, '').replace(
@@ -130,7 +136,7 @@ function format(a, b) {
 }
 
 function changeFileTreeLink() {
-	var path = (getCookie('path')) ? getCookie('path') : '/';
+	var path = (getCookie('path')) ? getCookie('path') : '';
 	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : 0;
 	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 1;
