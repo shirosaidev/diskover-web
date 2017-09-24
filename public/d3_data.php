@@ -9,7 +9,7 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 $client = connectES();
 
 // Get total directory size and count from Elasticsearch (recursive)
-function get_dir_info($client, $path, $filter) {
+function get_dir_info($client, $path, $filter, $mtime) {
   $totalsize = 0;
 	$totalcount = 0;
   $searchParams['body'] = [];
@@ -23,7 +23,7 @@ function get_dir_info($client, $path, $filter) {
      'size' => 0,
      'query' => [
        'query_string' => [
-         'query' => '"' . $path . '" AND filesize: >' . $filter
+         'query' => '"' . $path . '" AND filesize: >' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
        ]
      ],
       'aggs' => [
@@ -126,7 +126,7 @@ function get_es_path($client) {
 	
 	// set path to first path found
 	$path = $results[0]['_source']['path'];
-	
+
 	return $path;
 }
 
@@ -142,12 +142,20 @@ function get_sub_dirs($client, $path) {
 	// number of results to return
 	$searchParams['size'] = 100;
 	
-	$path = addcslashes($path,'+-&&||!(){}[]^"~*?:\/ ');
+	// diff query if root path /
+	if ($path == '/') {
+		$query = 'path: \/* NOT path: \/*\/* NOT path: \/';
+	} else {
+		// escape special characters
+		$path = addcslashes($path,'+-&&||!(){}[]^"~*?:\/ ');
+		$query = 'path: ' . $path . '\/* NOT path: ' . $path . '\/*\/*';
+	}
+	
 	$searchParams['body'] = [
 	'_source' => ["path"],
 	'query' => [
 		'query_string' => [
-			'query' => 'path: ' . $path . '\/* NOT path: ' . $path . '\/*\/*'
+			'query' => $query
 		]
 	],
 	'sort' => [
@@ -184,7 +192,7 @@ function walk_tree($client, $path, $filter, $mtime, $depth, $maxdepth) {
   // loop through all subdirs and add to items array
   foreach ($subdirs as $d) {
     // get dir total size and file count
-    $dirinfo = get_dir_info($client, $d, $filter);
+    $dirinfo = get_dir_info($client, $d, $filter, $mtime);
     // continue if directory is empty
 		if ($dirinfo[0] == 0 || $dirinfo[1] == 0) continue;
     $items[] = [
@@ -226,14 +234,13 @@ if (empty($maxdepth)) {
   $maxdepth = 1;
 }
 
-// check if root or no path (grab one from ES)
-if (empty($path) || $path == '/'){
+// check if no path (grab one from ES)
+if (empty($path)) {
 	$path = get_es_path($client);
 }
 
-
 // get dir total size and file count
-$dirinfo = get_dir_info($client, $path, $filter);
+$dirinfo = get_dir_info($client, $path, $filter, $mtime);
 
 // check for error
 if ($dirinfo[0] == 0) {

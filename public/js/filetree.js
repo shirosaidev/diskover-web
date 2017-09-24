@@ -29,7 +29,7 @@ function showHidden(root) {
 
 function getChildJSON(d) {
 	// get json data from Elasticsearch using php data grabber
-	console.log("getting children from Elasticsearch");
+	console.log("getting children from Elasticsearch:"+d.name);
 
 	var target = document.getElementById('tree-container');
 	// trigger loader

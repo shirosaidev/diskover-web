@@ -1,9 +1,14 @@
 # Diskover Web Change Log
 
+# [1.2.3] - 2017-09-24
+### fixed
+- file tree working with root / path
+- mtime filter for files on filetree
+
 # [1.2.2] - 2017-09-22
 ### added
 - mtime filter dropdown on file tree page
-- >1gb to size filter on file tree page
+- 1gb to size filter on file tree page
 - untag button to remove del/arch/keep tag
 - clicking file name on file tree page loads search results page with that file
 ### changed
