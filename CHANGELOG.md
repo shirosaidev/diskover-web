@@ -4,6 +4,7 @@
 ### fixed
 - file tree working with root / path
 - mtime filter for files on filetree
+- issue with opening file tree page with path that has spaces
 
 # [1.2.2] - 2017-09-22
 ### added
