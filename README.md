@@ -19,8 +19,8 @@ It is written in PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](htt
 
 ### Requirements
 
-* `Linux` (tested on Ubuntu 16.04)
-* `PHP 7.0` (tested on PHP 7.0.15)
+* `Linux or OS X/MacOS` (tested on Ubuntu 16.04, OS X 10.11.6)
+* `PHP 7.0` (tested on PHP 7.0.15, 7.0.19)
 * `Composer Dependency Manager for PHP`
 * `PHP client for Elasticsearch` (elasticsearch-php)
 * `Elasticsearch` (tested on Elasticsearch 5.3.0, 5.4.2)
