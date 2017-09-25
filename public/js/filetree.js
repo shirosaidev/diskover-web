@@ -144,7 +144,7 @@ function getJSON() {
 		($_GET('mtime')) ? setCookie('mtime', $_GET('mtime')): setCookie('mtime', 0);
 
 		// update file tree link
-		changeFileTreeLink();
+		updateVisLinks();
 
 		// load file tree
 		updateTree(root, root);

@@ -1,5 +1,13 @@
 # Diskover Web Change Log
 
+# [1.2.4] - 2017-09-25
+### added
+- Analytics drop down to nav bar
+- Treemap d3 visualization to Analytics
+- Treemap icon button to search results page
+### changed
+- moved File Tree link to Analytics drop down in nav bar
+
 # [1.2.3] - 2017-09-24
 ### fixed
 - file tree working with root / path

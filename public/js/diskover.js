@@ -33,6 +33,7 @@ $(document).ready(function () {
 		deleteCookie("path");
 		console.log("removing json data in session storage because reload");
 		sessionStorage.removeItem("diskover-filetree");
+		sessionStorage.removeItem("diskover-spaceexplorer");
 		location.reload(true);
 	});
 
@@ -135,15 +136,17 @@ function format(a, b) {
 	return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f]
 }
 
-function changeFileTreeLink() {
+function updateVisLinks() {
 	var path = (getCookie('path')) ? getCookie('path') : '';
 	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : 0;
 	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 1;
 	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
 	document.getElementById("filetreelink").setAttribute("href", url);
+	var url = "/treemap.php?path=" + path;
+	document.getElementById("treemaplink").setAttribute("href", url);
 	return false;
 }
 
-// change file tree link
-changeFileTreeLink();
+// update visualization links
+updateVisLinks();
