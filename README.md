@@ -10,6 +10,7 @@ It is written in PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](htt
 
 ![diskover-web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=true)
 ![diskover-web file tree](docs/diskover-web-filetree-screenshot.png?raw=true)
+![diskover-web treemap](docs/diskover-web-treemap-screenshot.png?raw=true)
 ![diskover-web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
 ![diskover-web advanced file view](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
 ![diskover-web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
