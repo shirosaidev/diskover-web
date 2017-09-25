@@ -23,7 +23,7 @@ It is written in PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](htt
 * `PHP 7.0` (tested on PHP 7.0.15)
 * `Composer Dependency Manager for PHP`
 * `PHP client for Elasticsearch` (elasticsearch-php)
-* `Elasticsearch` (tested on Elasticsearch 5.3.0)
+* `Elasticsearch` (tested on Elasticsearch 5.3.0, 5.4.2)
 * `Apache or Nginx` (if you don't want to use PHP built-in web server)
 * `diskover` (Elasticsearch index created by diskover >= 1.2.0)
 
