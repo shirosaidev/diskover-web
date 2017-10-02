@@ -82,15 +82,6 @@
 	overflow: hidden;
 }
 
-.path {
-	padding-top: 2px;
-	width: 300px;
-}
-
-.path:focus {
-	width: 300px;
-}
-
 .buttons-container {
 	margin-left: 15px;
 	margin-top: 2px;

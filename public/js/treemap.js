@@ -22,7 +22,7 @@ function getESJsonData() {
 
 		console.log("storing json data in session storage");
 		// store in session Storage
-		sessionStorage.setItem('diskover-spaceexplorer', JSON.stringify(data));
+		sessionStorage.setItem('diskover-treemap', JSON.stringify(data));
 
 		// stop spin.js loader
 		spinner.stop();
@@ -267,7 +267,7 @@ console.time('loadtime')
 var spinner = new Spinner(opts).spin(target);
 
 // check if json data stored in session storage
-root = JSON.parse(sessionStorage.getItem("diskover-spaceexplorer"));
+root = JSON.parse(sessionStorage.getItem("diskover-treemap"));
 
 // get data from Elasticsearh if no json in session storage or path diff
 if (!root || (root && root.name != path)) {

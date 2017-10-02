@@ -139,8 +139,8 @@ if (!empty($_REQUEST['submitted'])) {
       $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
     }
   } else {
-    // sort by filename
-    $searchParams['body']['sort'] = "path_parent";
+    // sort by parent path, then filename
+	$searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
   }
 
   // Send search query to Elasticsearch and get tag scroll id and first page of results
@@ -204,6 +204,7 @@ if (!empty($_REQUEST['submitted'])) {
     </div>
   </div>
 <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="form-horizontal">
+	<fieldset>
 <input type="hidden" name="submitted" value="true" />
 <input type="hidden" name="p" value="1" />
 
@@ -333,6 +334,7 @@ if (!empty($_REQUEST['submitted'])) {
   <button type="reset" class="btn btn-default">Clear</button>
   <button type="submit" class="btn btn-primary">Search</button>
   <span>&nbsp;<a href="/simple.php">Switch to simple search</a></span>
+		</fieldset>
 </form>
 
 <?php } ?>

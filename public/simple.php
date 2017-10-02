@@ -35,11 +35,25 @@ if (!empty($_REQUEST['submitted'])) {
 		$searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
   }
 
-  // sort by name
-  $searchParams['body']['sort'] = "path_parent";
+	// Check if we need to sort search differently
+  if ($_REQUEST['sort']) {
+    $searchParams['body']['sort'] = $_REQUEST['sort'];
+    if ($_REQUEST['sortorder']) {
+      $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
+    }
+  } else {
+    // sort by parent path, then filename
+	$searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
+  }
 
-  // Send search query to Elasticsearch and get scroll id and first page of results
-  $queryResponse = $client->search($searchParams);
+	try {
+		// Send search query to Elasticsearch and get scroll id and first page of results
+  	$queryResponse = $client->search($searchParams);
+	}
+	
+	catch(Exception $e) {
+		//echo 'Message: ' .$e->getMessage();	
+	}
 
   // set total hits
   $total = $queryResponse['hits']['total'];
@@ -72,66 +86,73 @@ if (!empty($_REQUEST['submitted'])) {
   }
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>diskover &mdash; Simple Search</title>
-  <!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
+	<!DOCTYPE html>
+	<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>diskover &mdash; Simple Search</title>
+		<!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
 	<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
-	<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
-  <link rel="stylesheet" href="/css/diskover.css" media="screen" />
-</head>
-<body>
-<?php include __DIR__ . "/nav.php"; ?>
+		<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
+		<link rel="stylesheet" href="/css/diskover.css" media="screen" />
+	</head>
 
-<?php if (!isset($_REQUEST['submitted'])) { ?>
+	<body>
+		<?php include __DIR__ . "/nav.php"; ?>
 
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-xs-2 col-xs-offset-5">
-      <p class="text-center"><img src="/images/diskoversmall.png" style="margin-top:130px;" alt="diskover" width="62" height="47" /></p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-6 col-xs-offset-3">
-      <p class="text-center"><h1 class="text-nowrap text-center">diskover &mdash; Simple Search</h1></p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-8 col-xs-offset-2">
-      <p class="text-center">
-      <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="form-inline text-center">
-      <input name="q" value="<?php echo $_REQUEST['q']; ?>" type="text" placeholder="What are you looking for?" class="form-control input-lg" size="50" />
-      <input type="hidden" name="submitted" value="true" />
-      <input type="hidden" name="p" value="1" />
-      <button type="submit" class="btn btn-primary btn-lg">Search</button>
-      </form>
-      </p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-8 col-xs-offset-2">
-      <p class="text-center"><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Query string syntax help</a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/advanced.php">Switch to advanced search</a></p>
-    </div>
-  </div>
-</div>
+		<?php if (!isset($_REQUEST['submitted'])) { ?>
 
-<?php } ?>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xs-2 col-xs-offset-5">
+					<p class="text-center"><img src="/images/diskoversmall.png" style="margin-top:120px;" alt="diskover" width="62" height="47" /></p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6 col-xs-offset-3">
+					<p class="text-center">
+						<h1 class="text-nowrap text-center">diskover &mdash; Simple Search</h1>
+					</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-8 col-xs-offset-2">
+					<p class="text-center">
+						<form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="form-inline text-center">
+							<input type="hidden" name="destination" value="<?php echo $_SERVER[" REQUEST_URI "]; ?>"/>
+							<input name="q" value="<?php echo $_REQUEST['q']; ?>" type="text" placeholder="What are you looking for?" class="form-control input-lg" size="70" />
+							<input type="hidden" name="submitted" value="true" />
+							<input type="hidden" name="p" value="1" />
+							<button type="submit" class="btn btn-primary btn-lg">Search</button>
+						</form>
+					</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-8 col-xs-offset-2">
+					<p class="text-center">
+						<a href="/help.php">Search examples</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Query string syntax help</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="/advanced.php">Switch to advanced search</a></p>
+				</div>
+			</div>
+		
+			<?php } ?>
 
-<?php
+			<?php
 
 if (isset($_REQUEST['submitted'])) {
   include __DIR__ . "/results.php";
 }
 
 ?>
-</div>
-<script language="javascript" src="/js/jquery.min.js"></script>
-<script language="javascript" src="/js/bootstrap.min.js"></script>
-<script language="javascript" src="/js/diskover.js"></script>
-</body>
-</html>
+		</div>
+		<script language="javascript" src="/js/jquery.min.js"></script>
+		<script language="javascript" src="/js/bootstrap.min.js"></script>
+		<script language="javascript" src="/js/diskover.js"></script>
+	</body>
+
+	</html>

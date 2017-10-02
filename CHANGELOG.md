@@ -1,5 +1,21 @@
 # Diskover Web Change Log
 
+# [1.2.5] - 2017-10-02
+### added
+- search results page tag buttons to top of page as well as bottom
+- help page and help link on nav bar
+- error handling for invalid search query
+- search within text input now searches custom tag inputs
+- alert box showing number of unsaved changes on search results page when tagging
+- sort by arrows to search results field columns
+### changed
+- improved file tree directory browsing by loading data on mouseover (previously was onclick)
+- switched to php header reload for tag files form submit, previously was javascript
+- visual changes for results page and nav bar
+- set default search results sort order to be path_parent then filename
+### fixed
+- white screen flash when tagging files
+
 # [1.2.4] - 2017-09-25
 ### added
 - Analytics drop down to nav bar

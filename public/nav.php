@@ -48,14 +48,16 @@
 			</ul>
 			<form method="get" action="/simple.php" class="navbar-form navbar-left" role="search">
 				<div class="form-group">
-					<input type="text" name="q" class="form-control" placeholder="What you looking for?">
+					<i class="glyphicon glyphicon-search" style="font-size:16px;margin-right:5px;"></i>
+					<input type="text" name="q" class="form-control" placeholder="Search query" size="60" style="background-color:#1C1E22;color:white;">
 					<input type="hidden" name="submitted" value="true" />
 					<input type="hidden" name="p" value="1" />
 				</div>
-				<button type="submit" class="btn btn-default">Search</button>
+				<!--<button type="submit" class="btn btn-default">Search</button>-->
 			</form>
 			<ul class="nav navbar-nav navbar-right">
-				<li><a href="https://github.com/shirosaidev/diskover-web">View on Github</a></li>
+				<li><a href="/help.php">Help</a></li>
+				<li><a href="https://github.com/shirosaidev/diskover-web" target="_blank">View on Github</a></li>
 			</ul>
 		</div>
 	</div>

@@ -57,7 +57,7 @@ function getChildJSON(d) {
 
 		// stop spin.js loader
 		spinner.stop();
-
+		
 	});
 
 }
@@ -198,6 +198,10 @@ function updateTree(data, parent) {
 		})
 		.on("mouseover", function (d) {
 			d3.select(this).classed("selected", true);
+			if (d.count > 0 && !d.children && !d._children) {
+				// check if there are any children in Elasticsearch
+				getChildJSON(d);
+			}
 		})
 		.on("mouseout", function (d) {
 			d3.selectAll(".selected").classed("selected", false);
@@ -250,7 +254,7 @@ function updateTree(data, parent) {
 	//update caret arrow direction
 	nodeEls.select("span.downarrow").attr("class", function (d) {
 		var icon = d.children ? " glyphicon-chevron-down" :
-			d._children ? "glyphicon-chevron-right" : "";
+			d._children || d.count > 0 ? "glyphicon-chevron-right" : "";
 		return "downarrow glyphicon " + icon;
 	});
 	//update position with transition

@@ -43,8 +43,12 @@ if (count($_POST['ids_tag_custom']) > 0) {
   }
 }
 
+if (isset($_REQUEST["destination"])) {
+		header("Location: {$_REQUEST["destination"]}");
+  } else if(isset($_SERVER["HTTP_REFERER"])) {
+		header("Location: {$_SERVER["HTTP_REFERER"]}");
+  } else {
+	header("Location: /simple.php");
+  }
+
 ?>
-<html>
-<body onload="window.history.back()">
-</body>
-</html>

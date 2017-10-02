@@ -1,6 +1,7 @@
 $(document).ready(function () {
 
-	$("#tagAllDelete").click(function () {
+	// select all buttons on search results pages
+	$(".tagAllDelete").click(function () {
 		$(".tagDeleteInput").prop('checked', true);
 		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning active');
 		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
@@ -8,7 +9,7 @@ $(document).ready(function () {
 		$(".tagDeleteLabel").closest('tr').attr('class', 'warning');
 	});
 
-	$("#tagAllArchive").click(function () {
+	$(".tagAllArchive").click(function () {
 		$(".tagArchiveInput").prop('checked', true);
 		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success active');
 		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
@@ -16,7 +17,7 @@ $(document).ready(function () {
 		$(".tagArchiveLabel").closest('tr').attr('class', 'success');
 	});
 
-	$("#tagAllKeep").click(function () {
+	$(".tagAllKeep").click(function () {
 		$(".tagKeepInput").prop('checked', true);
 		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info active');
 		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
@@ -24,19 +25,30 @@ $(document).ready(function () {
 		$(".tagKeepLabel").closest('tr').attr('class', 'info');
 	});
 
-	$("#refresh").click(function () {
+	$(".tagAllUntagged").click(function () {
+		$(".tagUntaggedInput").prop('checked', true);
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
+		$(".tagUntaggedLabel").closest('tr').attr('class', 'untagged');
+	});
+
+	// reload page button on search results pages
+	$(".reload-results").click(function () {
 		location.reload(true);
 	});
 
+	// reload page button on analytics pages
 	$("#reload").click(function () {
 		console.log("removing path cookie because reload");
 		deleteCookie("path");
 		console.log("removing json data in session storage because reload");
 		sessionStorage.removeItem("diskover-filetree");
-		sessionStorage.removeItem("diskover-spaceexplorer");
+		sessionStorage.removeItem("diskover-treemap");
 		location.reload(true);
 	});
 
+	// highlight results table rows when radio buttons pressed
 	$("#highlightRowDelete input").change(function () {
 		$(this).closest('tr').attr('class', 'warning');
 	});
@@ -48,31 +60,31 @@ $(document).ready(function () {
 	$("#highlightRowKeep input").change(function () {
 		$(this).closest('tr').attr('class', 'info');
 	});
-	
+
 	$("#highlightRowUntagged input").change(function () {
 		$(this).closest('tr').attr('class', 'untagged');
 	});
-
+	
+	// search within text input
 	$(".search").keyup(function () {
 		var searchTerm = $(".search").val();
-		var listItem = $('.results tbody').children('tr');
 		var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
 
 		$.extend($.expr[':'], {
 			'containsi': function (elem, i, match, array) {
-				return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+				return (elem.getElementsByTagName("input")[4].value || elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
 			}
 		});
 
-		$(".results tbody tr").not(":containsi('" + searchSplit + "')").each(function (e) {
+		$("#results-tbody tr").not(":containsi('" + searchSplit + "')").each(function (e) {
 			$(this).attr('visible', 'false');
 		});
 
-		$(".results tbody tr:containsi('" + searchSplit + "')").each(function (e) {
+		$("#results-tbody tr:containsi('" + searchSplit + "')").each(function (e) {
 			$(this).attr('visible', 'true');
 		});
 
-		var jobCount = $('.results tbody tr[visible="true"]').length;
+		var jobCount = $('#results-tbody tr[visible="true"]').length;
 		$('.counter').text(jobCount + ' item');
 
 		if (jobCount == '0') {
@@ -81,9 +93,44 @@ $(document).ready(function () {
 			$('.no-result').hide();
 		}
 	});
+	
+	// number of changes on results page that need to be tagged (saved in Elasticsearch)
+	var changeTagCount = 0;
+	$(".custom-tag-input").keyup(function (e) {
+		this.changed = typeof(this.changed) == 'undefined' ? false : this.changed;
+		if (!this.changed) {
+			changeTagCount += 1;
+			this.changed = true;
+		}
+		
+		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
+
+		if (changeTagCount > 0) {
+			$('.unsavedChangesAlert').show();
+		} else {
+			$('.unsavedChangesAlert').hide();
+		}
+	});
+
+	$(".tagButtons").change(function (e) {
+		this.changed = typeof(this.changed) == 'undefined' ? false : this.changed;
+		if (!this.changed) {
+			changeTagCount += 1;
+			this.changed = true;
+		}
+
+		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
+
+		if (changeTagCount > 0) {
+			$('.unsavedChangesAlert').show();
+		} else {
+			$('.unsavedChangesAlert').hide();
+		}
+	});
 
 });
 
+// cookie functions
 function setCookie(cname, cvalue) {
 	document.cookie = cname + "=" + cvalue + ";path=/";
 }
@@ -105,9 +152,10 @@ function getCookie(cname) {
 }
 
 function deleteCookie(cname) {
-  document.cookie = cname + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+	document.cookie = cname + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
+// GET url values
 function $_GET(param) {
 	var vars = {};
 	window.location.href.replace(location.hash, '').replace(
@@ -136,6 +184,7 @@ function format(a, b) {
 	return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f]
 }
 
+// update url links in nav bar for visualizations
 function updateVisLinks() {
 	var path = (getCookie('path')) ? getCookie('path') : '';
 	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;

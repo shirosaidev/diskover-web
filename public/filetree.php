@@ -41,15 +41,13 @@ if (!empty($_GET['path'])) {
 		<div class="container-fluid" id="mainwindow">
 			<div class="row">
 				<div class="col-xs-4">
-					<div class="row">
 						<form class="form-inline" id="path-container" style="display:none;">
 							<div class="form-group">
-								<div class="col-xs-12">
-									<input type="text" name="path" id="path" class="path" value="">
-								</div>
+								<input type="text" size="50" class="form-control input-sm" name="path" id="path" value="">
 							</div>
 							<button type="submit" id="submit" class="btn btn-primary btn-sm">Go</button>
 						</form>
+					<div class="row">
 						<div class="buttons-container" id="buttons-container" style="display:none;">
 							<div class="btn-group">
 								<button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Size Filter

@@ -1,5 +1,11 @@
 .searchresults{
-  padding:20px 20px;
+  padding-left:20px;
+	padding-right:20px;
+}
+
+.results{
+	word-break:break-word;
+	word-wrap:break-word;
 }
 
 .results tr[visible='false'],
@@ -14,4 +20,21 @@
 .counter{
   padding:8px;
   color:#ccc;
+}
+
+thead,tfoot{
+	color:#6C9EF8;
+}
+
+.button-tagfiles{
+	color:red;
+}
+
+.sortarrows{
+	color:#B77FDB;
+	font-size: 10px;
+}
+
+.sortarrows:hover{
+	color:#D89333;
 }
