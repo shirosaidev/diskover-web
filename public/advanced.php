@@ -25,7 +25,7 @@ if (!empty($_REQUEST['submitted'])) {
   // Scroll parameter alive time
   $searchParams['scroll'] = "1m";
 
-  $searchParams['size']  = 100; // limit results
+  $searchParams['size']  = 100; // limit search (results per page)
 
 
   if ($_REQUEST['filename']) {

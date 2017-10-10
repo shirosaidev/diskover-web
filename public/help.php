@@ -40,6 +40,10 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 				<h4>Search query examples</h4>
 
 				<div class="well well-sm">
+					<p><small class="text-success">all files in directory:</small><br>
+						<strong>path_parent:"/Users/shirosai/Downloads"</strong></p>
+					<p><small class="text-success">all files in directory and all subdirs:</small><br>
+						<strong>path_parent:\/Users\/shirosai\/Downloads*</strong></p>
 					<p><small class="text-success">files that haven't been modified in over 3 months and less than 5 years:</small><br>
 						<strong>last_modified: [now-5y TO now-3M]</strong></p>
 					<p><small class="text-success">files that haven't been modified or accessed in over 1 year:</small><br><strong>last_modified:[* TO now-1y] AND last_access:[* TO now-1y]</strong></p>
@@ -63,6 +67,19 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 						<strong>tag_custom:"version 8" AND filesize:>10485760</strong></p>
 					<p><small class="text-success">all files tagged delete:</small><br>
 						<strong>tag:"delete"</strong></p>
+				</div>
+				
+				<h4>diskover.py socket command examples</h4>
+
+				<div class="well well-sm">
+					<p><small class="text-success">nc (netcat) example:</small></p>
+					<pre>echo -n '{"action": "tagdupes"}' | nc -u 127.0.0.1 9999</pre>
+					<p><small class="text-success">tag duplicate files in index:</small><br>
+						<pre>{"action": "tagdupes", "index": "diskover-2017.04.22"}</pre></p>
+					<p><small class="text-success">crawl directory and save to index:</small><br><pre>{"action": "crawl", "path": "/Users/cp", "index": "diskover-2017.10.06"}</pre></p>
+					<p><small class="text-success">crawl directory (recursive) using 8 threads and save to default index:</small><br><pre>{"action": "crawl", "path": "/Users/cp/Downloads", "threads": 8}</pre></p>
+					<p><small class="text-success">reindex (freshen) directory and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Downloads"}</pre></p>
+					<p><small class="text-success">reindex (freshen) directory and all subdirs and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Documents", "recursive": "true"}</pre></p>
 				</div>
 			</div>
 

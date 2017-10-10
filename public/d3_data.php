@@ -59,7 +59,7 @@ function get_files($client, $path, $filter, $mtime) {
   $searchParams['index'] = Constants::ES_INDEX; // which index to search
   $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
-  // max number of results to return
+  // search size
   $searchParams['size'] = 100;
 
 	$path = addcslashes($path,'+-&&||!(){}[]^"~*?:\/ ');
@@ -139,7 +139,7 @@ function get_sub_dirs($client, $path) {
 	$searchParams['index'] = Constants::ES_INDEX; // which index to search
 	$searchParams['type']  = "directory"; //Constants::ES_TYPE;  // which type within the index to search
 
-	// number of results to return
+	// search size
 	$searchParams['size'] = 100;
 	
 	// diff query if root path /

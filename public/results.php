@@ -32,7 +32,7 @@ if (count($results[$p]) > 0) {
 					<button class="btn btn-default tagAllKeep" type="button" name="tagAll"> All Keep</button>
 					<button class="btn btn-default tagAllUntagged" type="button" name="tagAll"> All Untagged</button>
 				</div>
-				<button type="button" class="btn btn-default reload-results"><i class="glyphicon glyphicon-refresh"></i> Reload</button>
+				<button title="reload" type="button" class="btn btn-default reload-results"><i class="glyphicon glyphicon-refresh"></i> </button>
 				<button type="submit" class="btn btn-default button-tagfiles"><i class="glyphicon glyphicon-tag"></i> Tag files</button>
 				<div class="form-group">
 					<input type="text" class="search form-control" placeholder="Search within results">
@@ -44,15 +44,39 @@ if (count($results[$p]) > 0) {
       <thead>
         <tr>
           <th class="text-nowrap">#</th>
-          <th class="text-nowrap">Filename <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=filename&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=filename&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-          <th class="text-nowrap">Parent Path <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=path_parent&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=path_parent&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-					<th class="text-nowrap">Size <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=filesize&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=filesize&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-          <th class="text-nowrap">Owner <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=owner&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=owner&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-          <th class="text-nowrap">Group <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=group&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=group&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-          <th class="text-nowrap">Last Modified (utc) <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=last_modified&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=last_modified&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-          <th class="text-nowrap">Last Access (utc) <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=last_access&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=last_access&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-          <th class="text-nowrap">Tag (del/arch/keep) <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=tag&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=tag&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
-          <th class="text-nowrap">Custom Tag <a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=tag_custom&sortorder=asc' ?>"><i class="glyphicon glyphicon-chevron-up sortarrows"></i></a><a href="<?php echo $_SERVER["REQUEST_URI"] . '&sort=tag_custom&sortorder=desc' ?>"><i class="glyphicon glyphicon-chevron-down sortarrows"></i></a></th>
+					<?php
+					// get and change url variable for sort
+					function sortURL($sort) {
+						$query = $_GET;
+						$query['sort'] = $sort;
+						$query['sortorder'] = 'asc';
+						$query_result = http_build_query($query);
+						if ($_GET['sort'] == $sort && $_GET['sortorder'] == 'asc') {
+							$class = 'sortarrows-active';
+						} else {
+							$class = '';
+						}
+						$a_asc = "<a href=".$_SERVER['PHP_SELF']."?".$query_result."><i class=\"glyphicon glyphicon-chevron-up sortarrows ".$class."\"></i></a>";
+						$query['sortorder'] = 'desc';
+						$query_result = http_build_query($query);
+						if ($_GET['sort'] == $sort && $_GET['sortorder'] == 'desc') {
+							$class = 'sortarrows-active';
+						} else {
+							$class = '';
+						}
+						$a_desc = "<a href=".$_SERVER['PHP_SELF']."?".$query_result."><i class=\"glyphicon glyphicon-chevron-down sortarrows ".$class."\"></i></a>"; 
+						return $a_asc.$a_desc;
+					}
+					?>
+          <th class="text-nowrap">Filename <?php echo sortURL('filename'); ?></th>
+          <th class="text-nowrap">Parent Path <?php echo sortURL('path_parent'); ?></th>
+					<th class="text-nowrap">Size <?php echo sortURL('filesize'); ?></th>
+          <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
+          <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
+          <th class="text-nowrap">Last Modified (utc) <?php echo sortURL('last_modified'); ?></th>
+          <th class="text-nowrap">Last Access (utc) <?php echo sortURL('last_access'); ?></th>
+          <th class="text-nowrap">Tag (del/arch/keep) <?php echo sortURL('tag'); ?></th>
+          <th class="text-nowrap">Custom Tag <?php echo sortURL('tag_custom'); ?></th>
         </tr>
         <tr class="warning no-result">
           <td colspan="10"><i class="fa fa-warning"></i> No result</td>
@@ -93,19 +117,20 @@ if (count($results[$p]) > 0) {
         <td class="text-nowrap"><?php echo $file['last_access']; ?></td>
         <td class="text-nowrap"><div class="btn-group tagButtons" style="white-space:nowrap;" data-toggle="buttons">
             <label class="tagDeleteLabel btn btn-warning btn-sm <?php if ($file['tag'] == 'delete') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowDelete">
-              <input class="tagDeleteInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="delete" <?php if ($file['tag'] == 'delete') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-trash"></span>
+              <input class="tagDeleteInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="delete" <?php if ($file['tag'] == 'delete') { echo 'checked'; }; ?> /><i title="delete" class="glyphicon glyphicon-trash"></i>
             </label>
             <label class="tagArchiveLabel btn btn-success btn-sm <?php if ($file['tag'] == 'archive') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowArchive">
-              <input class="tagArchiveInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="archive" <?php if ($file['tag'] == 'archive') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-cloud-upload"></span>
+              <input class="tagArchiveInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="archive" <?php if ($file['tag'] == 'archive') { echo 'checked'; }; ?> /><i title="archive" class="glyphicon glyphicon-cloud-upload"></i>
             </label>
             <label class="tagKeepLabel btn btn-info btn-sm <?php if ($file['tag'] == 'keep') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowKeep">
-              <input class="tagKeepInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="keep" <?php if ($file['tag'] == 'keep') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-floppy-saved"></span>
+              <input class="tagKeepInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="keep" <?php if ($file['tag'] == 'keep') { echo 'checked'; }; ?> /><i title="keep" class="glyphicon glyphicon-floppy-saved"></i>
             </label>
 						<label class="tagUntaggedLabel btn btn-default btn-sm" style="display:inline-block;float:none;" id="highlightRowUntagged">
-              <input class="tagUntaggedInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="untagged" <?php if ($file['tag'] == 'untagged') { echo 'checked'; }; ?> /><span class="glyphicon glyphicon-remove-sign"></span>
+              <input class="tagUntaggedInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="untagged" <?php if ($file['tag'] == 'untagged') { echo 'checked'; }; ?> /><i title="untagged" class="glyphicon glyphicon-remove-sign"></i>
             </label>
           </div></td>
-        <td class="text-nowrap"><input type="text" name="ids_tag_custom[<?php echo $result['_id']; ?>]" class="custom-tag-input" value="<?php echo $file['tag_custom']; ?>"></td>
+        <td class="text-nowrap"><input type="text" name="ids_tag_custom[<?php echo $result['_id']; ?>]" class="custom-tag-input" value="<?php echo $file['tag_custom']; ?>"> 
+					<?php echo '<button title="copy to all" type="button" class="btn btn-default btn-xs copyCustomTag"><i class="glyphicon glyphicon-tags"></i> </button>'; ?></td>
       </tr>
       <?php
         } // END foreach loop over results
@@ -122,7 +147,7 @@ if (count($results[$p]) > 0) {
         <button class="btn btn-default tagAllKeep" type="button" name="tagAll"> All Keep</button>
 				<button class="btn btn-default" type="button" name="tagAll"> All Untagged</button>
       </div>
-      <button type="button" class="btn btn-default reload-results"><i class="glyphicon glyphicon-refresh"></i> Reload</button>
+      <button type="button" class="btn btn-default reload-results"><i class="glyphicon glyphicon-refresh"></i> </button>
       <button type="submit" class="btn btn-default button-tagfiles"><i class="glyphicon glyphicon-tag"></i> Tag files</button>
       </form>
 			</div>
@@ -187,7 +212,7 @@ else {
 ?>
 <div class="container">
   <div class="row">
-    <div class="alert alert-dismissible alert-warning col-xs-8">
+    <div class="alert alert-dismissible alert-danger col-xs-8">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
       <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found :(</strong> Change a few things up and try searching again.
     </div>

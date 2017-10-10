@@ -1,5 +1,18 @@
 # Diskover Web Change Log
 
+# [1.3.0] - 2017-10-10
+### added
+- Admin Panel page and Admin link to nav bar
+- copy custom tag to all buttons on search results page
+- added search button links to filetree directories
+- new config entries to Constants.php
+### changed
+- increased size of pie chart in filetree
+### fixed
+- sorting results on search page using arrows properly updates url parameters
+- clicking Select All buttons updates number of changes that need to be saved
+- user/pass auth issues when running on AWS (Diskover.php)
+
 # [1.2.5] - 2017-10-02
 ### added
 - search results page tag buttons to top of page as well as bottom

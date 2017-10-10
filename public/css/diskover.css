@@ -38,3 +38,17 @@ thead,tfoot{
 .sortarrows:hover{
 	color:#D89333;
 }
+
+.sortarrows-active{
+	color:#D89333;
+}
+
+.searchbox{
+	background-color:#1C1E22;
+	color:white;
+}
+
+textarea,select,input{
+	background-color:#1C1E22!important;
+	color:white!important;
+}

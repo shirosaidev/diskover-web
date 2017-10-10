@@ -22,7 +22,7 @@ if (!empty($_REQUEST['submitted'])) {
   // Scroll parameter alive time
   $searchParams['scroll'] = "1m";
 
-  // number of results to return per page
+  // search size (number of results to return per page)
   $searchParams['size'] = 100;
 
   // match all if search field empty

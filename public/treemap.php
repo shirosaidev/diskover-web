@@ -42,7 +42,7 @@ if (!empty($_GET['path'])) {
 			<div class="row">
 				<div class="col-xs-12">
 					<div id="buttons-container" style="display:none;">
-						<button type="submit" id="reload" class="btn btn-default btn-sm">Reload</button>
+						<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
 						<div class="btn-group" data-toggle="buttons">
 							<button class="btn btn-default btn-sm active" id="size"> Size</button>
 							<button class="btn btn-default btn-sm" id="count"> Count</button>

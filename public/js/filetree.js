@@ -223,6 +223,13 @@ function updateTree(data, parent) {
 		.html(function (d) {
 			return d.depth == 0 ? d.name : d.name.split('/').pop();
 		});
+	//add link for directory
+	entered.append("span").attr("class", "dirlink")
+		.html(function (d) {
+			if (d.count > 0) {
+				return '<a href="/advanced.php?submitted=true&p=1&path_parent=' + d.name + '"> <i class="glyphicon glyphicon-search small" title="search"></i></a>';
+			}
+		});
 	//add filesize
 	entered.append("span").attr("class", function (d) {
 			var percent = (d.size / (d.parent || root).size * 100).toFixed(0);

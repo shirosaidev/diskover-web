@@ -7,16 +7,26 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 function connectES() {
   // Connect to Elasticsearch node
-  $esPort = getenv('APP_ES_PORT') ?: 9200;
+  $esPort = getenv('APP_ES_PORT') ?: Constants::ES_PORT;
   $esIndex = getenv('APP_ES_INDEX') ?: Constants::ES_INDEX;
-  $hosts = [
+  if (Constants::AWS == false) {
+		$hosts = [
       [
     'host' => Constants::ES_HOST,
     'port' => $esPort,
     'user' => Constants::ES_USER,
     'pass' => Constants::ES_PASS
       ]
+  	];
+	} else { // using AWS
+		$hosts = [
+      [
+    'host' => Constants::ES_HOST,
+    'port' => $esPort
+      ]
   ];
+	}
+	
   $client = ClientBuilder::create()->setHosts($hosts)->build();
 
   // Check connection to Elasticsearch

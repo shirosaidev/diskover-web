@@ -70,6 +70,16 @@
 	padding-left: 2px;
 }
 
+.node .dirlink a:link, a:visited{
+	color: mediumpurple;
+	font-size: 10px;
+	padding-left: 2px;
+}
+
+.node .dirlink a:hover{
+	color: orange;
+}
+
 .node .percent {
 	background-color: slateblue;
 	opacity: .9;
@@ -91,9 +101,9 @@
 /* d3 pie chart */
 
 #piechart {
-	top: 50px;
+	top: 20px;
 	width: 100%;
-	height: 500px;
+	height: 700px;
 	position: relative;
 }
 

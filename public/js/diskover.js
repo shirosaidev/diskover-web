@@ -7,6 +7,9 @@ $(document).ready(function () {
 		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
 		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
 		$(".tagDeleteLabel").closest('tr').attr('class', 'warning');
+		changeTagCount =  $('#results-tbody tr').length;
+		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
+		$('.unsavedChangesAlert').show();
 	});
 
 	$(".tagAllArchive").click(function () {
@@ -15,6 +18,9 @@ $(document).ready(function () {
 		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
 		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
 		$(".tagArchiveLabel").closest('tr').attr('class', 'success');
+		changeTagCount =  $('#results-tbody tr').length;
+		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
+		$('.unsavedChangesAlert').show();
 	});
 
 	$(".tagAllKeep").click(function () {
@@ -23,6 +29,9 @@ $(document).ready(function () {
 		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
 		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
 		$(".tagKeepLabel").closest('tr').attr('class', 'info');
+		changeTagCount =  $('#results-tbody tr').length;
+		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
+		$('.unsavedChangesAlert').show();
 	});
 
 	$(".tagAllUntagged").click(function () {
@@ -31,11 +40,23 @@ $(document).ready(function () {
 		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
 		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
 		$(".tagUntaggedLabel").closest('tr').attr('class', 'untagged');
+		changeTagCount =  $('#results-tbody tr').length;
+		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
+		$('.unsavedChangesAlert').show();
 	});
 
-	// reload page button on search results pages
+	// reload page button on search results page
 	$(".reload-results").click(function () {
 		location.reload(true);
+	});
+	
+	// copy custom tag button on search results page
+	$(".copyCustomTag").click(function () {
+		var customtag = $(this).closest('tr').find('.custom-tag-input').val();
+		$(".custom-tag-input").val(customtag);
+		changeTagCount =  $('#results-tbody tr').length;
+		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
+		$('.unsavedChangesAlert').show();
 	});
 
 	// reload page button on analytics pages

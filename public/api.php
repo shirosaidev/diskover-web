@@ -68,7 +68,7 @@ function put($endpoint, $input) {
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
 
-			// number of results to return per page
+			// scroll size
 			$searchParams['size'] = 100;
 			
 			$searchParams['body'] = [
@@ -432,7 +432,7 @@ function get($endpoint, $query) {
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
 
-			// number of results to return per page
+			// scroll size
 			$searchParams['size'] = 100;
 			
 			// custom tag
@@ -504,7 +504,7 @@ function get($endpoint, $query) {
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
 
-			// number of results to return per page
+			// scroll size
 			$searchParams['size'] = 100;
 			
 			$searchParams['body'] = [

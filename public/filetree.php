@@ -77,7 +77,7 @@ if (!empty($_GET['path'])) {
 									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=1y">>1 year</a></li>
 								</ul>
 							</div>
-							<button type="submit" id="reload" class="btn btn-default btn-sm">Reload</button>
+							<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
 						</div>
 					</div>
 					<div class="row" id="tree-container"></div>
