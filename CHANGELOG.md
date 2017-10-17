@@ -1,5 +1,10 @@
 # Diskover Web Change Log
 
+# [1.3.1] - 2017-10-17
+### added
+- pie chart for file extensions on file tree page
+- bar chart for file modified times on file tree page
+
 # [1.3.0] - 2017-10-10
 ### added
 - Admin Panel page and Admin link to nav bar

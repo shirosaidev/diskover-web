@@ -149,8 +149,14 @@ function getJSON() {
 		// load file tree
 		updateTree(root, root);
 		
-		// load pie chart
+		// load file size/count pie chart
 		changePie(root);
+		
+		// load file extension pie chart
+		changePieFileExt(root.name);
+		
+		// load mtime bar chart
+		changeBarMtime(root.name);
 	}
 
 }
@@ -188,6 +194,8 @@ function updateTree(data, parent) {
 				toggleChildren(d);
 				updateTree(data, d);
 				changePie(d);
+				changePieFileExt(node.name);
+				changeBarMtime(node.name);
 			} else if (d.children) {
 				toggleChildren(d);
 				updateTree(data, d);
@@ -284,8 +292,8 @@ var tree = d3.layout.treelist()
 	.nodeHeight(18);
 var ul = d3.select("#tree-container").append("ul").classed("treelist", "true");
 
-var filter = parseInt($_GET('filter'));
-var mtime = $_GET('mtime');
+var filter = parseInt($_GET('filter')) || 1048576;
+var mtime = $_GET('mtime') || 0;
 var path = decodeURIComponent($_GET('path'));
 // remove any trailing slash
 if (path != '/') {

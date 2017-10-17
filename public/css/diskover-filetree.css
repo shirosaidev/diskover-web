@@ -97,13 +97,25 @@
 	margin-top: 2px;
 }
 
+.statustext {
+	font-size: 10px;
+	color: gray;
+}
+
 
 /* d3 pie chart */
 
 #piechart {
 	top: 20px;
 	width: 100%;
-	height: 700px;
+	height: 400px;
+	position: relative;
+}
+
+#piechart-ext {
+	top: 40px;
+	width: 100%;
+	height: 300px;
 	position: relative;
 }
 
@@ -151,6 +163,8 @@ text{
 	opacity: .7;
 }
 
+/* d3 tool tip */
+
 .d3-tip {
 	font-size: 11px;
 	line-height: 1;
@@ -164,7 +178,25 @@ text{
 	word-wrap: break-word;
 }
 
-.statustext {
-	font-size: 10px;
-	color: gray;
+/* d3 bar chart */
+
+#barchart-mtime {
+	top: 80px;
+	width: 100%;
+	height: 300px;
+	position: relative;
+}
+
+.barchart rect {
+  fill: steelblue;
+}
+
+.barchart rect:hover {
+  fill: steelblue;
+	opacity: .8;
+}
+
+.barchart text {
+  fill: slategray;
+  font-size: 11px;
 }

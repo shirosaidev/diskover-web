@@ -111,10 +111,20 @@ if (!empty($_GET['path'])) {
 						</div>
 					</div>
 					<div class="row">
-						<div id="piechart"></div>
+						<div class="col-xs-12">
+							<div id="piechart"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-6">
+							<div id="piechart-ext"></div>
+						</div>
+						<div class="col-xs-6">
+							<div id="barchart-mtime" class="barchart"></div>
+						</div>
 					</div>
 				</div>
-			</div>
+		</div>
 		</div>
 
 		<script language="javascript" src="/js/jquery.min.js"></script>
@@ -123,7 +133,7 @@ if (!empty($_GET['path'])) {
 		<script language="javascript" src="/js/d3.v3.min.js"></script>
 		<script language="javascript" src="/js/spin.min.js"></script>
 		<script language="javascript" src="/js/d3.tip.v0.6.3.js"></script>
-		<script language="javascript" src="/js/pie.js"></script>
+		<script language="javascript" src="/js/filetree_d3_visuals.js"></script>
 		<script language="javascript" src="/js/treelist.js"></script>
 		<script language="javascript" src="/js/filetree.js"></script>
 	</body>
