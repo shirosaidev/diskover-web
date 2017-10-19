@@ -225,8 +225,11 @@ function clearCache() {
 	console.log("purging cookies/cache");
 	deleteCookie('filter');
 	deleteCookie('mtime');
+	deleteCookie('hide_thresh');
 	deleteCookie('path');
 	deleteCookie('use_count');
+	deleteCookie('sort');
+	deleteCookie('sortorder');
 	sessionStorage.removeItem("diskover-filetree");
 	sessionStorage.removeItem("diskover-treemap");
 	document.getElementById('clearcachestatus').innerHTML = 'cleared.';

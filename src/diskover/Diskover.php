@@ -45,12 +45,26 @@ function connectES() {
   return $client;
 }
 
+// human readable file size format function
 function formatBytes($bytes, $precision = 2) {
   if ($bytes == 0) {
-    return 0;
+    return "0 Bytes";
   }
   $base = log($bytes) / log(1024);
-  $suffix = array("", "k", "M", "G", "T")[floor($base)];
+  $suffix = array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")[floor($base)];
 
-  return round(pow(1024, $base - floor($base)), $precision) . $suffix;
+  return round(pow(1024, $base - floor($base)), $precision) . " " . $suffix;
+}
+
+// cookie functions
+function createCookie($cname, $cvalue) {
+	setcookie($cname, $cvalue, 0, "/");
+}
+
+function getCookie($cname) {
+	return $_COOKIE[$cname];
+}
+
+function deleteCookie($cname) {
+	setcookie($cname, "", time() - 3600);
 }

@@ -1,5 +1,16 @@
 # Diskover Web Change Log
 
+# [1.3.2] - 2017-10-19
+### added
+- query search input in top nav now shows query previously searched from simple search
+- cookie functions in Diskover.php
+- sort order is now saved in cookie when changed in search results
+- filesize total to results
+### changed
+- modified file results human readable bytes format to match filetree
+### fixed
+- All Untagged button at bottom of search results not untagging all files
+
 # [1.3.1] - 2017-10-17
 ### added
 - pie chart for file extensions on file tree page

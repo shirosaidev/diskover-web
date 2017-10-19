@@ -49,7 +49,7 @@
 			<form method="get" action="/simple.php" class="navbar-form navbar-left" role="search">
 				<div class="form-group">
 					<i class="glyphicon glyphicon-search" style="font-size:16px;margin-right:5px;"></i>
-					<input type="text" name="q" class="form-control searchbox" placeholder="Search query" size="60">
+					<input type="text" name="q" class="form-control searchbox" placeholder="Search query" size="60" value='<?php echo $_GET['q']; ?>'>
 					<input type="hidden" name="submitted" value="true" />
 					<input type="hidden" name="p" value="1" />
 				</div>

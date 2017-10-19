@@ -7,6 +7,7 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
+$total_size = 0;
 
 if (!empty($_REQUEST['submitted'])) {
   // Connect to Elasticsearch
@@ -36,15 +37,23 @@ if (!empty($_REQUEST['submitted'])) {
   }
 
 	// Check if we need to sort search differently
-  if ($_REQUEST['sort']) {
-    $searchParams['body']['sort'] = $_REQUEST['sort'];
-    if ($_REQUEST['sortorder']) {
-      $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
-    }
-  } else {
-    // sort by parent path, then filename
-	$searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
-  }
+	// check for cookie
+	if (getCookie('sort')) {
+		$searchParams['body']['sort'] = getCookie('sort');
+		if (getCookie('sortorder')) {
+			$searchParams['body']['sort'] = [ ''.getCookie('sort').'' => ['order' => getCookie('sortorder') ] ];
+		}
+	} else { // no cookies, grab from request
+		if ($_REQUEST['sort']) {
+			$searchParams['body']['sort'] = $_REQUEST['sort'];
+			if ($_REQUEST['sortorder']) {
+				$searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
+			}
+		} else {
+			// sort by parent path, then filename
+		$searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
+		}
+	}
 
 	try {
 		// Send search query to Elasticsearch and get scroll id and first page of results
@@ -69,6 +78,10 @@ if (!empty($_REQUEST['submitted'])) {
     if ($i == $p) {
       // Get results
       $results[$i] = $queryResponse['hits']['hits'];
+			// Add to total filesize
+			for ($x=0; $x<=count($results[$i]); $x++) {
+				$total_size += $results[$i][$x]['_source']['filesize'];
+			}
       // end loop
       break;
     }
