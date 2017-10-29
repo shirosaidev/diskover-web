@@ -1,5 +1,26 @@
 # Diskover Web Change Log
 
+# [1.3.3] - 2017-10-29
+### added
+- search history to simple search page
+- file/directory pie chart in file manager can now be clicked to see results in search
+- extension pie chart in file manager can now be clicked to see results in search
+- last modified time bar chart in file manager can now be clicked to see results in search
+- data change animation to last modified time bar chart in file manager
+- 100y to 10y range to last modified time bar chart in file manager
+- maxdepth buttons on treemap page
+### changed
+- colors of charts and treemap
+- default maxdepth on treemap page is now set to 2
+- removed directory search link (magnify glass icons) in file tree
+- set scroll to fast for file tree charts
+- setting filesize filter and mtime filter on filetree page affects treemap
+- moved all filter buttons on filetree page to top right
+### fixed
+- long file name break word wrap in file view page
+- on file tree page clicking on magnify glass icon for directories containing spaces caused no results to be found
+- removed left scroll for charts
+
 # [1.3.2] - 2017-10-19
 ### added
 - query search input in top nav now shows query previously searched from simple search
@@ -82,7 +103,7 @@
 - removed maxdepth and set to load data on demand as directories traversed on filetree page
 - sunburst.php renamed to filetree.php
 ### fixed
-- not using session stored json data when refreshing File Tree page and 
+- not using session stored json data when refreshing File Tree page and
 path didn't change
 
 # [1.2.0] - 2017-09-10

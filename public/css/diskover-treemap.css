@@ -1,34 +1,34 @@
 /* d3 tree map */
 
 .chart {
-  display: block;
-  margin-top: 10px;
+    display: block;
+    margin-top: 10px;
 }
 
 text {
-	font-size: 10px;
-	fill: black;
-  pointer-events: none;
+    font-size: 10px;
+    fill: black;
+    pointer-events: none;
 }
 
 rect {
-  fill: none;
-  stroke: #272B30;
+    fill: none;
+    stroke: #272B30;
 }
 
 rect:hover {
-	fill-opacity: .5;
+    fill-opacity: .8;
 }
 
 .d3-tip {
-	font-size: 11px;
-	line-height: 1;
-	font-weight: bold;
-	padding: 12px;
-	background: rgba(0, 0, 0, 0.6);
-	color: #fff;
-	border-radius: 2px;
-	pointer-events: none;
-	word-break: break-all;
-	word-wrap: break-word;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border-radius: 2px;
+    pointer-events: none;
+    word-break: break-all;
+    word-wrap: break-word;
 }

@@ -26,7 +26,7 @@ function connectES() {
       ]
   ];
 	}
-	
+
   $client = ClientBuilder::create()->setHosts($hosts)->build();
 
   // Check connection to Elasticsearch
@@ -67,4 +67,25 @@ function getCookie($cname) {
 
 function deleteCookie($cname) {
 	setcookie($cname, "", time() - 3600);
+}
+
+// saved search query functions
+function saveSearchQuery($req) {
+    if (!getcookie('savedsearches')) {
+        $savedsearches = [];
+    } else {
+        $json = getcookie('savedsearches');
+        $savedsearches = json_decode($json, true);
+    }
+    $savedsearches[] = $req;
+    $json = json_encode($savedsearches);
+    setcookie('savedsearches', $json);
+}
+
+function getSavedSearchQuery() {
+    $json = getcookie('savedsearches');
+    $savedsearches = json_decode($json, true);
+    $savedsearches = array_reverse($savedsearches);
+    $savedsearches = array_slice($savedsearches, 0, 10);
+    return $savedsearches;
 }

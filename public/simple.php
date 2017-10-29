@@ -2,6 +2,7 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 use diskover\Constants;
+
 error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
@@ -10,93 +11,96 @@ $results = [];
 $total_size = 0;
 
 if (!empty($_REQUEST['submitted'])) {
-  // Connect to Elasticsearch
-  $client = connectES();
 
-  // curent page
-  $p = $_REQUEST['p'];
+    // Save search query
+    saveSearchQuery($_REQUEST['q']);
 
-  // Setup search query
-  $searchParams['index'] = Constants::ES_INDEX; // which index to search
-  $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+    // Connect to Elasticsearch
+    $client = connectES();
+
+    // curent page
+    $p = $_REQUEST['p'];
+
+    // Setup search query
+    $searchParams['index'] = Constants::ES_INDEX; // which index to search
+    $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
   // Scroll parameter alive time
-  $searchParams['scroll'] = "1m";
+    $searchParams['scroll'] = "1m";
 
-  // search size (number of results to return per page)
-  $searchParams['size'] = 100;
+    // search size (number of results to return per page)
+    $searchParams['size'] = 100;
 
-  // match all if search field empty
-  if (empty($_REQUEST['q'])) {
-    $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
-  // match what's in the search field
-  } else {
-		$req = $_REQUEST['q'];
-    $searchParams['body']['query']['query_string']['query'] = $req;
-		$searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
-  }
-
-	// Check if we need to sort search differently
-	// check for cookie
-	if (getCookie('sort')) {
-		$searchParams['body']['sort'] = getCookie('sort');
-		if (getCookie('sortorder')) {
-			$searchParams['body']['sort'] = [ ''.getCookie('sort').'' => ['order' => getCookie('sortorder') ] ];
-		}
-	} else { // no cookies, grab from request
-		if ($_REQUEST['sort']) {
-			$searchParams['body']['sort'] = $_REQUEST['sort'];
-			if ($_REQUEST['sortorder']) {
-				$searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
-			}
-		} else {
-			// sort by parent path, then filename
-		$searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
-		}
-	}
-
-	try {
-		// Send search query to Elasticsearch and get scroll id and first page of results
-  	$queryResponse = $client->search($searchParams);
-	}
-	
-	catch(Exception $e) {
-		//echo 'Message: ' .$e->getMessage();	
-	}
-
-  // set total hits
-  $total = $queryResponse['hits']['total'];
-
-  // Get the first scroll_id
-  $scroll_id = $queryResponse['_scroll_id'];
-
-  $i = 1;
-  // Loop through all the pages of results
-  while ($i <= ceil($total/$searchParams['size'])) {
-
-    // check if we have the results for the page we are on
-    if ($i == $p) {
-      // Get results
-      $results[$i] = $queryResponse['hits']['hits'];
-			// Add to total filesize
-			for ($x=0; $x<=count($results[$i]); $x++) {
-				$total_size += $results[$i][$x]['_source']['filesize'];
-			}
-      // end loop
-      break;
+    // match all if search field empty
+    if (empty($_REQUEST['q'])) {
+        $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
+        // match what's in the search field
+    } else {
+        $req = $_REQUEST['q'];
+        $searchParams['body']['query']['query_string']['query'] = $req;
+        $searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
     }
 
-    // Execute a Scroll request and repeat
-    $queryResponse = $client->scroll([
+    // Check if we need to sort search differently
+    // check for cookie
+    if (getCookie('sort')) {
+        $searchParams['body']['sort'] = getCookie('sort');
+        if (getCookie('sortorder')) {
+            $searchParams['body']['sort'] = [ ''.getCookie('sort').'' => ['order' => getCookie('sortorder') ] ];
+        }
+    } else { // no cookies, grab from request
+        if ($_REQUEST['sort']) {
+            $searchParams['body']['sort'] = $_REQUEST['sort'];
+            if ($_REQUEST['sortorder']) {
+                $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
+            }
+        } else {
+            // sort by parent path, then filename
+            $searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
+        }
+    }
+
+    try {
+        // Send search query to Elasticsearch and get scroll id and first page of results
+        $queryResponse = $client->search($searchParams);
+    } catch (Exception $e) {
+        //echo 'Message: ' .$e->getMessage();
+    }
+
+    // set total hits
+    $total = $queryResponse['hits']['total'];
+
+    // Get the first scroll_id
+    $scroll_id = $queryResponse['_scroll_id'];
+
+    $i = 1;
+    // Loop through all the pages of results
+    while ($i <= ceil($total/$searchParams['size'])) {
+
+    // check if we have the results for the page we are on
+        if ($i == $p) {
+            // Get results
+            $results[$i] = $queryResponse['hits']['hits'];
+            // Add to total filesize
+            for ($x=0; $x<=count($results[$i]); $x++) {
+                $total_size += $results[$i][$x]['_source']['filesize'];
+            }
+            // end loop
+            break;
+        }
+
+        // Execute a Scroll request and repeat
+        $queryResponse = $client->scroll(
+        [
             "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
             "scroll" => "1m"           // and the same timeout window
         ]
     );
 
-    // Get the scroll_id for next page of results
-    $scroll_id = $queryResponse['_scroll_id'];
-    $i += 1;
-  }
+        // Get the scroll_id for next page of results
+        $scroll_id = $queryResponse['_scroll_id'];
+        $i += 1;
+    }
 }
 ?>
 	<!DOCTYPE html>
@@ -116,7 +120,8 @@ if (!empty($_REQUEST['submitted'])) {
 	<body>
 		<?php include __DIR__ . "/nav.php"; ?>
 
-		<?php if (!isset($_REQUEST['submitted'])) { ?>
+		<?php if (!isset($_REQUEST['submitted'])) {
+    ?>
 
 		<div class="container-fluid">
 			<div class="row">
@@ -152,20 +157,33 @@ if (!empty($_REQUEST['submitted'])) {
 						<a href="/advanced.php">Switch to advanced search</a></p>
 				</div>
 			</div>
-		
-			<?php } ?>
+            <div class="row">
+                <div class="col-xs-6 col-xs-offset-3">
+                    <h5 style="color:slategray;margin-top:60px;"><i class="glyphicon glyphicon-time"></i> Search history</h5>
+                    <div class="well well-sm">
+                        <?php
+                            $savedsearches = getSavedSearchQuery();
+    foreach ($savedsearches as $key => $value) {
+        echo '<a class="small" style="color:slategray;" href=/simple.php?submitted=true&p=1&q=' . rawurlencode($value) . '>' . $value . '</a><br />';
+    } ?>
+                    </div>
+                </div>
+            </div>
+
+			<?php
+} ?>
 
 			<?php
 
 if (isset($_REQUEST['submitted'])) {
-  include __DIR__ . "/results.php";
+    include __DIR__ . "/results.php";
 }
 
 ?>
-		</div>
-		<script language="javascript" src="/js/jquery.min.js"></script>
-		<script language="javascript" src="/js/bootstrap.min.js"></script>
-		<script language="javascript" src="/js/diskover.js"></script>
-	</body>
+	</div>
+	<script language="javascript" src="/js/jquery.min.js"></script>
+	<script language="javascript" src="/js/bootstrap.min.js"></script>
+	<script language="javascript" src="/js/diskover.js"></script>
+</body>
 
-	</html>
+</html>

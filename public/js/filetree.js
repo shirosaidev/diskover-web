@@ -21,8 +21,6 @@ function showHidden(root) {
 	document.getElementById('path').value = root.name;
 	// show path input
 	document.getElementById('path-container').style.display = 'inline-block';
-	// show filetree buttons
-	document.getElementById('buttons-container').style.display = 'inline-block';
 	// show chart div
 	document.getElementById('chart-container').style.display = 'block';
 }
@@ -57,7 +55,7 @@ function getChildJSON(d) {
 
 		// stop spin.js loader
 		spinner.stop();
-		
+
 	});
 
 }
@@ -124,7 +122,7 @@ function getJSON() {
 
 			// stop spin.js loader
 			spinner.stop();
-			
+
 			console.timeEnd('loadtime');
 
 			// load d3 visuals
@@ -148,13 +146,13 @@ function getJSON() {
 
 		// load file tree
 		updateTree(root, root);
-		
+
 		// load file size/count pie chart
 		changePie(root);
-		
+
 		// load file extension pie chart
 		changePieFileExt(root.name);
-		
+
 		// load mtime bar chart
 		changeBarMtime(root.name);
 	}
@@ -172,7 +170,7 @@ function updateTree(data, parent) {
 			d._children = null;
 		}
 	}
-	
+
 	var nodes = tree.nodes(data),
 			duration = 250;
 
@@ -230,13 +228,6 @@ function updateTree(data, parent) {
 	entered.append("span").attr("class", "filename")
 		.html(function (d) {
 			return d.depth == 0 ? d.name : d.name.split('/').pop();
-		});
-	//add link for directory
-	entered.append("span").attr("class", "dirlink")
-		.html(function (d) {
-			if (d.count > 0) {
-				return '<a href="/advanced.php?submitted=true&p=1&path_parent=' + d.name + '"> <i class="glyphicon glyphicon-search small" title="search"></i></a>';
-			}
 		});
 	//add filesize
 	entered.append("span").attr("class", function (d) {

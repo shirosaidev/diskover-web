@@ -144,10 +144,10 @@ $text = file_get_contents($file);
 						// Send the request & save response to $curlresp
 						$curlresp = curl_exec($curl);
 						// Close request to clear up some resources
-						curl_close($curl);	
+						curl_close($curl);
 					}
 				}
-			
+
 				// Get cURL resource
 				$curl = curl_init();
 				// Set curl options
@@ -160,7 +160,7 @@ $text = file_get_contents($file);
 				$indices = json_decode($curlresp, true);
 				// Close request to clear up some resources
 				curl_close($curl);
-				
+
 				// Get cURL resource
 				$curl = curl_init();
 				// Set curl options
@@ -172,7 +172,7 @@ $text = file_get_contents($file);
 				$curlresp_esinfo = curl_exec($curl);
 				// Close request to clear up some resources
 				curl_close($curl);
-			
+
 				// Get cURL resource
 				$curl = curl_init();
 				// Set curl options
@@ -185,7 +185,7 @@ $text = file_get_contents($file);
 				// Close request to clear up some resources
 				curl_close($curl);
 			?>
-			<select multiple="" name="indices[]" id="indices" class="form-control"><?php 
+			<select multiple="" name="indices[]" id="indices" class="form-control"><?php
 				foreach ($indices as $key => $val) {
 					echo "<option>".$key."</option>";
 				}
@@ -215,7 +215,7 @@ $text = file_get_contents($file);
 	</div>
 </div>
 </div>
-	
+
 <script language="javascript" src="/js/jquery.min.js"></script>
 <script language="javascript" src="/js/bootstrap.min.js"></script>
 <script language="javascript" src="/js/diskover.js"></script>
@@ -225,6 +225,7 @@ function clearCache() {
 	console.log("purging cookies/cache");
 	deleteCookie('filter');
 	deleteCookie('mtime');
+    deleteCookie('maxdepth');
 	deleteCookie('hide_thresh');
 	deleteCookie('path');
 	deleteCookie('use_count');
@@ -287,7 +288,7 @@ function runCommand() {
 				document.getElementById('errormsg-container').style.display = 'none';
 				document.getElementById('errormsg').style.display = 'none';
 				// show progress bar
-				document.getElementById('progress').style.display = 'block';	
+				document.getElementById('progress').style.display = 'block';
 			}
 		}, false);
 

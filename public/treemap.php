@@ -39,15 +39,23 @@ if (!empty($_GET['path'])) {
 			</div>
 		</div>
 		<div class="container-fluid" id="mainwindow">
-			<div class="row">
+			<div class="row pull-right">
 				<div class="col-xs-12">
 					<div id="buttons-container" style="display:none;">
+                        <span style="font-size:10px; color:gray;">(click to zoom in/out, use alt/option key to zoom in slow)</span>
 						<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
 						<div class="btn-group" data-toggle="buttons">
 							<button class="btn btn-default btn-sm active" id="size"> Size</button>
 							<button class="btn btn-default btn-sm" id="count"> Count</button>
-						</div>
-						<span style="font-size:10px; color:gray;">Depth: 5 (click to zoom in/out, use alt/option key to zoom in slow)</span>
+                        </div>
+                            <span style="font-size:11px; color:gray;">Maxdepth:</span>
+                            <div class="btn-group">
+                                <button class="btn btn-default btn-sm" id="depth1">1</button>
+                                <button class="btn btn-default btn-sm" id="depth2">2</button>
+                                <button class="btn btn-default btn-sm" id="depth3">3</button>
+                                <button class="btn btn-default btn-sm" id="depth4">4</button>
+                                <button class="btn btn-default btn-sm" id="depth5">5</button>
+                            </div>
 					</div>
 				</div>
 			</div>

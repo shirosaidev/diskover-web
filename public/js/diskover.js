@@ -49,7 +49,7 @@ $(document).ready(function () {
 	$(".reload-results").click(function () {
 		location.reload(true);
 	});
-	
+
 	// copy custom tag button on search results page
 	$(".copyCustomTag").click(function () {
 		var customtag = $(this).closest('tr').find('.custom-tag-input').val();
@@ -85,7 +85,7 @@ $(document).ready(function () {
 	$("#highlightRowUntagged input").change(function () {
 		$(this).closest('tr').attr('class', 'untagged');
 	});
-	
+
 	// search within text input
 	$(".search").keyup(function () {
 		var searchTerm = $(".search").val();
@@ -114,7 +114,7 @@ $(document).ready(function () {
 			$('.no-result').hide();
 		}
 	});
-	
+
 	// number of changes on results page that need to be tagged (saved in Elasticsearch)
 	var changeTagCount = 0;
 	$(".custom-tag-input").keyup(function (e) {
@@ -123,7 +123,7 @@ $(document).ready(function () {
 			changeTagCount += 1;
 			this.changed = true;
 		}
-		
+
 		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
 
 		if (changeTagCount > 0) {
@@ -210,10 +210,10 @@ function updateVisLinks() {
 	var path = (getCookie('path')) ? getCookie('path') : '';
 	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : 0;
-	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 1;
-	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
+	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 2;
+	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime;
 	document.getElementById("filetreelink").setAttribute("href", url);
-	var url = "/treemap.php?path=" + path;
+	var url = "/treemap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
 	document.getElementById("treemaplink").setAttribute("href", url);
 	return false;
 }
