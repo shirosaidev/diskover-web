@@ -157,18 +157,20 @@ if (!empty($_REQUEST['submitted'])) {
 						<a href="/advanced.php">Switch to advanced search</a></p>
 				</div>
 			</div>
-            <div class="row">
-                <div class="col-xs-6 col-xs-offset-3">
-                    <h5 style="color:slategray;margin-top:60px;"><i class="glyphicon glyphicon-time"></i> Search history</h5>
-                    <div class="well well-sm">
-                        <?php
-                            $savedsearches = getSavedSearchQuery();
-    foreach ($savedsearches as $key => $value) {
-        echo '<a class="small" style="color:slategray;" href=/simple.php?submitted=true&p=1&q=' . rawurlencode($value) . '>' . $value . '</a><br />';
+            <?php $savedsearches = getSavedSearchQuery();
+        if ($savedsearches) { ?>
+			<div class="row">
+				<div class="col-xs-6 col-xs-offset-3">
+					<h5 style="color:slategray;margin-top:60px;"><i class="glyphicon glyphicon-time"></i> Search history</h5>
+					<div class="well well-sm">
+						<?php
+        foreach ($savedsearches as $key => $value) {
+            echo '<a class="small" style="color:slategray;" href=/simple.php?submitted=true&p=1&q=' . rawurlencode($value) . '>' . $value . '</a><br />';
+        }
     } ?>
-                    </div>
-                </div>
-            </div>
+					</div>
+				</div>
+			</div>
 
 			<?php
 } ?>

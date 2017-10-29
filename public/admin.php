@@ -231,6 +231,7 @@ function clearCache() {
 	deleteCookie('use_count');
 	deleteCookie('sort');
 	deleteCookie('sortorder');
+    deleteCookie('savedsearches');
 	sessionStorage.removeItem("diskover-filetree");
 	sessionStorage.removeItem("diskover-treemap");
 	document.getElementById('clearcachestatus').innerHTML = 'cleared.';

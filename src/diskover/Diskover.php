@@ -83,6 +83,9 @@ function saveSearchQuery($req) {
 }
 
 function getSavedSearchQuery() {
+    if (!getcookie('savedsearches')) {
+        return false;
+    }
     $json = getcookie('savedsearches');
     $savedsearches = json_decode($json, true);
     $savedsearches = array_reverse($savedsearches);
