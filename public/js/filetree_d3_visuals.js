@@ -172,9 +172,9 @@ function changePie(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click' ,function(d) {
-            var path_parent = (node.name + '/' + d.data.label).replace(/\//g, '\\/').replace(/\ /g, '\\ ') + "*";
-            var filename = d.data.label.replace(/\ /g, '\\ ');
-            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(path_parent) + ' OR filename:' + encodeURIComponent(filename);
+            var path_parent = node.name + '/' + d.data.label + '*';
+            var filename = d.data.label;
+            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' OR filename:' + encodeURIComponent(escapeHTML(filename));
         })
         .attr("class", "slice");
 
@@ -388,12 +388,12 @@ function loadPieFileExt(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click', function(d) {
-            var path_parent = node.name.replace(/\//g, '\\/') + "*";
+            var path_parent = node.name + "*";
             var extension = d.data.label;
             if (d.data.label == "") {
                 extension = '""';
             }
-            window.location.href = '/simple.php?submitted=true&p=1&q=extension:' + extension +' AND path_parent:' + path_parent;
+            window.location.href = '/simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent));
         })
         .attr("class", "slice");
 
@@ -645,7 +645,7 @@ function loadBarMtime(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click', function(d) {
-            var path_parent = node3.name.replace(/\//g, '\\/') + "*";
+            var path_parent = node3.name + "*";
             var dt = new Date();
             if (d.label == '1m-now') {
                 var last_mod_time_high = format_date(dt);
@@ -672,7 +672,7 @@ function loadBarMtime(data) {
                 var last_mod_time_high = format_date(dt, 0, 10);
                 var last_mod_time_low = '*';
             }
-            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + path_parent + ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + ']';
+            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + ']';
         });
 
     bar

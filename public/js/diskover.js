@@ -205,6 +205,18 @@ function format(a, b) {
 	return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f]
 }
 
+// escape special characters
+function escapeHTML(text) {
+   var chr = { '/': '\\/', '(': '\\(', ')': '\\)', '[': '\\[', ']': '\\]',
+       ' ': '\\ ', '"': '\\"', '&': '\\&', '<': '\\<', '>': '\\>',
+       '+': '\\+', '-': '\\-', '|': '\\|', '!': '\\!', '{': '\\{',
+       '}': '\\}', '^': '\\^', '~': '\\~', '?': '\\?', ':': '\\:' };
+   function abc(a) {
+      return chr[a];
+   }
+   return text.replace(/[/()\[\]\ \"&<>+\-\|!{}^~?:]/g, abc);
+}
+
 // update url links in nav bar for visualizations
 function updateVisLinks() {
 	var path = (getCookie('path')) ? getCookie('path') : '';

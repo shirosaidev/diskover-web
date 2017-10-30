@@ -14,6 +14,7 @@ text {
 rect {
     fill: none;
     stroke: #272B30;
+    cursor: pointer;
 }
 
 rect:hover {

@@ -9,7 +9,7 @@
     overflow: hidden;
     position: absolute;
     list-style: none;
-    cursor: default;
+    cursor: pointer;
     margin-left: 20px;
     margin-top: 50px;
     white-space: nowrap;
@@ -92,11 +92,6 @@
     overflow: hidden;
 }
 
-.buttons-container {
-    margin-left: 15px;
-    margin-top: 2px;
-}
-
 .statustext {
     font-size: 10px;
     color: gray;
@@ -127,6 +122,7 @@ path.slice {
     stroke-width: 1px;
     stroke: #272B30;
     fill-rule: evenodd;
+    cursor: pointer;
 }
 
 path.slice:hover {
@@ -142,7 +138,7 @@ polyline {
 }
 
 text {
-    fill: slategray;
+    fill: darkgray;
     font-size: 12px;
 }
 
@@ -150,8 +146,11 @@ text {
     text-anchor: middle;
     font-weight: bold;
     font-size: 14px;
-    fill: gray;
-    opacity: .6;
+    fill: darkgray;
+    opacity: .8;
+    overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 .label-percent {
@@ -189,6 +188,7 @@ text {
 .bars rect {
     fill: #71CA58;
     stroke: #272B30;
+    cursor: pointer;
 }
 
 .bars rect:hover {
@@ -196,13 +196,13 @@ text {
 }
 
 .barlabel text {
-    fill: slategray;
+    fill: darkgray;
     font-size: 11px;
     text-anchor: end;
 }
 
 .barvaluelabel text {
-    fill: slategray;
+    fill: darkgray;
     font-size: 11px;
     text-anchor: start;
 }

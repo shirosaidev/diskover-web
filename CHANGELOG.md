@@ -1,6 +1,6 @@
 # Diskover Web Change Log
 
-# [1.3.3] - 2017-10-29
+# [1.3.3] - 2017-10-30
 ### added
 - search history to simple search page
 - file/directory pie chart in file manager can now be clicked to see results in search
@@ -9,6 +9,7 @@
 - data change animation to last modified time bar chart in file manager
 - 100y to 10y range to last modified time bar chart in file manager
 - maxdepth buttons on treemap page
+- escapeHTML special characters function to diskover.js
 ### changed
 - colors of charts and treemap
 - default maxdepth on treemap page is now set to 2
@@ -16,10 +17,12 @@
 - set scroll to fast for file tree charts
 - setting filesize filter and mtime filter on filetree page affects treemap
 - moved all filter buttons on filetree page to top right
+- cursor to pointer type for charts and filetree
 ### fixed
 - long file name break word wrap in file view page
 - on file tree page clicking on magnify glass icon for directories containing spaces caused no results to be found
 - removed left scroll for charts
+- path links with special characters not working on file view page
 
 # [1.3.2] - 2017-10-19
 ### added
