@@ -11,6 +11,7 @@
 - maxdepth buttons on treemap page
 - escapeHTML special characters function to diskover.js
 ### changed
+- improved treemap
 - colors of charts and treemap
 - default maxdepth on treemap page is now set to 2
 - removed directory search link (magnify glass icons) in file tree

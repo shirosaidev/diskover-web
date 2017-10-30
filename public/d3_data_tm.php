@@ -202,7 +202,7 @@ function walk_tree($client, $path, $filter, $mtime, $depth, $maxdepth) {
         $items[] = [
             "name" => $d, //basename($d),
             "size" => $dirinfo[0],
-            //"count" => $dirinfo[1],
+            "count" => $dirinfo[1],
             "children" => walk_tree($client, $d, $filter, $mtime, $depth+=1, $maxdepth)
           ];
         $depth-=1;
@@ -233,9 +233,9 @@ if (empty($mtime) || $mtime == 0) {
     $mtime = gmdate("Y-m-d\TH:i:s", strtotime("-12 months"));
 }
 
-// default 5 max directory depth
+// default 2 max directory depth
 if (empty($maxdepth)) {
-    $maxdepth = 5;
+    $maxdepth = 2;
 }
 
 // check if no path (grab one from ES)
@@ -255,7 +255,7 @@ if ($dirinfo[0] == 0) {
 $data = [
     "name" => $path, //basename($path),
     "size" => $dirinfo[0],
-    //"count" => $dirinfo[1],
+    "count" => $dirinfo[1],
     "children" => walk_tree($client, $path, $filter, $mtime, $depth=0, $maxdepth)
 ];
 

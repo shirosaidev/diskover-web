@@ -45,7 +45,7 @@ if (!empty($_GET['path'])) {
                         <span style="font-size:10px; color:gray;">(click to zoom in/out, use alt/option key to zoom in slow)</span>
 						<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
 						<div class="btn-group" data-toggle="buttons">
-							<button class="btn btn-default btn-sm active" id="size"> Size</button>
+							<button class="btn btn-default btn-sm" id="size"> Size</button>
 							<button class="btn btn-default btn-sm" id="count"> Count</button>
                         </div>
                             <span style="font-size:11px; color:gray;">Maxdepth:</span>

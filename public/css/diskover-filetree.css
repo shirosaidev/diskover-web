@@ -123,11 +123,12 @@ path.slice {
     stroke: #272B30;
     fill-rule: evenodd;
     cursor: pointer;
+    opacity: .8;
 }
 
 path.slice:hover {
     stroke: black;
-    opacity: .8;
+    opacity: .6;
 }
 
 polyline {
@@ -186,13 +187,14 @@ text {
 }
 
 .bars rect {
-    fill: #71CA58;
+    fill: steelblue;
     stroke: #272B30;
     cursor: pointer;
+    opacity: .8;
 }
 
 .bars rect:hover {
-    opacity: .8;
+    opacity: .6;
 }
 
 .barlabel text {

@@ -98,10 +98,10 @@ var key = function(d) {
     return d.data.label;
 };
 
-//var color = d3.scale.category20c();
+var color = d3.scale.category20c();
 
-var color = d3.scale.ordinal()
-    .range(["#FFD22E", "#27BCF7", "#FFA226", "#AA86FC", "#FF4A7D", "#75DB51", "#A5A5A7"]);
+//var color = d3.scale.ordinal()
+//    .range(["#FFD22E", "#27BCF7", "#FFA226", "#AA86FC", "#FF4A7D", "#75DB51", "#A5A5A7"]);
 
 function pieData(data) {
 
@@ -297,10 +297,7 @@ var width2 = 420,
     height2 = 300,
     radius2 = Math.min(width2, height2) / 2;
 
-//var color2 = d3.scale.category20c();
-
-var color2 = d3.scale.ordinal()
-    .range(["#FFD22E", "#27BCF7", "#FFA226", "#AA86FC", "#FF4A7D", "#75DB51", "#A5A5A7"]);
+var color2 = d3.scale.category10();
 
 var pie2 = d3.layout.pie()
     .sort(null)
