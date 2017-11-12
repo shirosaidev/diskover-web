@@ -1,5 +1,22 @@
 # Diskover Web Change Log
 
+# [1.3.4] - 2017-11-12
+### added
+- results per page select input to search results page to control number of results to return per page
+- ability to add additional custom ES fields to search results table (created by diskover plugins)
+- EXTRA_FIELDS to Constants.php (for custom ES fields)
+- diskover icon to nav bar
+- top 10 largest files to dashboard page
+- more options to quick search dropdown including "Recommended files to remove" based on modified and access file times (>3 months, >1 mb)
+### changed
+- appearance of search results table and tag highlight
+- dashboard layout
+- moved page nav buttons at bottom of page to left side near results per page select input
+- search history will show * when searching for all by not entering anything into search box
+- nav bar search box dynamically resizes
+### fixed
+- prevented forms from Cross Site Scripting XSS attacks
+
 # [1.3.3] - 2017-10-30
 ### added
 - search history to simple search page

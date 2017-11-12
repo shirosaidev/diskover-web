@@ -55,9 +55,9 @@ if (!empty($message)) {
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <h1 class="path"><a href="/advanced.php?submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>"><?php echo $file['filename']; ?></a></h1>
+      <h1 class="path"><i class="glyphicon glyphicon-file" style="color:#738291;"></i> <a href="/advanced.php?submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>"><?php echo $file['filename']; ?></a></h1>
       <h4 class="path">Full path: <?php echo $file['path_parent']."/".$file['filename']; ?></h4>
-      <h5 class="path">Parent path: <a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $file['path_parent']; ?></a></h5>
+      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> Parent path: <a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $file['path_parent']; ?></a></h5>
     </div>
   </div>
   <div class="row">
@@ -95,6 +95,18 @@ if (!empty($message)) {
           <span class="badge"><?php echo $file['is_dupe']; ?></span>
           <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=<?php echo $file['is_dupe']; ?>">Is dupe</a>
         </li>
+    </ul>
+    <?php if (Constants::EXTRA_FIELDS) { ?>
+    <ul class="list-group">
+        <?php
+          foreach (Constants::EXTRA_FIELDS as $key => $value) { ?>
+              <li class="list-group-item">
+                <span class="badge"><?php echo $file[$key]; ?></span>
+                <?php echo $value; ?>
+              </li>
+          <?php } ?>
+      </ul>
+    <?php } ?>
       </div>
       <div class="col-xs-5">
         <ul class="list-group">

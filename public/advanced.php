@@ -28,7 +28,15 @@ if (!empty($_REQUEST['submitted'])) {
     // Scroll parameter alive time
     $searchParams['scroll'] = "1m";
 
-    $searchParams['size']  = 100; // limit search (results per page)
+    // search size (number of results to return per page)
+    if (isset($_REQUEST['resultsize'])) {
+        $searchParams['size'] = $_REQUEST['resultsize'];
+        createCookie("resultsize", $_REQUEST['resultsize']);
+    } elseif (getCookie("resultsize") != "") {
+        $searchParams['size'] = getCookie("resultsize");
+    } else {
+        $searchParams['size'] = 100;
+    }
 
 
     if ($_REQUEST['filename']) {
@@ -115,7 +123,7 @@ if (!empty($_REQUEST['submitted'])) {
         $filterClauses[] = [ 'term' => [ '_index' => $_REQUEST['index'] ] ];
     }
 
-    if ($_REQUEST['is_dupe']) {
+    if ($_REQUEST['is_dupe'] == "true") {
         $searchParams['body'] = [
         'query' => [
           'query_string' => [
@@ -136,22 +144,21 @@ if (!empty($_REQUEST['submitted'])) {
         }
     }
     // Check if we need to sort search differently
-    // check for cookie
-    if (getCookie('sort')) {
+    // check request
+    if ($_REQUEST['sort']) {
+        $searchParams['body']['sort'] = $_REQUEST['sort'];
+        if ($_REQUEST['sortorder']) {
+            $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
+        }
+    // check cookie
+    } elseif (getCookie('sort')) {
         $searchParams['body']['sort'] = getCookie('sort');
         if (getCookie('sortorder')) {
             $searchParams['body']['sort'] = [ ''.getCookie('sort').'' => ['order' => getCookie('sortorder') ] ];
         }
-    } else { // no cookies, grab from request
-        if ($_REQUEST['sort']) {
-            $searchParams['body']['sort'] = $_REQUEST['sort'];
-            if ($_REQUEST['sortorder']) {
-                $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
-            }
-        } else {
-            // sort by parent path, then filename
-            $searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
-        }
+    } else {
+        // sort by parent path, then filename
+        $searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
     }
 
     // Send search query to Elasticsearch and get tag scroll id and first page of results
@@ -220,10 +227,11 @@ if (!empty($_REQUEST['submitted'])) {
 	  <h1>diskover &mdash; Advanced Search</h1>
 	</div>
   </div>
-<form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="form-horizontal">
+<form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-horizontal">
 	<fieldset>
 <input type="hidden" name="submitted" value="true" />
 <input type="hidden" name="p" value="1" />
+<input type="hidden" name="resultsize" value="<?php echo getCookie('resultsize') != "" ? getCookie('resultsize') : 100; ?>" />
 
 <div class="container">
   <div class="form-group">

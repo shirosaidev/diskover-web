@@ -25,11 +25,18 @@ if (!empty($_REQUEST['submitted'])) {
     $searchParams['index'] = Constants::ES_INDEX; // which index to search
     $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
-  // Scroll parameter alive time
+    // Scroll parameter alive time
     $searchParams['scroll'] = "1m";
 
     // search size (number of results to return per page)
-    $searchParams['size'] = 100;
+    if (isset($_REQUEST['resultsize'])) {
+        $searchParams['size'] = $_REQUEST['resultsize'];
+        createCookie("resultsize", $_REQUEST['resultsize']);
+    } elseif (getCookie("resultsize") != "") {
+        $searchParams['size'] = getCookie("resultsize");
+    } else {
+        $searchParams['size'] = 100;
+    }
 
     // match all if search field empty
     if (empty($_REQUEST['q'])) {
@@ -42,22 +49,21 @@ if (!empty($_REQUEST['submitted'])) {
     }
 
     // Check if we need to sort search differently
-    // check for cookie
-    if (getCookie('sort')) {
+    // check request
+    if ($_REQUEST['sort']) {
+        $searchParams['body']['sort'] = $_REQUEST['sort'];
+        if ($_REQUEST['sortorder']) {
+            $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
+        }
+    // check cookie
+    } elseif (getCookie('sort')) {
         $searchParams['body']['sort'] = getCookie('sort');
         if (getCookie('sortorder')) {
             $searchParams['body']['sort'] = [ ''.getCookie('sort').'' => ['order' => getCookie('sortorder') ] ];
         }
-    } else { // no cookies, grab from request
-        if ($_REQUEST['sort']) {
-            $searchParams['body']['sort'] = $_REQUEST['sort'];
-            if ($_REQUEST['sortorder']) {
-                $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
-            }
-        } else {
-            // sort by parent path, then filename
-            $searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
-        }
+    } else {
+        // sort by parent path, then filename
+        $searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
     }
 
     try {
@@ -121,6 +127,7 @@ if (!empty($_REQUEST['submitted'])) {
 		<?php include __DIR__ . "/nav.php"; ?>
 
 		<?php if (!isset($_REQUEST['submitted'])) {
+        $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : 100;
     ?>
 
 		<div class="container-fluid">
@@ -139,11 +146,12 @@ if (!empty($_REQUEST['submitted'])) {
 			<div class="row">
 				<div class="col-xs-8 col-xs-offset-2">
 					<p class="text-center">
-						<form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="form-inline text-center">
-							<input type="hidden" name="destination" value="<?php echo $_SERVER[" REQUEST_URI "]; ?>"/>
+						<form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-inline text-center">
+                            <input type="hidden" name="destination" value="<?php echo $_SERVER[" REQUEST_URI "]; ?>"/>
 							<input name="q" value="<?php echo $_REQUEST['q']; ?>" type="text" placeholder="What are you looking for?" class="form-control input-lg" size="70" />
 							<input type="hidden" name="submitted" value="true" />
 							<input type="hidden" name="p" value="1" />
+                            <input type="hidden" name="resultsize" value="<?php echo $resultSize; ?>" />
 							<button type="submit" class="btn btn-primary btn-lg">Search</button>
 						</form>
 					</p>
@@ -165,7 +173,7 @@ if (!empty($_REQUEST['submitted'])) {
 					<div class="well well-sm">
 						<?php
         foreach ($savedsearches as $key => $value) {
-            echo '<a class="small" href=/simple.php?submitted=true&p=1&q=' . rawurlencode($value) . '>' . $value . '</a><br />';
+            echo '<a class="small" href=/simple.php?submitted=true&p=1&q=' . rawurlencode($value) . '&resultsize=' . $resultSize . '>' . $value . '</a><br />';
         }
     } ?>
 					</div>

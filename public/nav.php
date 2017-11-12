@@ -1,17 +1,17 @@
 <nav class="navbar navbar-default navbar-fixed">
 	<div class="container-fluid">
 		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapsible">
       <span class="sr-only">Toggle navigation</span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-			<a class="navbar-brand" href="/dashboard.php">diskover</a>
+			<a class="navbar-brand" href="/dashboard.php"><img class="pull-left" style="position:absolute;left:15px;top:10px;" src="/images/diskovernav.png" /><span style="margin-left:45px;">diskover</span></a>
 		</div>
 
-		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
+		<div class="collapse navbar-collapse" id="navbar-collapsible">
+			<ul class="nav navbar-nav navbar-left">
 				<li><a href="/simple.php">Simple Search</a></li>
 				<li><a href="/advanced.php">Advanced Search</a></li>
 				<li class="dropdown">
@@ -30,12 +30,19 @@
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;last_access_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-6 months ")); ?>&amp;sort=last_access&amp;sortorder=asc">All files last accessed > 6 months</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;last_access_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-12 months ")); ?>&amp;sort=last_access&amp;sortorder=asc">All files last accessed > 1 year</a></li>
 						<li class="divider"></li>
+                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=1048576&amp;sort=filesize&amp;sortorder=desc">All files size > 1 MB</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=10485760&amp;sort=filesize&amp;sortorder=desc">All files size > 10 MB</a></li>
+                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=26214400&amp;sort=filesize&amp;sortorder=desc">All files size > 25 MB</a></li>
+                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=52428800&amp;sort=filesize&amp;sortorder=desc">All files size > 50 MB</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=104857600&amp;sort=filesize&amp;sortorder=desc">All files size > 100 MB</a></li>
+                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=262144000&amp;sort=filesize&amp;sortorder=desc">All files size > 250 MB</a></li>
+                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=524288000&amp;sort=filesize&amp;sortorder=desc">All files size > 500 MB</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;file_size_bytes_low=1048576000&amp;sort=filesize&amp;sortorder=desc">All files size > 1 GB</a></li>
 						<li class="divider"></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;hardlinks_low=2">All files hardlinks > 1</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc">All duplicate files</a></li>
+                        <li class="divider"></li>
+                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;last_access_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;file_size_bytes_low=1048576&amp;sort=last_modified&amp;sortorder=asc">Recommended files to remove</a></li>
 					</ul>
 				</li>
 				<li class="dropdown">
@@ -46,20 +53,31 @@
 					</ul>
 				</li>
 			</ul>
-			<form method="get" action="/simple.php" class="navbar-form navbar-left" role="search">
-				<div class="form-group">
-					<i class="glyphicon glyphicon-search" style="font-size:16px;margin-right:5px;"></i>
-					<input type="text" name="q" class="form-control searchbox" placeholder="Search query" size="60" value='<?php echo $_GET['q']; ?>'>
-					<input type="hidden" name="submitted" value="true" />
-					<input type="hidden" name="p" value="1" />
-				</div>
-				<!--<button type="submit" class="btn btn-default">Search</button>-->
-			</form>
 			<ul class="nav navbar-nav navbar-right">
 				<li><a href="/admin.php">Admin</a></li>
 				<li><a href="/help.php">Help</a></li>
 				<li><a href="https://github.com/shirosaidev/diskover-web" target="_blank">View on Github</a></li>
 			</ul>
+            <form method="get" action="/simple.php" class="navbar-form" role="search">
+                <input type="hidden" name="submitted" value="true" />
+                <input type="hidden" name="p" value="1" />
+                <?php if (isset($_REQUEST['resultsize'])) {
+                    $resultSize = $_REQUEST['resultsize'];
+                } elseif (getCookie("resultsize") != "") {
+                    $resultSize = getCookie("resultsize");
+                } else {
+                    $resultSize = 100;
+                } ?>
+                <input type="hidden" name="resultsize" value="<?php echo $resultSize; ?>" />
+				<div class="form-group" style="display:inline;">
+                    <div class="input-group" style="display:table;">
+                        <span class="input-group-addon" style="width: 1%;">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </span>
+    					<input type="text" name="q" class="form-control" placeholder="Search query" value='<?php echo $_GET['q']; ?>'>
+                    </div>
+				</div>
+			</form>
 		</div>
 	</div>
 </nav>

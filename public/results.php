@@ -1,4 +1,9 @@
 <?php
+require __DIR__ . '/../vendor/autoload.php';
+use diskover\Constants;
+
+error_reporting(E_ALL ^ E_NOTICE);
+
 // display results
 if (count($results[$p]) > 0) {
 	//print_r($_SERVER);
@@ -23,9 +28,9 @@ if (count($results[$p]) > 0) {
 		</div>
   </div>
   <div class="row">
-    <form method="post" action="/tagfiles.php" class="form-inline">
 			<div class="col-xs-12 text-right">
 				<div class="row">
+                <form method="post" action="/tagfiles.php" class="form-inline">
 				<div class="btn-group">
 					<button class="btn btn-default tagAllDelete" type="button" name="tagAll"> Select All Delete</button>
 					<button class="btn btn-default tagAllArchive" type="button" name="tagAll"> All Archive</button>
@@ -40,7 +45,7 @@ if (count($results[$p]) > 0) {
 				</div>
 		</div>
     <div class="counter pull-right"></div>
-    <table class="table table-striped table-hover results">
+    <table class="table results table-striped table-hover table-condensed">
       <thead>
         <tr>
           <th class="text-nowrap">#</th>
@@ -51,16 +56,20 @@ if (count($results[$p]) > 0) {
 						$query['sort'] = $sort;
 						$query['sortorder'] = 'asc';
 						$query_result = http_build_query($query);
-						if (($_GET['sort'] == $sort || getCookie('sort') == $sort ) && ($_GET['sortorder'] == 'asc' || getCookie('sortorder') == 'asc')) {
+						if (($_GET['sort'] == $sort) && ($_GET['sortorder'] == 'asc')) {
 							$class = 'sortarrows-active';
-						} else {
+						} elseif (($_GET['sort'] == null) && (getCookie('sort') == $sort ) && (getCookie('sortorder') == 'asc')) {
+    						$class = 'sortarrows-active';
+                        } else {
 							$class = '';
 						}
 						$a_asc = "<a href=\"".$_SERVER['PHP_SELF']."?".$query_result."\" onclick=\"setCookie('sort', '".$sort."'); setCookie('sortorder', 'asc');\"><i class=\"glyphicon glyphicon-chevron-up sortarrows ".$class."\"></i></a>";
 						$query['sortorder'] = 'desc';
 						$query_result = http_build_query($query);
-						if (($_GET['sort'] == $sort || getCookie('sort') == $sort ) && ($_GET['sortorder'] == 'desc' || getCookie('sortorder') == 'desc')) {
+						if (($_GET['sort'] == $sort) && ($_GET['sortorder'] == 'desc')) {
 							$class = 'sortarrows-active';
+                        } elseif (($_GET['sort'] == null) && (getCookie('sort') == $sort ) && (getCookie('sortorder') == 'desc')) {
+    						$class = 'sortarrows-active';
 						} else {
 							$class = '';
 						}
@@ -75,6 +84,12 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
           <th class="text-nowrap">Last Modified (utc) <?php echo sortURL('last_modified'); ?></th>
           <th class="text-nowrap">Last Access (utc) <?php echo sortURL('last_access'); ?></th>
+          <?php
+          if (Constants::EXTRA_FIELDS != "") {
+            foreach (Constants::EXTRA_FIELDS as $key => $value) { ?>
+                <th class="text-nowrap"><?php echo $value ?> <?php echo sortURL($key); ?></th>
+            <?php }
+            } ?>
           <th class="text-nowrap">Tag (del/arch/keep) <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Custom Tag <?php echo sortURL('tag_custom'); ?></th>
         </tr>
@@ -92,6 +107,12 @@ if (count($results[$p]) > 0) {
 					<th class="text-nowrap">Group</th>
 					<th class="text-nowrap">Last Modified (utc)</th>
 					<th class="text-nowrap">Last Access (utc)</th>
+                    <?php
+                    if (Constants::EXTRA_FIELDS != "") {
+                      foreach (Constants::EXTRA_FIELDS as $key => $value) { ?>
+                          <th class="text-nowrap"><?php echo $value; ?></th>
+                      <?php }
+                    } ?>
 					<th class="text-nowrap">Tag (del/arch/keep)</th>
 					<th class="text-nowrap">Custom Tag</th>
 				</tr>
@@ -106,15 +127,21 @@ if (count($results[$p]) > 0) {
           $i += 1;
       ?>
       <input type="hidden" name="<?php echo $result['_id']; ?>" value="<?php echo $result['_index']; ?>" />
-      <tr class="<?php if ($file['tag'] == 'delete') { echo 'warning'; } elseif ($file['tag'] == 'archive') { echo 'success'; } elseif ($file['tag'] == 'keep') { echo 'info'; }?>">
+      <tr class="<?php if ($file['tag'] == 'delete') { echo 'deleterow'; } elseif ($file['tag'] == 'archive') { echo 'archiverow'; } elseif ($file['tag'] == 'keep') { echo 'keeprow'; }?>">
         <th scope="row" class="text-nowrap"><?php echo $i; ?></th>
-        <td><a href="/view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
-		  <td><a href="/filetree.php?path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><label title="filetree" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-folder-open"></i></label></a>&nbsp;<a href="/treemap.php?path=<?php echo rawurlencode($file['path_parent']); ?>"><label title="treemap" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-th-large"></i></label></a>&nbsp;<a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><label title="filter" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-filter"></i></label></a>&nbsp;<?php echo $file['path_parent']; ?></td>
+        <td class="path"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <a href="/view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
+		  <td class="path"><a href="/filetree.php?path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><label title="filetree" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-folder-open"></i></label></a>&nbsp;<a href="/treemap.php?path=<?php echo rawurlencode($file['path_parent']); ?>"><label title="treemap" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-th-large"></i></label></a>&nbsp;<a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><label title="filter" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-filter"></i></label></a>&nbsp;<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <?php echo $file['path_parent']; ?></td>
         <td class="text-nowrap"><?php echo formatBytes($file['filesize']); ?></td>
         <td class="text-nowrap"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap"><?php echo $file['group']; ?></td>
         <td class="text-nowrap"><?php echo $file['last_modified']; ?></td>
         <td class="text-nowrap"><?php echo $file['last_access']; ?></td>
+        <?php
+        if (Constants::EXTRA_FIELDS != "") {
+          foreach (Constants::EXTRA_FIELDS as $key => $value) { ?>
+              <td><?php echo $file[$key]; ?></td>
+          <?php }
+        } ?>
         <td class="text-nowrap"><div class="btn-group tagButtons" style="white-space:nowrap;" data-toggle="buttons">
             <label class="tagDeleteLabel btn btn-warning btn-sm <?php if ($file['tag'] == 'delete') { echo 'active'; }?>" style="display:inline-block;float:none;" id="highlightRowDelete">
               <input class="tagDeleteInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="delete" <?php if ($file['tag'] == 'delete') { echo 'checked'; }; ?> /><i title="delete" class="glyphicon glyphicon-trash"></i>
@@ -129,8 +156,7 @@ if (count($results[$p]) > 0) {
               <input class="tagUntaggedInput" type="radio" name="ids_tag[<?php echo $result['_id']; ?>]" value="untagged" <?php if ($file['tag'] == 'untagged') { echo 'checked'; }; ?> /><i title="untagged" class="glyphicon glyphicon-remove-sign"></i>
             </label>
           </div></td>
-        <td class="text-nowrap"><input type="text" name="ids_tag_custom[<?php echo $result['_id']; ?>]" class="custom-tag-input form-control input-sm" value="<?php echo $file['tag_custom']; ?>"> 
-					<?php echo '<button title="copy to all" type="button" class="btn btn-default btn-xs copyCustomTag file-btns"><i class="glyphicon glyphicon-tags"></i> </button>'; ?></td>
+        <td class="text-nowrap customtag"><div class="input-group"><input type="text" name="ids_tag_custom[<?php echo $result['_id']; ?>]" class="custom-tag-input form-control input-sm" value="<?php echo $file['tag_custom']; ?>"><span class="input-group-btn"><button title="copy to all" type="button" class="btn btn-default btn-xs copyCustomTag file-btns"><i class="glyphicon glyphicon-tags"></i></button></span></div></td>
       </tr>
       <?php
         } // END foreach loop over results
@@ -138,9 +164,10 @@ if (count($results[$p]) > 0) {
       </tbody>
     </table>
   </div>
-  <div class="row">
-    <div class="col-xs-12 text-right">
-			<div class="row">
+<div class="row">
+    <div class="col-xs-12">
+			<div class="row text-right">
+        <form method="post" action="/tagfiles.php" class="form-inline">
       <div class="btn-group">
         <button class="btn btn-default tagAllDelete" type="button" name="tagAll"> Select All Delete</button>
         <button class="btn btn-default tagAllArchive" type="button" name="tagAll"> All Archive</button>
@@ -149,17 +176,44 @@ if (count($results[$p]) > 0) {
       </div>
       <button type="button" class="btn btn-default reload-results"><i class="glyphicon glyphicon-refresh"></i> </button>
       <button type="submit" class="btn btn-default button-tagfiles"><i class="glyphicon glyphicon-tag"></i> Tag files</button>
-      </form>
-			</div>
+    </form>
+            </div>
     </div>
+</div>
+</form>
+  <div class="row">
+      <div class="col-xs-2">
+          <div class="row">
+              <form class="form-inline" method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                <?php
+                foreach($_GET as $name => $value) {
+                  $name = htmlspecialchars($name);
+                  $value = htmlspecialchars($value);
+                  echo '<input type="hidden" name="'. $name .'" value="'. $value .'">';
+                }
+                ?>
+              <div class="form-group">
+                    <div class="col-xs-12">
+                        <div class="row">
+                         <label>Results per page</label>
+                    <select class="form-control" name="resultsize" id="resultsize">
+                      <option <?php echo $searchParams['size'] == 10 ? "selected" : ""; ?>>10</option>
+                      <option <?php echo $searchParams['size'] == 25 ? "selected" : ""; ?>>25</option>
+                      <option <?php echo $searchParams['size'] == 50 ? "selected" : ""; ?>>50</option>
+                      <option <?php echo $searchParams['size'] == 100 ? "selected" : ""; ?>>100</option>
+                      <option <?php echo $searchParams['size'] == 200 ? "selected" : ""; ?>>200</option>
+                      <option <?php echo $searchParams['size'] == 300 ? "selected" : ""; ?>>300</option>
+                    </select>
+                </div>
+                </div>
+            </div>
+            </form>
+          </div>
+      </div>
   </div>
   <div class="row">
-    <div class="col-xs-12 text-right">
+    <div class="col-xs-12">
 			<div class="row">
-      <?php
-      // pagination
-      if ($total > $limit) {
-      ?>
       <ul class="pagination">
         <?php
         parse_str($_SERVER["QUERY_STRING"], $querystring);
@@ -200,7 +254,7 @@ if (count($results[$p]) > 0) {
         <?php if ($page >= $last) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpageurl . '">'; } ?>&raquo;</a></li>
         <?php if ($end < $last) { echo '<li><a href="' . $lastpageurl . '">' . $last . '</a></li>'; } ?>
       </ul>
-      <?php } else { echo "<br />"; } ?>
+      <br />
     </div>
 	</div>
   </div>

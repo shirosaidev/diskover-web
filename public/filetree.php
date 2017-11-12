@@ -67,7 +67,7 @@ if (!empty($_GET['path'])) {
         									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=10485760&amp;mtime=<?php echo $_GET['mtime']; ?>">>10 MB</a></li>
         									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=26214400&amp;mtime=<?php echo $_GET['mtime']; ?>">>25 MB</a></li>
         									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=52428800&amp;mtime=<?php echo $_GET['mtime']; ?>">>50 MB</a></li>
-        									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&filter=104857600&amp;mtime=<?php echo $_GET['mtime']; ?>">>100 MB</a></li>
+        									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=104857600&amp;mtime=<?php echo $_GET['mtime']; ?>">>100 MB</a></li>
         									<li><a href="/filetree.php?path=<?php echo $_GET['path']; ?>&amp;filter=1073741824&amp;mtime=<?php echo $_GET['mtime']; ?>">>1 GB</a></li>
         								</ul>
         							</div>

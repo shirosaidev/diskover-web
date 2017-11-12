@@ -10,7 +10,7 @@ $client = connectES();
 
 // Update files if any were submitted
 if (count($_POST['ids_tag']) > 0) {
-  
+
   // update existing tag field with new value
   foreach ($_POST['ids_tag'] as $id => $value) {
     $index = $_POST[$id];

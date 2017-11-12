@@ -1,6 +1,36 @@
+.keeprow {
+    border-left: 10px solid #5EBFDB;
+    color: #5EBFDB;
+    opacity: .8;
+}
+
+.keeprow a {
+    color: #5EBFDB;
+}
+
+.archiverow {
+    border-left: 10px solid #47AF48;
+    color: #47AF48;
+    opacity: .8;
+}
+
+.archiverow a {
+    color: #47AF48;
+}
+
+.deleterow {
+    border-left: 10px solid #F6962A;
+    color: #F6962A;
+    opacity: .8;
+}
+
+.deleterow a {
+    color: #F6962A;
+}
+
 .path {
-    word-break: break-word;
     word-wrap: break-word;
+    word-break: break-all;
 }
 
 .searchresults {
@@ -9,8 +39,9 @@
 }
 
 .results {
-    word-break: break-word;
     word-wrap: break-word;
+    word-break: break-all;
+    font-size: 12px;
 }
 
 .results tr[visible='false'], .no-result {
@@ -47,9 +78,8 @@ thead, tfoot {
     color: #D89333;
 }
 
-.searchbox {
-    background-color: #1C1E22;
-    color: white;
+.customtag {
+    width: 200px;
 }
 
 textarea, select, input {
@@ -58,5 +88,5 @@ textarea, select, input {
 }
 
 .file-btns {
-    color: #85A300;
+    color: #CB77DF;
 }

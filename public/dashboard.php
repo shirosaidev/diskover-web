@@ -10,6 +10,7 @@ $client = connectES();
 
 // Get search results from Elasticsearch for tags
 $results = [];
+$totalfiles = 0;
 $tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 $totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
@@ -43,6 +44,9 @@ foreach ($tagCounts as $tag => $value) {
 
   // Get total size of all files with tag
   $totalFilesize[$tag] = $queryResponse['aggregations']['total_size']['value'];
+
+  // Add to total files
+  $totalfiles += $queryResponse['hits']['total'];
 
 }
 
@@ -81,6 +85,86 @@ $totalDupes = $queryResponse['hits']['total'];
 // Get total size of all duplicate files
 $totalFilesizeDupes = $queryResponse['aggregations']['total_size']['value'];
 
+
+// Get search results from Elasticsearch for top 10 largest files
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = Constants::ES_INDEX; // which index to search
+$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+
+
+// Setup search query for largest files
+$searchParams['body'] = [
+    'size' => 10,
+    '_source' => ['filename', 'path_parent', 'filesize'],
+    'query' => [
+        'query_string' => [
+            'query' => '*'
+        ]
+    ],
+    'sort' => [
+        'filesize' => [
+            'order' => 'desc'
+        ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of duplicate files
+$largestfiles = $queryResponse['hits']['hits'];
+
+
+// Get search results from Elasticsearch for last index date
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = Constants::ES_INDEX; // which index to search
+$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+
+$searchParams['body'] = [
+    'size' => 1,
+    '_source' => ['indexing_date'],
+    'query' => [
+        'query_string' => [
+            'query' => '*'
+        ]
+    ],
+    'sort' => [
+        'indexing_date' => [
+            'order' => 'asc'
+        ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of duplicate files
+$lastindexdate = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+
+
+// Get search results from Elasticsearch for number of directories
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = Constants::ES_INDEX; // which index to search
+$searchParams['type']  = "directory";  // which type within the index to search
+
+$searchParams['body'] = [
+    'size' => 0,
+    'query' => [
+        'query_string' => [
+            'query' => '*'
+        ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of directories
+$totaldirs = $queryResponse['hits']['total'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -105,70 +189,91 @@ $totalFilesizeDupes = $queryResponse['aggregations']['total_size']['value'];
 </head>
 <body>
 <?php include __DIR__ . "/nav.php"; ?>
-<div class="container">
+<div class="container-fluid">
   <div class="row">
-    <div class="col-xs-4">
-      <img src="/images/diskover.png" class="img-responsive" style="margin-top:30px;" alt="diskover" width="249" height="189" />
-    </div>
-    <div class="col-xs-8">
+    <div class="col-xs-6">
       <div class="jumbotron">
-        <h1><span class="glyphicon glyphicon-piggy-bank"></span> Space Savings</h1>
-        <p>You could save <strong><?php echo formatBytes($totalFilesize['untagged']+$totalFilesize['delete']+$totalFilesize['archive']+$totalFilesize['keep']); ?></strong> of disk space if you delete or archive all your files.
-          There are <strong><?php echo $totalDupes; ?></strong> duplicate files taking up <strong><?php echo formatBytes($totalFilesizeDupes); ?></strong> space.</p>
+        <h1><i class="glyphicon glyphicon-piggy-bank"></i> Space Savings</h1>
+        <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesize['untagged']+$totalFilesize['delete']+$totalFilesize['archive']+$totalFilesize['keep']); ?></span> of disk space if you delete or archive all your files.
+            There are a total of <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> files and <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> directories.
+            There are <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> duplicate files taking up <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span> space.</p>
+          <p><small><i class="glyphicon glyphicon-calendar"></i> Your last crawl was at <span style="font-weight:bold;color:#66C266;"><?php echo $lastindexdate; ?></span> UTC.</small></p>
       </div>
+      <div class="alert alert-dismissible alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> This app will help you <a href="/simple.php" class="alert-link">quickly search your file system</a> using your diskover indices in Elasticsearch.
+      </div>
+      <?php
+      if ($totalFilesize['untagged'] == 0 AND $totalFilesize['delete'] == 0 AND $totalFilesize['archive'] == 0 AND $totalFilesize['keep'] == 0) {
+      ?>
+      <div class="alert alert-dismissible alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><span class="glyphicon glyphicon-alert"></span> No diskover indices found! :(</h4>
+        <p>It looks like you haven't crawled any files yet. Crawl some files and come back.</p>
+      </div>
+      <?php
+      }
+      ?>
+      <?php
+      if ($totalDupes > 0) {
+      ?>
+      <div class="alert alert-dismissible alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
+        <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
+      </div>
+      <?php
+      }
+      ?>
+      <?php
+      if ($tagCounts['untagged'] > 0) {
+      ?>
+      <div class="alert alert-dismissible alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><i class="glyphicon glyphicon-tags"></i> Untagged files!</h4>
+        <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;tag=untagged" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
+      </div>
+      <?php
+      }
+      ?>
+      <?php
+      if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFilesize['archive'] > 0 AND $totalFilesize['keep'] > 0 ) {
+      ?>
+      <div class="alert alert-dismissible alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="glyphicon glyphicon-thumbs-up"></i> <strong>Well done!</strong> It looks like all files have been tagged.
+      </div>
+      <?php
+      }
+      ?>
     </div>
+    <div class="col-xs-6">
+        <center><img src="/images/diskover.png" class="img-responsive" alt="diskover" width="249" height="189" /></center>
+        <h3><i class="glyphicon glyphicon-file"></i> Top 10 Largest Files</h3>
+        <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
+          <thead>
+            <tr>
+              <th class="text-nowrap">File</th>
+              <th class="text-nowrap">Size</th>
+          </tr>
+        </thead>
+        <tbody>
+              <?php
+              foreach ($largestfiles as $key => $value) {
+                ?>
+                <tr><td class="path"><a href="/view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index']; ?>"><?php echo $value['_source']['path_parent'] . "/" . $value['_source']['filename']; ?></a></td>
+                    <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
+                </tr>
+              <?php }
+               ?>
+           </tbody>
+      </table>
+      </div>
   </div>
-<div class="alert alert-dismissible alert-success">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong>Welcome to diskover's web file manager.</strong> This application will help you <a href="/simple.php" class="alert-link">search and tag files</a> in your diskover indices in Elasticsearch.
-</div>
-<?php
-if ($totalFilesize['untagged'] == 0 AND $totalFilesize['delete'] == 0 AND $totalFilesize['archive'] == 0 AND $totalFilesize['keep'] == 0) {
-?>
-<div class="alert alert-dismissible alert-danger">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <h4><span class="glyphicon glyphicon-alert"></span> No diskover indices found! :(</h4>
-  <p>It looks like you haven't crawled any files yet. Crawl some files and come back.</p>
-</div>
-<?php
-}
-?>
 
-<?php
-if ($totalDupes > 0) {
-?>
-<div class="alert alert-dismissible alert-danger">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <h4><span class="glyphicon glyphicon-duplicate"></span> Duplicate files!</h4>
-  <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
-</div>
-<?php
-}
-?>
-<?php
-if ($tagCounts['untagged'] > 0) {
-?>
-<div class="alert alert-dismissible alert-warning">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <h4><span class="glyphicon glyphicon-tags"></span> Untagged files!</h4>
-  <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;tag=untagged" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
-</div>
-<?php
-}
-?>
-<?php
-if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFilesize['archive'] > 0 AND $totalFilesize['keep'] > 0 ) {
-?>
-<div class="alert alert-dismissible alert-info">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <span class="glyphicon glyphicon-thumbs-up"></span> <strong>Well done!</strong> It looks like all files have been tagged.
-</div>
-<?php
-}
-?>
 <div class="row">
   <div class="col-xs-4">
-    <h3><span class="glyphicon glyphicon-tag"></span> Tag Counts</h3>
+    <h3><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3>
     <ul class="nav nav-pills">
       <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=untagged">untagged <span class="badge"><?php echo $tagCounts['untagged']; ?></span></a></li>
       <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=delete">delete <span class="badge"><?php echo $tagCounts['delete']; ?></span></a></li>
@@ -180,7 +285,7 @@ if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFiles
 		<div id="tagcountchart"></div>
 	</div>
   <div class="col-xs-4">
-    <h3><span class="glyphicon glyphicon-hdd"></span> Total File Sizes</h3>
+    <h3><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3>
     <ul class="list-group">
       <li class="list-group-item">
         <span class="badge"><?php echo formatBytes($totalFilesize['untagged']); ?></span>
@@ -277,7 +382,7 @@ if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFiles
 				return d.data.label;
 			});
 	</script>
-	
+
 	<script>
 		var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
 		var size_delete = <?php echo $totalFilesize['delete'] ?>;
