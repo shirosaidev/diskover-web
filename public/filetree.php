@@ -4,6 +4,12 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
+// redirect to select indices page if no index cookie
+$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+if (!$esIndex) {
+    header("location:selectindices.php");
+}
+
 if (!empty($_GET['path'])) {
   $path = $_GET['path'];
 	// remove any trailing slash unless root
@@ -32,7 +38,7 @@ if (!empty($_GET['path'])) {
 		<?php include __DIR__ . "/nav.php"; ?>
 		<div class="container" id="error" style="display:none;">
 			<div class="row">
-				<div class="alert alert-dismissible alert-warning col-xs-8">
+				<div class="alert alert-dismissible alert-danger col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
 					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again or check browser console and Elasticsearch for errors.
 				</div>
@@ -102,6 +108,7 @@ if (!empty($_GET['path'])) {
 									<span id="statusfilters">
 									</span><span id="statushidethresh">
 									</span>
+                                    *filters affect all analytics pages
 								</div>
 							</div>
 						</div>

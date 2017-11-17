@@ -50,6 +50,11 @@ $(document).ready(function () {
 		location.reload(true);
 	});
 
+    // select results per page
+    $("#resultsize").change(function () {
+		$(this).closest('form').trigger('submit');
+	});
+
 	// copy custom tag button on search results page
 	$(".copyCustomTag").click(function () {
 		var customtag = $(this).closest('tr').find('.custom-tag-input').val();
@@ -66,6 +71,7 @@ $(document).ready(function () {
 		console.log("removing json data in session storage because reload");
 		sessionStorage.removeItem("diskover-filetree");
 		sessionStorage.removeItem("diskover-treemap");
+        sessionStorage.removeItem("diskover-heatmap");
 		location.reload(true);
 	});
 
@@ -217,16 +223,23 @@ function escapeHTML(text) {
    return text.replace(/[/()\[\]\ &<>+\-\|!{}^~?:]/g, abc);
 }
 
+// calculate change percentage between two numbers
+function changePercent(a,b) {
+    return ((a - b) / b) * 100;
+}
+
 // update url links in nav bar for visualizations
 function updateVisLinks() {
 	var path = (getCookie('path')) ? getCookie('path') : '';
 	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : 0;
-	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 2;
+	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 1;
 	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime;
 	document.getElementById("filetreelink").setAttribute("href", url);
 	var url = "/treemap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
 	document.getElementById("treemaplink").setAttribute("href", url);
+    var url = "/heatmap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
+	document.getElementById("heatmaplink").setAttribute("href", url);
 	return false;
 }
 

@@ -10,6 +10,12 @@ if(isset($_GET['command'])) {
 	unset($_GET['command']);
 }
 
+$host = Constants::ES_HOST;
+$port = Constants::ES_PORT;
+
+$index = getCookie('index');
+$index2 = getCookie('index2');
+
 ?>
 
 <!DOCTYPE html>
@@ -35,15 +41,23 @@ if(isset($_GET['command'])) {
 		<h1 class="text-nowrap"><img src="/images/diskoversmall.png" alt="diskover" width="62" height="47" /> diskover &mdash; Admin Panel</h1>
 		<span class="text-success small"><?php echo "diskover-web v".Constants::VERSION; ?></span>
 	</div>
-	<div class="col-xs-6">
-		<div class="pull-right">
+	<div class="col-xs-3">
+        <div class="well well-sm">
+            <h5>diskover indices selected</h5>
+            Index: <?php echo $index; ?><br />
+            Index 2: <?php echo $index2; ?><br />
+            <small><a href="/selectindices.php">Change</a></small>
+        </div>
+    </div>
+    <div class="col-xs-3">
+		<div class="well well-sm pull-right">
 			<h5>diskover socket listener status</h5>
 		<?php
 error_reporting(E_ERROR | E_PARSE);
 // open socket connection to diskover listener
-$host = Constants::SOCKET_LISTENER_HOST;
-$port = Constants::SOCKET_LISTENER_PORT;
-$fp = stream_socket_client("udp://".$host.":".$port, $errno, $errstr);
+$socket_host = Constants::SOCKET_LISTENER_HOST;
+$socket_port = Constants::SOCKET_LISTENER_PORT;
+$fp = stream_socket_client("udp://".$socket_host.":".$socket_port, $errno, $errstr);
 // set timeout
 stream_set_timeout($fp, 2);
 // test if listening
@@ -139,7 +153,7 @@ $text = file_get_contents($file);
 						curl_setopt_array($curl, array(
 								CURLOPT_RETURNTRANSFER => 1,
 								CURLOPT_CUSTOMREQUEST => 'DELETE',
-								CURLOPT_URL => 'http://localhost:9200/'.$i.'?pretty'
+								CURLOPT_URL => 'http://'.$host.':'.$port.'/'.$i.'?pretty'
 						));
 						// Send the request & save response to $curlresp
 						$curlresp = curl_exec($curl);
@@ -153,7 +167,7 @@ $text = file_get_contents($file);
 				// Set curl options
 				curl_setopt_array($curl, array(
 						CURLOPT_RETURNTRANSFER => 1,
-						CURLOPT_URL => 'http://localhost:9200/diskover-*?pretty'
+						CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*?pretty'
 				));
 				// Send the request & save response to $curlresp
 				$curlresp = curl_exec($curl);
@@ -166,7 +180,7 @@ $text = file_get_contents($file);
 				// Set curl options
 				curl_setopt_array($curl, array(
 						CURLOPT_RETURNTRANSFER => 1,
-						CURLOPT_URL => 'http://localhost:9200/diskover-*/_stats?pretty'
+						CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*/_stats?pretty'
 				));
 				// Send the request & save response to $curlresp_esinfo
 				$curlresp_esinfo = curl_exec($curl);
@@ -178,7 +192,7 @@ $text = file_get_contents($file);
 				// Set curl options
 				curl_setopt_array($curl, array(
 						CURLOPT_RETURNTRANSFER => 1,
-						CURLOPT_URL => 'http://localhost:9200/_cat/indices?v'
+						CURLOPT_URL => 'http://'.$host.':'.$port.'/_cat/indices?v'
 				));
 				// Send the request & save response to $curlresp_esinfo
 				$curlresp_eshealth = curl_exec($curl);
@@ -233,6 +247,8 @@ function clearCache() {
 	deleteCookie('sortorder');
     deleteCookie('savedsearches');
     deleteCookie('resultsize');
+    deleteCookie('index');
+    deleteCookie('index2');
 	sessionStorage.removeItem("diskover-filetree");
 	sessionStorage.removeItem("diskover-treemap");
 	document.getElementById('clearcachestatus').innerHTML = 'cleared.';

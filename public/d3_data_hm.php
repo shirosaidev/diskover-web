@@ -8,7 +8,8 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 
 // redirect to select indices page if no index cookie
 $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-if (!$esIndex) {
+$esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+if (!$esIndex || !$esIndex2) {
     header("location:selectindices.php");
 }
 
@@ -22,12 +23,12 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = $index;
-    $searchParams['type']  = Constants::ES_TYPE;
+    $searchParams['index'] = $index; // which index to search
+    $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
     $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
-        'size' => 0,
+         'size' => 0,
             'query' => [
                 'query_string' => [
                     'query' => '"' . $path . '" AND filesize: >' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
@@ -63,15 +64,15 @@ function get_files($client, $index, $path, $filter, $mtime) {
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = $index;;
+    $searchParams['index'] = $index;
     $searchParams['type']  = Constants::ES_TYPE;
 
-    // search size
+  // search size
     $searchParams['size'] = 100;
 
     $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
-                '_source' => ["filename","filesize"],
+                '_source' => ["path_parent","filename","filesize"],
                 'query' => [
                     'query_string' => [
                         'query' => 'path_parent: "' . $path . '" AND filesize: >' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
@@ -93,8 +94,8 @@ function get_files($client, $index, $path, $filter, $mtime) {
     // Add files to items array
     foreach ($results as $result) {
         $items[] = [
-                        "name" => $result['_source']['filename'],
-                        "size" => $result['_source']['filesize']
+                    "name" => $result['_source']['path_parent'] . '/' . $result['_source']['filename'],
+                    "size" => $result['_source']['filesize']
                     ];
     }
 
@@ -115,15 +116,15 @@ function get_es_path($client, $index) {
 
     $searchParams['body'] = [
         '_source' => ["path"],
-           'query' => [
-               'match_all' => (object) []
-        ],
-        'sort' => [
-            'path' => [
-            'order' => 'asc'
+            'query' => [
+                'match_all' => (object) []
+            ],
+            'sort' => [
+                'path' => [
+                    'order' => 'asc'
+                ]
             ]
-        ]
-    ];
+        ];
 
     // Send search query to Elasticsearch and get results
     $queryResponse = $client->search($searchParams);
@@ -143,7 +144,7 @@ function get_sub_dirs($client, $index, $path) {
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = $index;;
+    $searchParams['index'] = $index;
     $searchParams['type']  = "directory";
 
     // search size
@@ -159,17 +160,17 @@ function get_sub_dirs($client, $index, $path) {
     }
 
     $searchParams['body'] = [
-        '_source' => ["path"],
-            'query' => [
-                'query_string' => [
-                'query' => $query
-            ]
-        ],
-        'sort' => [
-            'path' => [
-                'order' => 'asc'
-            ]
+    '_source' => ["path"],
+    'query' => [
+        'query_string' => [
+            'query' => $query
         ]
+    ],
+    'sort' => [
+            'path' => [
+            'order' => 'asc'
+            ]
+    ]
     ];
 
     // Send search query to Elasticsearch and get results
@@ -206,11 +207,11 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth) {
             continue;
         }
         $items[] = [
-            "name" => $d, //basename($d)
+            "name" => $d, //basename($d),
             "size" => $dirinfo[0],
             "count" => $dirinfo[1],
             "children" => walk_tree($client, $index, $d, $filter, $mtime, $depth+=1, $maxdepth)
-        ];
+          ];
         $depth-=1;
     }
     return $items;
@@ -220,6 +221,8 @@ $path = $_GET['path'];
 $filter = $_GET['filter']; // file size
 $mtime = $_GET['mtime']; // file mtime
 $maxdepth = $_GET['maxdepth'];
+
+// get indices from cookies
 
 // default 1 MB min file size filter
 if (empty($filter)) {
@@ -239,9 +242,9 @@ if (empty($mtime) || $mtime == 0) {
     $mtime = gmdate("Y-m-d\TH:i:s", strtotime("-12 months"));
 }
 
-// default 1 max directory depth
+// default 2 max directory depth
 if (empty($maxdepth)) {
-    $maxdepth = 1;
+    $maxdepth = 2;
 }
 
 // check if no path (grab one from ES)
@@ -249,20 +252,29 @@ if (empty($path)) {
     $path = get_es_path($client, $esIndex);
 }
 
-// get dir total size and file count
-$dirinfo = get_dir_info($client, $esIndex, $path, $filter, $mtime);
+// create list of indices
+$indices = [$esIndex, $esIndex2];
 
-// check for error
-if ($dirinfo[0] == 0) {
-    echo json_encode([ "error" => "nothing found" ]);
-    exit;
+// create list to hold file/directory data from ES
+$data = [];
+
+// get dir total size and file count for each index
+foreach ($indices as $key => $value) {
+    $dirinfo = get_dir_info($client, $value, $path, $filter, $mtime);
+
+    // check for error
+    if ($dirinfo[0] == 0) {
+        echo json_encode([ "error" => "nothing found" ]);
+        exit;
+    }
+    // append each index info to data list
+    $data[] = [
+        "name" => $path, //basename($path),
+        "size" => $dirinfo[0],
+        "count" => $dirinfo[1],
+        "children" => walk_tree($client, $value, $path, $filter, $mtime, $depth=0, $maxdepth)
+    ];
 }
 
-$data = [
-    "name" => $path,
-    "size" => $dirinfo[0],
-    "count" => $dirinfo[1],
-    "children" => walk_tree($client, $esIndex, $path, $filter, $mtime, $depth=0, $maxdepth)
-];
-
+// output json encoded data for d3
 echo json_encode($data);

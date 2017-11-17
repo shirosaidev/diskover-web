@@ -50,6 +50,7 @@
 					<ul class="dropdown-menu" role="menu">
 						<li><a href="/filetree.php" id="filetreelink">File Tree</a></li>
 						<li><a href="/treemap.php" id="treemaplink">Treemap</a></li>
+                        <li><a href="/heatmap.php" id="heatmaplink">Heatmap</a></li>
 					</ul>
 				</li>
 			</ul>

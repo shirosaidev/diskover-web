@@ -1,5 +1,22 @@
 # Diskover Web Change Log
 
+# [1.3.5] - 2017-11-17
+### added
+- disk space overview and chart to dashboard showing total, used, free and available space for crawled path, also shows comparison if two indices selected
+- index selector page to change elasticsearch indices
+- selected indices to admin page
+- Heatmap to analytics nav menu (d3 treemap + js simpleheat heatmap showing files/directories which have changed between index and index2)
+- index select selectindices.php page
+### changed
+- elasticsearch index variable no longer stored in Constants.php, selected by env var or from new selectindices.php page
+- when loading any page, if no cookies or env var for indices are found will be redirected to selectindicies.php page
+- file tree pie chart now displays full path on mouseover
+- clicking file tree pie chart now expands directory in file tree
+- collapsing directory in file tree now updates charts
+### fixed
+- admin page if using host other than localhost
+- d3 errors on treemap for negative rect width
+
 # [1.3.4] - 2017-11-12
 ### added
 - results per page select input to search results page to control number of results to return per page

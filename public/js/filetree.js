@@ -29,7 +29,7 @@ function getChildJSON(d) {
 	// get json data from Elasticsearch using php data grabber
 	console.log("getting children from Elasticsearch:"+d.name);
 
-	var target = document.getElementById('tree-container');
+	var target = document.getElementById('mainwindow');
 	// trigger loader
 	var spinner = new Spinner(opts).spin(target);
 
@@ -159,17 +159,40 @@ function getJSON() {
 
 }
 
-function updateTree(data, parent) {
+function toggleChildren(d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+    } else if (d._children) {
+        d.children = d._children;
+        d._children = null;
+    }
+}
 
-	function toggleChildren(d) {
-		if (d.children) {
-			d._children = d.children;
-			d.children = null;
-		} else if (d._children) {
-			d.children = d._children;
-			d._children = null;
-		}
-	}
+function click(d) {
+    console.log(d)
+    if (d.count > 0 && !d.children && !d._children) {
+        // check if there are any children in Elasticsearch
+        getChildJSON(d);
+    } else if (d._children) {
+        toggleChildren(d);
+        updateTree(root, d);
+        changePie(d);
+        changePieFileExt(node.name);
+        changeBarMtime(node.name);
+    } else if (d.children) {
+        toggleChildren(d);
+        updateTree(root, d);
+        changePie(d.parent);
+        changePieFileExt(d.parent.name);
+        changeBarMtime(d.parent.name);
+    } else if (!d.count) {
+        // display file in search results
+        window.location.href = '/advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name) +'&path_parent=' + encodeURIComponent(node.name);
+    }
+}
+
+function updateTree(data, parent) {
 
 	var nodes = tree.nodes(data),
 			duration = 250;
@@ -185,22 +208,7 @@ function updateTree(data, parent) {
 		.style("opacity", 0)
 		.style("height", tree.nodeHeight() + "px")
 		.on("click", function (d) {
-			if (d.count > 0 && !d.children && !d._children) {
-				// check if there are any children in Elasticsearch
-				getChildJSON(d);
-			} else if (d._children) {
-				toggleChildren(d);
-				updateTree(data, d);
-				changePie(d);
-				changePieFileExt(node.name);
-				changeBarMtime(node.name);
-			} else if (d.children) {
-				toggleChildren(d);
-				updateTree(data, d);
-			} else if (!d.count) {
-				// display file in search results
-				window.location.href = '/advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name) +'&path_parent=' + encodeURIComponent(node.name);
-			}
+			click(d);
 		})
 		.on("mouseover", function (d) {
 			d3.select(this).classed("selected", true);

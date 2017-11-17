@@ -95,6 +95,7 @@
 .statustext {
     font-size: 10px;
     color: gray;
+    padding: 4px;
 }
 
 /* d3 pie chart */

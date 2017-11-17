@@ -3,14 +3,13 @@
 namespace diskover;
 
 class Constants {
-	// diskover-web version
-	const VERSION = '1.3.3';
+    // diskover-web version
+    const VERSION = '1.3.5';
     // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // set to your Elasticsearch port, default 9200
     const ES_PORT = 9200;
-    // Elasticsearch index you want to use or diskover-* for all
-    const ES_INDEX = 'diskover-*';
+    // Elasticsearch doc type
     const ES_TYPE = 'file';
     // set following two lines if using X-Pack http-auth
     const ES_USER = '';
@@ -20,4 +19,6 @@ class Constants {
     // diskover.py socket listener
     const SOCKET_LISTENER_HOST = '127.0.0.1';
     const SOCKET_LISTENER_PORT = 9999;
+    // additional custom ES fields to display in search results
+    const EXTRA_FIELDS = "";  // ['md5_checksum' => 'MD5 Checksum']
 }

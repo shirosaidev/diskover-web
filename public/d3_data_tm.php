@@ -6,17 +6,23 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
+// redirect to select indices page if no index cookie
+$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+if (!$esIndex) {
+    header("location:selectindices.php");
+}
+
 // Connect to Elasticsearch
 $client = connectES();
 
 // Get total directory size and count from Elasticsearch (recursive)
-function get_dir_info($client, $path, $filter, $mtime) {
+function get_dir_info($client, $index, $path, $filter, $mtime) {
     $totalsize = 0;
     $totalcount = 0;
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX; // which index to search
+    $searchParams['index'] = $index; // which index to search
     $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
     $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
@@ -51,13 +57,13 @@ function get_dir_info($client, $path, $filter, $mtime) {
     return $dirinfo;
 }
 
-function get_files($client, $path, $filter, $mtime) {
+function get_files($client, $index, $path, $filter, $mtime) {
     // gets all the files in the current directory (path)
     $items = [];
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX;
+    $searchParams['index'] = $index;
     $searchParams['type']  = Constants::ES_TYPE;
 
   // search size
@@ -95,13 +101,13 @@ function get_files($client, $path, $filter, $mtime) {
     return $items;
 }
 
-function get_es_path($client) {
+function get_es_path($client, $index) {
     // try to get a top level path from ES
 
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX;
+    $searchParams['index'] = $index;
     $searchParams['type']  = "directory";
 
     // number of results to return
@@ -131,13 +137,13 @@ function get_es_path($client) {
     return $path;
 }
 
-function get_sub_dirs($client, $path) {
+function get_sub_dirs($client, $index, $path) {
     $dirs = [];
 
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX;
+    $searchParams['index'] = $index;
     $searchParams['type']  = "directory";
 
     // search size
@@ -179,22 +185,22 @@ function get_sub_dirs($client, $path) {
     return $dirs;
 }
 
-function walk_tree($client, $path, $filter, $mtime, $depth, $maxdepth) {
+function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth) {
     $items = [];
     $subdirs = [];
     if ($depth == $maxdepth) {
         return $items;
     }
     // get files in current path (not recursive)
-    $items = get_files($client, $path, $filter, $mtime);
+    $items = get_files($client, $index, $path, $filter, $mtime);
     // get directories in current path (not recursive)
-    $subdirs = get_sub_dirs($client, $path);
+    $subdirs = get_sub_dirs($client, $index, $path);
     // get depth of path
     //$depth = count(explode("/", $path));
     // loop through all subdirs and add to items array
     foreach ($subdirs as $d) {
         // get dir total size and file count
-        $dirinfo = get_dir_info($client, $d, $filter, $mtime);
+        $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
         // continue if directory is empty
         if ($dirinfo[0] == 0 || $dirinfo[1] == 0) {
             continue;
@@ -203,7 +209,7 @@ function walk_tree($client, $path, $filter, $mtime, $depth, $maxdepth) {
             "name" => $d, //basename($d),
             "size" => $dirinfo[0],
             "count" => $dirinfo[1],
-            "children" => walk_tree($client, $d, $filter, $mtime, $depth+=1, $maxdepth)
+            "children" => walk_tree($client, $index, $d, $filter, $mtime, $depth+=1, $maxdepth)
           ];
         $depth-=1;
     }
@@ -240,11 +246,11 @@ if (empty($maxdepth)) {
 
 // check if no path (grab one from ES)
 if (empty($path)) {
-    $path = get_es_path($client);
+    $path = get_es_path($client, $esIndex);
 }
 
 // get dir total size and file count
-$dirinfo = get_dir_info($client, $path, $filter, $mtime);
+$dirinfo = get_dir_info($client, $esIndex, $path, $filter, $mtime);
 
 // check for error
 if ($dirinfo[0] == 0) {
@@ -256,7 +262,7 @@ $data = [
     "name" => $path, //basename($path),
     "size" => $dirinfo[0],
     "count" => $dirinfo[1],
-    "children" => walk_tree($client, $path, $filter, $mtime, $depth=0, $maxdepth)
+    "children" => walk_tree($client, $esIndex, $path, $filter, $mtime, $depth=0, $maxdepth)
 ];
 
 echo json_encode($data);

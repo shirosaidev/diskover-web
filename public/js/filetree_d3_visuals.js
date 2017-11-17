@@ -4,7 +4,7 @@
 
 $(document).ready(function() {
 
-    // move sunburst on scroll
+    // move charts on scroll
     $(window).scroll(function() {
         $("#chart-container").stop().animate({
             "marginTop": ($(window).scrollTop()) + "px"
@@ -115,7 +115,7 @@ function pieData(data) {
         var percent = (val / rootval * 100).toFixed(1);
         if (percent > hide_thresh) {
             labels.push({
-                'label': item.name.split('/').pop(),
+                'label': item.name,
                 'value': val
             });
         }
@@ -124,6 +124,16 @@ function pieData(data) {
     return labels;
 }
 
+function getFileTreeItem(a) {
+    var item;
+    node.children.forEach(function(d) {
+        if (a.data.label == d.name) {
+            item = d;
+        }
+    });
+    //console.log(item)
+    return item;
+}
 
 /* ------- TOOLTIP -------*/
 
@@ -161,10 +171,15 @@ function changePie(data) {
             return color(d.data.label);
         })
         .on("mouseover", function(d) {
-            tip.show(d)
+            tip.show(d);
+            var item = getFileTreeItem(d);
+            if (item.count > 0 && !item.children && !item._children) {
+                // check if there are any children in Elasticsearch
+                getChildJSON(item);
+            }
         })
         .on('mouseout', function(d) {
-            tip.hide(d)
+            tip.hide(d);
         })
         .on('mousemove', function() {
             return tip
@@ -172,9 +187,11 @@ function changePie(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click' ,function(d) {
-            var path_parent = node.name + '/' + d.data.label + '*';
-            var filename = d.data.label;
-            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' OR filename:' + encodeURIComponent(escapeHTML(filename));
+            //var path_parent = node.name + '/' + d.data.label + '*';
+            //var filename = d.data.label;
+            //window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' OR filename:' + encodeURIComponent(escapeHTML(filename));
+            var item = getFileTreeItem(d);
+            click(item);
         })
         .attr("class", "slice");
 
@@ -216,7 +233,7 @@ function changePie(data) {
         .append("text")
         .attr("dy", ".35em")
         .text(function(d) {
-            return d.data.label;
+            return d.data.label.split('/').pop();
         });
 
     function midAngle(d) {

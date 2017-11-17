@@ -1,0 +1,55 @@
+/* d3 heat map */
+
+.heatmapcontrols {
+    vertical-align: middle;
+    line-height: 1;
+    margin-right: 20px;
+}
+
+.heatmapcontrols input {
+    width: 200px;
+}
+
+.heatmapcontrols label {
+    font-size: 10px;
+    width: 60px;
+    float: left;
+    text-align: right;
+    margin-right: 10px;
+    color: #555;
+}
+
+.chart {
+    display: block;
+    margin-top: 10px;
+    opacity: .5;
+}
+
+text {
+    font-size: 10px;
+    fill: #C8C8C8;
+    pointer-events: none;
+}
+
+rect {
+    stroke: #272B30;
+    cursor: pointer;
+    stroke-width: 2px;
+}
+
+rect:hover {
+    fill-opacity: .7;
+}
+
+.d3-tip {
+    font-size: 11px;
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(100, 100, 100, 0.6);
+    color: #fff;
+    border-radius: 2px;
+    pointer-events: none;
+    word-break: break-all;
+    word-wrap: break-word;
+}

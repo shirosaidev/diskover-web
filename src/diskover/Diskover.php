@@ -8,7 +8,8 @@ error_reporting(E_ALL ^ E_NOTICE);
 function connectES() {
   // Connect to Elasticsearch node
   $esPort = getenv('APP_ES_PORT') ?: Constants::ES_PORT;
-  $esIndex = getenv('APP_ES_INDEX') ?: Constants::ES_INDEX;
+  $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+  $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
   if (Constants::AWS == false) {
 		$hosts = [
       [
@@ -71,6 +72,7 @@ function deleteCookie($cname) {
 
 // saved search query functions
 function saveSearchQuery($req) {
+    $req == "" ? $req = "*" : "";
     if (!getcookie('savedsearches')) {
         $savedsearches = [];
     } else {
@@ -91,4 +93,8 @@ function getSavedSearchQuery() {
     $savedsearches = array_reverse($savedsearches);
     $savedsearches = array_slice($savedsearches, 0, 10);
     return $savedsearches;
+}
+
+function changePercent($a, $b) {
+    return (($a - $b) / $b) * 100;
 }

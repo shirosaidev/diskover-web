@@ -6,6 +6,12 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
+// redirect to select indices page if no index cookie
+$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+if (!$esIndex) {
+    header("location:selectindices.php");
+}
+
 // Connect to Elasticsearch
 $client = connectES();
 
@@ -16,7 +22,7 @@ function get_dir_info($client, $path, $filter, $mtime) {
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX;
+    $searchParams['index'] = $esIndex;
     $searchParams['type']  = Constants::ES_TYPE;
 
     $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
@@ -57,7 +63,7 @@ function get_file_ext($client, $path, $filter, $mtime) {
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX;
+    $searchParams['index'] = $esIndex;
     $searchParams['type']  = Constants::ES_TYPE;
 
     $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
@@ -113,7 +119,7 @@ function get_es_path($client) {
     $searchParams['body'] = [];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX;
+    $searchParams['index'] = $esIndex;
     $searchParams['type']  = "directory";
 
     // number of results to return

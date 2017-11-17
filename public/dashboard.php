@@ -5,6 +5,13 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
+// redirect to select indices page if no index cookie
+$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+if (!$esIndex) {
+    header("location:selectindices.php");
+}
+$esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+
 // Connect to Elasticsearch
 $client = connectES();
 
@@ -15,8 +22,8 @@ $tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 $totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
 // Setup search query
-$searchParams['index'] = Constants::ES_INDEX; // which index to search
-$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = Constants::ES_TYPE;
 
 // Execute the search
 foreach ($tagCounts as $tag => $value) {
@@ -57,8 +64,8 @@ $totalDupes = 0;
 $totalFilesizeDupes = 0;
 
 // Setup search query
-$searchParams['index'] = Constants::ES_INDEX; // which index to search
-$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = Constants::ES_TYPE;
 
 
 // Setup search query for dupes count
@@ -91,8 +98,8 @@ $results = [];
 $searchParams = [];
 
 // Setup search query
-$searchParams['index'] = Constants::ES_INDEX; // which index to search
-$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = Constants::ES_TYPE;
 
 
 // Setup search query for largest files
@@ -121,8 +128,8 @@ $results = [];
 $searchParams = [];
 
 // Setup search query
-$searchParams['index'] = Constants::ES_INDEX; // which index to search
-$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = Constants::ES_TYPE;
 
 $searchParams['body'] = [
     'size' => 1,
@@ -149,8 +156,8 @@ $results = [];
 $searchParams = [];
 
 // Setup search query
-$searchParams['index'] = Constants::ES_INDEX; // which index to search
-$searchParams['type']  = "directory";  // which type within the index to search
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = "directory";
 
 $searchParams['body'] = [
     'size' => 0,
@@ -164,6 +171,62 @@ $queryResponse = $client->search($searchParams);
 
 // Get total count of directories
 $totaldirs = $queryResponse['hits']['total'];
+
+
+// Get search results from Elasticsearch for disk space info
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = "diskspace";
+
+$searchParams['body'] = [
+    'size' => 1,
+    'query' => [
+        'query_string' => [
+            'query' => '*'
+        ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get disk space info from queryResponse
+$diskspace_path = $queryResponse['hits']['hits'][0]['_source']['path'];
+$diskspace_total = $queryResponse['hits']['hits'][0]['_source']['total'];
+$diskspace_free = $queryResponse['hits']['hits'][0]['_source']['free'];
+$diskspace_available = $queryResponse['hits']['hits'][0]['_source']['available'];
+$diskspace_used = $queryResponse['hits']['hits'][0]['_source']['used'];
+$diskspace_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+
+
+if ($esIndex2 != "") {
+    // Get search results from Elasticsearch for disk space info from index2
+    $results = [];
+    $searchParams = [];
+
+    // Setup search query
+    $searchParams['index'] = $esIndex2;
+    $searchParams['type']  = "diskspace";
+
+    $searchParams['body'] = [
+        'size' => 1,
+        'query' => [
+            'query_string' => [
+                'query' => '*'
+            ]
+        ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    // Get disk space info from queryResponse
+    $diskspace2_path = $queryResponse['hits']['hits'][0]['_source']['path'];
+    $diskspace2_total = $queryResponse['hits']['hits'][0]['_source']['total'];
+    $diskspace2_free = $queryResponse['hits']['hits'][0]['_source']['free'];
+    $diskspace2_available = $queryResponse['hits']['hits'][0]['_source']['available'];
+    $diskspace2_used = $queryResponse['hits']['hits'][0]['_source']['used'];
+    $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+}
 
 ?>
 <!DOCTYPE html>
@@ -185,6 +248,20 @@ $totaldirs = $queryResponse['hits']['total'];
 		.arc path {
 			stroke: #0B0C0E;
 		}
+        #diskspacechart rect {
+            fill: #D20915;
+            stroke: black;
+        }
+        #diskspacechart text {
+            font-size: 10px;
+            fill: white;
+        }
+        #diskspacechart {
+            height: 22px;
+            width: 400px;
+            border:1px solid #000;
+            background-color: #ccc;
+        }
 	</style>
 </head>
 <body>
@@ -248,7 +325,22 @@ $totaldirs = $queryResponse['hits']['total'];
       ?>
     </div>
     <div class="col-xs-6">
-        <center><img src="/images/diskover.png" class="img-responsive" alt="diskover" width="249" height="189" /></center>
+        <div class="well">
+          <h2><i class="glyphicon glyphicon-eye-open"></i> Disk Space Overview</h2>
+          <p>Path: <span style="font-weight:bold;color:#66C266;"><?php echo $diskspace_path; ?></span></p>
+          <div id="diskspacechart"></div>
+          <?php
+          if ($esIndex2 != "") {
+              $diskspace_used_change = number_format(changePercent($diskspace_used, $diskspace2_used), 2);
+              $diskspace_free_change = number_format(changePercent($diskspace_free, $diskspace2_free), 2);
+              $diskspace_available_change = number_format(changePercent($diskspace_available, $diskspace2_available), 2);
+          }
+          ?>
+          <p>Total: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_total); ?></span>&nbsp;&nbsp;&nbsp;&nbsp;
+              Used: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_used); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small><?php } ?><br />
+              Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
+              Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
+        </div>
         <h3><i class="glyphicon glyphicon-file"></i> Top 10 Largest Files</h3>
         <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
           <thead>
@@ -314,6 +406,7 @@ $totaldirs = $queryResponse['hits']['total'];
 <script language="javascript" src="/js/bootstrap.min.js"></script>
 <script language="javascript" src="/js/diskover.js"></script>
 <script language="javascript" src="/js/d3.v3.min.js"></script>
+<!-- d3 charts -->
 	<script>
 		var count_untagged = <?php echo $tagCounts['untagged'] ?>;
 		var count_delete = <?php echo $tagCounts['delete'] ?>;
@@ -451,6 +544,48 @@ $totaldirs = $queryResponse['hits']['total'];
 			.text(function(d) {
 				return d.data.label;
 			});
+	</script>
+    <script>
+		var size_total = <?php echo $diskspace_total; ?>;
+		var size_used = <?php echo $diskspace_used; ?>;
+		var size_free = <?php echo $diskspace_free; ?>;
+		var size_available = <?php echo $diskspace_available; ?>;
+
+		var height = 20,
+            maxBarWidth = 400;
+
+		var svg = d3.select("#diskspacechart")
+			.append('svg')
+			.attr('width', maxBarWidth)
+			.attr('height', height)
+			.append('g');
+
+        var bar = svg.selectAll('.bar')
+			.data([size_used])
+			.enter().append('g')
+			.attr('class', 'bar');
+
+		bar.append('rect')
+            .attr('height', height)
+            .attr('class', 'bar')
+            .attr('width', function(d) {
+                percent = parseInt(d / size_total * 100) + "%";
+                return percent;
+            });
+
+        var label = svg.selectAll(".label")
+            .data([size_used])
+            .enter()
+            .append('text')
+            .attr('transform', 'translate(' + maxBarWidth / 2 + ',0)')
+            .attr("dy", "1.35em")
+            .attr('class', 'label')
+            .attr('text-anchor', 'middle')
+            .text(function(d) {
+                percent = d3.round(d / size_total * 100, 2) + "%";
+                return percent;
+            });
+
 	</script>
 </body>
 </html>

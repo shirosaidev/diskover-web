@@ -6,6 +6,12 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
+// redirect to select indices page if no index cookie
+$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+if (!$esIndex) {
+    header("location:selectindices.php");
+}
+
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
 $total_size = 0;
@@ -22,7 +28,7 @@ if (!empty($_REQUEST['submitted'])) {
     $p = $_REQUEST['p'];
 
     // Setup search query
-    $searchParams['index'] = Constants::ES_INDEX; // which index to search
+    $searchParams['index'] = $esIndex; // which index to search
     $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
 
     // Scroll parameter alive time
