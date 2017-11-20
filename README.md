@@ -24,7 +24,7 @@ It is written in PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](htt
 * `Linux or OS X/MacOS` (tested on Ubuntu 16.04, OS X 10.11.6)
 * `PHP 7.0` (tested on PHP 7.1.10)
 * `Composer Dependency Manager for PHP`
-* `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.0)
+* `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.3.2)
 * `Elasticsearch` (tested on Elasticsearch 5.4.2, 5.5.4)
 * `Apache or Nginx` (if you don't want to use PHP built-in web server)
 * `diskover` (Elasticsearch index created by diskover)
