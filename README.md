@@ -1,5 +1,8 @@
 # diskover-web
 
+[![License](https://img.shields.io/github/license/shirosaidev/diskover-web.svg?label=License&maxAge=86400)](./LICENSE.txt)
+[![Release](https://img.shields.io/github/release/shirosaidev/diskover-web.svg?label=Release&maxAge=60)](https://github.com/shirosaidev/diskover-web/releases/latest)
+
 diskover-web is the file manager and storage analytics web app for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search your file system (using Elasticsearch diskover indices), file tagging and provide detailed analytics for your file system.
 
 diskover-web also includes a REST API that can be used to view or update data in diskover indices.
