@@ -4,12 +4,15 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require __DIR__ . "/../src/diskover/Diskover.php";
 
-if (!empty($_GET['path'])) {
-  $path = $_GET['path'];
-	// remove any trailing slash unless root
-	if ($path != "/") {
-  	$path = rtrim($path, '/');
-	}
+// redirect to select indices page if no index cookie
+$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+if (!$esIndex) {
+    header("location:selectindices.php");
+}
+
+// remove any trailing slash unless root
+if (!empty($_GET['path']) && $_GET['path'] !== "/") {
+    $path = rtrim($_GET['path'], '/');
 }
 ?>
 
@@ -32,7 +35,7 @@ if (!empty($_GET['path'])) {
 		<?php include __DIR__ . "/nav.php"; ?>
 		<div class="container" id="error" style="display:none;">
 			<div class="row">
-				<div class="alert alert-dismissible alert-warning col-xs-8">
+				<div class="alert alert-dismissible alert-danger col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
 					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again or check browser console and Elasticsearch for errors.
 				</div>
@@ -42,7 +45,8 @@ if (!empty($_GET['path'])) {
 			<div class="row pull-right">
 				<div class="col-xs-12">
 					<div id="buttons-container" style="display:none;">
-                        <span style="font-size:10px; color:gray;">(click to zoom in/out, use alt/option key to zoom in slow)</span>
+                        <span id="path" class="text-success" style="font-size:12px; font-weight: bold;"><?php echo $path; ?></span>
+                        <span style="margin-right:10px;"><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='/treemap.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;maxdepth=<?php echo $_GET['maxdepth']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
 						<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
 						<div class="btn-group" data-toggle="buttons">
 							<button class="btn btn-default btn-sm" id="size"> Size</button>
@@ -56,10 +60,11 @@ if (!empty($_GET['path'])) {
                                 <button class="btn btn-default btn-sm" id="depth4">4</button>
                                 <button class="btn btn-default btn-sm" id="depth5">5</button>
                             </div>
+                            <span style="font-size:10px; color:gray;">*filters on filetree page affect this page</span>
 					</div>
 				</div>
 			</div>
-			<div class="row">
+			<div class="row" id="treemap-wrapper" style="display:none;">
 				<div class="col-xs-12">
 					<div id="treemap-container"></div>
 				</div>

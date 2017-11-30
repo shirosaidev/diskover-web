@@ -7,7 +7,7 @@ function getESJsonData() {
     // config references
     var chartConfig = {
         target: 'mainwindow',
-        data_url: '/d3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth
+        data_url: '/d3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count
     };
 
     // loader settings
@@ -56,13 +56,14 @@ function getESJsonData() {
 
 function renderTreeMap(data) {
 
+    // show heatmap buttons
+    document.getElementById('buttons-container').style.display = 'inline-block';
+    document.getElementById('heatmapcontrols').style.display = 'inline-block';
+    document.getElementById('path-wrapper').style.display = 'inline-block';
+    // display heatmap container
+    document.getElementById('heatmap-wrapper').style.display = 'block';
+
     svg.selectAll('.celllabel').remove();
-
-    // display treemap container
-    document.getElementById('heatmap-container').style.display = 'block';
-
-    // display heatmap overlay
-    document.getElementById('heatmap-overlay').style.display = 'block';
 
     var data_index = data[0],
         data_index2 = data[1];
@@ -72,7 +73,7 @@ function renderTreeMap(data) {
         .size([w, h])
         .sticky(false)
         .value(function(d) {
-            var val = (use_count == true) ? d.count : d.size;
+            var val = (use_count) ? d.count : d.size;
             return val;
         });
 
@@ -92,12 +93,12 @@ function renderTreeMap(data) {
     // add index2 data (value) to nodes as value2 and add change_percent
     nodes.forEach(function(d) {
         var result = nodes2.filter(function(a) {
-            return a.name == d.name;
+            return a.name === d.name;
         });
         d.value2 = (result[0] !== undefined) ? result[0].value : 0;
         if (d.value2 !== 0 && d.value !== 0) {
             d.change_percent = changePercent(d.value, d.value2);
-        } else if (d.value2 == 0 && d.value == 0) {
+        } else if (d.value2 === 0 && d.value === 0) {
             d.change_percent = 0;
         } else {
             d.change_percent = 100;
@@ -106,11 +107,10 @@ function renderTreeMap(data) {
     //console.log(nodes)
 
     // add node data to heatmap data list
-    heatmapdata = [];
     nodes.forEach(function(d) {
         var x = d.x + (d.dx / 2);
         var y = d.y + (d.dy / 2);
-        if (d.change_percent > 0 || d.change_percent < 0) {
+        if (d.change_percent !== 0) {
             heatmapdata.push([x, y, d.change_percent]);
         }
     });
@@ -122,9 +122,9 @@ function renderTreeMap(data) {
     max = d3.max(nodes, function(d) { return d.change_percent; });
 
     // draw heatmap
-    get('maxs').value = max;
     get('maxs').min = min;
     get('maxs').max = max;
+    get('maxs').value = max;
     draw();
 
     var color = d3.scale.linear()
@@ -137,7 +137,7 @@ function renderTreeMap(data) {
             return "translate(" + d.x + "," + d.y + ")";
         })
         .on("click", function(d) {
-            return zoom(node == d.parent ? root : d.parent);
+            location.href = '/heatmap.php?path=' + encodeURIComponent(d.parent.name) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count
         })
         .on("mouseover", function(d) {
             tip.show(d);
@@ -205,41 +205,46 @@ function renderTreeMap(data) {
     cell.exit()
         .remove();
 
-    d3.select(window).on("click", function() {
-        zoom(root);
-    });
+    //d3.select(window).on("click", function() {
+        //zoom(root);
+    //});
 
     /* ------- MAXDEPTH BUTTONS -------*/
 
     d3.select("#depth1").on("click", function() {
         maxdepth = 1;
-        svg.selectAll('g').remove();
-        document.getElementById('heatmap-overlay').style.display = 'none';
-        getESJsonData();
+        setCookie('maxdepth', 1)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-heatmap");
+        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth2").on("click", function() {
         maxdepth = 2;
-        svg.selectAll('g').remove();
-        document.getElementById('heatmap-overlay').style.display = 'none';
-        getESJsonData();
+        setCookie('maxdepth', 2)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-heatmap");
+        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth3").on("click", function() {
         maxdepth = 3;
-        svg.selectAll('g').remove();
-        document.getElementById('heatmap-overlay').style.display = 'none';
-        getESJsonData();
+        setCookie('maxdepth', 3)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-heatmap");
+        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth4").on("click", function() {
         maxdepth = 4;
-        svg.selectAll('g').remove();
-        document.getElementById('heatmap-overlay').style.display = 'none';
-        getESJsonData();
+        setCookie('maxdepth', 4)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-heatmap");
+        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth5").on("click", function() {
         maxdepth = 5;
-        svg.selectAll('g').remove();
-        document.getElementById('heatmap-overlay').style.display = 'none';
-        getESJsonData();
+        setCookie('maxdepth', 5)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-heatmap");
+        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
 
     d3.select("#depth"+maxdepth).classed("active", true);
@@ -252,25 +257,13 @@ function renderTreeMap(data) {
     /* ------- SIZE/COUNT BUTTONS -------*/
 
     d3.select("#size").on("click", function() {
-        setCookie('use_count', 0);
         use_count = 0;
-        //treemap.value(size).nodes(root);
-        svg.selectAll('g').remove();
-        document.getElementById('heatmap-overlay').style.display = 'none';
-        getESJsonData();
-        d3.select("#size").classed("active", true);
-        d3.select("#count").classed("active", false);
+        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
 
     d3.select("#count").on("click", function() {
-        setCookie('use_count', 1);
         use_count = 1;
-        //treemap.value(count).nodes(root);
-        svg.selectAll('g').remove();
-        document.getElementById('heatmap-overlay').style.display = 'none';
-        getESJsonData();
-        d3.select("#size").classed("active", false);
-        d3.select("#count").classed("active", true);
+        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
 
     function size(d) {
@@ -322,12 +315,12 @@ function renderTreeMap(data) {
         .attr('class', 'd3-tip')
         .html(function(d) {
 
-            var rootval = (use_count == true) ? (node || root).count : (node || root).size;
-            var rootval2 = (use_count == true) ? (node2 || root2).count : (node2 || root2).size;
+            var rootval = (use_count) ? (node || root).count : (node || root).size;
+            var rootval2 = (use_count) ? (node2 || root2).count : (node2 || root2).size;
             var percent = (d.value / rootval * 100).toFixed(1) + '%';
             var percent2 = (d.value2 / rootval2 * 100).toFixed(1) + '%';
-            var sum = (use_count == true) ? d.value : format(d.value);
-            var sum2 = (use_count == true) ? d.value2 : format(d.value2);
+            var sum = (use_count) ? d.value : format(d.value);
+            var sum2 = (use_count) ? d.value2 : format(d.value2);
             var change_percent = d3.round(d.change_percent, 2);
             var color = "white";
             var increase_decrease = "";
@@ -347,36 +340,24 @@ function renderTreeMap(data) {
     d3.select("#heatmap-container").append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
-
-    // show treemap buttons
-    document.getElementById('buttons-container').style.display = 'inline-block';
-    document.getElementById('heatmapcontrols').style.display = 'inline-block';
-
-    // store cookies
-    setCookie('path', root.name);
-    setCookie('maxdepth', maxdepth);
-
-    // update analytics links
-    updateVisLinks();
-
 }
 
 var path = decodeURIComponent($_GET('path'));
 // remove any trailing slash
-if (path != '/') {
+if (path !== '/') {
     path = path.replace(/\/$/, "");
 }
-var filter = $_GET('filter') || 1048576, // min file size filter
-    mtime = $_GET('mtime') || 0, // min modified time filter
-    maxdepth = getCookie('maxdepth') || 1, // max directory depth
+var filter = $_GET('filter') || FILTER, // min file size filter
+    mtime = $_GET('mtime') || MTIME, // min modified time filter
+    maxdepth = $_GET('maxdepth') || getCookie('maxdepth') || MAXDEPTH, // max directory depth
     root,
     node,
     min,
     max;
 
-var use_count = getCookie('use_count');
-(use_count == '') ? use_count = false: "";
-(use_count == 1) ? $('#count').addClass('active'): $('#size').addClass('active');
+var use_count = parseInt($_GET('use_count'));
+(!use_count || use_count === 0) ? use_count = 0 : use_count = 1;
+(use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
 
 console.log("PATH:" + path);
 console.log("SIZE_FILTER:" + filter);
@@ -425,7 +406,10 @@ function draw() {
     heat.clear();
     heat.data(heatmapdata);
     heat.max(+maxs.value);
+    console.log('HEATMAP_MAX:'+maxs.value)
     heat.radius(+radius.value, +blur.value);
+    console.log('HEATMAP_RADIUS:'+radius.value)
+    console.log('HEATMAP_BLUR:'+blur.value)
     heat.draw();
     console.timeEnd('draw');
     frame = null;
@@ -445,7 +429,7 @@ radius[changeType] = blur[changeType] = maxs[changeType] = function (e) {
 root = JSON.parse(sessionStorage.getItem("diskover-heatmap"));
 
 // get data from Elasticsearh if no json in session storage or path diff
-if (!root || (root && root[0].name != path)) {
+if (!root || root[0].name !== path) {
     getESJsonData();
 } else {
     renderTreeMap(root);

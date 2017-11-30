@@ -10,6 +10,7 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
 if (!$esIndex) {
     header("location:selectindices.php");
+    exit();
 }
 
 // Get search results from Elasticsearch if the user searched for something
@@ -28,8 +29,8 @@ if (!empty($_REQUEST['submitted'])) {
     $p = $_REQUEST['p'];
 
     // Setup search query
-    $searchParams['index'] = $esIndex; // which index to search
-    $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = ($_REQUEST['doctype']) ? $_REQUEST['doctype'] : '';
 
     // Scroll parameter alive time
     $searchParams['scroll'] = "1m";
@@ -46,12 +47,21 @@ if (!empty($_REQUEST['submitted'])) {
 
     // match all if search field empty
     if (empty($_REQUEST['q'])) {
-        $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
+        $searchParams['body'] = [
+            'query' => [
+                'match_all' => (object) []
+            ]
+        ];
         // match what's in the search field
     } else {
-        $req = $_REQUEST['q'];
-        $searchParams['body']['query']['query_string']['query'] = $req;
-        $searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
+        $searchParams['body'] = [
+            'query' => [
+                'query_string' => [
+                    'query' => $_REQUEST['q'],
+                    'analyze_wildcard' => 'true'
+                ]
+            ]
+        ];
     }
 
     // Check if we need to sort search differently
@@ -95,7 +105,7 @@ if (!empty($_REQUEST['submitted'])) {
             $results[$i] = $queryResponse['hits']['hits'];
             // Add to total filesize
             for ($x=0; $x<=count($results[$i]); $x++) {
-                $total_size += $results[$i][$x]['_source']['filesize'];
+                $total_size += (int)$results[$i][$x]['_source']['filesize'];
             }
             // end loop
             break;
@@ -153,11 +163,15 @@ if (!empty($_REQUEST['submitted'])) {
 				<div class="col-xs-8 col-xs-offset-2">
 					<p class="text-center">
 						<form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-inline text-center">
-                            <input type="hidden" name="destination" value="<?php echo $_SERVER[" REQUEST_URI "]; ?>"/>
 							<input name="q" value="<?php echo $_REQUEST['q']; ?>" type="text" placeholder="What are you looking for?" class="form-control input-lg" size="70" />
 							<input type="hidden" name="submitted" value="true" />
 							<input type="hidden" name="p" value="1" />
                             <input type="hidden" name="resultsize" value="<?php echo $resultSize; ?>" />
+                    		<select class="form-control input-lg" name="doctype">
+                    		  <option value="file" selected>file</option>
+                              <option value="directory">directory</option>
+                              <option value="">all</option>
+                    		</select>
 							<button type="submit" class="btn btn-primary btn-lg">Search</button>
 						</form>
 					</p>

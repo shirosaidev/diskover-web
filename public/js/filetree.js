@@ -2,47 +2,85 @@
  * d3 filetree for diskover-web
  */
 
-$(document).ready(function () {
+ $(document).ready(function() {
+     $('#changepath').click(function () {
+         console.log('changing paths');
+         var p = encodeURIComponent($('#pathinput').val());
+         setCookie('path', p);
+         var f = getCookie('filter');
+         var m = getCookie('mtime');
+         var u = getCookie('use_count');
+         location.href = "/filetree.php?path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u;
+         return false;
+     });
 
-	$('#submit').click(function () {
-		console.log('changing paths');
-		var newdir = $('#path').val();
-		var filter = parseInt($_GET('filter'));
-		var mtime = $_GET('mtime');
-		location.href = "/filetree.php?path=" + newdir + "&filter=" + filter + "&mtime=" + mtime;
-		return false;
-	});
+     d3.select("#size").on("click", function() {
+         use_count = 0;
+         setCookie('use_count', 0);
+         console.log("removing json data on local storage because size/count clicked");
+ 		 sessionStorage.removeItem("diskover-filetree");
+         location.href = "/filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+     });
 
-});
+     d3.select("#count").on("click", function() {
+         use_count = 1;
+         setCookie('use_count', 1);
+         console.log("removing json data on local storage because size/count clicked");
+ 		 sessionStorage.removeItem("diskover-filetree");
+         location.href = "/filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+     });
+     getJSON();
+ });
+
 
 function showHidden(root) {
 	// data is loaded so let's show hidden elements on the page
 	// update path field
-	document.getElementById('path').value = root.name;
+	document.getElementById('pathinput').value = root.name;
 	// show path input
 	document.getElementById('path-container').style.display = 'inline-block';
+    // show chart buttons div
+	document.getElementById('chart-buttons').style.display = 'inline-block';
+    // show filetree div
+	document.getElementById('tree-wrapper').style.display = 'block';
 	// show chart div
 	document.getElementById('chart-container').style.display = 'block';
 }
 
 function getChildJSON(d) {
 	// get json data from Elasticsearch using php data grabber
-	console.log("getting children from Elasticsearch:"+d.name);
+	console.log("getting children from Elasticsearch: " + d.name);
 
-	var target = document.getElementById('mainwindow');
-	// trigger loader
-	var spinner = new Spinner(opts).spin(target);
+    // config references
+    chartConfig = {
+        target: 'mainwindow',
+        data_url: '/d3_data.php?path=' + encodeURIComponent(d.name) + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
+    };
 
-	// url for d3.json
-	var url = '/d3_data.php?path=' + encodeURIComponent(d.name) + '&filter=' + filter + '&mtime=' + mtime;
+    // loader settings
+    opts = {
+        lines: 12, // The number of lines to draw
+        length: 6, // The length of each line
+        width: 3, // The line thickness
+        radius: 7, // The radius of the inner circle
+        color: '#EE3124', // #rgb or #rrggbb or array of colors
+        speed: 1.9, // Rounds per second
+        trail: 40, // Afterglow percentage
+        className: 'spinner', // The CSS class to assign to the spinner
+    };
+
+    var target = document.getElementById(chartConfig.target);
+    // trigger loader
+    var spinner = new Spinner(opts).spin(target);
+    console.log(chartConfig.data_url)
 
 	// load json data and trigger callback
-	d3.json(url, function (error, data) {
+	d3.json(chartConfig.data_url, function (error, data) {
 
 		// display error if data has error message
 		if ((data && data.error) || error) {
 			spinner.stop();
-			console.warn("nothing found in Elasticsearch: " + error);
+			console.warn("Elasticsearch data fetch error: " + error);
 			document.getElementById('error').style.display = 'block';
 			return false;
 		}
@@ -61,7 +99,6 @@ function getChildJSON(d) {
 }
 
 function getJSON() {
-
 	console.time('loadtime')
 
 	// check if json data stored in session storage
@@ -72,24 +109,20 @@ function getJSON() {
 		getESJsonData();
 		return true;
 	}
-
-	// get new json data if filter cookies are different than current url params
-	if ($_GET('filter') != '' || $_GET('mtime') != '') {
-		if ($_GET('filter') != getCookie('filter') || $_GET('mtime') != getCookie('mtime')) {
-			console.log("removing json data on local storage because filters changed");
-			sessionStorage.removeItem("diskover-filetree");
-			getESJsonData();
-			return true;
-		}
-	}
-
+    // get new json data from ES if filters changed
+	if ($_GET('filter') !== getCookie('filter') || $_GET('mtime') !== getCookie('mtime') || $_GET('use_count') !== getCookie('use_count')) {
+		console.log("removing json data on local storage because filters changed");
+		sessionStorage.removeItem("diskover-filetree");
+		getESJsonData();
+		return true;
+    }
 	// get new json data from ES if path changed
-	if (root.name != path) {
+	if (root.name !== path) {
 		console.log("removing json data on local storage because path changed");
 		sessionStorage.removeItem("diskover-filetree");
 		getESJsonData();
 		return true;
-	} else if (root.name == path) {
+	} else if (root.name === path) {
 		// json data on local storage is same as path so lets show the visuals
 		console.log("json data in storage same as path, load visuals");
 		loadVisualizations();
@@ -100,16 +133,35 @@ function getJSON() {
 		// get json data from Elasticsearch using php data grabber
 		console.log("no json data in session storage, grabbing from Elasticsearch");
 
+        // config references
+        chartConfig = {
+            target: 'mainwindow',
+            data_url: '/d3_data.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
+        };
+
+        // loader settings
+        opts = {
+            lines: 12, // The number of lines to draw
+            length: 6, // The length of each line
+            width: 3, // The line thickness
+            radius: 7, // The radius of the inner circle
+            color: '#EE3124', // #rgb or #rrggbb or array of colors
+            speed: 1.9, // Rounds per second
+            trail: 40, // Afterglow percentage
+            className: 'spinner', // The CSS class to assign to the spinner
+        };
+
+        var target = document.getElementById(chartConfig.target);
 		// trigger loader
 		var spinner = new Spinner(opts).spin(target);
-
+        console.log(chartConfig.data_url)
 		// load json data from Elasticsearch
 		d3.json(chartConfig.data_url, function (error, data) {
 
 			// display error if data has error message
 			if ((data && data.error) || error) {
 				spinner.stop();
-				console.warn("nothing found in Elasticsearch: " + error);
+				console.warn("Elasticsearch data fetch error: " + error);
 				document.getElementById('error').style.display = 'block';
 				return false;
 			}
@@ -136,25 +188,30 @@ function getJSON() {
 		// show hidden elements on page
 		showHidden(root);
 
-		// store cookies
-		setCookie('path', $('#path').val());
-		($_GET('filter')) ? setCookie('filter', $_GET('filter')): setCookie('filter', 1048576);
-		($_GET('mtime')) ? setCookie('mtime', $_GET('mtime')): setCookie('mtime', 0);
-
-		// update file tree link
-		updateVisLinks();
-
 		// load file tree
 		updateTree(root, root);
 
+        // set root in parent window
+        parent.root = root;
+        parent.node = root;
+
+        // store cookies
+        setCookie('path', encodeURIComponent(root.name));
+        (filter) ? setCookie('filter', filter) : setCookie('filter', FILTER);
+        (mtime) ? setCookie('mtime', mtime): setCookie('mtime', MTIME);
+        (use_count) ? setCookie('use_count', use_count): setCookie('use_count', USE_COUNT);
+
 		// load file size/count pie chart
-		changePie(root);
+		parent.changePie(root);
 
 		// load file extension pie chart
-		changePieFileExt(root.name);
+		parent.changePieFileExt(root);
+
+        // load filesizes bar chart
+		parent.changeBarFileSizes(root);
 
 		// load mtime bar chart
-		changeBarMtime(root.name);
+		parent.changeBarMtime(root);
 	}
 
 }
@@ -170,29 +227,40 @@ function toggleChildren(d) {
 }
 
 function click(d) {
-    console.log(d)
+    //console.log(d)
+    if (d.name == root.name) {
+        return null;
+    }
     if (d.count > 0 && !d.children && !d._children) {
         // check if there are any children in Elasticsearch
         getChildJSON(d);
     } else if (d._children) {
         toggleChildren(d);
         updateTree(root, d);
-        changePie(d);
-        changePieFileExt(node.name);
-        changeBarMtime(node.name);
+        parent.changePie(d);
+        parent.changePieFileExt(d);
+        parent.changeBarFileSizes(d);
+        parent.changeBarMtime(d);
     } else if (d.children) {
         toggleChildren(d);
         updateTree(root, d);
-        changePie(d.parent);
-        changePieFileExt(d.parent.name);
-        changeBarMtime(d.parent.name);
+        parent.changePie(d.parent);
+        parent.changePieFileExt(d.parent);
+        parent.changeBarFileSizes(d.parent);
+        parent.changeBarMtime(d.parent);
     } else if (!d.count) {
         // display file in search results
-        window.location.href = '/advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name) +'&path_parent=' + encodeURIComponent(node.name);
+        location.href = '/advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name);
     }
 }
 
 function updateTree(data, parent) {
+    // update path input
+    if (parent.children) {
+        document.getElementById('pathinput').value = parent.name;
+    } else if (parent._children) {
+        document.getElementById('pathinput').value = parent.parent.name;
+    }
 
 	var nodes = tree.nodes(data),
 			duration = 250;
@@ -206,65 +274,96 @@ function updateTree(data, parent) {
 	var entered = nodeEls.enter().append("li").classed("node", true)
 		.style("top", parent.y + "px")
 		.style("opacity", 0)
-		.style("height", tree.nodeHeight() + "px")
-		.on("click", function (d) {
-			click(d);
-		})
-		.on("mouseover", function (d) {
-			d3.select(this).classed("selected", true);
-			if (d.count > 0 && !d.children && !d._children) {
-				// check if there are any children in Elasticsearch
-				getChildJSON(d);
-			}
-		})
-		.on("mouseout", function (d) {
-			d3.selectAll(".selected").classed("selected", false);
-		});
+		.style("height", tree.nodeHeight() + "px");
+
 	//add arrows if it is a folder
 	entered.append("span").attr("class", function (d) {
 		var icon = d.children ? " glyphicon-chevron-down" :
 			d._children ? "glyphicon-chevron-right" : "";
 		return "downarrow glyphicon " + icon;
 	});
+
 	//add icons for folder for file
 	entered.append("span").attr("class", function (d) {
-		var icon = d.children || d._children || d.count > 0 ? "glyphicon-folder-close" :
-			"glyphicon-file";
+		var icon = d.count > 0 ? "glyphicon-folder-close" : "glyphicon-file";
 		return "glyphicon " + icon;
-	});
-	//add text
+	})
+    .style('cursor', 'pointer')
+    .on("click", function (d) {
+        click(d);
+    });
+
+    //add filesize
+    entered.append("span").attr("class", function (d) {
+            var value = (use_count) ? d.count : d.size;
+            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
+            var percent = (value / parent_value * 100).toFixed(0);
+            if (percent >= 90) {
+                var fileclass = "filesize-red";
+            } else if (percent >= 75) {
+                var fileclass = "filesize-orange";
+            } else if (percent >= 50) {
+                var fileclass = "filesize-yellow";
+            } else {
+                var fileclass = "filesize-gray";
+            }
+            return fileclass;
+        })
+        .html(function (d) {
+            return format(d.size);
+        });
+
+    // add percent bar
+    entered.append("span").attr("class", "percent")
+        .style("width", function (d) {
+            var value = (use_count) ? (d.count > 0) ? d.count : 1 : d.size;
+            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
+            var percent = (value / parent_value * 100).toFixed(0);
+            return percent + "%";
+        });
+
+    // add percent text
+    entered.append("span").attr("class", "percent-text")
+        .html(function (d) {
+            var value = (use_count) ? (d.count > 0) ? d.count : 1 : d.size;
+            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
+            var percent = (value / parent_value * 100).toFixed(1);
+            return "(" + percent + "%)";
+        });
+
+    // add file count
+    entered.append("span").attr("class", "filecount")
+        .html(function (d) {
+            return d.count > 0 ? "(" + d.count + ")" : "";
+        });
+
+	//add text for filename
 	entered.append("span").attr("class", "filename")
-		.html(function (d) {
-			return d.depth == 0 ? d.name : d.name.split('/').pop();
-		});
-	//add filesize
-	entered.append("span").attr("class", function (d) {
-			var percent = (d.size / (d.parent || root).size * 100).toFixed(0);
-			if (percent >= 90) {
-				var fileclass = "filesize-red";
-			} else if (percent >= 75) {
-				var fileclass = "filesize-orange";
-			} else if (percent >= 50) {
-				var fileclass = "filesize-yellow";
-			} else {
-				var fileclass = "filesize-gray";
-			}
-			return fileclass;
-		})
-		.html(function (d) {
-			return format(d.size);
-		});
-	// add percent
-	entered.append("span").attr("class", "percent")
-		.style("width", function (d) {
-			var percent = (d.size / (d.parent || root).size * 100).toFixed(0);
-			return percent + "%";
-		});
-	// add file count
-	entered.append("span").attr("class", "filecount")
-		.html(function (d) {
-			return d.count > 0 ? "(" + d.count + ")" : "";
-		});
+        .html(function (d) {
+            return d.depth === 0 ? d.name : d.name.split('/').pop();
+        })
+        .on("click", function (d) {
+            click(d);
+        })
+        .on("mouseover", function (d) {
+            d3.select(this).classed("selected", true);
+            if (d.count > 0 && !d.children && !d._children) {
+                // check if there are any children in Elasticsearch
+                getChildJSON(d);
+            }
+        })
+        .on("mouseout", function (d) {
+            d3.selectAll(".selected").classed("selected", false);
+        });
+
+    //add icons for search button
+	entered.append("span").attr("class", "filetree-btns")
+        .html(function (d) {
+            if (d.count > 0) {
+                return '<a href="/simple.php?submitted=true&amp;p=1&amp;q=&quot;' + d.name + '&quot;"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
+            }
+        });
+
 	//update caret arrow direction
 	nodeEls.select("span.downarrow").attr("class", function (d) {
 		var icon = d.children ? " glyphicon-chevron-down" :
@@ -289,47 +388,5 @@ var root,
 var tree = d3.layout.treelist()
 	.childIndent(15)
 	.nodeHeight(18);
+
 var ul = d3.select("#tree-container").append("ul").classed("treelist", "true");
-
-var filter = parseInt($_GET('filter')) || 1048576;
-var mtime = $_GET('mtime') || 0;
-var path = decodeURIComponent($_GET('path'));
-// remove any trailing slash
-if (path != '/') {
-	path = path.replace(/\/$/, "");
-}
-
-console.log("PATH:" + path);
-console.log("SIZE_FILTER:" + filter);
-console.log("MTIME_FILTER:" + mtime);
-
-// add filters and maxdepth to statustext
-var status_filter = ($_GET('filter')) ? 'size:' + format($_GET('filter')) : 'size:>1 MB';
-var status_mtime = ($_GET('mtime')) ? ' mtime:' + $_GET('mtime') : ' mtime:0';
-document.getElementById('statusfilters').append(status_filter);
-document.getElementById('statusfilters').append(status_mtime);
-
-// config references
-var chartConfig = {
-	target: 'mainwindow',
-	data_url: '/d3_data.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
-};
-
-// loader settings
-var opts = {
-	lines: 12, // The number of lines to draw
-	length: 6, // The length of each line
-	width: 3, // The line thickness
-	radius: 7, // The radius of the inner circle
-	color: '#EE3124', // #rgb or #rrggbb or array of colors
-	speed: 1.9, // Rounds per second
-	trail: 40, // Afterglow percentage
-	className: 'spinner', // The CSS class to assign to the spinner
-};
-
-// loader settings
-var target = document.getElementById(chartConfig.target);
-
-
-// get json data
-getJSON();

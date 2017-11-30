@@ -21,6 +21,7 @@
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=delete">All files tagged delete</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=archive">All files tagged archive</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=keep">All files tagged keep</a></li>
+                        <li><a href="/simple.php?submitted=true&amp;p=1&amp;q=tag_custom:* AND NOT tag_custom:&quot;&quot;">All files with custom tag</a></li>
 						<li class="divider"></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;sort=last_modified&amp;sortorder=asc">All files last modified > 3 months</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-6 months ")); ?>&amp;sort=last_modified&amp;sortorder=asc">All files last modified > 6 months</a></li>
@@ -42,7 +43,7 @@
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;hardlinks_low=2">All files hardlinks > 1</a></li>
 						<li><a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc">All duplicate files</a></li>
                         <li class="divider"></li>
-                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;last_access_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;file_size_bytes_low=1048576&amp;sort=last_modified&amp;sortorder=asc">Recommended files to remove</a></li>
+                        <li><a href="/advanced.php?submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;last_access_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;file_size_bytes_low=1&amp;sort=last_modified&amp;sortorder=asc">Recommended files to remove</a></li>
 					</ul>
 				</li>
 				<li class="dropdown">
@@ -51,6 +52,7 @@
 						<li><a href="/filetree.php" id="filetreelink">File Tree</a></li>
 						<li><a href="/treemap.php" id="treemaplink">Treemap</a></li>
                         <li><a href="/heatmap.php" id="heatmaplink">Heatmap</a></li>
+                        <li><a href="/top50.php" id="top50link">Top 50</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -75,7 +77,14 @@
                         <span class="input-group-addon" style="width: 1%;">
                             <span class="glyphicon glyphicon-search"></span>
                         </span>
-    					<input type="text" name="q" class="form-control" placeholder="Search query" value='<?php echo $_GET['q']; ?>'>
+    					<input type="text" name="q" class="form-control input" placeholder="Search query" value='<?php echo $_GET['q']; ?>'>
+                        <span class="input-group-addon" style="width: 1%;">
+                            <select name="doctype">
+                              <option value="file" selected>file</option>
+                              <option value="directory">directory</option>
+                              <option value="">all</option>
+                            </select>
+                        </span>
                     </div>
 				</div>
 			</form>

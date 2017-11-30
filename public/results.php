@@ -77,13 +77,13 @@ if (count($results[$p]) > 0) {
 						return $a_asc.$a_desc;
 					}
 					?>
-          <th class="text-nowrap">Filename <?php echo sortURL('filename'); ?></th>
-          <th class="text-nowrap">Parent Path <?php echo sortURL('path_parent'); ?></th>
-					<th class="text-nowrap">Size <?php echo sortURL('filesize'); ?></th>
+          <th class="text-nowrap">Name <?php echo sortURL('filename'); ?></th>
+          <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
+					<th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
-          <th class="text-nowrap">Last Modified (utc) <?php echo sortURL('last_modified'); ?></th>
-          <th class="text-nowrap">Last Access (utc) <?php echo sortURL('last_access'); ?></th>
+          <th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
+          <th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
           <?php
           if (Constants::EXTRA_FIELDS != "") {
             foreach (Constants::EXTRA_FIELDS as $key => $value) { ?>
@@ -100,13 +100,13 @@ if (count($results[$p]) > 0) {
       <tfoot>
 				<tr>
 					<th class="text-nowrap">#</th>
-					<th class="text-nowrap">Filename</th>
-					<th class="text-nowrap">Parent Path</th>
-					<th class="text-nowrap">Size</th>
+					<th class="text-nowrap">Name</th>
+					<th class="text-nowrap">Path</th>
+					<th class="text-nowrap">File Size</th>
 					<th class="text-nowrap">Owner</th>
 					<th class="text-nowrap">Group</th>
-					<th class="text-nowrap">Last Modified (utc)</th>
-					<th class="text-nowrap">Last Access (utc)</th>
+					<th class="text-nowrap">Modified (utc)</th>
+					<th class="text-nowrap">Accessed (utc)</th>
                     <?php
                     if (Constants::EXTRA_FIELDS != "") {
                       foreach (Constants::EXTRA_FIELDS as $key => $value) { ?>
@@ -126,12 +126,12 @@ if (count($results[$p]) > 0) {
           $file = $result['_source'];
           $i += 1;
       ?>
-      <input type="hidden" name="<?php echo $result['_id']; ?>" value="<?php echo $result['_index']; ?>" />
+      <input type="hidden" name="<?php echo $result['_id']; ?>" value="<?php echo $result['_type']; ?>" />
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'deleterow'; } elseif ($file['tag'] == 'archive') { echo 'archiverow'; } elseif ($file['tag'] == 'keep') { echo 'keeprow'; }?>">
         <th scope="row" class="text-nowrap"><?php echo $i; ?></th>
-        <td class="path"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <a href="/view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index']; ?>"><?php echo $file['filename']; ?></a></td>
-		  <td class="path"><a href="/filetree.php?path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><label title="filetree" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-folder-open"></i></label></a>&nbsp;<a href="/treemap.php?path=<?php echo rawurlencode($file['path_parent']); ?>"><label title="treemap" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-th-large"></i></label></a>&nbsp;<a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><label title="filter" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-filter"></i></label></a>&nbsp;<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <?php echo $file['path_parent']; ?></td>
-        <td class="text-nowrap"><?php echo formatBytes($file['filesize']); ?></td>
+        <td class="path"><?php echo ($result['_type'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i>'; ?> <a href="/view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><?php echo $file['filename']; ?></a></td>
+		  <td class="path"><a href="/filetree.php?path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><label title="filetree" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-tree-conifer"></i></label></a>&nbsp;<a href="/treemap.php?path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><label title="treemap" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-th-large"></i></label></a>&nbsp;<a href="/top50.php?path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><label title="top50" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-th-list"></i></label></a>&nbsp;<a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><label title="filter" class="btn btn-default btn-xs file-btns"><i class="glyphicon glyphicon-filter"></i></label></a> <?php echo $file['path_parent']; ?></td>
+        <td class="text-nowrap"><?php echo ($result['_type'] == 'directory') ? "--" : formatBytes($file['filesize']); ?></td>
         <td class="text-nowrap"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap"><?php echo $file['group']; ?></td>
         <td class="text-nowrap"><?php echo $file['last_modified']; ?></td>

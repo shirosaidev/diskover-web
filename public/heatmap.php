@@ -9,14 +9,12 @@ $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
 $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
 if (!$esIndex || !$esIndex2) {
     header("location:selectindices.php");
+    exit();
 }
 
-if (!empty($_GET['path'])) {
-  $path = $_GET['path'];
-	// remove any trailing slash unless root
-	if ($path != "/") {
-  	$path = rtrim($path, '/');
-	}
+// remove any trailing slash unless root
+if (!empty($_GET['path']) && $_GET['path'] !== "/") {
+    $path = rtrim($_GET['path'], '/');
 }
 ?>
 
@@ -47,15 +45,18 @@ if (!empty($_GET['path'])) {
 		</div>
 		<div class="container-fluid" id="mainwindow">
 			<div class="row pull-right">
-				<div class="col-xs-12">
+                <div class="col-xs-12">
+                    <div id="path-wrapper" style="display:none;">
+                        <span id="path" class="text-success" style="font-size:12px; font-weight:bold;"><?php echo $path; ?></span>
+                        <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='/heatmap.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;maxdepth=<?php echo $_GET['maxdepth']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
+                    </div>
                     <div id="heatmapcontrols" class="heatmapcontrols" style="display:none;">
-                        <label>Radius </label><input type="range" id="radius" value="75" min="1" max="150" />
-                        <label>Blur </label><input type="range" id="blur" value="60" min="1" max="75" />
+                        <label>Radius </label><input type="range" id="radius" value="25" min="1" max="100" />
+                        <label>Blur </label><input type="range" id="blur" value="15" min="1" max="60" />
                         <label>Max </label><input type="range" id="maxs" value="" min="" max="" />
                     </div>
 					<div id="buttons-container" style="display:none;">
-                        <span style="font-size:10px; color:gray;">(click to zoom in/out, use alt/option key to zoom in slow)</span>
-						<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
+                        <button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
 						<div class="btn-group" data-toggle="buttons">
 							<button class="btn btn-default btn-sm" id="size"> Size</button>
 							<button class="btn btn-default btn-sm" id="count"> Count</button>
@@ -68,14 +69,15 @@ if (!empty($_GET['path'])) {
                                 <button class="btn btn-default btn-sm" id="depth4">4</button>
                                 <button class="btn btn-default btn-sm" id="depth5">5</button>
                             </div>
+                            <span style="font-size:10px; color:gray;">*filters on filetree page affect this page</span>
 					</div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-xs-12">
-                    <div style="position:relative;">
+                    <div style="position:relative; display:none;" id="heatmap-wrapper">
                         <canvas id="heatmap-overlay" style="position:absolute;top:10px;"></canvas>
-					    <div id="heatmap-container" style="z-index:0;display:none;position:absolute;top:0px;left:0px;"></div>
+					    <div id="heatmap-container" style="z-index:0;position:absolute;top:0px;left:0px;"></div>
                     </div>
 				</div>
 			</div>

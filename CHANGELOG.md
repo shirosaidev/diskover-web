@@ -1,5 +1,56 @@
 # Diskover Web Change Log
 
+# [1.4.0] - 2017-12-01
+### notice
+- requires index created with diskover >= 1.4.0
+### added
+- doctype (file/directory/all) select input to search pages/nav bar to be able to search for file or directory docs
+- ability to search for and tag directory docs
+- Top 10 directories to dashboard
+- Top 50 to analytics nav bar drop down menu (top 50 largest, oldest, newest and users)
+- top 50 button to each result row on search results page
+- additional file sizes to min size dropdown filter on file tree page
+- additional ranges to mtime bar chart on filetree page
+- all files with custom tag to nav bar quick search menu
+- new clickable filesize range chart to filetree analytics page
+- path label to treemap and heatmap pages
+- up level button to analytics pages
+- last crawl stats to dashboard including started/finished/elapsed time
+- notification on dashboard if crawl is still running
+- added defaults for mtime,filter,maxdepth,use_count to Constants.php
+### changed
+- improved ES queries for analytics pages to return more accurate doc counts/sums
+- filetree on file tree analytics page is now sorted by size/count
+- better scrolling in filetree page using scrolling div for file tree
+- improved filetree sorting and count/size display
+- submitting file tags now goes to confirmation page
+- moved common used functions for analytics to d3_inc.php and referenced file in d3_data.php, d3_data_tm.php and d3_data_hm.php
+- added error detection if index deleted or no diskover indices found
+- removed ES_TYPE from Constants.php
+- names of column headers on search results table
+- improved top10 files list on dashboard
+- filetree button icon on search results page
+- string comparisons from == to === (php and javascript)
+- mtime dates on file tree bar chart to midnight
+- getmtime function in d3_inc.php to use Elasticsearch formatted date ranges
+- removed format_date function in filetree_d3_visuals.js
+- using Elasticsearch formatted date ranges in filetree_d3_visuals.js
+- 10 to 100 top extensions for extension pie chart on filetree page
+- > to >= for filters on filetree page
+- more options to mtime filter on filetree page
+- clicking on heatmap will reload heatmap with parent path of rectangle clicked
+- search history on simple search page is now stored in php session instead of browser cookie
+- clicking directory name label in pie chart returns to parent directory on file tree page
+- set default min file size filter to 1 byte (previously was 1 mb)
+### fixed
+- heatmap max default values and slider causing the hot areas to be more accurate to the change percent
+- clicking file in filetree page loads file in search results
+- improved ES queries for analytics pages
+- Elasticsearch queries on analytics pages not returning exact aggregate sums from Elasticsearch
+- search history not being saved
+- error when index2 is deleted and still set as cookie
+- clicking files in different directories than current directory on file tree page would cause search to return no results
+
 # [1.3.5] - 2017-11-17
 ### added
 - disk space overview and chart to dashboard showing total, used, free and available space for crawled path, also shows comparison if two indices selected

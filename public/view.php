@@ -20,7 +20,7 @@ if (empty($_REQUEST['id'])) {
         $file = $client->get([
             'id'    => $_REQUEST['id'],
             'index' => $_REQUEST['index'],
-            'type'  => Constants::ES_TYPE
+            'type'  => $_REQUEST['doctype']
         ]);
         $file = $file['_source'];
     } catch (Missing404Exception $e) {
@@ -55,33 +55,36 @@ if (!empty($message)) {
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <h1 class="path"><i class="glyphicon glyphicon-file" style="color:#738291;"></i> <a href="/advanced.php?submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>"><?php echo $file['filename']; ?></a></h1>
+      <h1 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; ?> <a href="/advanced.php?submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>"><?php echo $file['filename']; ?></a></h1>
       <h4 class="path">Full path: <?php echo $file['path_parent']."/".$file['filename']; ?></h4>
-      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> Parent path: <a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $file['path_parent']; ?></a></h5>
+      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> Parent path: <a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>"><?php echo $file['path_parent']; ?></a></h5>
     </div>
   </div>
   <div class="row">
     <div class="col-xs-5">
       <ul class="list-group">
         <li class="list-group-item">
-          <span class="badge"><?php echo formatBytes($file['filesize']); ?></span>
+          <span class="badge"><?php echo ($_REQUEST['doctype'] == 'directory') ? "--" : formatBytes($file['filesize']); ?></span>
           Filesize
         </li>
+        <?php if ($_REQUEST['doctype'] == 'file') { ?>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['extension']; ?></span>
-          <a href="/advanced.php?submitted=true&amp;p=1&amp;extension=<?php echo $file['extension']; ?>">Extension</a>
+          <a href="/advanced.php?submitted=true&amp;p=1&amp;extension=<?php echo $file['extension']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Extension</a>
         </li>
+        <?php } ?>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['owner']; ?></span>
-          <a href="/advanced.php?submitted=true&amp;p=1&amp;owner=<?php echo $file['owner']; ?>">Owner</a>
+          <a href="/advanced.php?submitted=true&amp;p=1&amp;owner=<?php echo $file['owner']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Owner</a>
         </li>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['group']; ?></span>
-          <a href="/advanced.php?submitted=true&amp;p=1&amp;group=<?php echo $file['group']; ?>">Group</a>
+          <a href="/advanced.php?submitted=true&amp;p=1&amp;group=<?php echo $file['group']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Group</a>
         </li>
+        <?php if ($_REQUEST['doctype'] == 'file') { ?>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['inode']; ?></span>
-          <a href="/advanced.php?submitted=true&amp;p=1&amp;inode=<?php echo $file['inode']; ?>">Inode</a>
+          <a href="/advanced.php?submitted=true&amp;p=1&amp;inode=<?php echo $file['inode']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Inode</a>
         </li>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['hardlinks']; ?></span>
@@ -89,12 +92,13 @@ if (!empty($message)) {
         </li>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['filehash']; ?></span>
-          <a href="/advanced.php?submitted=true&amp;p=1&amp;filehash=<?php echo $file['filehash']; ?>">Filehash</a>
+          <a href="/advanced.php?submitted=true&amp;p=1&amp;filehash=<?php echo $file['filehash']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Filehash</a>
         </li>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['is_dupe']; ?></span>
-          <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=<?php echo $file['is_dupe']; ?>">Is dupe</a>
+          <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=<?php echo $file['is_dupe']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Is dupe</a>
         </li>
+        <?php } ?>
     </ul>
     <?php if (Constants::EXTRA_FIELDS) { ?>
     <ul class="list-group">
@@ -128,7 +132,7 @@ if (!empty($message)) {
         <ul class="list-group">
           <li class="list-group-item">
             <span class="badge"><?php echo $_REQUEST['index']; ?></span>
-            <a href="/advanced.php?submitted=true&amp;p=1&amp;index=<?php echo $_REQUEST['index']; ?>">Index name</a>
+            <a href="/advanced.php?submitted=true&amp;p=1&amp;index=<?php echo $_REQUEST['index']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Index name</a>
           </li>
           <li class="list-group-item">
             <span class="badge"><?php echo $file['indexing_date']; ?></span>
@@ -140,11 +144,11 @@ if (!empty($message)) {
         <ul class="list-group">
           <li class="list-group-item">
             <span class="badge"><?php echo $file['tag']; ?></span>
-            <a href="/advanced.php?submitted=true&amp;p=1&amp;tag=<?php echo $file['tag']; ?>">Tag</a>
+            <a href="/advanced.php?submitted=true&amp;p=1&amp;tag=<?php echo $file['tag']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Tag</a>
           </li>
           <li class="list-group-item">
             <span class="badge"><?php echo $file['tag_custom']; ?></span>
-            <a href="/advanced.php?submitted=true&amp;p=1&amp;tag_custom=<?php echo $file['tag_custom']; ?>">Custom Tag</a>
+            <a href="/advanced.php?submitted=true&amp;p=1&amp;tag_custom=<?php echo $file['tag_custom']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Custom Tag</a>
           </li>
         </ul>
       </div>

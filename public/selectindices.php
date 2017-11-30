@@ -24,10 +24,14 @@ $port = Constants::ES_PORT;
 <link rel="stylesheet" href="/css/diskover.css" media="screen" />
 <?php
 // set cookies for indices and redirect to index page
-if (isset($_POST['index']) || isset($_POST['index2'])) {
+if (isset($_POST['index'])) {
     createCookie('index', $_POST['index']);
-    createCookie('index2', $_POST['index2']);
-    header("location:index.php");
+    if (isset($_POST['index2']) && $_POST['index2'] != "none") {
+        createCookie('index2', $_POST['index2']);
+    } else if (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "" )) {
+        deleteCookie('index2');
+    }
+    header("location: /index.php");
 }
 ?>
 </head>
@@ -44,10 +48,6 @@ if (isset($_POST['index']) || isset($_POST['index2'])) {
 <div class="row">
     <br />
 <div class="col-xs-6 col-xs-offset-3">
-    <div class="alert alert-dismissible alert-danger">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <strong><i class="glyphicon glyphicon-exclamation-sign"></i> No diskover indices found in browser cookies.</strong> Please select the Elasticsearch diskover indices you want to use.
-    </div>
 	<form action="" method="post" class="form-horizontal">
 	<fieldset>
 		<div class="form-group">
@@ -65,22 +65,34 @@ if (isset($_POST['index']) || isset($_POST['index2'])) {
 				// Close request to clear up some resources
 				curl_close($curl);
 			?>
-            <strong>Index:</strong> <small>*required</small>
+            <?php if ($indices == null) { ?>
+                <div class="alert alert-dismissible alert-danger">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> No diskover indices found in Elasticsearch. Please run a crawl and come back.
+                </div>
+            <?php } else { ?>
+                <div class="alert alert-dismissible alert-info">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  <i class="glyphicon glyphicon-cog"></i> Please select the Elasticsearch diskover indices you want to use.
+                </div>
+            <?php } ?>
+            <strong>Index </strong> <small>*required</small>
 			<select name="index" id="index" class="form-control">
-                <option selected><?php echo getCookie('index'); ?></option>
+                <option selected><?php echo getCookie('index') ? getCookie('index') : ""; ?></option>
                 <?php
 				foreach ($indices as $key => $val) {
 					echo "<option>".$key."</option>";
 				}
 				?></select>
             <br />
-            <strong>Index 2:</strong> <small>(previous index for data comparison)</small>
+            <strong>Index 2 </strong> <small>(previous index for data comparison)</small>
             <select name="index2" id="index2" class="form-control">
                 <option selected><?php echo getCookie('index2') ? getCookie('index2') : ""; ?></option>
                 <?php
 				foreach ($indices as $key => $val) {
 					echo "<option>".$key."</option>";
 				}
+                echo "<option>none</option>";
 				?></select>
 		</div>
 		<div class="form-group">

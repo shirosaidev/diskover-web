@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 require __DIR__ . '/../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
@@ -9,11 +9,60 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
 if (!$esIndex) {
     header("location:selectindices.php");
+    exit();
 }
 $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
 
-// Connect to Elasticsearch
-$client = connectES();
+require __DIR__ . "/d3_inc.php";
+
+function top10dirs($client, $index, $path, $filter, $mtime, $depth, $maxdepth) {
+    $items = [];
+    $subdirs = [];
+    if ($depth == $maxdepth) {
+        return $items;
+    }
+
+    // get directories in current path (not recursive)
+    $subdirs = get_sub_dirs($client, $index, $path);
+
+    // loop through all subdirs and add to items array
+    foreach ($subdirs as $d) {
+        // get dir total size, file count, last modified time
+        $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
+
+        // continue if directory is empty
+        if ($dirinfo[0] == 0 || $dirinfo[1] == 0) {
+            continue;
+        }
+        $items[] = [
+            "name" => $d,
+            "size" => $dirinfo[0],
+            "count" => $dirinfo[1],
+            "modified" => $dirinfo[2],
+            "children" => top10dirs($client, $index, $d, $filter, $mtime, $depth+=1, $maxdepth)
+        ];
+        $depth-=1;
+    }
+    return $items;
+}
+
+// get top 10 directories
+$data = top10dirs($client, $esIndex, $path, 1, getmtime(0), 0, 2);
+$largestdirs = [];
+foreach ($data as $arr) {
+    if (isset($arr['count'])) {
+        $largestdirs[$arr['name']] = [$arr['size'], $arr['count'], $arr['modified']];
+    }
+    if (isset($arr['children'])) {
+        foreach ($arr['children'] as $arr1) {
+            if (isset($arr1['count'])) {
+                $largestdirs[$arr1['name']] = [$arr1['size'], $arr1['count'], $arr1['modified']];
+            }
+        }
+    }
+}
+arsort($largestdirs);
+$largestdirs = array_slice($largestdirs, 0, 10);
 
 // Get search results from Elasticsearch for tags
 $results = [];
@@ -23,7 +72,7 @@ $totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
 // Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = Constants::ES_TYPE;
+//$searchParams['type']  = 'file';
 
 // Execute the search
 foreach ($tagCounts as $tag => $value) {
@@ -65,7 +114,7 @@ $totalFilesizeDupes = 0;
 
 // Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = Constants::ES_TYPE;
+$searchParams['type']  = 'file';
 
 
 // Setup search query for dupes count
@@ -99,13 +148,13 @@ $searchParams = [];
 
 // Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = Constants::ES_TYPE;
+$searchParams['type']  = 'file';
 
 
 // Setup search query for largest files
 $searchParams['body'] = [
     'size' => 10,
-    '_source' => ['filename', 'path_parent', 'filesize'],
+    '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
     'query' => [
         'query_string' => [
             'query' => '*'
@@ -119,36 +168,54 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-// Get total count of duplicate files
 $largestfiles = $queryResponse['hits']['hits'];
 
 
-// Get search results from Elasticsearch for last index date
+// Get search results from Elasticsearch for index stats
 $results = [];
 $searchParams = [];
 
 // Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = Constants::ES_TYPE;
+$searchParams['type']  = 'crawlstat_start';
 
 $searchParams['body'] = [
     'size' => 1,
-    '_source' => ['indexing_date'],
     'query' => [
-        'query_string' => [
-            'query' => '*'
-        ]
-    ],
-    'sort' => [
-        'indexing_date' => [
-            'order' => 'asc'
-        ]
-    ]
+            'match_all' => (object) []
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'desc'
+         ]
+     ]
 ];
 $queryResponse = $client->search($searchParams);
 
-// Get total count of duplicate files
-$lastindexdate = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+$crawlstarttime = $queryResponse['hits']['hits'][0]['_source']['start_time'];
+
+$results = [];
+$searchParams = [];
+
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'crawlstat_stop';
+
+$searchParams['body'] = [
+    'size' => 1,
+    'query' => [
+            'match_all' => (object) []
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'desc'
+         ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+$crawlstoptime = $queryResponse['hits']['hits'][0]['_source']['stop_time'];
+$crawlelapsedtime = $queryResponse['hits']['hits'][0]['_source']['elapsed_time'];
+$crawlfinished = ($crawlstoptime) ? true : false;
 
 
 // Get search results from Elasticsearch for number of directories
@@ -199,6 +266,8 @@ $diskspace_available = $queryResponse['hits']['hits'][0]['_source']['available']
 $diskspace_used = $queryResponse['hits']['hits'][0]['_source']['used'];
 $diskspace_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
+// store disk space path into session var
+$_SESSION['rootpath'] = $diskspace_path;
 
 if ($esIndex2 != "") {
     // Get search results from Elasticsearch for disk space info from index2
@@ -274,7 +343,16 @@ if ($esIndex2 != "") {
         <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesize['untagged']+$totalFilesize['delete']+$totalFilesize['archive']+$totalFilesize['keep']); ?></span> of disk space if you delete or archive all your files.
             There are a total of <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> files and <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> directories.
             There are <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> duplicate files taking up <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span> space.</p>
-          <p><small><i class="glyphicon glyphicon-calendar"></i> Your last crawl was at <span style="font-weight:bold;color:#66C266;"><?php echo $lastindexdate; ?></span> UTC.</small></p>
+      </div>
+      <div class="well">
+          <h4><i class="glyphicon glyphicon-dashboard"></i> Last Crawl Stats</h4>
+              <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span style="font-weight:bold;color:#66C266;"><?php echo $crawlstarttime; ?></span> UTC.<br />
+              <?php if ($crawlfinished) { ?>
+                  <i class="glyphicon glyphicon-flag"></i> Finished at: <span style="font-weight:bold;color:#66C266;"><?php echo $crawlstoptime; ?></span> UTC.<br />
+                  <i class="glyphicon glyphicon-time"></i> Crawl time: <span style="font-weight:bold;color:#66C266;"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
+              <?php } else { ?>
+                  <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="/dashboard.php">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
+              <?php } ?>
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -341,25 +419,64 @@ if ($esIndex2 != "") {
               Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
               Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
         </div>
-        <h3><i class="glyphicon glyphicon-file"></i> Top 10 Largest Files</h3>
-        <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
-          <thead>
-            <tr>
-              <th class="text-nowrap">File</th>
-              <th class="text-nowrap">Size</th>
-          </tr>
-        </thead>
-        <tbody>
-              <?php
-              foreach ($largestfiles as $key => $value) {
-                ?>
-                <tr><td class="path"><a href="/view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index']; ?>"><?php echo $value['_source']['path_parent'] . "/" . $value['_source']['filename']; ?></a></td>
-                    <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
-                </tr>
-              <?php }
-               ?>
-           </tbody>
-      </table>
+        <div id="top10files">
+            <h3 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/top50.php">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top10Switch('directory');">Directories</a></small>
+            <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
+              <thead>
+                <tr>
+                  <th class="text-nowrap">#</th>
+                  <th class="text-nowrap">Name</th>
+                  <th class="text-nowrap">File Size</th>
+                  <th class="text-nowrap">Modified (utc)</th>
+                  <th class="text-nowrap">Path</th>
+              </tr>
+            </thead>
+            <tbody>
+                  <?php
+                  $n = 1;
+                  foreach ($largestfiles as $key => $value) {
+                    ?>
+                    <tr><td><?php echo $n; ?></td>
+                        <td class="path"><a href="/view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
+                        <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
+                        <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
+                        <td class="path"><a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
+                    </tr>
+                  <?php $n++; }
+                   ?>
+               </tbody>
+          </table>
+        </div>
+        <div id="top10dirs" style="display:none;">
+            <h3 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Directories</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/top50.php">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top10Switch('file');">Files</a></small>
+            <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
+              <thead>
+                <tr>
+                  <th class="text-nowrap">#</th>
+                  <th class="text-nowrap">Name</th>
+                  <th class="text-nowrap">Size</th>
+                  <th class="text-nowrap">Items</th>
+                  <th class="text-nowrap">Modified (utc)</th>
+                  <th class="text-nowrap">Path</th>
+              </tr>
+            </thead>
+            <tbody>
+                  <?php
+                  $n = 1;
+                  foreach ($largestdirs as $key => $value) {
+                    ?>
+                    <tr><td><?php echo $n; ?></td>
+                        <td class="path"><?php echo basename($key); ?></td>
+                        <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value[0]); ?></span></td>
+                        <td class="path"><?php echo $value[1]; ?></td>
+                        <td class="path"><?php echo $value[2]; ?></td>
+                        <td class="path"><?php echo dirname($key); ?></td>
+                    </tr>
+                  <?php $n++; }
+                   ?>
+               </tbody>
+          </table>
+        </div>
       </div>
   </div>
 
@@ -587,5 +704,17 @@ if ($esIndex2 != "") {
             });
 
 	</script>
+    <!-- top 10 switcher -->
+    <script>
+        function top10Switch(a) {
+            if (a == 'directory') {
+                document.getElementById('top10files').style.display = 'none';
+                document.getElementById('top10dirs').style.display = 'block';
+            } else {
+                document.getElementById('top10dirs').style.display = 'none';
+                document.getElementById('top10files').style.display = 'block';
+            }
+        }
+    </script>
 </body>
 </html>

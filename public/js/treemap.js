@@ -7,7 +7,7 @@ function getESJsonData() {
     // config references
     var chartConfig = {
         target: 'mainwindow',
-        data_url: '/d3_data_tm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth
+        data_url: '/d3_data_tm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count
     };
 
     // loader settings
@@ -56,6 +56,11 @@ function getESJsonData() {
 
 function renderTreeMap(data) {
 
+    // show treemap buttons
+    document.getElementById('buttons-container').style.display = 'inline-block';
+    // show treemap
+    document.getElementById('treemap-wrapper').style.display = 'block';
+
     svg.selectAll('.celllabel').remove();
 
     var treemap = d3.layout.treemap()
@@ -63,7 +68,7 @@ function renderTreeMap(data) {
         .size([w, h])
         .sticky(false)
         .value(function(d) {
-            var val = (use_count == true) ? d.count : d.size;
+            var val = (use_count) ? d.count : d.size;
             return val;
         });
 
@@ -82,7 +87,7 @@ function renderTreeMap(data) {
             return "translate(" + d.x + "," + d.y + ")";
         })
         .on("click", function(d) {
-            return zoom(node == d.parent ? root : d.parent);
+            return zoom(node === d.parent ? root : d.parent);
         })
         .on("mouseover", function(d) {
             tip.show(d);
@@ -158,28 +163,38 @@ function renderTreeMap(data) {
 
     d3.select("#depth1").on("click", function() {
         maxdepth = 1;
-        svg.selectAll('g').remove();
-        getESJsonData();
+        setCookie('maxdepth', 1)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-treemap");
+        location.href='/treemap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth2").on("click", function() {
         maxdepth = 2;
-        svg.selectAll('g').remove();
-        getESJsonData();
+        setCookie('maxdepth', 2)
+        console.log("removing json data on local storage because maxdepth changed");
+	    sessionStorage.removeItem("diskover-treemap");
+        location.href='/treemap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth3").on("click", function() {
         maxdepth = 3;
-        svg.selectAll('g').remove();
-        getESJsonData();
+        setCookie('maxdepth', 3)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-treemap");
+        location.href='/treemap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth4").on("click", function() {
         maxdepth = 4;
-        svg.selectAll('g').remove();
-        getESJsonData();
+        setCookie('maxdepth', 4)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-treemap");
+        location.href='/treemap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth5").on("click", function() {
         maxdepth = 5;
-        svg.selectAll('g').remove();
-        getESJsonData();
+        setCookie('maxdepth', 5)
+        console.log("removing json data on local storage because maxdepth changed");
+		sessionStorage.removeItem("diskover-treemap");
+        location.href='/treemap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
 
     d3.select("#depth"+maxdepth).classed("active", true);
@@ -192,19 +207,19 @@ function renderTreeMap(data) {
     /* ------- SIZE/COUNT BUTTONS -------*/
 
     d3.select("#size").on("click", function() {
-        setCookie('use_count', 0);
         use_count = 0;
         treemap.value(size).nodes(root);
         d3.select("#size").classed("active", true);
         d3.select("#count").classed("active", false);
+        updateVisLinks();
     });
 
     d3.select("#count").on("click", function() {
-        setCookie('use_count', 1);
         use_count = 1;
         treemap.value(count).nodes(root);
         d3.select("#size").classed("active", false);
         d3.select("#count").classed("active", true);
+        updateVisLinks();
     });
 
     function size(d) {
@@ -256,9 +271,9 @@ function renderTreeMap(data) {
         .attr('class', 'd3-tip')
         .html(function(d) {
 
-            var rootval = (use_count == true) ? (node || root).count : (node || root).size;
+            var rootval = (use_count) ? (node || root).count : (node || root).size;
             var percent = (d.value / rootval * 100).toFixed(1) + '%';
-            var sum = (use_count == true) ? d.value : format(d.value);
+            var sum = (use_count) ? d.value : format(d.value);
 
             return "<span style='font-size:12px;color:white;'>" + d.name + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
         });
@@ -268,17 +283,6 @@ function renderTreeMap(data) {
     d3.select("#treemap-container").append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
-
-    // show treemap buttons
-    document.getElementById('buttons-container').style.display = 'inline-block';
-
-    // store cookies
-    setCookie('path', root.name);
-    setCookie('maxdepth', maxdepth);
-
-    // update analytics links
-    updateVisLinks();
-
 }
 
 var path = decodeURIComponent($_GET('path'));
@@ -286,15 +290,15 @@ var path = decodeURIComponent($_GET('path'));
 if (path != '/') {
     path = path.replace(/\/$/, "");
 }
-var filter = $_GET('filter') || 1048576, // min file size filter
-    mtime = $_GET('mtime') || 0, // min modified time filter
-    maxdepth = getCookie('maxdepth') || 2, // max directory depth
+var filter = $_GET('filter') || FILTER, // min file size filter
+    mtime = $_GET('mtime') || MTIME, // min modified time filter
+    maxdepth = ($_GET('maxdepth')) || getCookie('maxdepth') || MAXDEPTH, // max directory depth
     root,
     node;
 
 var use_count = getCookie('use_count');
-(use_count == '') ? use_count = false: "";
-(use_count == 1) ? $('#count').addClass('active'): $('#size').addClass('active');
+(!use_count || use_count === '0') ? use_count = 0 : use_count = 1;
+(use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
 
 console.log("PATH:" + path);
 console.log("SIZE_FILTER:" + filter);
@@ -327,7 +331,7 @@ var svg = d3.select("#treemap-container")
 root = JSON.parse(sessionStorage.getItem("diskover-treemap"));
 
 // get data from Elasticsearh if no json in session storage or path diff
-if (!root || (root && root.name != path)) {
+if (!root || root.name !== path) {
     getESJsonData();
 } else {
     renderTreeMap(root);

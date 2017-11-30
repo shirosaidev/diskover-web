@@ -114,7 +114,7 @@ $(document).ready(function () {
 		var jobCount = $('#results-tbody tr[visible="true"]').length;
 		$('.counter').text(jobCount + ' item');
 
-		if (jobCount == '0') {
+		if (jobCount === 0) {
 			$('.no-result').show();
 		} else {
 			$('.no-result').hide();
@@ -124,7 +124,7 @@ $(document).ready(function () {
 	// number of changes on results page that need to be tagged (saved in Elasticsearch)
 	var changeTagCount = 0;
 	$(".custom-tag-input").keyup(function (e) {
-		this.changed = typeof(this.changed) == 'undefined' ? false : this.changed;
+		this.changed = typeof(this.changed) === 'undefined' ? false : this.changed;
 		if (!this.changed) {
 			changeTagCount += 1;
 			this.changed = true;
@@ -140,7 +140,7 @@ $(document).ready(function () {
 	});
 
 	$(".tagButtons").change(function (e) {
-		this.changed = typeof(this.changed) == 'undefined' ? false : this.changed;
+		this.changed = typeof(this.changed) === 'undefined' ? false : this.changed;
 		if (!this.changed) {
 			changeTagCount += 1;
 			this.changed = true;
@@ -155,6 +155,8 @@ $(document).ready(function () {
 		}
 	});
 
+    // update visualization links
+    updateVisLinks();
 });
 
 // cookie functions
@@ -203,7 +205,7 @@ function $_GET(param) {
 
 // format bytes to mb, gb
 function format(a, b) {
-	if (0 == a) return "0 Bytes";
+	if (0 === a) return "0 Bytes";
 	var c = 1024,
 		d = b || 2,
 		e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
@@ -230,18 +232,24 @@ function changePercent(a,b) {
 
 // update url links in nav bar for visualizations
 function updateVisLinks() {
-	var path = (getCookie('path')) ? getCookie('path') : '';
-	var filter = (getCookie('filter')) ? getCookie('filter') : 1048576;
-	var mtime = (getCookie('mtime')) ? getCookie('mtime') : 0;
-	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : 1;
-	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime;
-	document.getElementById("filetreelink").setAttribute("href", url);
-	var url = "/treemap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
-	document.getElementById("treemaplink").setAttribute("href", url);
-    var url = "/heatmap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth;
-	document.getElementById("heatmaplink").setAttribute("href", url);
+	var path = ($_GET('path')) ? $_GET('path') : getCookie('path');
+	var filter = (getCookie('filter')) ? getCookie('filter') : FILTER;
+	var mtime = (getCookie('mtime')) ? getCookie('mtime') : MTIME;
+	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : MAXDEPTH;
+    var use_count = (getCookie('use_count')) ? getCookie('use_count') : USE_COUNT;
+	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+	window.parent.document.getElementById("filetreelink").setAttribute("href", url);
+	var url = "/treemap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+	window.parent.document.getElementById("treemaplink").setAttribute("href", url);
+    var url = "/heatmap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+	window.parent.document.getElementById("heatmaplink").setAttribute("href", url);
+    var url = "/top50.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime;
+	window.parent.document.getElementById("top50link").setAttribute("href", url);
 	return false;
 }
 
-// update visualization links
-updateVisLinks();
+// default constants
+var FILTER = 1;
+var MAXDEPTH = 2;
+var MTIME = 0;
+var USE_COUNT = 0;

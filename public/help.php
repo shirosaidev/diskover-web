@@ -28,7 +28,7 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-12">
-				<h1>Help</h1>
+				<h1><i class="glyphicon glyphicon-question-sign"></i> Help</h1>
 			</div>
 		</div>
 		<div class="row">
@@ -68,7 +68,7 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 					<p><small class="text-success">all files tagged delete:</small><br>
 						<strong>tag:"delete"</strong></p>
 				</div>
-				
+
 				<h4>diskover.py socket command examples</h4>
 
 				<div class="well well-sm">

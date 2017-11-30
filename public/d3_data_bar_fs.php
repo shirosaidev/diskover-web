@@ -15,7 +15,7 @@ $data = [
     "name" => $path,
     "size" => $dirinfo[0],
     "count" => $dirinfo[1],
-    "children" => walk_tree($client, $esIndex, $path, $filter, $mtime, $depth=0, $maxdepth, $use_count)
+    "children" => get_file_sizes($client, $esIndex, $path, $filter, $mtime)
 ];
 
 echo json_encode($data);

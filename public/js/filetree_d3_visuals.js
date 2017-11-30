@@ -2,65 +2,74 @@
  * d3 filetree visuals for diskover-web
  */
 
-$(document).ready(function() {
+var filter = parseInt($_GET('filter'));
+var mtime = $_GET('mtime');
+var path = decodeURIComponent($_GET('path'));
+// remove any trailing slash
+if (path !== '/') {
+	path = path.replace(/\/$/, "");
+}
 
-    // move charts on scroll
-    $(window).scroll(function() {
-        $("#chart-container").stop().animate({
-            "marginTop": ($(window).scrollTop()) + "px"
-        }, "fast");
-    });
+var use_count = parseInt($_GET('use_count'));
+(!use_count) ? use_count = 0 : "";
+(use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
 
-    d3.select("#size").on("click", function() {
-        setCookie('use_count', 0);
-        use_count = 0;
+var hide_thresh = parseInt(getCookie('hide_thresh'));
+(!hide_thresh) ? hide_thresh = 0.9 : "";
 
-        changePie(node);
-        changePieFileExt(node.name);
-        changeBarMtime(node.name);
-
-        d3.select("#size").classed("active", true);
-        d3.select("#count").classed("active", false);
-    });
-
-    d3.select("#count").on("click", function() {
-        setCookie('use_count', 1);
-        use_count = 1;
-
-        changePie(node);
-        changePieFileExt(node.name);
-        changeBarMtime(node.name);
-
-        d3.select("#size").classed("active", false);
-        d3.select("#count").classed("active", true);
-    });
-
-});
-
-var use_count = getCookie('use_count');
-(use_count == '') ? use_count = false: "";
-(use_count == 1) ? $('#count').addClass('active'): $('#size').addClass('active');
-
-console.log("USECOUNT:" + use_count);
-
-var hide_thresh = getCookie('hide_thresh');
-(hide_thresh == '') ? hide_thresh = 0.9: "";
-// add hide thresh to statustext
+// add filtersto statustext
+var status_filter = ($_GET('filter')) ? 'size:' + format($_GET('filter')) : 'size:1 Bytes';
+var status_mtime = ($_GET('mtime')) ? ' mtime:' + $_GET('mtime') : ' mtime:0';
+document.getElementById('statusfilters').append(status_filter);
+document.getElementById('statusfilters').append(status_mtime);
 document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
 
+console.log("PATH:" + path);
+console.log("SIZE_FILTER:" + filter);
+console.log("MTIME_FILTER:" + mtime);
+console.log("USECOUNT:" + use_count);
 console.log("HIDETHRESH:" + hide_thresh);
+
+var root,
+    node;
 
 function changeThreshold(a) {
     hide_thresh = a;
     setCookie('hide_thresh', hide_thresh);
     document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
     changePie(node);
-    changePieFileExt(node.name);
-    changeBarMtime(node.name);
+    changePieFileExt(node);
+    changeBarMtime(node);
+}
+
+function getMtime() {
+    if (mtime === '0') {
+        var last_mod_time_high = 'now';
+    } else if (mtime === '1d') {
+        var last_mod_time_high = 'now-1d/d';
+    } else if (mtime === '1w') {
+        var last_mod_time_high = 'now-1w/d';
+    } else if (mtime === '1m') {
+        var last_mod_time_high = 'now-1M/d';
+    } else if (mtime === '3m') {
+        var last_mod_time_high = 'now-3M/d';
+    } else if (mtime === '6m') {
+        var last_mod_time_high = 'now-6M/d';
+    } else if (mtime === '1y') {
+        var last_mod_time_high = 'now-1y/d';
+    } else if (mtime === '2y') {
+        var last_mod_time_high = 'now-2y/d';
+    } else if (mtime === '3y') {
+        var last_mod_time_high = 'now-3y/d';
+    } else if (mtime === '5y') {
+        var last_mod_time_high = 'now-5y/d';
+    }
+
+    return '* TO ' + last_mod_time_high;
 }
 
 /*
- * d3 Pie chart for diskover-web
+ * d3 File size/count Pie chart for diskover-web
  */
 
 var svg = d3.select("#piechart")
@@ -110,8 +119,8 @@ function pieData(data) {
     data.children.forEach(addLabels)
 
     function addLabels(item) {
-        var val = (use_count == true) ? (item.count) ? item.count : 0 : item.size;
-        var rootval = (use_count == true) ? (node || root).count : (node || root).size;
+        var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
+        var rootval = (use_count) ? (node || root).count : (node || root).size;
         var percent = (val / rootval * 100).toFixed(1);
         if (percent > hide_thresh) {
             labels.push({
@@ -127,7 +136,7 @@ function pieData(data) {
 function getFileTreeItem(a) {
     var item;
     node.children.forEach(function(d) {
-        if (a.data.label == d.name) {
+        if (a === d.name) {
             item = d;
         }
     });
@@ -141,14 +150,22 @@ var tip = d3.tip()
     .attr('class', 'd3-tip')
     .html(function(d) {
 
-        var rootval = (use_count == true) ? (node || root).count : (node || root).size;
+        var rootval = (use_count) ? (node || root).count : (node || root).size;
         var percent = (d.value / rootval * 100).toFixed(1) + '%';
-        var sum = (use_count == true) ? d.value : format(d.value);
+        var sum = (use_count) ? d.value : format(d.value);
 
         return "<span style='font-size:12px;color:white;'>" + d.data.label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
     });
 
 svg.call(tip);
+
+var tip_button = d3.tip()
+    .attr('class', 'd3-tip')
+    .html(function() {
+        return "<span style='font-size:12px;color:gray;'>go back</span>";
+    });
+
+svg.call(tip_button);
 
 d3.select("#piechart").append("div")
     .attr("class", "tooltip")
@@ -172,7 +189,7 @@ function changePie(data) {
         })
         .on("mouseover", function(d) {
             tip.show(d);
-            var item = getFileTreeItem(d);
+            var item = getFileTreeItem(d.data.label);
             if (item.count > 0 && !item.children && !item._children) {
                 // check if there are any children in Elasticsearch
                 getChildJSON(item);
@@ -187,10 +204,7 @@ function changePie(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click' ,function(d) {
-            //var path_parent = node.name + '/' + d.data.label + '*';
-            //var filename = d.data.label;
-            //window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' OR filename:' + encodeURIComponent(escapeHTML(filename));
-            var item = getFileTreeItem(d);
+            var item = getFileTreeItem(d.data.label);
             click(item);
         })
         .attr("class", "slice");
@@ -214,15 +228,46 @@ function changePie(data) {
     svg.select(".label").remove();
     svg.select(".label-percent").remove();
 
-    var label = svg.append("text")
-        .attr("dy", "-1em")
-        .attr("class", "label")
-        .text(node.name.split('/').pop());
+    var button = svg.append("circle")
+        .style("stroke", "#131517")
+        .style("fill", "#3C4147")
+        .style("cursor", "pointer")
+        .attr("r", 118)
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .on("mouseover", function() {
+            tip_button.show();
+            d3.select(this).style("fill", "#121415");
+        })
+        .on("mouseout", function() {
+            tip_button.hide();
+            d3.select(this).style("fill", "#3C4147");
+        })
+        .on('mousemove', function() {
+            return tip_button
+                .style("top", (d3.event.pageY - 10) + "px")
+                .style("left", (d3.event.pageX + 10) + "px");
+        })
+        .on('click' ,function() {
+            click(node);
+        });
 
     var percent = svg.append("text")
-        .attr("dy", "1.5em")
+        .attr("dy", "-.5em")
         .attr("class", "label-percent")
-        .text((node.size / root.size * 100).toFixed(1) + '%');
+        .text(function() {
+            var value = (use_count) ? node.count : node.size;
+            var parent_value = (use_count) ? (node.parent) ? node.parent.count : root.count : (node.parent) ? node.parent.size : root.size;
+            var percent = (value / parent_value * 100).toFixed(1) + '%';
+            return percent;
+        });
+
+    var info = svg.append("text")
+        .attr("dy", "1.5em")
+        .attr("class", "label-info")
+        .text(function() {
+            return node.count + ' files' + ', ' + format(node.size);
+        });
 
     /* ------- TEXT LABELS -------*/
 
@@ -310,11 +355,11 @@ svg2.append("g")
 svg2.append("g")
     .attr("class", "lines");
 
-var width2 = 420,
+var width2 = 360,
     height2 = 300,
-    radius2 = Math.min(width2, height2) / 2;
+    radius2 = Math.min(width2, height2) / 2.5;
 
-var color2 = d3.scale.category10();
+var color2 = d3.scale.category20c();
 
 var pie2 = d3.layout.pie()
     .sort(null)
@@ -338,10 +383,10 @@ var tip2 = d3.tip()
     .attr('class', 'd3-tip')
     .html(function(d) {
 
-        var rootval = (use_count == true) ? (node2 || root2).count : (node2 || root2).size;
+        var rootval = (use_count) ? (node2 || root2).count : (node2 || root2).size;
         var percent = (d.value / rootval * 100).toFixed(1) + '%';
-        var sum = (use_count == true) ? d.value : format(d.value);
-        var label = (d.data.label == '') ? 'NULLEXT (none)' : d.data.label;
+        var sum = (use_count) ? d.value : format(d.value);
+        var label = (!d.data.label) ? 'NULLEXT (none)' : d.data.label;
 
         return "<span style='font-size:12px;color:white;'>extension: " + label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
     });
@@ -362,8 +407,8 @@ function loadPieFileExt(data) {
         data.children.forEach(addLabels)
 
         function addLabels(item) {
-            var val = (use_count == true) ? (item.count) ? item.count : 0 : item.size;
-            var rootval = (use_count == true) ? (node2 || root2).count : (node2 || root2).size;
+            var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
+            var rootval = (use_count) ? (node2 || root2).count : (node2 || root2).size;
             var percent = (val / rootval * 100).toFixed(1);
             if (percent > hide_thresh) {
                 labels.push({
@@ -404,10 +449,10 @@ function loadPieFileExt(data) {
         .on('click', function(d) {
             var path_parent = node.name + "*";
             var extension = d.data.label;
-            if (d.data.label == "") {
+            if (!d.data.label) {
                 extension = '""';
             }
-            window.location.href = '/simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent));
+            window.location.href = '/simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:>=' + filter  + ' AND last_modified:[' + getMtime() + ']';
         })
         .attr("class", "slice");
 
@@ -434,7 +479,7 @@ function loadPieFileExt(data) {
         .append("text")
         .attr("dy", ".35em")
         .text(function(d) {
-            return (d.data.label == '') ? 'NULLEXT' : d.data.label;
+            return (!d.data.label) ? 'NULLEXT' : d.data.label;
         });
 
     function midAngle(d) {
@@ -492,7 +537,8 @@ function loadPieFileExt(data) {
 
 }
 
-function changePieFileExt(path) {
+function changePieFileExt(node) {
+    var path = node.name;
 
     // config references
     var chartConfig = {
@@ -541,14 +587,16 @@ var root3;
 
 var valueLabelWidth = 40; // space reserved for value labels (right)
 var barHeight = 20; // height of one bar
-var barLabelWidth = 50; // space reserved for bar labels
-var barLabelPadding = 5; // padding between bar and bar labels (left)
+var barLabelWidth = 80; // space reserved for bar labels
+var barLabelPadding = 10; // padding between bar and bar labels (left)
 var gridChartOffset = 0; // space between start of grid and first bar
-var maxBarWidth = 320; // width of the bar with the max value
+var maxBarWidth = 200; // width of the bar with the max value
 
 // svg container element
 var svg3 = d3.select('#barchart-mtime').append("svg")
     .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth);
+
+var color3 = d3.scale.category20c();
 
 svg3.append("g")
     .attr("class", "bars");
@@ -563,12 +611,12 @@ var tip3 = d3.tip()
     .attr('class', 'd3-tip')
     .html(function(d) {
 
-        var rootval = (use_count == true) ? (node3 || root3).count : (node3 || root3).size;
+        var rootval = (use_count) ? (node3 || root3).count : (node3 || root3).size;
         var percent = (d.value / rootval * 100).toFixed(1) + '%';
-        var sum = (use_count == true) ? d.value : format(d.value);
+        var sum = (use_count) ? d.value : format(d.value);
         var label = d.label;
 
-        return "<span style='font-size:12px;color:white;'>last_modified: " + label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
+        return "<span style='font-size:12px;color:white;'>modified: " + label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
     });
 
 svg3.call(tip3);
@@ -586,7 +634,7 @@ function loadBarMtime(data) {
         data.children.forEach(addLabels)
 
         function addLabels(item) {
-            var val = (use_count == true) ? (item.count) ? item.count : 0 : item.size;
+            var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
             labels.push({
                 'label': item.mtime,
                 'value': val
@@ -623,27 +671,14 @@ function loadBarMtime(data) {
     // bars
     var bar = svg3.select(".bars").selectAll("rect").data(data);
 
-    function format_date(dt, m=0, y=0) {
-        var yyyy = dt.getUTCFullYear()-y;
-        var mn = dt.getUTCMonth()+1-m;
-        var dd = dt.getUTCDate();
-        var hh = dt.getUTCHours();
-        var mm = dt.getUTCMinutes();
-        var ss = dt.getUTCSeconds();
-
-        function pad (str, max=2) {
-            str = str.toString();
-            return str.length < max ? pad("0" + str, max) : str;
-        }
-
-        return yyyy+'-'+pad(mn)+'-'+pad(dd)+'T'+pad(hh)+':'+pad(mm)+':'+pad(ss);
-    }
-
     bar.enter().append("rect")
         .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
         .attr('height', yScale.rangeBand())
         .attr('y', y)
         .attr('class', 'bars')
+        .style('fill', function(d) {
+            return color3(d.label);
+        })
         .attr('width', function(d) {
             return x(barValue(d));
         })
@@ -660,33 +695,44 @@ function loadBarMtime(data) {
         })
         .on('click', function(d) {
             var path_parent = node3.name + "*";
-            var dt = new Date();
-            if (d.label == '1m-now') {
-                var last_mod_time_high = format_date(dt);
-                var last_mod_time_low = format_date(dt, 1);
-            } else if (d.label == '3m-1m') {
-                var last_mod_time_high = format_date(dt, 1);
-                var last_mod_time_low = format_date(dt, 3);
-            } else if (d.label == '6m-3m') {
-                var last_mod_time_high = format_date(dt, 3);
-                var last_mod_time_low = format_date(dt, 6);
-            } else if (d.label == '1y-6m') {
-                var last_mod_time_high = format_date(dt, 6);
-                var last_mod_time_low = format_date(dt, 0, 1);
-            } else if (d.label == '2y-1y') {
-                var last_mod_time_high = format_date(dt, 0, 1);
-                var last_mod_time_low = format_date(dt, 0, 2);
-            } else if (d.label == '3y-2y') {
-                var last_mod_time_high = format_date(dt, 0, 2);
-                var last_mod_time_low = format_date(dt, 0, 3);
-            } else if (d.label == '10y-3y') {
-                var last_mod_time_high = format_date(dt, 0, 3);
-                var last_mod_time_low = format_date(dt, 0, 10);
-            } else if (d.label == '*-10y') {
-                var last_mod_time_high = format_date(dt, 0, 10);
+            if (d.label === 'today') {
+                var last_mod_time_high = 'now';
+                var last_mod_time_low = 'now/d';
+            } else if (d.label === 'yesterday') {
+                var last_mod_time_high = 'now/d';
+                var last_mod_time_low = 'now-1d/d';
+            } else if (d.label === '1-7days') {
+                var last_mod_time_high = 'now-1d/d';
+                var last_mod_time_low = 'now-1w/d';
+            } else if (d.label === '8-30days') {
+                var last_mod_time_high = 'now-1w/d';
+                var last_mod_time_low = 'now-1M/d';
+            } else if (d.label === '31-90days') {
+                var last_mod_time_high = 'now-1M/d';
+                var last_mod_time_low = 'now-3M/d';
+            } else if (d.label === '91-180days') {
+                var last_mod_time_high = 'now-3M/d';
+                var last_mod_time_low = 'now-6M/d';
+            } else if (d.label === '181-365days') {
+                var last_mod_time_high = 'now-6M/d';
+                var last_mod_time_low = 'now-1y/d';
+            } else if (d.label === '1-2years') {
+                var last_mod_time_high = 'now-1y/d';
+                var last_mod_time_low = 'now-2y/d';
+            } else if (d.label === '2-3years') {
+                var last_mod_time_high = 'now-2y/d';
+                var last_mod_time_low = 'now-3y/d';
+            } else if (d.label === '3-5years') {
+                var last_mod_time_high = 'now-3y/d'
+                var last_mod_time_low = 'now-5y/d';
+            } else if (d.label === '5-10years') {
+                var last_mod_time_high = 'now-5y/d';
+                var last_mod_time_low = 'now-10y/d';
+            } else if (d.label === 'over 10 years') {
+                var last_mod_time_high = 'now-10y/d';
                 var last_mod_time_low = '*';
             }
-            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + ']';
+            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter;
         });
 
     bar
@@ -724,14 +770,16 @@ function loadBarMtime(data) {
         })
         .attr("y", yText)
         .text(function(d) {
-            return (use_count == true) ? (barValue(d)) ? barValue(d) : 0 : format(barValue(d));
+            return (use_count) ? (barValue(d)) ? barValue(d) : 0 : format(barValue(d));
         });
 
     barvaluelabel.exit().remove();
 
 }
 
-function changeBarMtime(path) {
+function changeBarMtime(node) {
+
+    var path = node.name;
 
     // config references
     var chartConfig = {
@@ -767,6 +815,253 @@ function changeBarMtime(path) {
 
         // load d3 visual
         loadBarMtime(data);
+
+    });
+}
+
+
+/*
+ * d3 File Size bar chart for diskover-web
+ */
+
+var root4;
+
+var valueLabelWidth = 40; // space reserved for value labels (right)
+var barHeight = 15; // height of one bar
+var barLabelWidth = 80; // space reserved for bar labels
+var barLabelPadding = 10; // padding between bar and bar labels (left)
+var gridChartOffset = 0; // space between start of grid and first bar
+var maxBarWidth = 200; // width of the bar with the max value
+
+// svg container element
+var svg4 = d3.select('#barchart-filesizes').append("svg")
+    .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth);
+
+var color4 = d3.scale.category20c();
+
+svg4.append("g")
+    .attr("class", "bars");
+svg4.append("g")
+    .attr("class", "barvaluelabel");
+svg4.append("g")
+    .attr("class", "barlabel");
+
+/* ------- TOOLTIP -------*/
+
+var tip4 = d3.tip()
+    .attr('class', 'd3-tip')
+    .html(function(d) {
+
+        var rootval = (use_count) ? (node4 || root4).count : (node4 || root4).size;
+        var percent = (d.value / rootval * 100).toFixed(1) + '%';
+        var sum = (use_count) ? d.value : format(d.value);
+        var label = d.label;
+
+        return "<span style='font-size:12px;color:white;'>filesize: " + label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
+    });
+
+svg4.call(tip4);
+
+d3.select("#barchart-mtime").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+function loadBarFileSizes(data) {
+
+    function barData(data) {
+
+        var labels = [];
+
+        data.children.forEach(addLabels)
+
+        function addLabels(item) {
+            var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
+            labels.push({
+                'label': item.filesize,
+                'value': val
+            });
+        }
+        labels.reverse()
+        return labels;
+    }
+
+    node4 = data;
+
+    data = barData(data);
+
+    /* ------- BARS -------*/
+
+    // accessor functions
+    var barLabel = function(d) {
+        return d['label'];
+    };
+    var barValue = function(d) {
+        return d['value'];
+    };
+
+    // scales
+    var yScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barHeight]);
+    var y = function(d, i) {
+        return yScale(i);
+    };
+    var yText = function(d, i) {
+        return y(d, i) + yScale.rangeBand() / 2;
+    };
+    var x = d3.scale.linear().domain([0, d3.max(data, barValue)]).range([0, maxBarWidth]);
+
+    // bars
+    var bar2 = svg4.select(".bars").selectAll("rect").data(data);
+
+    bar2.enter().append("rect")
+        .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
+        .attr('height', yScale.rangeBand())
+        .attr('y', y)
+        .attr('class', 'bars')
+        .style('fill', function(d) {
+            return color4(d.label);
+        })
+        .attr('width', function(d) {
+            return x(barValue(d));
+        })
+        .on("mouseover", function(d) {
+            tip4.show(d)
+        })
+        .on('mouseout', function(d) {
+            tip4.hide(d)
+        })
+        .on('mousemove', function() {
+            return tip4
+                .style("top", (d3.event.pageY - 10) + "px")
+                .style("left", (d3.event.pageX + 10) + "px");
+        })
+        .on('click', function(d) {
+            var path_parent = node4.name + "*";
+            if (d.label === '0KB-1KB') {
+                var filesize_high = 1024;
+                var filesize_low = 0;
+            } else if (d.label === '1KB-4KB') {
+                var filesize_high = 4096;
+                var filesize_low = 1024;
+            } else if (d.label === '4KB-16KB') {
+                var filesize_high = 16384;
+                var filesize_low = 4096;
+            } else if (d.label === '16KB-64KB') {
+                var filesize_high = 65536;
+                var filesize_low = 16384;
+            } else if (d.label === '64KB-256KB') {
+                var filesize_high= 262144;
+                var filesize_low = 65536;
+            } else if (d.label === '256KB-1MB') {
+                var filesize_high = 1048576;
+                var filesize_low = 262144;
+            } else if (d.label === '1MB-4MB') {
+                var filesize_high = 4194304;
+                var filesize_low = 1048576;
+            } else if (d.label === '4MB-16MB') {
+                var filesize_high = 16777216;
+                var filesize_low = 4194304;
+            } else if (d.label === '16MB-64MB') {
+                var filesize_high = 67108864;
+                var filesize_low = 16777216;
+            } else if (d.label === '64MB-256MB') {
+                var filesize_high = 268435456;
+                var filesize_low = 67108864;
+            } else if (d.label === '256MB-1GB') {
+                var filesize_high = 1073741824;
+                var filesize_low = 268435456;
+            } else if (d.label === '1GB-4GB') {
+                var filesize_high = 4294967296;
+                var filesize_low = 1073741824;
+            } else if (d.label === '4GB-16GB') {
+                var filesize_high = 17179869184;
+                var filesize_low = 4294967296;
+            } else if (d.label === 'over 16GB') {
+                var filesize_high = '*';
+                var filesize_low = 17179869184;
+            }
+            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND filesize:>=' + filter + ' AND last_modified:[' + getMtime() + ']'
+        });
+
+    bar2
+        .transition().duration(1000)
+        .attr("width", function(d) {
+            return x(barValue(d));
+        });
+
+    bar2.exit().remove();
+
+    // bar labels
+    var barlabel2 = svg4.select(".barlabel").selectAll('text').data(data);
+
+    barlabel2.enter().append('text')
+        .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + gridChartOffset + ')')
+        .attr('y', yText)
+        .attr("dy", ".35em") // vertical-align: middle
+        .attr("class", "barlabel")
+        .text(barLabel);
+
+    barlabel2.exit().remove();
+
+    // bar value labels
+    var barvaluelabel2 = svg4.select(".barvaluelabel").selectAll('text').data(data);
+
+    barvaluelabel2.enter().append("text")
+        .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
+        .attr("dx", 3) // padding-left
+        .attr("dy", ".35em") // vertical-align: middle
+        .attr("class", "barvaluelabel");
+
+    barvaluelabel2
+        .attr("x", function(d) {
+            return x(barValue(d));
+        })
+        .attr("y", yText)
+        .text(function(d) {
+            return (use_count) ? (barValue(d)) ? barValue(d) : 0 : format(barValue(d));
+        });
+
+    barvaluelabel2.exit().remove();
+
+}
+
+function changeBarFileSizes(node) {
+
+    var path = node.name;
+
+    // config references
+    var chartConfig = {
+        target: 'barchart-filesizes',
+        data_url: '/d3_data_bar_fs.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
+    };
+
+    // loader settings
+    var opts = {
+        lines: 12, // The number of lines to draw
+        length: 6, // The length of each line
+        width: 3, // The line thickness
+        radius: 7, // The radius of the inner circle
+        color: '#EE3124', // #rgb or #rrggbb or array of colors
+        speed: 1.9, // Rounds per second
+        trail: 40, // Afterglow percentage
+        className: 'spinner', // The CSS class to assign to the spinner
+    };
+
+    // loader settings
+    var target = document.getElementById(chartConfig.target);
+
+    // trigger loader
+    var spinner = new Spinner(opts).spin(target);
+
+    // load json data from Elasticsearch
+    d3.json(chartConfig.data_url, function(error, data) {
+
+        root4 = data;
+
+        // stop spin.js loader
+        spinner.stop();
+
+        // load d3 visual
+        loadBarFileSizes(data);
 
     });
 }

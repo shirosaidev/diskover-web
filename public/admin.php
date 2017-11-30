@@ -38,7 +38,7 @@ $index2 = getCookie('index2');
 <div class="container">
 <div class="row">
 	<div class="col-xs-6">
-		<h1 class="text-nowrap"><img src="/images/diskoversmall.png" alt="diskover" width="62" height="47" /> diskover &mdash; Admin Panel</h1>
+		<h1 class="text-nowrap"><i class="glyphicon glyphicon-cog"></i> Admin Panel</h1>
 		<span class="text-success small"><?php echo "diskover-web v".Constants::VERSION; ?></span>
 	</div>
 	<div class="col-xs-3">

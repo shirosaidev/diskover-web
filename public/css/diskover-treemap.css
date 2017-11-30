@@ -14,12 +14,15 @@ text {
 rect {
     fill: none;
     stroke: #272B30;
+    stroke-width: .5px;
     cursor: pointer;
     opacity: .8;
 }
 
 rect:hover {
     fill-opacity: .8;
+    stroke: black;
+    stroke-width: 1px;
 }
 
 .d3-tip {

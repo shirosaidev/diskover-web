@@ -10,6 +10,7 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
 if (!$esIndex) {
     header("location:selectindices.php");
+    exit();
 }
 
 // Get search results from Elasticsearch if the user searched for something
@@ -24,9 +25,11 @@ if (!empty($_REQUEST['submitted'])) {
     // curent page
     $p = $_REQUEST['p'];
 
+    $doctype = ($_REQUEST['doctype']) ? $_REQUEST['doctype'] : '';
+
     // Setup search query
-    $searchParams['index'] = $esIndex; // which index to search
-    $searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = $doctype;
 
     $searchParams['body'] = [];
     $filterClauses = [];
@@ -186,7 +189,7 @@ if (!empty($_REQUEST['submitted'])) {
             $results[$i] = $queryResponse['hits']['hits'];
             // Add to total filesize
             for ($x=0; $x<=count($results[$i]); $x++) {
-                $total_size += $results[$i][$x]['_source']['filesize'];
+                $total_size += (int)$results[$i][$x]['_source']['filesize'];
             }
             // end loop
             break;
@@ -359,6 +362,14 @@ if (!empty($_REQUEST['submitted'])) {
 		  <option value="desc">desc</option>
 		</select>
 	  </div>
+      <div class="col-xs-2">
+		<label for="sortorder">Doc type...</label>
+          <select class="form-control" name="doctype">
+            <option value="file" selected>file</option>
+            <option value="directory">directory</option>
+            <option value="">all</option>
+          </select>
+      </div>
 	</div>
   </div>
   </div>

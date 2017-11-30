@@ -22,7 +22,7 @@
 .chart {
     display: block;
     margin-top: 10px;
-    opacity: .5;
+    opacity: .6;
 }
 
 text {
@@ -34,11 +34,13 @@ text {
 rect {
     stroke: #272B30;
     cursor: pointer;
-    stroke-width: 2px;
+    stroke-width: 1px;
 }
 
 rect:hover {
     fill-opacity: .7;
+    stroke: black;
+    stroke-width: 2px;
 }
 
 .d3-tip {

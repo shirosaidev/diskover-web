@@ -1,9 +1,10 @@
 <?php
-
+session_start();
 use diskover\Constants;
 use Elasticsearch\ClientBuilder;
 
 error_reporting(E_ALL ^ E_NOTICE);
+
 
 function connectES() {
   // Connect to Elasticsearch node
@@ -30,17 +31,15 @@ function connectES() {
 
   $client = ClientBuilder::create()->setHosts($hosts)->build();
 
-  // Check connection to Elasticsearch
-  try {
-    $params = [
-      'index' => $esIndex,
-      'type' => Constants::ES_TYPE,
-      'id' => 1,
-      'client' => [ 'ignore' => [400, 404, 500] ]
-    ];
-    $client->get($params);
-  } catch(Exception $e) {
-    echo 'Error connecting to Elasticsearch: ',  $e->getMessage(), "\n";
+  // Check if diskover index exists in Elasticsearch
+  $params = ['index' => $esIndex];
+  $bool_index = $client->indices()->exists($params);
+  $params = ['index' => $esIndex2];
+  $bool_index2 = $client->indices()->exists($params);
+  if (!$bool_index || !$bool_index2) {
+      deleteCookie('index');
+      deleteCookie('index2');
+      header("Location: /selectindices.php");
   }
 
   return $client;
@@ -63,7 +62,8 @@ function createCookie($cname, $cvalue) {
 }
 
 function getCookie($cname) {
-	return $_COOKIE[$cname];
+    $c = (isset($_COOKIE[$cname])) ? $_COOKIE[$cname] : '';
+	return $c;
 }
 
 function deleteCookie($cname) {
@@ -72,23 +72,23 @@ function deleteCookie($cname) {
 
 // saved search query functions
 function saveSearchQuery($req) {
-    $req == "" ? $req = "*" : "";
-    if (!getcookie('savedsearches')) {
-        $savedsearches = [];
+    $req === "" ? $req = "*" : "";
+    if (!isset($_SESSION['savedsearches'])) {
+        $_SESSION['savedsearches'] = [];
     } else {
-        $json = getcookie('savedsearches');
+        $json = $_SESSION['savedsearches'];
         $savedsearches = json_decode($json, true);
     }
     $savedsearches[] = $req;
     $json = json_encode($savedsearches);
-    setcookie('savedsearches', $json);
+    $_SESSION['savedsearches'] = $json;
 }
 
 function getSavedSearchQuery() {
-    if (!getcookie('savedsearches')) {
+    if (!isset($_SESSION['savedsearches'])) {
         return false;
     }
-    $json = getcookie('savedsearches');
+    $json = $_SESSION['savedsearches'];
     $savedsearches = json_decode($json, true);
     $savedsearches = array_reverse($savedsearches);
     $savedsearches = array_slice($savedsearches, 0, 10);
@@ -97,4 +97,19 @@ function getSavedSearchQuery() {
 
 function changePercent($a, $b) {
     return (($a - $b) / $b) * 100;
+}
+
+function getParentDir($p) {
+    if (strlen($p) > strlen($_SESSION['rootpath'])) {
+        return dirname($p);
+    } else {
+        return $_SESSION['rootpath'];
+    }
+}
+
+function secondsToTime($seconds) {
+    $seconds = (int)$seconds;
+    $dtF = new \DateTime('@0');
+    $dtT = new \DateTime("@$seconds");
+    return $dtF->diff($dtT)->format('%hh:%im:%ss');
 }
