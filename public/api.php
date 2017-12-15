@@ -1,9 +1,14 @@
 <?php
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
 
-require __DIR__ . '/../vendor/autoload.php';
+require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
-require __DIR__ . "/../src/diskover/Diskover.php";
+require "../src/diskover/Diskover.php";
 
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];
@@ -44,7 +49,7 @@ function error($message, $type='error') {
 function put($endpoint, $input) {
 	// Connect to Elasticsearch
 	$client = connectES();
-	
+
 	// Setup search query
 	$searchParams['index'] = Constants::ES_INDEX; // which index to search
 	$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
@@ -54,23 +59,23 @@ function put($endpoint, $input) {
 	$path_parent = $input['path_parent'];
 	$tag = $input['tag'];
 	$tag_custom = $input['tag_custom'];
-	
+
 	switch ($endpoint) {
 		// tag all files in directory
 		case $endpoint[0] == 'tagdir':
 			$numfiles = 0;
-			
+
 			// first let's get all the file id's
-			
+
 			$searchParams = [];
 			$queryResponse = [];
-			
+
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
 			$searchParams['size'] = 100;
-			
+
 			$searchParams['body'] = [
 				 	'query' => [
 				   		'match' => [
@@ -78,10 +83,10 @@ function put($endpoint, $input) {
 				   		]
 				 	]
 			 ];
-			
+
 			try {
 				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);	
+				$queryResponse = $client->search($searchParams);
 			}
 			catch (Exception $e) {
 				error('Message: ' . $e);
@@ -93,7 +98,7 @@ function put($endpoint, $input) {
 				echo "path_parent not found: " . $path_parent . "\r\n";
 				die();
 			}
-			
+
 			// set total hits
 			$total = $queryResponse['hits']['total'];
 
@@ -117,22 +122,22 @@ function put($endpoint, $input) {
 				$scroll_id = $queryResponse['_scroll_id'];
 				$i += 1;
 			}
-			
+
 			// loop through all the files in results and update tag
-			
+
 			foreach ($results as $r) {
 				$searchParams = [];
 				$queryResponse = [];
-				
+
 				// get id and index of file
 				$id = $r['_id'];
 				$index = $r['_index'];
-				
+
 				$searchParams = array();
 				$searchParams['id'] = $id;
 				$searchParams['index'] = $index;
 				$searchParams['type'] = Constants::ES_TYPE;
-				
+
 				try {
 					$queryResponse = $client->get($searchParams);
 				}
@@ -140,15 +145,15 @@ function put($endpoint, $input) {
 					error('Message: ' . $e);
 					echo "0\r\n";
 				}
-				
+
 				if ($tag_custom) {
 					$queryResponse['_source']['tag_custom'] = $tag_custom;
 				} elseif ($tag) {
 					$queryResponse['_source']['tag'] = $tag;
 				}
-				
+
 				$searchParams['body']['doc'] = $queryResponse['_source'];
-				
+
 				try {
 					$queryResponse = $client->update($searchParams);
 					$numfiles += 1;
@@ -156,25 +161,25 @@ function put($endpoint, $input) {
 				catch (Exception $e) {
 					error('Message: ' . $e);
 					$numfiles -= 1;
-					
+
 				}
-				
+
 		  	}
 			// print number of files updated
 			echo $numfiles . "\r\n";
 			break;
-		
+
 		// tag files
 		case $endpoint[0] == 'tagfiles':
 			$numfiles = 0;
-			
+
 			// update existing tag field with new value
 			foreach ($files as $f) {
 				$searchParams = [];
-				$queryResponse = [];			
+				$queryResponse = [];
 				$path_parent = dirname($f);
 				$filename = basename($f);
-				
+
 				$searchParams['body'] = [
 				 	'query' => [
 				   		'query_string' => [
@@ -182,22 +187,22 @@ function put($endpoint, $input) {
 						]
 				 	]
 			  	];
-				
+
 				try {
 					// Send search query to Elasticsearch
-					$queryResponse = $client->search($searchParams);	
+					$queryResponse = $client->search($searchParams);
 				}
 				catch (Exception $e) {
 					error('Message: ' . $e);
 					echo "0\r\n";
 				}
-				
+
 				// check if any files found
 				if (!$queryResponse['hits']['hits']) {
 					echo "file not found: " . $f . "\r\n";
 					continue;
 				}
-				
+
 				// get id and index of file
 				$id = $queryResponse['hits']['hits'][0]['_id'];
 				$index = $queryResponse['hits']['hits'][0]['_index'];
@@ -206,7 +211,7 @@ function put($endpoint, $input) {
 				$searchParams['id'] = $id;
 				$searchParams['index'] = $index;
 				$searchParams['type'] = Constants::ES_TYPE;
-				
+
 				try {
 					$queryResponse = $client->get($searchParams);
 				}
@@ -214,15 +219,15 @@ function put($endpoint, $input) {
 					error('Message: ' . $e);
 					echo "0\r\n";
 				}
-				
+
 				if ($tag_custom) {
 					$queryResponse['_source']['tag_custom'] = $tag_custom;
 				} elseif ($tag) {
 					$queryResponse['_source']['tag'] = $tag;
 				}
-				
+
 				$searchParams['body']['doc'] = $queryResponse['_source'];
-				
+
 				try {
 					$queryResponse = $client->update($searchParams);
 					$numfiles += 1;
@@ -230,14 +235,14 @@ function put($endpoint, $input) {
 				catch (Exception $e) {
 					error('Message: ' . $e);
 					$numfiles -= 1;
-					
+
 				}
-				
+
 		  	}
 			// print number of files updated
 			echo $numfiles . "\r\n";
 			break;
-			
+
 		default:
 			echo "0\r\n";
 	}
@@ -246,11 +251,11 @@ function put($endpoint, $input) {
 function get($endpoint, $query) {
 	// Connect to Elasticsearch
 	$client = connectES();
-	
+
 	// Setup search query
 	$searchParams['index'] = Constants::ES_INDEX; // which index to search
 	$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
-	
+
 	switch ($endpoint) {
 		case $endpoint[0] == 'tagcounts':
 			// Get search results from Elasticsearch for tags
@@ -265,12 +270,12 @@ function get($endpoint, $query) {
 				   		]
 				 	]
 			  	];
-				
+
 				try {
 					// Send search query to Elasticsearch
-					$queryResponse = $client->search($searchParams);	
+					$queryResponse = $client->search($searchParams);
 				}
-			
+
 				catch (Exception $e) {
 					error('Message: ' . $e);
 				}
@@ -307,22 +312,22 @@ function get($endpoint, $query) {
 					]
 				];
 			}
-			
+
 			// Get search results from Elasticsearch for tag
 			$tagCount = 0;
 
 			try {
 				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);	
+				$queryResponse = $client->search($searchParams);
 			}
-			
+
 			catch (Exception $e) {
 				error('Message: ' . $e);
 			}
 
 			// Get total for tag
 			$tagCount = $queryResponse['hits']['total'];
-			
+
 			// print results
 			header('Content-Type: application/json');
 			echo json_encode($tagCount, JSON_PRETTY_PRINT);
@@ -348,12 +353,12 @@ function get($endpoint, $query) {
 						]
 				  	]
 			  	];
-				
+
 				try {
 				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);	
+				$queryResponse = $client->search($searchParams);
 				}
-			
+
 				catch (Exception $e) {
 					error('Message: ' . $e);
 				}
@@ -404,37 +409,37 @@ function get($endpoint, $query) {
 				  	]
 			  	];
 			}
-			
+
 			// Get search results from Elasticsearch for tag
 			$totalFilesize = 0;
 
 			try {
 				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);	
+				$queryResponse = $client->search($searchParams);
 			}
-			
+
 			catch (Exception $e) {
 				error('Message: ' . $e);
 			}
 
 			// Get total size of all files with tag
 			$totalFilesize = $queryResponse['aggregations']['total_size']['value'];
-			
+
 			// print results
 			header('Content-Type: application/json');
 			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);
 			break;
-			
+
 		case $endpoint[0] == 'tagfiles':
 			$tag = $query || error('missing tag');
 			parse_str($query, $output);
-			
+
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
 			$searchParams['size'] = 100;
-			
+
 			// custom tag
 			if ($output['custom']) {
 				$tag = $output['custom'];
@@ -458,9 +463,9 @@ function get($endpoint, $query) {
 			// Send search query to Elasticsearch and get scroll id and first page of results
 			try {
 				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);	
+				$queryResponse = $client->search($searchParams);
 			}
-			
+
 			catch (Exception $e) {
 				error('Message: ' . $e);
 			}
@@ -488,7 +493,7 @@ function get($endpoint, $query) {
 				$scroll_id = $queryResponse['_scroll_id'];
 				$i += 1;
 			}
-			
+
 			// print results
 			header('Content-Type: application/json');
 			if ($results) {
@@ -500,13 +505,13 @@ function get($endpoint, $query) {
 
 		case $endpoint[0] == 'dupes':
 			$tag = $query;
-			
+
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
 			$searchParams['size'] = 100;
-			
+
 			$searchParams['body'] = [
 					'query' => [
           				'match' => [
@@ -521,9 +526,9 @@ function get($endpoint, $query) {
 			// Send search query to Elasticsearch and get scroll id and first page of results
 			try {
 				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);	
+				$queryResponse = $client->search($searchParams);
 			}
-			
+
 			catch (Exception $e) {
 				error('Message: ' . $e);
 			}
@@ -551,7 +556,7 @@ function get($endpoint, $query) {
 				$scroll_id = $queryResponse['_scroll_id'];
 				$i += 1;
 			}
-			
+
 			// print results
 			header('Content-Type: application/json');
 			if ($results) {
@@ -582,7 +587,7 @@ function get($endpoint, $query) {
 
 			try {
 			// Send search query to Elasticsearch
-			$queryResponse = $client->search($searchParams);	
+			$queryResponse = $client->search($searchParams);
 			}
 
 			catch (Exception $e) {
@@ -591,7 +596,7 @@ function get($endpoint, $query) {
 
 			// Get total size of all files with tag
 			$totalFilesize = $queryResponse['aggregations']['total_size']['value'];
-			
+
 			// print results
 			header('Content-Type: application/json');
 			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);

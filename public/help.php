@@ -1,10 +1,15 @@
 <?php
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
 
-require __DIR__ . '/../vendor/autoload.php';
+require '../vendor/autoload.php';
 use diskover\Constants;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 error_reporting(E_ALL ^ E_NOTICE);
-require __DIR__ . "/../src/diskover/Diskover.php";
+require "../src/diskover/Diskover.php";
 
 ?>
 
@@ -16,16 +21,20 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>diskover &mdash; Help</title>
-	<!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
-<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
-	<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
-	<link rel="stylesheet" href="/css/diskover.css" media="screen" />
+	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+	<link rel="stylesheet" href="css/diskover.css" media="screen" />
+    <style>
+    pre {
+        background-color:#060606!important;
+        color: #56B6C2!important;
+        border: none;
+    }
+    </style>
 </head>
-
 <body>
-	<?php include __DIR__ . "/nav.php"; ?>
+	<?php include "nav.php"; ?>
 
-	<div class="container">
+	<div class="container" style="margin-top:70px;">
 		<div class="row">
 			<div class="col-xs-12">
 				<h1><i class="glyphicon glyphicon-question-sign"></i> Help</h1>
@@ -80,7 +89,9 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 					<p><small class="text-success">crawl directory (recursive) using 8 threads and save to default index:</small><br><pre>{"action": "crawl", "path": "/Users/cp/Downloads", "threads": 8}</pre></p>
 					<p><small class="text-success">reindex (freshen) directory and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Downloads"}</pre></p>
 					<p><small class="text-success">reindex (freshen) directory and all subdirs and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Documents", "recursive": "true"}</pre></p>
-				</div>
+                    <p><small class="text-success">calculate all directory sizes/items and update default index:</small><br><pre>{"action": "dirsize", "index": "diskover-2017.12.11"}</pre></p>
+                    <p><small class="text-success">calculate single directory size/items and update default index:</small><br><pre>{"action": "dirsize", "path": "/Users/cp/Documents"}</pre></p>
+                </div>
 			</div>
 
 
@@ -165,9 +176,9 @@ require __DIR__ . "/../src/diskover/Diskover.php";
 				</div>
 			</div>
 		</div>
-		<script language="javascript" src="/js/jquery.min.js"></script>
-		<script language="javascript" src="/js/bootstrap.min.js"></script>
-		<script language="javascript" src="/js/diskover.js"></script>
+		<script language="javascript" src="js/jquery.min.js"></script>
+		<script language="javascript" src="js/bootstrap.min.js"></script>
+		<script language="javascript" src="js/diskover.js"></script>
 </body>
 
 </html>

@@ -1,5 +1,34 @@
 # Diskover Web Change Log
 
+# [1.4.1] - 2017-12-15
+### notice
+- diskover project is now accepting donations on Patreon. Please consider supporting if you are using diskover :) https://www.patreon.com/diskover
+### added
+- notification on dashboard if no duplicate files found
+- Export button to bottom of search results page to export json or csv
+- crawl thread usage to dashboard (files/directories indexed per thread (queue items))
+- sort by two fields in search results (previously could only sort by one)
+- newest option to index select page to select the index with most recent creation date
+- reindex and calculate directory size/items buttons to directory search results table (requires diskover socket server running)
+- alert if no files tagged before clicking tag files submit button
+
+### changed
+- new dark theme (Bootswatch Cyborg)
+- nav bar is now fixed and stays on top when scrolling
+- improved dashboard layout
+- removed EXTRA_FIELDS variable from Constants.php and added to Admin page to add extra fields to search results
+- improved admin page
+- any absolute link paths have been changed to relative
+- switched from using server sent events (SSE) to XMLHttpRequests for diskover socket server connections
+- renamed run_command.php to sockethandler.php for handling XMLHttpRequests to diskover socket server
+
+### fixed
+- slow load times on dashboard
+- incorrect total number of files displayed on dashboard
+- advanced search not returning both files and directories when picking all for doctype
+- incorrect port number on admin page for socket listener status
+- file tree page folder icons not pre-fetching data from Elasticsearch
+
 # [1.4.0] - 2017-12-01
 ### notice
 - requires index created with diskover >= 1.4.0

@@ -1,8 +1,14 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+ 
+require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
-require __DIR__ . "/../src/diskover/Diskover.php";
+require "../src/diskover/Diskover.php";
 
 // redirect to select indices page if no index cookie
 $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
@@ -24,16 +30,14 @@ if (!empty($_GET['path']) && $_GET['path'] !== "/") {
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>diskover &mdash; Treemap</title>
-		<!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
-		<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
-		<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
-		<link rel="stylesheet" href="/css/diskover.css" media="screen" />
-		<link rel="stylesheet" href="/css/diskover-treemap.css" media="screen" />
+		<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+		<link rel="stylesheet" href="css/diskover.css" media="screen" />
+		<link rel="stylesheet" href="css/diskover-treemap.css" media="screen" />
 	</head>
 
 	<body>
-		<?php include __DIR__ . "/nav.php"; ?>
-		<div class="container" id="error" style="display:none;">
+		<?php include "nav.php"; ?>
+		<div class="container" id="error" style="display:none; margin-top:70px;">
 			<div class="row">
 				<div class="alert alert-dismissible alert-danger col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -41,12 +45,12 @@ if (!empty($_GET['path']) && $_GET['path'] !== "/") {
 				</div>
 			</div>
 		</div>
-		<div class="container-fluid" id="mainwindow">
+		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
 			<div class="row pull-right">
 				<div class="col-xs-12">
 					<div id="buttons-container" style="display:none;">
-                        <span id="path" class="text-success" style="font-size:12px; font-weight: bold;"><?php echo $path; ?></span>
-                        <span style="margin-right:10px;"><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='/treemap.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;maxdepth=<?php echo $_GET['maxdepth']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
+                        <span id="path" class="text-success" style="font-size:14px; font-weight: bold;"><?php echo $path; ?></span>
+                        <span style="margin-right:10px;"><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='treemap.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;maxdepth=<?php echo $_GET['maxdepth']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
 						<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
 						<div class="btn-group" data-toggle="buttons">
 							<button class="btn btn-default btn-sm" id="size"> Size</button>
@@ -71,13 +75,13 @@ if (!empty($_GET['path']) && $_GET['path'] !== "/") {
 			</div>
 		</div>
 
-		<script language="javascript" src="/js/jquery.min.js"></script>
-		<script language="javascript" src="/js/bootstrap.min.js"></script>
-		<script language="javascript" src="/js/diskover.js"></script>
-		<script language="javascript" src="/js/d3.v3.min.js"></script>
-		<script language="javascript" src="/js/spin.min.js"></script>
-		<script language="javascript" src="/js/d3.tip.v0.6.3.js"></script>
-		<script language="javascript" src="/js/treemap.js"></script>
+		<script language="javascript" src="js/jquery.min.js"></script>
+		<script language="javascript" src="js/bootstrap.min.js"></script>
+		<script language="javascript" src="js/diskover.js"></script>
+		<script language="javascript" src="js/d3.v3.min.js"></script>
+		<script language="javascript" src="js/spin.min.js"></script>
+		<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
+		<script language="javascript" src="js/treemap.js"></script>
 	</body>
 
 	</html>

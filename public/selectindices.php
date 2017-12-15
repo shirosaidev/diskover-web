@@ -1,9 +1,14 @@
 <?php
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
 
-require __DIR__ . '/../vendor/autoload.php';
+require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
-require __DIR__ . "/../src/diskover/Diskover.php";
+require "../src/diskover/Diskover.php";
 
 $host = Constants::ES_HOST;
 $port = Constants::ES_PORT;
@@ -17,14 +22,12 @@ $port = Constants::ES_PORT;
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>diskover &mdash; Index Changer</title>
-<!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
-<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
-<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
-<link rel="stylesheet" href="/css/diskover.css" media="screen" />
+<title>diskover &mdash; Index Selector</title>
+<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+<link rel="stylesheet" href="css/diskover.css" media="screen" />
 <?php
 // set cookies for indices and redirect to index page
-if (isset($_POST['index'])) {
+if (isset($_POST['index']) && $_POST['index'] != "newest") {
     createCookie('index', $_POST['index']);
     if (isset($_POST['index2']) && $_POST['index2'] != "none") {
         createCookie('index2', $_POST['index2']);
@@ -32,16 +35,46 @@ if (isset($_POST['index'])) {
         deleteCookie('index2');
     }
     header("location: /index.php");
+    exit();
+} elseif (isset($_POST['index']) && $_POST['index'] == "newest") {
+    // Get cURL resource
+    $curl = curl_init();
+    // Set curl options
+    curl_setopt_array($curl, array(
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*?pretty'
+    ));
+    // Send the request & save response to $curlresp
+    $curlresp = curl_exec($curl);
+    $indices = json_decode($curlresp, true);
+    // Close request to clear up some resources
+    curl_close($curl);
+    // sort indices by creation_date
+    $indices_sorted = [];
+    foreach ($indices as $key => $val) {
+        $indices_sorted[$indices[$key]['settings']['index']['creation_date']] = $key;
+    }
+    krsort($indices_sorted);
+    $newest_index = reset($indices_sorted);
+
+    createCookie('index', $newest_index);
+    if (isset($_POST['index2']) && $_POST['index2'] != "none") {
+        createCookie('index2', $_POST['index2']);
+    } else if (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "" )) {
+        deleteCookie('index2');
+    }
+    header("location: /index.php");
+    exit();
 }
 ?>
 </head>
 
 <body>
 
-<div class="container">
+<div class="container" style="margin-top:100px;">
 <div class="row">
 	<div class="col-xs-12">
-		<center><img style="margin-top: 100px;" src="/images/diskover.png" alt="diskover" width="249" height="189" /></center>
+		<center><img src="images/diskover.png" alt="diskover" width="249" height="189" /></center>
 		<center><span class="text-success small"><?php echo "diskover-web v".Constants::VERSION; ?></span></center>
 	</div>
 </div>
@@ -79,6 +112,7 @@ if (isset($_POST['index'])) {
             <strong>Index </strong> <small>*required</small>
 			<select name="index" id="index" class="form-control">
                 <option selected><?php echo getCookie('index') ? getCookie('index') : ""; ?></option>
+                echo "<option>newest</option>";
                 <?php
 				foreach ($indices as $key => $val) {
 					echo "<option>".$key."</option>";
@@ -95,17 +129,20 @@ if (isset($_POST['index'])) {
                 echo "<option>none</option>";
 				?></select>
 		</div>
-		<div class="form-group">
-			<button type="submit" class="btn btn-primary">Select</button>
+		<div class="form-group text-center">
+			<button type="submit" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-saved"></i> Select</button>
 		</div>
 	</fieldset>
 	</form>
+    <br />
+    <br />
+    <center><small><i class="glyphicon glyphicon-heart"></i> Support diskover on <a href="https://www.patreon.com/diskover" target="_blank">Patreon</a></small></center>
 </div>
 </div>
 </div>
 
-<script language="javascript" src="/js/jquery.min.js"></script>
-<script language="javascript" src="/js/bootstrap.min.js"></script>
+<script language="javascript" src="js/jquery.min.js"></script>
+<script language="javascript" src="js/bootstrap.min.js"></script>
 
 </body>
 

@@ -1,3 +1,9 @@
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
 /* d3 heat map */
 
 .heatmapcontrols {
@@ -32,9 +38,10 @@ text {
 }
 
 rect {
-    stroke: #272B30;
+    stroke: #060606;
     cursor: pointer;
     stroke-width: 1px;
+    fill-opacity: .8;
 }
 
 rect:hover {

@@ -1,4 +1,10 @@
 /*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
+/*
  * d3 Heat map for diskover-web
  */
 
@@ -7,7 +13,7 @@ function getESJsonData() {
     // config references
     var chartConfig = {
         target: 'mainwindow',
-        data_url: '/d3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count
+        data_url: 'd3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count
     };
 
     // loader settings
@@ -129,7 +135,7 @@ function renderTreeMap(data) {
 
     var color = d3.scale.linear()
                 .domain([min, 0, max])
-                .range(["#29FE2F", "#000000", "#FD0D1B"]);
+                .range(["#29FE2F", "#272727", "#FD0D1B"]);
 
     cell.enter().append("g")
         .attr("class", "cell")
@@ -137,7 +143,7 @@ function renderTreeMap(data) {
             return "translate(" + d.x + "," + d.y + ")";
         })
         .on("click", function(d) {
-            location.href = '/heatmap.php?path=' + encodeURIComponent(d.parent.name) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count
+            location.href = 'heatmap.php?path=' + encodeURIComponent(d.parent.name) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count
         })
         .on("mouseover", function(d) {
             tip.show(d);
@@ -216,35 +222,35 @@ function renderTreeMap(data) {
         setCookie('maxdepth', 1)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+        location.href='heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth2").on("click", function() {
         maxdepth = 2;
         setCookie('maxdepth', 2)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+        location.href='heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth3").on("click", function() {
         maxdepth = 3;
         setCookie('maxdepth', 3)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+        location.href='heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth4").on("click", function() {
         maxdepth = 4;
         setCookie('maxdepth', 4)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+        location.href='heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
     d3.select("#depth5").on("click", function() {
         maxdepth = 5;
         setCookie('maxdepth', 5)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+        location.href='heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
 
     d3.select("#depth"+maxdepth).classed("active", true);
@@ -258,12 +264,12 @@ function renderTreeMap(data) {
 
     d3.select("#size").on("click", function() {
         use_count = 0;
-        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+        location.href='heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
 
     d3.select("#count").on("click", function() {
         use_count = 1;
-        location.href='/heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+        location.href='heatmap.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
     });
 
     function size(d) {

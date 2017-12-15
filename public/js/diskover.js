@@ -1,4 +1,18 @@
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
 $(document).ready(function () {
+
+    $('.tagfiles').submit(function() {
+        if (changeTagCount == 0) {
+            alert("no files tagged")
+            return false;
+        }
+        return true;
+    });
 
 	// select all buttons on search results pages
 	$(".tagAllDelete").click(function () {
@@ -122,7 +136,6 @@ $(document).ready(function () {
 	});
 
 	// number of changes on results page that need to be tagged (saved in Elasticsearch)
-	var changeTagCount = 0;
 	$(".custom-tag-input").keyup(function (e) {
 		this.changed = typeof(this.changed) === 'undefined' ? false : this.changed;
 		if (!this.changed) {
@@ -237,16 +250,123 @@ function updateVisLinks() {
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : MTIME;
 	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : MAXDEPTH;
     var use_count = (getCookie('use_count')) ? getCookie('use_count') : USE_COUNT;
-	var url = "/filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+	var url = "filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
 	window.parent.document.getElementById("filetreelink").setAttribute("href", url);
-	var url = "/treemap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+	var url = "treemap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
 	window.parent.document.getElementById("treemaplink").setAttribute("href", url);
-    var url = "/heatmap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+    var url = "heatmap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
 	window.parent.document.getElementById("heatmaplink").setAttribute("href", url);
-    var url = "/top50.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime;
+    var url = "top50.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime;
 	window.parent.document.getElementById("top50link").setAttribute("href", url);
 	return false;
 }
+
+// listen for msgs from diskover socket server and display progress bar on screen
+// using XMLHttpRequest
+function listenSocketServer() {
+    var socketlistening = document.getElementById('socketlistening').value;
+    if (socketlistening == 0) {
+        return false;
+    }
+    console.log('listening for xhr msgs from diskover socket server')
+    /*xhr.onprogress = function() {
+        console.log(this.responseText)
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        // update progressbar
+        document.getElementById('progressbar').innerHTML = data.percent + '%';
+        document.getElementById('progressbar').innerHTML += ' ['+data.eta+', '+data.it_per_sec+' '+data.it_name+'/s]';
+        document.getElementById('progressbar').setAttribute('aria-valuenow', data.percent);
+        document.getElementById('progressbar').style.width = data.percent+'%';
+    }*/
+    xhr.onreadystatechange = function() {
+        //console.log(this.readyState)
+        //console.log(this.status)
+        //console.log(this.responseText)
+        if (this.readyState==2 && this.status==200) {
+            // disable run buttons
+            $('.run-btn').addClass("disabled");
+            // show progress bar
+            $("#progress-container").fadeIn();
+        } else if (this.readyState==3 && this.status==200) {
+            var lines = this.responseText.trim().split('\n');
+            var lastline = lines[lines.length-1]
+            //console.log(lastline)
+            var data = JSON.parse(lastline);
+            if (data.msg == 'error') {  // check if we received err msg
+                console.log("got error msg, closing event source and displaying error")
+        		// hide progress
+        		document.getElementById('progress-container').style.display = 'none';
+        		// display error
+                $("#errormsg-container").fadeIn();
+                $("#errormsg").fadeIn();
+        		document.getElementById('errormsg').innerHTML = '<i class="glyphicon glyphicon-exclamation-sign"></i> Error, check command';
+                setTimeout(function(){
+                    $("#errormsg").fadeOut();
+                    $("#errormsg-container").fadeOut();
+                    // enable run buttons
+                    $('.run-btn').removeClass("disabled");
+                }, 3000);
+        	} else if (data.msg == 'taskid') {
+                console.log("got taskid msg, storing in cookie " + data.id)
+                setCookie('running_task_id', data.id);
+        	} else {
+        		// update progressbar
+                document.getElementById('progressbar').innerHTML = data.percent + '%';
+        		document.getElementById('progressbar').innerHTML += ' ['+data.eta+', '+data.it_per_sec+' '+data.it_name+'/s]';
+        		document.getElementById('progressbar').setAttribute('aria-valuenow', data.percent);
+        		document.getElementById('progressbar').style.width = data.percent+'%';
+        	}
+        } else if (this.readyState==4 && this.status==200) {
+            var lines = this.responseText.trim().split('\n');
+            var lastline = lines[lines.length-1]
+            //console.log(lastline)
+            var data = JSON.parse(lastline);
+        	console.log(data);
+            if (data.msg == 'exit') {  // check if we received exit msg
+                console.log("got exit msg, hiding progress bar and reloading page")
+                document.getElementById('progressbar').innerHTML = '100%';
+                document.getElementById('progressbar').style.width = '100%';
+        		document.getElementById('progressbar').innerHTML = 'Finished (exit code:  '+data.exitcode+', elapsed time: '+data.elapsedtime+')';
+                setTimeout(function(){
+                    $(".progress-container").fadeOut();
+                    // enable run buttons
+                    $('.run-btn').removeClass("disabled");
+                    //document.getElementById('progressbar').innerHTML = '0%';
+                    //document.getElementById('progressbar').style.width = '0%';
+                    location.reload(true);
+                }, 3000);
+            } else {
+        		// update progressbar
+                document.getElementById('progressbar').innerHTML = data.percent + '%';
+        		document.getElementById('progressbar').innerHTML += ' ['+data.eta+', '+data.it_per_sec+' '+data.it_name+'/s]';
+        		document.getElementById('progressbar').setAttribute('aria-valuenow', data.percent);
+        		document.getElementById('progressbar').style.width = data.percent+'%';
+        	}
+        }
+    }
+}
+
+// send command to diskover socket server
+function runCommand(command) {
+    var socketlistening = document.getElementById('socketlistening').value;
+    if (socketlistening == 0) {
+        alert("diskover socket server not listening")
+        return false;
+    }
+    if (!command) {
+		alert("no command")
+		return false;
+	}
+    var command = JSON.stringify(command);
+    console.log("sending command to socket server")
+    console.log(command)
+    xhr.open("GET", "sockethandler.php?command="+command, true);
+    xhr.send();
+}
+
+var xhr = new XMLHttpRequest();
+var changeTagCount = 0;
 
 // default constants
 var FILTER = 1;

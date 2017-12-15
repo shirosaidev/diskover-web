@@ -1,7 +1,13 @@
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
 /* diskover style sheet */
 
 .keeprow {
-    border-left: 10px solid #5EBFDB;
+    border-left: 5px solid #5EBFDB;
     color: #5EBFDB;
     opacity: .8;
 }
@@ -11,7 +17,7 @@
 }
 
 .archiverow {
-    border-left: 10px solid #47AF48;
+    border-left: 5px solid #47AF48;
     color: #47AF48;
     opacity: .8;
 }
@@ -21,7 +27,7 @@
 }
 
 .deleterow {
-    border-left: 10px solid #F6962A;
+    border-left: 5px solid #F6962A;
     color: #F6962A;
     opacity: .8;
 }
@@ -36,8 +42,8 @@
 }
 
 .searchresults {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
 }
 
 .results {
@@ -67,16 +73,41 @@ thead, tfoot {
     color: red;
 }
 
-.sortarrows {
-    color: #B77FDB;
-    font-size: 10px;
+.sortarrow-container {
+    position: relative;
+    top: 0;
+    left: 0;
 }
 
-.sortarrows:hover {
+.sortarrow-asc {
+    position: relative;
+    top: -3px;
+    left: 4px;
+    color: #333;
+    font-size: 9px;
+}
+
+.sortarrow-desc {
+    position: absolute;
+    top: 7px;
+    left: 4px;
+    color: #333;
+    font-size: 9px;
+}
+
+.sortarrow-asc:hover {
     color: #D89333;
 }
 
-.sortarrows-active {
+.sortarrow-desc:hover {
+    color: #D89333;
+}
+
+.sortarrow-asc-active {
+    color: #D89333;
+}
+
+.sortarrow-desc-active {
     color: #D89333;
 }
 
@@ -91,4 +122,28 @@ textarea, select, input {
 
 .file-btns {
     color: #CB77DF;
+}
+
+.file-cmd-btns {
+    color: #73C990;
+}
+
+tbody a {
+    color: white!important;
+    text-decoration: none!important;
+}
+
+tbody a:hover {
+    color: white!important;
+    text-decoration: underline!important;
+}
+
+.chartbox a {
+    color: white!important;
+    text-decoration: none!important;
+}
+
+.chartbox a:hover {
+    color: white!important;
+    text-decoration: underline!important;
 }

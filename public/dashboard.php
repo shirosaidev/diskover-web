@@ -1,9 +1,15 @@
 <?php
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+ 
 session_start();
-require __DIR__ . '/../vendor/autoload.php';
+require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
-require __DIR__ . "/../src/diskover/Diskover.php";
+require "../src/diskover/Diskover.php";
 
 // redirect to select indices page if no index cookie
 $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
@@ -13,66 +19,58 @@ if (!$esIndex) {
 }
 $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
 
-require __DIR__ . "/d3_inc.php";
+require "d3_inc.php";
 
-function top10dirs($client, $index, $path, $filter, $mtime, $depth, $maxdepth) {
-    $items = [];
-    $subdirs = [];
-    if ($depth == $maxdepth) {
-        return $items;
-    }
-
-    // get directories in current path (not recursive)
-    $subdirs = get_sub_dirs($client, $index, $path);
-
-    // loop through all subdirs and add to items array
-    foreach ($subdirs as $d) {
-        // get dir total size, file count, last modified time
-        $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
-
-        // continue if directory is empty
-        if ($dirinfo[0] == 0 || $dirinfo[1] == 0) {
-            continue;
-        }
-        $items[] = [
-            "name" => $d,
-            "size" => $dirinfo[0],
-            "count" => $dirinfo[1],
-            "modified" => $dirinfo[2],
-            "children" => top10dirs($client, $index, $d, $filter, $mtime, $depth+=1, $maxdepth)
-        ];
-        $depth-=1;
-    }
-    return $items;
+$path = $_GET['path'] ?: getCookie('path');
+// check if no path (grab one from ES)
+if (empty($path)) {
+    $path = get_es_path($client, $esIndex);
+    createCookie('path', $path);
+} elseif ($path !== "/") {
+    // remove any trailing slash
+    $path = rtrim($path, '/');
 }
 
-// get top 10 directories
-$data = top10dirs($client, $esIndex, $path, 1, getmtime(0), 0, 2);
-$largestdirs = [];
-foreach ($data as $arr) {
-    if (isset($arr['count'])) {
-        $largestdirs[$arr['name']] = [$arr['size'], $arr['count'], $arr['modified']];
-    }
-    if (isset($arr['children'])) {
-        foreach ($arr['children'] as $arr1) {
-            if (isset($arr1['count'])) {
-                $largestdirs[$arr1['name']] = [$arr1['size'], $arr1['count'], $arr1['modified']];
-            }
-        }
-    }
+
+// Get search results from Elasticsearch for thread usage
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'file';
+
+$thread_nums = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+$thread_usage = [];
+
+foreach ($thread_nums as $key => $value) {
+    // Execute the search
+    $searchParams['body'] = [
+     'size' => 0,
+     'query' => [
+       'match' => [
+         'indexing_thread' => $value
+       ]
+     ]
+    ];
+
+    // Send search query to Elasticsearch
+    $queryResponse = $client->search($searchParams);
+    $thread_usage[$key] = [ 'label' => $key, 'count' => $queryResponse['hits']['total'] ];
 }
-arsort($largestdirs);
-$largestdirs = array_slice($largestdirs, 0, 10);
+$js_threads = json_encode($thread_usage);
+
 
 // Get search results from Elasticsearch for tags
 $results = [];
-$totalfiles = 0;
+$searchParams = [];
+
 $tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 $totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
 // Setup search query
 $searchParams['index'] = $esIndex;
-//$searchParams['type']  = 'file';
+$searchParams['type']  = 'file';
 
 // Execute the search
 foreach ($tagCounts as $tag => $value) {
@@ -100,10 +98,6 @@ foreach ($tagCounts as $tag => $value) {
 
   // Get total size of all files with tag
   $totalFilesize[$tag] = $queryResponse['aggregations']['total_size']['value'];
-
-  // Add to total files
-  $totalfiles += $queryResponse['hits']['total'];
-
 }
 
 // Get search results from Elasticsearch for duplicate files
@@ -128,8 +122,8 @@ $searchParams['body'] = [
       ]
     ],
     'query' => [
-      'query_string' => [
-        'query' => 'is_dupe:true'
+      'match' => [
+        'is_dupe' => 'true'
       ]
     ]
 ];
@@ -140,35 +134,6 @@ $totalDupes = $queryResponse['hits']['total'];
 
 // Get total size of all duplicate files
 $totalFilesizeDupes = $queryResponse['aggregations']['total_size']['value'];
-
-
-// Get search results from Elasticsearch for top 10 largest files
-$results = [];
-$searchParams = [];
-
-// Setup search query
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = 'file';
-
-
-// Setup search query for largest files
-$searchParams['body'] = [
-    'size' => 10,
-    '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
-    'query' => [
-        'query_string' => [
-            'query' => '*'
-        ]
-    ],
-    'sort' => [
-        'filesize' => [
-            'order' => 'desc'
-        ]
-    ]
-];
-$queryResponse = $client->search($searchParams);
-
-$largestfiles = $queryResponse['hits']['hits'];
 
 
 // Get search results from Elasticsearch for index stats
@@ -218,6 +183,26 @@ $crawlelapsedtime = $queryResponse['hits']['hits'][0]['_source']['elapsed_time']
 $crawlfinished = ($crawlstoptime) ? true : false;
 
 
+// Get search results from Elasticsearch for number of files
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = "file";
+
+$searchParams['body'] = [
+    'size' => 0,
+    'query' => [
+        'match_all' => (object) []
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of files
+$totalfiles = $queryResponse['hits']['total'];
+
+
 // Get search results from Elasticsearch for number of directories
 $results = [];
 $searchParams = [];
@@ -229,10 +214,8 @@ $searchParams['type']  = "directory";
 $searchParams['body'] = [
     'size' => 0,
     'query' => [
-        'query_string' => [
-            'query' => '*'
-        ]
-    ]
+        'match_all' => (object) []
+     ]
 ];
 $queryResponse = $client->search($searchParams);
 
@@ -251,10 +234,8 @@ $searchParams['type']  = "diskspace";
 $searchParams['body'] = [
     'size' => 1,
     'query' => [
-        'query_string' => [
-            'query' => '*'
-        ]
-    ]
+        'match_all' => (object) []
+     ]
 ];
 $queryResponse = $client->search($searchParams);
 
@@ -281,10 +262,8 @@ if ($esIndex2 != "") {
     $searchParams['body'] = [
         'size' => 1,
         'query' => [
-            'query_string' => [
-                'query' => '*'
-            ]
-        ]
+            'match_all' => (object) []
+         ]
     ];
     $queryResponse = $client->search($searchParams);
 
@@ -305,10 +284,8 @@ if ($esIndex2 != "") {
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>diskover &mdash; Dashboard</title>
-  <!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
-	<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
-	<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
-  <link rel="stylesheet" href="/css/diskover.css" media="screen" />
+	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+  <link rel="stylesheet" href="css/diskover.css" media="screen" />
 	<style>
 		.arc text {
 			font: 10px sans-serif;
@@ -331,40 +308,43 @@ if ($esIndex2 != "") {
             border:1px solid #000;
             background-color: #ccc;
         }
+        .axis {
+	        font: 10px sans-serif;
+            fill: #ccc;
+	    }
+	    .axis path,
+	    .axis line {
+    	  fill: none;
+    	  stroke: #000;
+    	  shape-rendering: crispEdges;
+        }
+        #threadchart rect {
+            stroke: black;
+        }
 	</style>
 </head>
 <body>
-<?php include __DIR__ . "/nav.php"; ?>
-<div class="container-fluid">
+<?php include "nav.php"; ?>
+<div class="container-fluid" style="margin-top:70px;">
   <div class="row">
     <div class="col-xs-6">
-      <div class="jumbotron">
+      <div class="well">
         <h1><i class="glyphicon glyphicon-piggy-bank"></i> Space Savings</h1>
         <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesize['untagged']+$totalFilesize['delete']+$totalFilesize['archive']+$totalFilesize['keep']); ?></span> of disk space if you delete or archive all your files.
             There are a total of <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> files and <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> directories.
             There are <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> duplicate files taking up <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span> space.</p>
       </div>
-      <div class="well">
-          <h4><i class="glyphicon glyphicon-dashboard"></i> Last Crawl Stats</h4>
-              <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span style="font-weight:bold;color:#66C266;"><?php echo $crawlstarttime; ?></span> UTC.<br />
-              <?php if ($crawlfinished) { ?>
-                  <i class="glyphicon glyphicon-flag"></i> Finished at: <span style="font-weight:bold;color:#66C266;"><?php echo $crawlstoptime; ?></span> UTC.<br />
-                  <i class="glyphicon glyphicon-time"></i> Crawl time: <span style="font-weight:bold;color:#66C266;"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
-              <?php } else { ?>
-                  <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="/dashboard.php">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
-              <?php } ?>
-      </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> This app will help you <a href="/simple.php" class="alert-link">quickly search your file system</a> using your diskover indices in Elasticsearch.
+        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support the diskover project on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a>.
       </div>
       <?php
-      if ($totalFilesize['untagged'] == 0 AND $totalFilesize['delete'] == 0 AND $totalFilesize['archive'] == 0 AND $totalFilesize['keep'] == 0) {
+      if ($totalDupes === 0) {
       ?>
-      <div class="alert alert-dismissible alert-danger">
+      <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <h4><span class="glyphicon glyphicon-alert"></span> No diskover indices found! :(</h4>
-        <p>It looks like you haven't crawled any files yet. Crawl some files and come back.</p>
+        <h4><span class="glyphicon glyphicon-duplicate"></span> No dupe files found.</h4>
+        <p>Run diskover with the --tagdupes flag after crawl finishes to check for duplicate files.</p>
       </div>
       <?php
       }
@@ -375,7 +355,7 @@ if ($esIndex2 != "") {
       <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
-        <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
+        <p>It looks like you have <a href="advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
       </div>
       <?php
       }
@@ -386,7 +366,7 @@ if ($esIndex2 != "") {
       <div class="alert alert-dismissible alert-warning">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-tags"></i> Untagged files!</h4>
-        <p>It looks like you have <a href="/advanced.php?submitted=true&amp;p=1&amp;tag=untagged" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
+        <p>It looks like you have <a href="advanced.php?submitted=true&amp;p=1&amp;tag=untagged" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
       </div>
       <?php
       }
@@ -401,11 +381,34 @@ if ($esIndex2 != "") {
       <?php
       }
       ?>
+      <div class="well">
+          <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Last Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
+              <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $crawlstarttime; ?></span> UTC.<br />
+              <?php if ($crawlfinished) { ?>
+                  <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $crawlstoptime; ?></span> UTC.<br />
+                  <i class="glyphicon glyphicon-time"></i> Crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
+              <?php } else { ?>
+                  <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
+              <?php } ?>
+      </div>
+      <div class="panel panel-primary">
+      <div class="panel-heading">
+          <h3 class="panel-title"><i class="glyphicon glyphicon-tasks"></i> Crawl Thread Usage</h3>
+      </div>
+  <div class="panel-body">
+      <div id="threadchart" class="text-center"></div>
+      <div>
+          <?php foreach($thread_usage as $key => $value) { if ($value['count'] > 0) { ?>
+        <span class="label" style="background-color: black;">thread-<?php echo $key; ?> <?php echo $value['count']; ?></span>
+    <?php } } ?>
+    </div>
+  </div>
+  </div>
     </div>
     <div class="col-xs-6">
         <div class="well">
-          <h2><i class="glyphicon glyphicon-eye-open"></i> Disk Space Overview</h2>
-          <p>Path: <span style="font-weight:bold;color:#66C266;"><?php echo $diskspace_path; ?></span></p>
+          <h4><i class="glyphicon glyphicon-eye-open"></i> Disk Space Overview</h4>
+          <p>Path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span></p>
           <div id="diskspacechart"></div>
           <?php
           if ($esIndex2 != "") {
@@ -419,8 +422,11 @@ if ($esIndex2 != "") {
               Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
               Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
         </div>
-        <div id="top10files">
-            <h3 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/top50.php">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top10Switch('directory');">Directories</a></small>
+        <div class="panel panel-primary chartbox">
+            <div class="panel-heading">
+                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?path=<?php echo $path; ?>">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?path=<?php echo $path; ?>">Directories</a></small>
+            </div>
+            <div class="panel-body">
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
               <thead>
                 <tr>
@@ -433,97 +439,155 @@ if ($esIndex2 != "") {
             </thead>
             <tbody>
                   <?php
+                  // Get search results from Elasticsearch for top 10 largest files
+                  $results = [];
+                  $searchParams = [];
+
+                  // Setup search query
+                  $searchParams['index'] = $esIndex;
+                  $searchParams['type']  = 'file';
+
+
+                  // Setup search query for largest files
+                  $searchParams['body'] = [
+                      'size' => 10,
+                      '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
+                      'query' => [
+                          'match_all' => (object) []
+                      ],
+                      'sort' => [
+                          'filesize' => [
+                              'order' => 'desc'
+                          ]
+                      ]
+                  ];
+                  $queryResponse = $client->search($searchParams);
+
+                  $largestfiles = $queryResponse['hits']['hits'];
                   $n = 1;
                   foreach ($largestfiles as $key => $value) {
                     ?>
                     <tr><td><?php echo $n; ?></td>
-                        <td class="path"><a href="/view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
+                        <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
                         <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                         <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
-                        <td class="path"><a href="/advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
+                        <td class="path"><a href="advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
                     </tr>
                   <?php $n++; }
                    ?>
                </tbody>
           </table>
         </div>
-        <div id="top10dirs" style="display:none;">
-            <h3 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Directories</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/top50.php">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top10Switch('file');">Files</a></small>
-            <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
-              <thead>
-                <tr>
-                  <th class="text-nowrap">#</th>
-                  <th class="text-nowrap">Name</th>
-                  <th class="text-nowrap">Size</th>
-                  <th class="text-nowrap">Items</th>
-                  <th class="text-nowrap">Modified (utc)</th>
-                  <th class="text-nowrap">Path</th>
-              </tr>
-            </thead>
-            <tbody>
-                  <?php
-                  $n = 1;
-                  foreach ($largestdirs as $key => $value) {
-                    ?>
-                    <tr><td><?php echo $n; ?></td>
-                        <td class="path"><?php echo basename($key); ?></td>
-                        <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value[0]); ?></span></td>
-                        <td class="path"><?php echo $value[1]; ?></td>
-                        <td class="path"><?php echo $value[2]; ?></td>
-                        <td class="path"><?php echo dirname($key); ?></td>
-                    </tr>
-                  <?php $n++; }
-                   ?>
-               </tbody>
-          </table>
         </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3>
+            </div>
+            <div class="panel-body">
+                <div id="tagcountchart" class="text-center"></div>
+                <div class="chartbox">
+                  <span class="label" style="background-color:#666666;"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo $tagCounts['untagged']; ?></a></span>
+                  <span class="label" style="background-color:#F69327"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
+                  <span class="label" style="background-color:#65C165"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
+                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
+              </div>
+            </div>
+            </div>
+          </div>
+        	<div class="col-xs-6">
+                <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3>
+                </div>
+            <div class="panel-body">
+                <div id="filesizechart" class="text-center"></div>
+                <div class="chartbox">
+                  <span class="label" style="background-color:#666666;"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
+                  <span class="label" style="background-color:#F69327"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
+                  <span class="label" style="background-color:#65C165"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
+                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
+              </div>
+            </div>
+        	</div>
+        </div>
+        </div>
+
       </div>
   </div>
-
-<div class="row">
-  <div class="col-xs-4">
-    <h3><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3>
-    <ul class="nav nav-pills">
-      <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=untagged">untagged <span class="badge"><?php echo $tagCounts['untagged']; ?></span></a></li>
-      <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=delete">delete <span class="badge"><?php echo $tagCounts['delete']; ?></span></a></li>
-      <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=archive">archive <span class="badge"><?php echo $tagCounts['archive']; ?></span></a></li>
-      <li><a href="/advanced.php?submitted=true&amp;p=1&amp;tag=keep">keep <span class="badge"><?php echo $tagCounts['keep']; ?></span></a></li>
-    </ul>
-  </div>
-	<div class="col-xs-2">
-		<div id="tagcountchart"></div>
-	</div>
-  <div class="col-xs-4">
-    <h3><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3>
-    <ul class="list-group">
-      <li class="list-group-item">
-        <span class="badge"><?php echo formatBytes($totalFilesize['untagged']); ?></span>
-        untagged
-      </li>
-      <li class="list-group-item">
-        <span class="badge"><?php echo formatBytes($totalFilesize['delete']); ?></span>
-        delete
-      </li>
-      <li class="list-group-item">
-        <span class="badge"><?php echo formatBytes($totalFilesize['archive']); ?></span>
-        archive
-      </li>
-      <li class="list-group-item">
-        <span class="badge"><?php echo formatBytes($totalFilesize['keep']); ?></span>
-        keep
-      </li>
-    </ul>
-	</div>
-	<div class="col-xs-2">
-	<div id="filesizechart"></div>
-	</div>
 </div>
-</div>
-<script language="javascript" src="/js/jquery.min.js"></script>
-<script language="javascript" src="/js/bootstrap.min.js"></script>
-<script language="javascript" src="/js/diskover.js"></script>
-<script language="javascript" src="/js/d3.v3.min.js"></script>
+<script language="javascript" src="js/jquery.min.js"></script>
+<script language="javascript" src="js/bootstrap.min.js"></script>
+<script language="javascript" src="js/diskover.js"></script>
+<script language="javascript" src="js/d3.v3.min.js"></script>
 <!-- d3 charts -->
+    <script>
+        var margin = {top: 20, right: 20, bottom: 70, left: 40},
+        width = 600 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
+        var color = d3.scale.category20c();
+
+        var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+
+        var y = d3.scale.linear().range([height, 0]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .ticks(10);
+
+        var svg = d3.select("#threadchart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+        var data = <?php echo $js_threads ?>;
+
+        data.forEach(function(d) {
+            d.label = d.label;
+            d.value = d.count;
+        });
+
+        x.domain(data.map(function(d) { return (d.value > 0) ? d.label : ''; }));
+        y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis)
+        .selectAll("text")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", "-.55em")
+          .attr("transform", "rotate(-90)" );
+
+        svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        .append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("Queue items");
+
+        svg.selectAll("bar")
+          .data(data)
+        .enter().append("rect")
+          .style("fill", color)
+          .attr("x", function(d) { return x(d.label); })
+          .attr("width", x.rangeBand())
+          .attr("y", function(d) { return y(d.value); })
+          .attr("height", function(d) { return height - y(d.value); });
+    </script>
 	<script>
 		var count_untagged = <?php echo $tagCounts['untagged'] ?>;
 		var count_delete = <?php echo $tagCounts['delete'] ?>;
@@ -704,17 +768,5 @@ if ($esIndex2 != "") {
             });
 
 	</script>
-    <!-- top 10 switcher -->
-    <script>
-        function top10Switch(a) {
-            if (a == 'directory') {
-                document.getElementById('top10files').style.display = 'none';
-                document.getElementById('top10dirs').style.display = 'block';
-            } else {
-                document.getElementById('top10dirs').style.display = 'none';
-                document.getElementById('top10files').style.display = 'block';
-            }
-        }
-    </script>
 </body>
 </html>

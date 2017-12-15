@@ -1,10 +1,15 @@
 <?php
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
 
 namespace diskover;
 
 class Constants {
     // diskover-web version
-    const VERSION = '1.4.0';
+    const VERSION = '1.4.1';
     // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // set to your Elasticsearch port, default 9200
@@ -17,8 +22,6 @@ class Constants {
     // diskover.py socket listener
     const SOCKET_LISTENER_HOST = '127.0.0.1';
     const SOCKET_LISTENER_PORT = 9999;
-    // additional custom ES fields to display in search results
-    const EXTRA_FIELDS = "";  // ['md5_checksum' => 'MD5 Checksum']
     // default min file size (bytes) filter
     const FILTER = 1;
     // default mtime filter

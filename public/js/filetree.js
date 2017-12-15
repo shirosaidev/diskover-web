@@ -1,4 +1,10 @@
 /*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
+/*
  * d3 filetree for diskover-web
  */
 
@@ -10,7 +16,7 @@
          var f = getCookie('filter');
          var m = getCookie('mtime');
          var u = getCookie('use_count');
-         location.href = "/filetree.php?path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u;
+         location.href = "filetree.php?path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u;
          return false;
      });
 
@@ -19,7 +25,7 @@
          setCookie('use_count', 0);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "/filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+         location.href = "filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
      });
 
      d3.select("#count").on("click", function() {
@@ -27,7 +33,7 @@
          setCookie('use_count', 1);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "/filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+         location.href = "filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
      });
      getJSON();
  });
@@ -54,7 +60,7 @@ function getChildJSON(d) {
     // config references
     chartConfig = {
         target: 'mainwindow',
-        data_url: '/d3_data.php?path=' + encodeURIComponent(d.name) + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
+        data_url: 'd3_data.php?path=' + encodeURIComponent(d.name) + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
     };
 
     // loader settings
@@ -136,7 +142,7 @@ function getJSON() {
         // config references
         chartConfig = {
             target: 'mainwindow',
-            data_url: '/d3_data.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
+            data_url: 'd3_data.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
         };
 
         // loader settings
@@ -250,7 +256,7 @@ function click(d) {
         parent.changeBarMtime(d.parent);
     } else if (!d.count) {
         // display file in search results
-        location.href = '/advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name);
+        location.href = 'advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name);
     }
 }
 
@@ -291,6 +297,12 @@ function updateTree(data, parent) {
     .style('cursor', 'pointer')
     .on("click", function (d) {
         click(d);
+    })
+    .on("mouseover", function (d) {
+        if (d.count > 0 && !d.children && !d._children) {
+            // check if there are any children in Elasticsearch
+            getChildJSON(d);
+        }
     });
 
     //add filesize
@@ -360,7 +372,7 @@ function updateTree(data, parent) {
 	entered.append("span").attr("class", "filetree-btns")
         .html(function (d) {
             if (d.count > 0) {
-                return '<a href="/simple.php?submitted=true&amp;p=1&amp;q=&quot;' + d.name + '&quot;"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
+                return '<a href="simple.php?submitted=true&amp;p=1&amp;q=&quot;' + d.name + '&quot;"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
             }
         });
 

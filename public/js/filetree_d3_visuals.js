@@ -1,4 +1,10 @@
 /*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
+/*
  * d3 filetree visuals for diskover-web
  */
 
@@ -229,8 +235,8 @@ function changePie(data) {
     svg.select(".label-percent").remove();
 
     var button = svg.append("circle")
-        .style("stroke", "#131517")
-        .style("fill", "#3C4147")
+        .style("stroke", "#060606")
+        .style("fill", "#1B1D23")
         .style("cursor", "pointer")
         .attr("r", 118)
         .attr("cx", 0)
@@ -241,7 +247,7 @@ function changePie(data) {
         })
         .on("mouseout", function() {
             tip_button.hide();
-            d3.select(this).style("fill", "#3C4147");
+            d3.select(this).style("fill", "#1B1D23");
         })
         .on('mousemove', function() {
             return tip_button
@@ -452,7 +458,7 @@ function loadPieFileExt(data) {
             if (!d.data.label) {
                 extension = '""';
             }
-            window.location.href = '/simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:>=' + filter  + ' AND last_modified:[' + getMtime() + ']';
+            window.location.href = 'simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:>=' + filter  + ' AND last_modified:[' + getMtime() + ']';
         })
         .attr("class", "slice");
 
@@ -543,7 +549,7 @@ function changePieFileExt(node) {
     // config references
     var chartConfig = {
         target: 'piechart-ext',
-        data_url: '/d3_data_pie_ext.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
+        data_url: 'd3_data_pie_ext.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
     };
 
     // loader settings
@@ -732,7 +738,7 @@ function loadBarMtime(data) {
                 var last_mod_time_high = 'now-10y/d';
                 var last_mod_time_low = '*';
             }
-            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter;
+            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter;
         });
 
     bar
@@ -784,7 +790,7 @@ function changeBarMtime(node) {
     // config references
     var chartConfig = {
         target: 'barchart-mtime',
-        data_url: '/d3_data_bar_mtime.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
+        data_url: 'd3_data_bar_mtime.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
     };
 
     // loader settings
@@ -979,7 +985,7 @@ function loadBarFileSizes(data) {
                 var filesize_high = '*';
                 var filesize_low = 17179869184;
             }
-            window.location.href = '/simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND filesize:>=' + filter + ' AND last_modified:[' + getMtime() + ']'
+            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND filesize:>=' + filter + ' AND last_modified:[' + getMtime() + ']'
         });
 
     bar2
@@ -1031,7 +1037,7 @@ function changeBarFileSizes(node) {
     // config references
     var chartConfig = {
         target: 'barchart-filesizes',
-        data_url: '/d3_data_bar_fs.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
+        data_url: 'd3_data_bar_fs.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime
     };
 
     // loader settings

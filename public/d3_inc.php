@@ -1,5 +1,11 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+ 
+require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 
@@ -526,37 +532,4 @@ function get_file_ext($client, $index, $path, $filter, $mtime) {
     }
 
     return $items;
-}
-
-
-$path = $_GET['path'];
-$filter = (int)$_GET['filter'] ?: Constants::FILTER; // file size
-$mtime = $_GET['mtime'] ?: Constants::MTIME; // file mtime
-$maxdepth = (int)$_GET['maxdepth'] ?: Constants::MAXDEPTH; // maxdepth
-
-// get use_count
-$use_count = (int)$_GET['use_count'] ?: Constants::USE_COUNT; // use count
-$use_count = ($use_count === 0) ? false : true;
-settype($use_count, 'bool');
-
-// get mtime in ES format
-$mtime = getmtime($mtime);
-
-// remove any trailing slash unless root
-if (!empty($path) && $path !== "/") {
-    $path = rtrim($path, '/');
-}
-
-// check if no path (grab one from ES)
-if (empty($path)) {
-    $path = get_es_path($client, $esIndex);
-}
-
-// get dir total size and file count
-$dirinfo = get_dir_info($client, $esIndex, $path, $filter, $mtime);
-
-// check for error
-if ($dirinfo[0] === 0) {
-    echo json_encode([ "error" => "no diskover data found in elasticsearch" ]);
-    exit;
 }

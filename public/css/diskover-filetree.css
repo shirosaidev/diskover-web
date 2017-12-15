@@ -1,30 +1,35 @@
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
 /* d3 file tree */
 
 .tree-wrapper
 {
 	float: left;
-	height: 760px;
+	height: 750px;
 	width: 500px;
-	background: #272B30;
 	overflow-y: scroll;
     border: 0;
 }
 
 #tree-wrapper::-webkit-scrollbar-track
 {
-	background-color: #272B30;
+	background-color: #060606;
 }
 
 #tree-wrapper::-webkit-scrollbar-corner
 {
-	background-color: #272B30;
+	background-color: #060606;
 }
 
 #tree-wrapper::-webkit-scrollbar
 {
 	width: 8px;
     height: 8px;
-	background-color: #272B30;
+	background-color: #060606;
 }
 
 #tree-wrapper::-webkit-scrollbar-thumb

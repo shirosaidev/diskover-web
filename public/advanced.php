@@ -1,10 +1,15 @@
 <?php
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
 
-require __DIR__ . '/../vendor/autoload.php';
+require '../vendor/autoload.php';
 use diskover\Constants;
 
 error_reporting(E_ALL ^ E_NOTICE);
-require __DIR__ . "/../src/diskover/Diskover.php";
+require "../src/diskover/Diskover.php";
 
 // redirect to select indices page if no index cookie
 $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
@@ -25,11 +30,9 @@ if (!empty($_REQUEST['submitted'])) {
     // curent page
     $p = $_REQUEST['p'];
 
-    $doctype = ($_REQUEST['doctype']) ? $_REQUEST['doctype'] : '';
-
     // Setup search query
     $searchParams['index'] = $esIndex;
-    $searchParams['type']  = $doctype;
+    $searchParams['type']  = ($_REQUEST['doctype']) ? $_REQUEST['doctype'] : 'file,directory';
 
     $searchParams['body'] = [];
     $filterClauses = [];
@@ -152,22 +155,37 @@ if (!empty($_REQUEST['submitted'])) {
             $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
         }
     }
-    // Check if we need to sort search differently
-    // check request
-    if ($_REQUEST['sort']) {
-        $searchParams['body']['sort'] = $_REQUEST['sort'];
-        if ($_REQUEST['sortorder']) {
-            $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
-        }
-    // check cookie
-    } elseif (getCookie('sort')) {
-        $searchParams['body']['sort'] = getCookie('sort');
-        if (getCookie('sortorder')) {
-            $searchParams['body']['sort'] = [ ''.getCookie('sort').'' => ['order' => getCookie('sortorder') ] ];
-        }
+
+    // Sort search results
+    if (!$_REQUEST['sort'] && !$_REQUEST['sort2'] && !getCookie("sort") && !getCookie("sort2")) {
+        $searchParams['body']['sort'] = [ 'path_parent' => [ 'order' => 'asc' ], 'filename' => 'asc' ];
     } else {
-        // sort by parent path, then filename
-        $searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
+        $searchParams['body']['sort'] = [];
+        if ($_REQUEST['sort'] && !$_REQUEST['sortorder']) {
+            $searchParams['body']['sort'] = $_REQUEST['sort'];
+            createCookie("sort", $_REQUEST['sort']);
+        } elseif ($_REQUEST['sort'] && $_REQUEST['sortorder']) {
+            array_push($searchParams['body']['sort'], [ $_REQUEST['sort'] => [ 'order' => $_REQUEST['sortorder'] ] ]);
+            createCookie("sort", $_REQUEST['sort']);
+            createCookie("sortorder", $_REQUEST['sortorder']);
+        } elseif (getCookie('sort') && !getCookie('sortorder')) {
+            $searchParams['body']['sort'] = getCookie('sort');
+        } elseif (getCookie('sort') && getCookie('sortorder')) {
+            array_push($searchParams['body']['sort'], [ getCookie('sort') => [ 'order' => getCookie('sortorder') ] ]);
+        }
+        // sort 2
+        if ($_REQUEST['sort2'] && !$_REQUEST['sortorder2']) {
+            $searchParams['body']['sort'] = $_REQUEST['sort2'];
+            createCookie("sort2", $_REQUEST['sort2']);
+        } elseif ($_REQUEST['sort2'] && $_REQUEST['sortorder2']) {
+            array_push($searchParams['body']['sort'], [ $_REQUEST['sort2'] => [ 'order' => $_REQUEST['sortorder2'] ] ]);
+            createCookie("sort2", $_REQUEST['sort2']);
+            createCookie("sortorder2", $_REQUEST['sortorder2']);
+        } elseif (getCookie('sort2') && !getCookie('sortorder2')) {
+            $searchParams['body']['sort'] = getCookie('sort2');
+        } elseif (getCookie('sort2') && getCookie('sortorder2')) {
+            array_push($searchParams['body']['sort'], [ getCookie('sort2') => [ 'order' => getCookie('sortorder2') ] ]);
+        }
     }
 
     // Send search query to Elasticsearch and get tag scroll id and first page of results
@@ -216,24 +234,22 @@ if (!empty($_REQUEST['submitted'])) {
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>diskover &mdash; Advanced Search</title>
-  <!--<link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" />
-	<link rel="stylesheet" href="/css/bootstrap-theme.min.css" media="screen" />-->
-	<link rel="stylesheet" href="/css/bootswatch.min.css" media="screen" />
-  <link rel="stylesheet" href="/css/diskover.css" media="screen" />
+	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+  <link rel="stylesheet" href="css/diskover.css" media="screen" />
 </head>
 <body>
-<?php include __DIR__ . "/nav.php"; ?>
+<?php include "nav.php"; ?>
 
 <?php if (!isset($_REQUEST['submitted'])) {
     ?>
 
-<div class="container">
+<div class="container" style="margin-top:70px;">
   <div class="row">
 	<div class="col-xs-1" style="display:inline-block;vertical-align:middle;float:none;">
-	  <img src="/images/diskoversmall.png" alt="diskover" width="62" height="47" />
+	  <img src="images/diskoversmall.png" alt="diskover" width="62" height="47" />
 	</div>
 	<div class="col-xs-8" style="display:inline-block;vertical-align:middle;float:none;">
-	  <h1>diskover &mdash; Advanced Search</h1>
+	  <h1><i class="glyphicon glyphicon-search"></i> Advanced Search</h1>
 	</div>
   </div>
 <form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-horizontal">
@@ -245,53 +261,53 @@ if (!empty($_REQUEST['submitted'])) {
 <div class="container">
   <div class="form-group">
 	<div class="row">
-	  <div class="col-xs-5">
+	  <div class="col-xs-6">
 		<label for="filename">Filename is...</label>
 		<input name="filename" value="<?php echo $_REQUEST['filename']; ?>" placeholder="somefile.m4a" class="form-control" />
 	  </div>
-	  <div class="col-xs-3">
+	  <div class="col-xs-4">
 		<label for="filehash">Filehash is...</label>
-		<input name="filehash" value="<?php echo $_REQUEST['filehash']; ?>" placeholder="md5 hash" class="form-control"/>
+		<input name="filehash" value="<?php echo $_REQUEST['filehash']; ?>" placeholder="md5 hash" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="inode">Inode is...</label>
-		<input name="inode" value="<?php echo $_REQUEST['inode']; ?>" placeholder="inode num" class="form-control"/>
+		<input name="inode" value="<?php echo $_REQUEST['inode']; ?>" placeholder="inode num" class="form-control" />
 	  </div>
 	</div>
   </div>
   <div class="form-group">
 	<div class="row">
-	  <div class="col-xs-10">
+	  <div class="col-xs-12">
 		<label for="path_parent">Parent path is...  </label>
-		<input name="path_parent" value="<?php echo $_REQUEST['path_parent']; ?>" placeholder="/Users/shirosai/Music" class="form-control"/>
+		<input name="path_parent" value="<?php echo $_REQUEST['path_parent']; ?>" placeholder="/Users/shirosai/Music" class="form-control" />
 	  </div>
 	</div>
   </div>
   <div class="form-group">
 	<div class="row">
-	  <div class="col-xs-2">
+	  <div class="col-xs-4">
 		<label for="file_size_bytes_low">File size is between...</label>
-		<input name="file_size_bytes_low" value="<?php echo $_REQUEST['file_size_bytes_low']; ?>" type="number" placeholder="bytes" class="form-control"/>
+		<input name="file_size_bytes_low" value="<?php echo $_REQUEST['file_size_bytes_low']; ?>" type="number" placeholder="bytes" class="form-control" />
 		<label for="file_size_bytes_high">and</label>
-		<input name="file_size_bytes_high" value="<?php echo $_REQUEST['file_size_bytes_high']; ?>" type="number" placeholder="bytes" class="form-control"/>
+		<input name="file_size_bytes_high" value="<?php echo $_REQUEST['file_size_bytes_high']; ?>" type="number" placeholder="bytes" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="hardlinks_low">Hardlinks is between...</label>
-		<input name="hardlinks_low" value="<?php echo $_REQUEST['hardlinks_low']; ?>" type="number" placeholder="2" class="form-control"/>
+		<input name="hardlinks_low" value="<?php echo $_REQUEST['hardlinks_low']; ?>" type="number" placeholder="2" class="form-control" />
 		<label for="hardlinks_high">and</label>
-		<input name="hardlinks_high" value="<?php echo $_REQUEST['hardlinks_high']; ?>" type="number" placeholder="10" class="form-control"/>
+		<input name="hardlinks_high" value="<?php echo $_REQUEST['hardlinks_high']; ?>" type="number" placeholder="10" class="form-control" />
 	  </div>
 	  <div class="col-xs-3">
 		<label for="last_mod_time_low">Last modified time is between...</label>
-		<input name="last_mod_time_low" value="<?php echo $_REQUEST['last_mod_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control"/>
+		<input name="last_mod_time_low" value="<?php echo $_REQUEST['last_mod_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control" />
 		<label for="last_mod_time_high">and</label>
-		<input name="last_mod_time_high" value="<?php echo $_REQUEST['last_mod_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control"/>
+		<input name="last_mod_time_high" value="<?php echo $_REQUEST['last_mod_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control" />
 	  </div>
 	  <div class="col-xs-3">
 		<label for="last_access_time_low">Last access time is between...</label>
-		<input name="last_access_time_low" value="<?php echo $_REQUEST['last_access_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control"/>
+		<input name="last_access_time_low" value="<?php echo $_REQUEST['last_access_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control" />
 		<label for="last_access_time_high">and</label>
-		<input name="last_access_time_high" value="<?php echo $_REQUEST['last_access_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control"/>
+		<input name="last_access_time_high" value="<?php echo $_REQUEST['last_access_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control" />
 	  </div>
 	</div>
   </div>
@@ -299,15 +315,15 @@ if (!empty($_REQUEST['submitted'])) {
 	<div class="row">
 	  <div class="col-xs-2">
 		<label for="owner">Owner is...  </label>
-		<input name="owner" value="<?php echo $_REQUEST['owner']; ?>" placeholder="shirosai" class="form-control"/>
+		<input name="owner" value="<?php echo $_REQUEST['owner']; ?>" placeholder="shirosai" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="group">Group is...  </label>
-		<input name="group" value="<?php echo $_REQUEST['group']; ?>" placeholder="staff" class="form-control"/>
+		<input name="group" value="<?php echo $_REQUEST['group']; ?>" placeholder="staff" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="extension">Extension is...</label>
-		<input name="extension" value="<?php echo $_REQUEST['extension']; ?>" type="string" placeholder="zip" class="form-control"/>
+		<input name="extension" value="<?php echo $_REQUEST['extension']; ?>" type="string" placeholder="zip" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="tag">Tag is...</label>
@@ -319,30 +335,26 @@ if (!empty($_REQUEST['submitted'])) {
 		  <option value="keep">keep</option>
 		</select>
 	  </div>
-	  <div class="col-xs-2">
+	  <div class="col-xs-4">
 		<label for="tag_custom">Custom Tag is...</label>
-		<input name="tag_custom" value="<?php echo $_REQUEST['tag_custom']; ?>" type="string" placeholder="version 8" class="form-control"/>
+		<input name="tag_custom" value="<?php echo $_REQUEST['tag_custom']; ?>" type="string" placeholder="version 8" class="form-control" />
 	  </div>
 	</div>
   </div>
   <div class="form-group">
 	<div class="row">
-	  <div class="col-xs-2">
+	  <div class="col-xs-4">
 		<label for="index">Index is...</label>
-		<input name="index" value="<?php echo $_REQUEST['index']; ?>" type="string" placeholder="diskover-2017.05.24" class="form-control"/>
+		<input name="index" value="<?php echo $_REQUEST['index']; ?>" type="string" placeholder="diskover-2017.05.24" class="form-control" />
 	  </div>
 	</div>
   </div>
   <div class="form-group">
 	<div class="row">
-	  <div class="col-xs-2">
-		<label for="tags">Show request JSON?</label>
-		<input type="checkbox" name="debug" value="true"<?php echo($_REQUEST['debug'] ? " checked" : ""); ?> />
-	  </div>
 	  <div class="col-xs-2">
 		<label for="sort">Sort by...</label>
 		<select class="form-control" name="sort">
-		  <option value="<?php echo $_REQUEST['sort']; ?>" selected><?php echo $_REQUEST['sort']; ?></option>
+		  <option value="<?php echo getCookie('sort'); ?>" selected><?php echo getCookie('sort'); ?></option>
 		  <option value="filename">filename</option>
 		  <option value="path_parent">path_parent</option>
 		  <option value="filesize">filesize</option>
@@ -357,11 +369,42 @@ if (!empty($_REQUEST['submitted'])) {
 	  <div class="col-xs-2">
 		<label for="sortorder">Sort order...</label>
 		<select class="form-control" name="sortorder">
-		  <option value="<?php echo $_REQUEST['sortorder']; ?>" selected><?php echo $_REQUEST['sortorder']; ?></option>
+		  <option value="<?php echo getCookie('sortorder'); ?>" selected><?php echo getCookie('sortorder'); ?></option>
 		  <option value="asc">asc</option>
 		  <option value="desc">desc</option>
 		</select>
 	  </div>
+      <div class="col-xs-2">
+		<label for="sort">Sort2 by...</label>
+		<select class="form-control" name="sort2">
+		  <option value="<?php echo getCookie('sort2'); ?>" selected><?php echo getCookie('sort2'); ?></option>
+		  <option value="filename">filename</option>
+		  <option value="path_parent">path_parent</option>
+		  <option value="filesize">filesize</option>
+		  <option value="owner">owner</option>
+		  <option value="group">group</option>
+		  <option value="last_modified">last_modified</option>
+		  <option value="last_access">last_access</option>
+		  <option value="tag">tag</option>
+		  <option value="tag_custom">tag_custom</option>
+		</select>
+	  </div>
+	  <div class="col-xs-2">
+		<label for="sortorder">Sort2 order...</label>
+		<select class="form-control" name="sortorder2">
+		  <option value="<?php echo getCookie('sortorder2'); ?>" selected><?php echo getCookie('sortorder2'); ?></option>
+		  <option value="asc">asc</option>
+		  <option value="desc">desc</option>
+		</select>
+	  </div>
+	</div>
+    </div>
+     <div class="form-group">
+    <div class="row">
+        <div class="col-xs-2">
+  		<label for="tags">Show request JSON?</label>
+  		<input type="checkbox" name="debug" value="true"<?php echo($_REQUEST['debug'] ? " checked" : ""); ?> />
+  	  </div>
       <div class="col-xs-2">
 		<label for="sortorder">Doc type...</label>
           <select class="form-control" name="doctype">
@@ -370,12 +413,12 @@ if (!empty($_REQUEST['submitted'])) {
             <option value="">all</option>
           </select>
       </div>
-	</div>
+    </div>
   </div>
   </div>
   <button type="reset" class="btn btn-default">Clear</button>
   <button type="submit" class="btn btn-primary">Search</button>
-  <span>&nbsp;<a href="/simple.php">Switch to simple search</a></span>
+  <span>&nbsp;<a href="simple.php">Switch to simple search</a></span>
 		</fieldset>
 </form>
 
@@ -385,7 +428,7 @@ if (!empty($_REQUEST['submitted'])) {
 <?php
 
 if (isset($_REQUEST['submitted'])) {
-    include __DIR__ . "/results.php";
+    include "results.php";
 
     // Print out request JSON if debug flag is set
     if ($_REQUEST['debug']) {
@@ -400,8 +443,13 @@ if (isset($_REQUEST['submitted'])) {
 
 ?>
 </div>
-<script language="javascript" src="/js/jquery.min.js"></script>
-<script language="javascript" src="/js/bootstrap.min.js"></script>
-<script language="javascript" src="/js/diskover.js"></script>
+<script language="javascript" src="js/jquery.min.js"></script>
+<script language="javascript" src="js/bootstrap.min.js"></script>
+<script language="javascript" src="js/diskover.js"></script>
+<script>
+// listen for msgs from diskover socket server
+listenSocketServer();
+</script>
+<iframe name="hiddeniframe" width=0 height=0 style="display:none;"></iframe>
 </body>
 </html>
