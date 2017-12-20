@@ -4,7 +4,7 @@ Copyright (C) Chris Park 2017
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
- 
+
 require '../vendor/autoload.php';
 use diskover\Constants;
 
@@ -351,7 +351,7 @@ if (count($results[$p]) > 0) {
 
 else {
 ?>
-<div class="container">
+<div class="container" style="margin-top: 70px;">
   <div class="row">
     <div class="alert alert-dismissible alert-danger col-xs-8">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
