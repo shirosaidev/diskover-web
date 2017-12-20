@@ -4,7 +4,7 @@ Copyright (C) Chris Park 2017
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
- 
+
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
@@ -22,7 +22,7 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     $searchParams['index'] = $index;
     $searchParams['type']  = 'file';
 
-    $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
+    $path = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
         'size' => 0,
             'query' => [
@@ -50,14 +50,25 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
 
     // Get directory last modified time
     $searchParams['type']  = 'directory';
-    $searchParams['body'] = [
-        'size' => 1,
-        'query' => [
-            'query_string' => [
-                'query' => 'path_parent: ' . dirname($path) . ' AND filename: ' . basename($path) . ''
+    if ($path === '\/') {  // root /
+        $searchParams['body'] = [
+            'size' => 1,
+            'query' => [
+                'query_string' => [
+                    'query' => 'path_parent: ' . $path . ' AND filename: ' . $path . ''
+                ]
             ]
-        ]
-    ];
+        ];
+    } else {
+        $searchParams['body'] = [
+            'size' => 1,
+            'query' => [
+                'query_string' => [
+                    'query' => 'path_parent: ' . dirname($path) . ' AND filename: ' . basename($path) . ''
+                ]
+            ]
+        ];
+    }
     // Send search query to Elasticsearch
     $queryResponse = $client->search($searchParams);
 
@@ -82,7 +93,7 @@ function get_files($client, $index, $path, $filter, $mtime) {
     // search size
     $searchParams['size'] = 100;
 
-    $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
+    $path = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
                 '_source' => ["path_parent","filename","filesize"],
                 'query' => [
@@ -105,10 +116,17 @@ function get_files($client, $index, $path, $filter, $mtime) {
 
     // Add files to items array
     foreach ($results as $result) {
-        $items[] = [
-                        "name" => $result['_source']['path_parent'] . '/' . $result['_source']['filename'],
-                        "size" => $result['_source']['filesize']
-                    ];
+        if ($path === '\/') {  // root /
+            $items[] = [
+                "name" => $result['_source']['path_parent'] . $result['_source']['filename'],
+                "size" => $result['_source']['filesize']
+            ];
+        } else {
+            $items[] = [
+                "name" => $result['_source']['path_parent'] . '/' . $result['_source']['filename'],
+                "size" => $result['_source']['filesize']
+            ];
+        }
     }
 
     return $items;
@@ -159,10 +177,10 @@ function get_sub_dirs($client, $index, $path, $sort='filename', $sortorder='asc'
 
     // diff query if root path /
     if ($path === '/') {
-        $query = 'path_parent: \/* NOT path_parent: \/*\/* NOT path_parent: \/';
+        $query = 'path_parent: \/ NOT path_parent: \/*\/* NOT filename: ""';
     } else {
         // escape special characters
-        $path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
+        $path = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
         $query = 'path_parent: ' . $path . ' NOT path_parent: ' . $path . '\/*';
     }
 
@@ -187,7 +205,11 @@ function get_sub_dirs($client, $index, $path, $sort='filename', $sortorder='asc'
     $results = $queryResponse['hits']['hits'];
 
     foreach ($results as $arr) {
-        $dirs[] = $arr['_source']['path_parent'] . '/' . $arr['_source']['filename'];
+        if ($path === '/') {
+            $dirs[] = $arr['_source']['path_parent'] . $arr['_source']['filename'];
+        } else {
+            $dirs[] = $arr['_source']['path_parent'] . '/' . $arr['_source']['filename'];
+        }
     }
 
     return $dirs;
@@ -295,7 +317,6 @@ function get_file_mtime($client, $index, $path, $filter, $mtime) {
     $searchParams['index'] = $index;
     $searchParams['type'] = 'file';
 
-    //$path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
         'size' => 0,
         'query' => [
@@ -381,7 +402,6 @@ function get_file_sizes($client, $index, $path, $filter, $mtime) {
     $searchParams['index'] = $index;
     $searchParams['type'] = 'file';
 
-    //$path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
         'size' => 0,
         'query' => [
@@ -468,7 +488,6 @@ function get_file_ext($client, $index, $path, $filter, $mtime) {
     $searchParams['index'] = $index;
     $searchParams['type']  = 'file';
 
-    //$path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
             'size' => 0,
             'query' => [

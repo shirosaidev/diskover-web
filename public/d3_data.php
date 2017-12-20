@@ -35,7 +35,6 @@ $use_count = (int)$_GET['use_count'] ?: Constants::USE_COUNT; // use count
 $use_count = ($use_count === 0) ? false : true;
 settype($use_count, 'bool');
 
-
 // get dir total size and file count
 $dirinfo = get_dir_info($client, $esIndex, $path, $filter, $mtime);
 

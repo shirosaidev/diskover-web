@@ -4,7 +4,7 @@ Copyright (C) Chris Park 2017
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
- 
+
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
@@ -38,7 +38,7 @@ if (isset($_GET['path']) && $_GET['path'] !== "/") {
 
 	<body>
 		<?php include "nav.php"; ?>
-		<div class="container" id="error" style="display:none;">
+		<div class="container" id="error" style="display:none; margin-top:70px;">
 			<div class="row">
 				<div class="alert alert-dismissible alert-danger col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
