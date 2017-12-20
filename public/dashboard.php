@@ -4,7 +4,7 @@ Copyright (C) Chris Park 2017
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
- 
+
 session_start();
 require '../vendor/autoload.php';
 use diskover\Constants;
@@ -249,6 +249,11 @@ $diskspace_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
 // store disk space path into session var
 $_SESSION['rootpath'] = $diskspace_path;
+
+// update path cookie
+if ($diskspace_path !== getCookie('path')) {
+    createCookie('path', $diskspace_path);
+}
 
 if ($esIndex2 != "") {
     // Get search results from Elasticsearch for disk space info from index2

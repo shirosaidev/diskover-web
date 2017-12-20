@@ -27,7 +27,7 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
         'size' => 0,
             'query' => [
                 'query_string' => [
-                    'query' => '"' . $path . '" AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
+                    'query' => 'path_parent: ' . $path . '* AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
                 ]
             ],
             'aggs' => [

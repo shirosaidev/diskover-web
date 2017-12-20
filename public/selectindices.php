@@ -34,6 +34,8 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
     } else if (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "" )) {
         deleteCookie('index2');
     }
+    // delete existing path cookie
+    deleteCookie('path');
     header("location: /index.php");
     exit();
 } elseif (isset($_POST['index']) && $_POST['index'] == "newest") {
@@ -63,6 +65,8 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
     } else if (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "" )) {
         deleteCookie('index2');
     }
+    // delete existing path cookie
+    deleteCookie('path');
     header("location: /index.php");
     exit();
 }
