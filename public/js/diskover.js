@@ -17,9 +17,9 @@ $(document).ready(function () {
 	// select all buttons on search results pages
 	$(".tagAllDelete").click(function () {
 		$(".tagDeleteInput").prop('checked', true);
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning active');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning active');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success');
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info');
 		$(".tagDeleteLabel").closest('tr').attr('class', 'warning');
 		changeTagCount =  $('#results-tbody tr').length;
 		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
@@ -28,9 +28,9 @@ $(document).ready(function () {
 
 	$(".tagAllArchive").click(function () {
 		$(".tagArchiveInput").prop('checked', true);
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success active');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success active');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning');
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info');
 		$(".tagArchiveLabel").closest('tr').attr('class', 'success');
 		changeTagCount =  $('#results-tbody tr').length;
 		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
@@ -39,9 +39,9 @@ $(document).ready(function () {
 
 	$(".tagAllKeep").click(function () {
 		$(".tagKeepInput").prop('checked', true);
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info active');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info active');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning');
 		$(".tagKeepLabel").closest('tr').attr('class', 'info');
 		changeTagCount =  $('#results-tbody tr').length;
 		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
@@ -50,9 +50,9 @@ $(document).ready(function () {
 
 	$(".tagAllUntagged").click(function () {
 		$(".tagUntaggedInput").prop('checked', true);
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-sm btn-info');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-sm btn-success');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-sm btn-warning');
+		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info');
+		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success');
+		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning');
 		$(".tagUntaggedLabel").closest('tr').attr('class', 'untagged');
 		changeTagCount =  $('#results-tbody tr').length;
 		$('.changetagcounter').text(changeTagCount + ' changes unsaved');

@@ -70,7 +70,7 @@ foreach ($_POST['ids_tag_custom'] as $id => $value) {
 	<div class="col-xs-8">
         <div class="alert alert-dismissible alert-success">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong><i class="glyphicon glyphicon-tags"></i> Files have been tagged in Elasticsearch.</strong> Redirecting to search results in 3 seconds...
+  <strong><i class="glyphicon glyphicon-tags"></i> Files have been tagged in Elasticsearch.</strong> Redirecting to search results in <span id="count-num">3</span> seconds...
 </div>
 	</div>
   </div>
@@ -78,5 +78,18 @@ foreach ($_POST['ids_tag_custom'] as $id => $value) {
 <script language="javascript" src="js/jquery.min.js"></script>
 <script language="javascript" src="js/bootstrap.min.js"></script>
 <script language="javascript" src="js/diskover.js"></script>
+<script>
+function handleTimer() {
+  if(count === 0) {
+    clearInterval(timer);
+  } else {
+    $('#count-num').html(count);
+    count--;
+  }
+}
+
+var count = 2;
+var timer = setInterval(function() { handleTimer(count); }, 1000);
+</script>
 </body>
 </html>
