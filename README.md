@@ -7,7 +7,7 @@
 
 diskover-web is the web file manager and storage analytics application for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search your file system (using Elasticsearch diskover indices), file tagging and provide detailed disk usage analytics for your file system.
 
-diskover-web also includes a REST API that can be used to view or update data in diskover indices.
+diskover-web allows exporting of file lists in json/csv, also REST API can be used to view or update data in diskover indices.
 
 It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](http://getbootstrap.com/) and [D3.js](https://d3js.org).
 
