@@ -11,13 +11,26 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 
-// redirect to select indices page if no index cookie
-$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-if (!$esIndex) {
-    header("location:selectindices.php");
-    exit();
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // get index from env var or cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
 }
-$esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+// check for index2 in url
+if (isset($_GET['index2'])) {
+    $esIndex2 = $_GET['index2'];
+    setCookie('index2', $esIndex2);
+} else {
+    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+}
 
 require "d3_inc.php";
 
@@ -281,6 +294,35 @@ if ($esIndex2 != "") {
     $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 }
 
+// Check if directory sizes have been calculated
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = "directory";
+
+// escape any special characters in path
+$escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
+$searchParams['body'] = [
+    'size' => 1,
+    'query' => [
+        'query_string' => [
+            'query' => 'path_parent:' . dirname($escapedpath) . ' AND filename:' . basename($escapedpath)
+            ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of directories
+$sizecheck = $queryResponse['hits']['hits'][0]['_source']['filesize'];
+$itemscheck = $queryResponse['hits']['hits'][0]['_source']['items'];
+
+$dirsizecalc = false;
+if ($sizecheck > 0 && $itemscheck > 0) {
+    $dirsizecalc = true;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -341,14 +383,25 @@ if ($esIndex2 != "") {
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support the diskover project on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a>.
+        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support the diskover project on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
       </div>
+      <?php
+      if (!$dirsizecalc) {
+      ?>
+      <div class="alert alert-dismissible alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><i class="glyphicon glyphicon-exclamation-sign"></i> Directory sizes not calculated.</h4>
+        <p>Run diskover with the --dirsize flag after crawl finishes to calculate directory sizes. This improves performance of analytics pages.</p>
+      </div>
+      <?php
+      }
+      ?>
       <?php
       if ($totalDupes === 0) {
       ?>
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <h4><span class="glyphicon glyphicon-duplicate"></span> No dupe files found.</h4>
+        <h4><i class="glyphicon glyphicon-duplicate"></i> No dupe files found.</h4>
         <p>Run diskover with the --tagdupes flag after crawl finishes to check for duplicate files.</p>
       </div>
       <?php
@@ -360,7 +413,7 @@ if ($esIndex2 != "") {
       <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
-        <p>It looks like you have <a href="advanced.php?submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
+        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
       </div>
       <?php
       }
@@ -368,10 +421,10 @@ if ($esIndex2 != "") {
       <?php
       if ($tagCounts['untagged'] > 0) {
       ?>
-      <div class="alert alert-dismissible alert-warning">
+      <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-tags"></i> Untagged files!</h4>
-        <p>It looks like you have <a href="advanced.php?submitted=true&amp;p=1&amp;tag=untagged" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
+        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
       </div>
       <?php
       }
@@ -393,7 +446,7 @@ if ($esIndex2 != "") {
                   <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $crawlstoptime; ?></span> UTC.<br />
                   <i class="glyphicon glyphicon-time"></i> Crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
               <?php } else { ?>
-                  <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
+                  <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
               <?php } ?>
       </div>
       <div class="panel panel-primary">
@@ -429,7 +482,7 @@ if ($esIndex2 != "") {
         </div>
         <div class="panel panel-primary chartbox">
             <div class="panel-heading">
-                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?path=<?php echo $path; ?>">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?path=<?php echo $path; ?>">Directories</a></small>
+                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Directories</a></small>
             </div>
             <div class="panel-body">
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -476,7 +529,7 @@ if ($esIndex2 != "") {
                         <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
                         <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                         <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
-                        <td class="path"><a href="advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
+                        <td class="path"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
                     </tr>
                   <?php $n++; }
                    ?>
@@ -493,10 +546,10 @@ if ($esIndex2 != "") {
             <div class="panel-body">
                 <div id="tagcountchart" class="text-center"></div>
                 <div class="chartbox">
-                  <span class="label" style="background-color:#666666;"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo $tagCounts['untagged']; ?></a></span>
-                  <span class="label" style="background-color:#F69327"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
-                  <span class="label" style="background-color:#65C165"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
-                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
+                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo $tagCounts['untagged']; ?></a></span>
+                  <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
+                  <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
+                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
               </div>
             </div>
             </div>
@@ -509,10 +562,10 @@ if ($esIndex2 != "") {
             <div class="panel-body">
                 <div id="filesizechart" class="text-center"></div>
                 <div class="chartbox">
-                  <span class="label" style="background-color:#666666;"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
-                  <span class="label" style="background-color:#F69327"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
-                  <span class="label" style="background-color:#65C165"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
-                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
+                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
+                  <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
+                  <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
+                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
               </div>
             </div>
         	</div>
@@ -528,9 +581,9 @@ if ($esIndex2 != "") {
 <script language="javascript" src="js/d3.v3.min.js"></script>
 <!-- d3 charts -->
     <script>
-        var margin = {top: 20, right: 20, bottom: 70, left: 40},
+        var margin = {top: 20, right: 20, bottom: 30, left: 70},
         width = 600 - margin.left - margin.right,
-        height = 300 - margin.top - margin.bottom;
+        height = 250 - margin.top - margin.bottom;
 
         var color = d3.scale.category20c();
 

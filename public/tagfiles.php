@@ -11,8 +11,13 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 
-// get index cookies
-$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+} else {
+    // get index from env var or cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+}
 
 ?>
 

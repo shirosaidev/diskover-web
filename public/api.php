@@ -51,8 +51,8 @@ function put($endpoint, $input) {
 	$client = connectES();
 
 	// Setup search query
-	$searchParams['index'] = Constants::ES_INDEX; // which index to search
-	$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+	$searchParams['index'] = $endpoint[0]; // which index to search
+	$searchParams['type']  = 'file';  // which type within the index to search
 
 	$files = [];
 	$files = $input['files'];
@@ -62,7 +62,7 @@ function put($endpoint, $input) {
 
 	switch ($endpoint) {
 		// tag all files in directory
-		case $endpoint[0] == 'tagdir':
+		case $endpoint[1] == 'tagdir':
 			$numfiles = 0;
 
 			// first let's get all the file id's
@@ -136,7 +136,7 @@ function put($endpoint, $input) {
 				$searchParams = array();
 				$searchParams['id'] = $id;
 				$searchParams['index'] = $index;
-				$searchParams['type'] = Constants::ES_TYPE;
+				$searchParams['type'] = 'file';
 
 				try {
 					$queryResponse = $client->get($searchParams);
@@ -170,7 +170,7 @@ function put($endpoint, $input) {
 			break;
 
 		// tag files
-		case $endpoint[0] == 'tagfiles':
+		case $endpoint[1] == 'tagfiles':
 			$numfiles = 0;
 
 			// update existing tag field with new value
@@ -210,7 +210,7 @@ function put($endpoint, $input) {
 				$searchParams = array();
 				$searchParams['id'] = $id;
 				$searchParams['index'] = $index;
-				$searchParams['type'] = Constants::ES_TYPE;
+				$searchParams['type'] = 'file';
 
 				try {
 					$queryResponse = $client->get($searchParams);
@@ -253,11 +253,11 @@ function get($endpoint, $query) {
 	$client = connectES();
 
 	// Setup search query
-	$searchParams['index'] = Constants::ES_INDEX; // which index to search
-	$searchParams['type']  = Constants::ES_TYPE;  // which type within the index to search
+	$searchParams['index'] = $endpoint[0]; // which index to search
+	$searchParams['type']  = 'file';  // which type within the index to search
 
 	switch ($endpoint) {
-		case $endpoint[0] == 'tagcounts':
+		case $endpoint[1] == 'tagcounts':
 			// Get search results from Elasticsearch for tags
 			$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
@@ -288,8 +288,8 @@ function get($endpoint, $query) {
 			echo json_encode($tagCounts, JSON_PRETTY_PRINT);
 			break;
 
-		case $endpoint[0] == 'tagcount':
-			$tag = $query || error('missing tag');
+		case $endpoint[1] == 'tagcount':
+			$tag = $query ?: error('missing tag');
 			parse_str($query, $output);
 			// custom tag
 			if ($output['custom']) {
@@ -333,7 +333,7 @@ function get($endpoint, $query) {
 			echo json_encode($tagCount, JSON_PRETTY_PRINT);
 			break;
 
-		case $endpoint[0] == 'tagsizes':
+		case $endpoint[1] == 'tagsizes':
 			// Get search results from Elasticsearch for tags
 			$totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
@@ -371,8 +371,8 @@ function get($endpoint, $query) {
 			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);
 			break;
 
-		case $endpoint[0] == 'tagsize':
-			$tag = $query || error('missing tag');
+		case $endpoint[1] == 'tagsize':
+			$tag = $query ?: error('missing tag');
 			parse_str($query, $output);
 			// custom tag
 			if ($output['custom']) {
@@ -430,8 +430,8 @@ function get($endpoint, $query) {
 			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);
 			break;
 
-		case $endpoint[0] == 'tagfiles':
-			$tag = $query || error('missing tag');
+		case $endpoint[1] == 'tagfiles':
+			$tag = $query ?: error('missing tag');
 			parse_str($query, $output);
 
 			// Scroll parameter alive time
@@ -503,7 +503,7 @@ function get($endpoint, $query) {
 			}
 			break;
 
-		case $endpoint[0] == 'dupes':
+		case $endpoint[1] == 'dupes':
 			$tag = $query;
 
 			// Scroll parameter alive time
@@ -566,7 +566,7 @@ function get($endpoint, $query) {
 			}
 			break;
 
-		case $endpoint[0] == 'dupessize':
+		case $endpoint[1] == 'dupessize':
 			$totalFilesize = 0;
 
 			$searchParams['body'] = [

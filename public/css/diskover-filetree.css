@@ -39,18 +39,20 @@ LICENSE for the full license text.
 }
 
 .selected {
-    color: orange;
+    color: orange !important;
 }
 
 .node {
     font-size: 12px;
-    overflow: hidden;
+    overflow: visible;
     position: absolute;
     list-style: none;
     margin-left: 10px;
     white-space: nowrap;
     word-wrap: break-word;
     z-index: 1;
+    width: 300px;
+    color: lightgray;
 }
 
 .node span {
@@ -96,7 +98,7 @@ LICENSE for the full license text.
 }
 
 .node .filesize-gray {
-    color: gray;
+    color: #9DA5B4;
     font-size: 11px;
     padding-left: 1px;
 }
@@ -109,7 +111,7 @@ LICENSE for the full license text.
 }
 
 .node .percent-text {
-    color: gray;
+    color: #9DA5B4;
     font-size: 11px;
     padding-left: 4px;
 }
@@ -124,7 +126,7 @@ LICENSE for the full license text.
 
 .node .percent {
     background-color: #A5060E;
-    opacity: .4;
+    opacity: .5;
     display: inline-block;
     height: 90%;
     left: 0px;
@@ -132,7 +134,8 @@ LICENSE for the full license text.
     position: absolute;
     z-index: -1;
     overflow: hidden;
-    border: 1px solid black;
+    border: 0px solid black;
+    max-width: 300px;
 }
 
 .node .filename {

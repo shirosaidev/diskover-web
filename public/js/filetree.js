@@ -9,6 +9,9 @@ LICENSE for the full license text.
  */
 
  $(document).ready(function() {
+     var index = getCookie('index');
+     var index2 = getCookie('index2');
+
      $('#changepath').click(function () {
          console.log('changing paths');
          var p = encodeURIComponent($('#pathinput').val());
@@ -16,7 +19,7 @@ LICENSE for the full license text.
          var f = getCookie('filter');
          var m = getCookie('mtime');
          var u = getCookie('use_count');
-         location.href = "filetree.php?path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u;
+         location.href = "filetree.php?index=" + index +"&index2=" + index2 +"&path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u;
          return false;
      });
 
@@ -25,7 +28,7 @@ LICENSE for the full license text.
          setCookie('use_count', 0);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+         location.href = "filetree.php?index=" + index +"&index2=" + index2 +"&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
      });
 
      d3.select("#count").on("click", function() {
@@ -33,7 +36,7 @@ LICENSE for the full license text.
          setCookie('use_count', 1);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "filetree.php?path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+         location.href = "filetree.php?index=" + index +"&index2=" + index2 +"&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
      });
      getJSON();
  });
@@ -55,7 +58,7 @@ function showHidden(root) {
 
 function getChildJSON(d) {
 	// get json data from Elasticsearch using php data grabber
-	console.log("getting children from Elasticsearch: " + d.name);
+	//console.log("getting children from Elasticsearch: " + d.name);
 
     // config references
     chartConfig = {
@@ -78,7 +81,7 @@ function getChildJSON(d) {
     var target = document.getElementById(chartConfig.target);
     // trigger loader
     var spinner = new Spinner(opts).spin(target);
-    console.log(chartConfig.data_url)
+    //console.log(chartConfig.data_url)
 
 	// load json data and trigger callback
 	d3.json(chartConfig.data_url, function (error, data) {
@@ -197,10 +200,6 @@ function getJSON() {
 		// load file tree
 		updateTree(root, root);
 
-        // set root in parent window
-        parent.root = root;
-        parent.node = root;
-
         // store cookies
         setCookie('path', encodeURIComponent(root.name));
         (filter) ? setCookie('filter', filter) : setCookie('filter', FILTER);
@@ -208,16 +207,16 @@ function getJSON() {
         (use_count) ? setCookie('use_count', use_count): setCookie('use_count', USE_COUNT);
 
 		// load file size/count pie chart
-		parent.changePie(root);
+		changePie(root);
 
 		// load file extension pie chart
-		parent.changePieFileExt(root);
+		changePieFileExt(root);
 
         // load filesizes bar chart
-		parent.changeBarFileSizes(root);
+		changeBarFileSizes(root);
 
 		// load mtime bar chart
-		parent.changeBarMtime(root);
+		changeBarMtime(root);
 	}
 
 }
@@ -243,17 +242,17 @@ function click(d) {
     } else if (d._children) {
         toggleChildren(d);
         updateTree(root, d);
-        parent.changePie(d);
-        parent.changePieFileExt(d);
-        parent.changeBarFileSizes(d);
-        parent.changeBarMtime(d);
+        setTimeout(function() { changePie(d) },500);
+        setTimeout(function() { changePieFileExt(d) },500);
+        setTimeout(function() { changeBarFileSizes(d) },500);
+        setTimeout(function() { changeBarMtime(d) },500);
     } else if (d.children) {
         toggleChildren(d);
         updateTree(root, d);
-        parent.changePie(d.parent);
-        parent.changePieFileExt(d.parent);
-        parent.changeBarFileSizes(d.parent);
-        parent.changeBarMtime(d.parent);
+        setTimeout(function() { changePie(d.parent) },500);
+        setTimeout(function() { changePieFileExt(d.parent) },500);
+        setTimeout(function() { changeBarFileSizes(d.parent) },500);
+        setTimeout(function() { changeBarMtime(d.parent) },500);
     } else if (!d.count) {
         // display file in search results
         location.href = 'advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name);
@@ -269,7 +268,7 @@ function updateTree(data, parent) {
     }
 
 	var nodes = tree.nodes(data),
-			duration = 250;
+			treeduration = 125;
 
 	var nodeEls = ul.selectAll("li.node").data(nodes, function (d) {
 		d.id = d.id || ++id;
@@ -372,7 +371,7 @@ function updateTree(data, parent) {
 	entered.append("span").attr("class", "filetree-btns")
         .html(function (d) {
             if (d.count > 0) {
-                return '<a href="simple.php?submitted=true&amp;p=1&amp;q=&quot;' + d.name + '&quot;"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
+                return '<a href="simple.php?submitted=true&amp;p=1&amp;q=path_parent: ' + escapeHTML(d.name) + '*"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
             }
         });
 
@@ -383,7 +382,7 @@ function updateTree(data, parent) {
 		return "downarrow glyphicon " + icon;
 	});
 	//update position with transition
-	nodeEls.transition().duration(duration)
+	nodeEls.transition().duration(treeduration)
 		.style("top", function (d) {
 			return (d.y - tree.nodeHeight()) + "px";
 		})

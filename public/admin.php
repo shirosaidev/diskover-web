@@ -18,8 +18,25 @@ if(isset($_GET['command'])) {
 $host = Constants::ES_HOST;
 $port = Constants::ES_PORT;
 
-$index = getCookie('index');
-$index2 = getCookie('index2');
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // redirect to select indices page if no index cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
+}
+// check for index2 in url
+if (isset($_GET['index2'])) {
+    $esIndex2 = $_GET['index2'];
+    setCookie('index2', $esIndex2);
+} else {
+    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+}
 
 ?>
 
@@ -50,7 +67,9 @@ pre {
     <div class="col-xs-6">
         <h1 class="text-nowrap"><i class="glyphicon glyphicon-cog"></i> Admin Panel</h1>
         <span class="text-success"><?php echo "diskover-web v".Constants::VERSION; ?></span><br />
-        <small><a target="_blank" href="https://github.com/shirosaidev/diskover-web/releases/latest">Check for updates</a></small>
+        <small><i class="glyphicon glyphicon-download-alt"></i> <a target="_blank" href="https://github.com/shirosaidev/diskover-web/releases/latest">Check for updates</a></small><br />
+        <strong><i class="glyphicon glyphicon-heart"></i> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.</strong>
+        <br /><br />
 </div>
 <div class="col-xs-6">
 <pre>    __               __
@@ -67,8 +86,8 @@ pre {
 	<div class="col-xs-6">
         <div class="well">
             <h5>diskover indices selected</h5>
-            Index: <?php echo $index; ?><br />
-            Index 2: <?php echo $index2; ?><br />
+            Index: <?php echo $esIndex; ?><br />
+            Index 2: <?php echo $esIndex2; ?><br />
             <small><a href="selectindices.php">Change</a></small>
         </div>
     </div>
@@ -112,7 +131,7 @@ if ($result == "pong") {
         // Send the request & save response to $curlresp
         $curlresp = curl_exec($curl);
         $json = json_decode($curlresp, true);
-        $fields = $json[$index]['mappings']['file']['properties'];
+        $fields = $json[$esIndex]['mappings']['file']['properties'];
         // Close request to clear up some resources
         curl_close($curl);
     ?>
@@ -120,9 +139,9 @@ if ($result == "pong") {
     <fieldset>
         <div class="form-group">
             <select class="form-control" id="commandset" name="commandset" style="width:200px; display: inline;">
-                <?php $cmd = '{"action": "tagdupes", "index": "'.$index.'"}'; ?>
+                <?php $cmd = '{"action": "tagdupes", "index": "'.$esIndex.'"}'; ?>
               <option value='<?php echo $cmd; ?>'>Tag duplicate files</option>
-                <?php $cmd = '{"action": "dirsize", "index": "'.$index.'"}'; ?>
+                <?php $cmd = '{"action": "dirsize", "index": "'.$esIndex.'"}'; ?>
               <option value='<?php echo $cmd; ?>'>Calculate all directory sizes/items</option>
             </select>
         </div>

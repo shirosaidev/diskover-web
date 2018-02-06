@@ -11,11 +11,18 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 
-// redirect to select indices page if no index cookie
-$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-if (!$esIndex) {
-    header("location:selectindices.php");
-    exit();
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // get index from env var or cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
 }
 
 // Get search results from Elasticsearch if the user searched for something
@@ -180,7 +187,9 @@ if (!empty($_REQUEST['submitted'])) {
 				<div class="col-xs-8 col-xs-offset-2">
 					<p class="text-center">
 						<form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-inline text-center">
-							<input name="q" value="<?php echo $_REQUEST['q']; ?>" type="text" placeholder="Elasticsearch query string syntax" class="form-control input-lg" size="70" />
+                            <input type="hidden" name="index" value="<?php echo $esIndex; ?>" />
+                            <input type="hidden" name="index2" value="<?php echo $esIndex2; ?>" />
+                            <input name="q" value="<?php echo $_REQUEST['q']; ?>" type="text" placeholder="Elasticsearch query string syntax" class="form-control input-lg" size="70" />
 							<input type="hidden" name="submitted" value="true" />
 							<input type="hidden" name="p" value="1" />
                             <input type="hidden" name="resultsize" value="<?php echo $resultSize; ?>" />
@@ -197,9 +206,9 @@ if (!empty($_REQUEST['submitted'])) {
 			<div class="row">
 				<div class="col-xs-8 col-xs-offset-2">
 					<p class="text-center">
-						<a href="help.php">Search examples</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="help.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Search examples</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Query string syntax help</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="advanced.php">Switch to advanced search</a></p>
+						<a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Switch to advanced search</a></p>
 				</div>
 			</div>
             <?php $savedsearches = getSavedSearchQuery();
@@ -210,7 +219,7 @@ if (!empty($_REQUEST['submitted'])) {
 					<div class="well well-sm">
 						<?php
         foreach ($savedsearches as $key => $value) {
-            echo '<a class="small" href=/simple.php?submitted=true&p=1&q=' . rawurlencode($value) . '&resultsize=' . $resultSize . '>' . $value . '</a><br />';
+            echo '<a class="small" href=/simple.php?' . $_SERVER['QUERY_STRING'] . '&submitted=true&p=1&q=' . rawurlencode($value) . '&resultsize=' . $resultSize . '>' . $value . '</a><br />';
         }
     } ?>
 					</div>

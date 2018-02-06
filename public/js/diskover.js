@@ -250,13 +250,15 @@ function updateVisLinks() {
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : MTIME;
 	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : MAXDEPTH;
     var use_count = (getCookie('use_count')) ? getCookie('use_count') : USE_COUNT;
-	var url = "filetree.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+    var index = ($_GET('index')) ? $_GET('index') : getCookie('index');
+    var index2 = ($_GET('index2')) ? $_GET('index2') : getCookie('index2');
+	var url = "filetree.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
 	window.parent.document.getElementById("filetreelink").setAttribute("href", url);
-	var url = "treemap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+	var url = "treemap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
 	window.parent.document.getElementById("treemaplink").setAttribute("href", url);
-    var url = "heatmap.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+    var url = "heatmap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
 	window.parent.document.getElementById("heatmaplink").setAttribute("href", url);
-    var url = "top50.php?path=" + path + "&filter=" + filter + "&mtime=" + mtime;
+    var url = "top50.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime;
 	window.parent.document.getElementById("top50link").setAttribute("href", url);
 	return false;
 }

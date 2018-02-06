@@ -36,7 +36,7 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
     }
     // delete existing path cookie
     deleteCookie('path');
-    header("location: /index.php");
+    header("location: /index.php?index=".$_POST['index']."&index2=".$_POST['index2']."");
     exit();
 } elseif (isset($_POST['index']) && $_POST['index'] == "newest") {
     // Get cURL resource
@@ -67,7 +67,7 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
     }
     // delete existing path cookie
     deleteCookie('path');
-    header("location: /index.php");
+    header("location: /index.php?index=".$newest_index."&index2=".$_POST['index2']."");
     exit();
 }
 ?>
@@ -140,7 +140,7 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
 	</form>
     <br />
     <br />
-    <center><small><i class="glyphicon glyphicon-heart"></i> Support diskover on <a href="https://www.patreon.com/diskover" target="_blank">Patreon</a></small></center>
+    <center><i class="glyphicon glyphicon-heart"></i> Support diskover on <a href="https://www.patreon.com/diskover" target="_blank">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.</center>
 </div>
 </div>
 </div>

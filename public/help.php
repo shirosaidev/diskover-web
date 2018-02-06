@@ -102,66 +102,66 @@ require "../src/diskover/Diskover.php";
 					<h4>Get (with curl or web browser)</h4>
 					<p>Getting file tag info is done with the GET method.</p>
 					<p><small class="text-success">Curl example:</small></p>
-					<pre>curl -X GET http://localhost:8000/api.php/endpoint</pre>
+					<pre>curl -X GET http://localhost:8000/api.php/index/endpoint</pre>
 					<p><small class="text-success">List files with custom tag “version 1”:</small></p>
-					<pre>GET http://localhost:8000/api.php/tagfiles?custom=version%201</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagfiles?custom=version%201</pre>
 
 					<p><small class="text-success">List files tagged archive:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/tagfiles?archive</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagfiles?archive</pre>
 
 					<p><small class="text-success">List total file size for tags:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/tagsizes</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagsizes</pre>
 
 					<p><small class="text-success">List total file size for tag:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/tagsize?delete</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagsize?delete</pre>
 
 					<p><small class="text-success">List tag size for custom tag “version 1”:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/tagsize?custom=version%201</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagsize?custom=version%201</pre>
 
 					<p><small class="text-success">List total number of files for tags:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/tagcounts</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagcounts</pre>
 
 					<p><small class="text-success">List total number of files for tag delete:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/tagcount?delete</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagcount?delete</pre>
 
 					<p><small class="text-success">List total number of files for custom tag “version 1”:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/tagcount?custom=version+1</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/tagcount?custom=version+1</pre>
 
 					<p><small class="text-success">List all duplicate files:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/dupes</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/dupes</pre>
 
 					<p><small class="text-success">List total file size of duplicate files:</small></p>
 
-					<pre>GET http://localhost:8000/api.php/dupessize</pre>
+					<pre>GET http://localhost:8000/api.php/diskover-2018.01.17/dupessize</pre>
 
 					<br>
 					<h4>Update (with JSON object)</h4>
 					<p>Updating file tags is done with the PUT method. You can send a JSON object in the body. The call returns the number of files affected.</p>
 
 					<p><small class="text-success">Curl example:</small></p>
-					<pre>curl -X PUT http://localhost:8000/api.php/endpoint -d {}</pre>
+					<pre>curl -X PUT http://localhost:8000/api.php/index/endpoint -d {}</pre>
 
 					<p><small class="text-success">Tag files delete:</small></p>
 
-					<pre>PUT http://localhost:8000/api.php/tagfiles</pre>
+					<pre>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagfiles</pre>
 					<pre>{"tag": "delete", "files": [“/Users/shirosai/file1.png", “/Users/shirosai/file2.png"]}</pre>
 
 					<p><small class="text-success">Tag all files in directory archive:</small></p>
 
-					<pre>PUT http://localhost:8000/api.php/tagdir</pre>
+					<pre>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagdir</pre>
 					<pre>{"tag": "archive", "path_parent": "/Users/shirosai/Downloads"}</pre>
 
 					<p><small class="text-success">Tag all files in directory with custom tag “version 1”:</small></p>
 
-					<pre>PUT http://localhost:8000/api.php/tagdir</pre>
+					<pre>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagdir</pre>
 					<pre>{"tag_custom”: “version 1“, "path_parent": "/Users/shirosai/Downloads"}</pre>
 				</div>
 

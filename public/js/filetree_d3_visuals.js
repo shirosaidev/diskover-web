@@ -39,6 +39,9 @@ console.log("HIDETHRESH:" + hide_thresh);
 var root,
     node;
 
+// chart animation duration (ms)
+var duration = 250;
+
 function changeThreshold(a) {
     hide_thresh = a;
     setCookie('hide_thresh', hide_thresh);
@@ -114,9 +117,6 @@ var key = function(d) {
 };
 
 var color = d3.scale.category20c();
-
-//var color = d3.scale.ordinal()
-//    .range(["#FFD22E", "#27BCF7", "#FFA226", "#AA86FC", "#FF4A7D", "#75DB51", "#A5A5A7"]);
 
 function pieData(data) {
 
@@ -216,7 +216,7 @@ function changePie(data) {
         .attr("class", "slice");
 
     slice
-        .transition().duration(1000)
+        .transition().duration(duration)
         .attrTween("d", function(d) {
             this._current = this._current || d;
             var interpolate = d3.interpolate(this._current, d);
@@ -291,7 +291,7 @@ function changePie(data) {
         return d.startAngle + (d.endAngle - d.startAngle) / 2;
     }
 
-    text.transition().duration(1000)
+    text.transition().duration(duration)
         .attrTween("transform", function(d) {
             this._current = this._current || d;
             var interpolate = d3.interpolate(this._current, d);
@@ -324,7 +324,7 @@ function changePie(data) {
     polyline.enter()
         .append("polyline");
 
-    polyline.transition().duration(1000)
+    polyline.transition().duration(duration)
         .attrTween("points", function(d) {
             this._current = this._current || d;
             var interpolate = d3.interpolate(this._current, d);
@@ -463,7 +463,7 @@ function loadPieFileExt(data) {
         .attr("class", "slice");
 
     slice2
-        .transition().duration(1000)
+        .transition().duration(duration)
         .attrTween("d", function(d) {
             this._current = this._current || d;
             var interpolate = d3.interpolate(this._current, d);
@@ -492,7 +492,7 @@ function loadPieFileExt(data) {
         return d.startAngle + (d.endAngle - d.startAngle) / 2;
     }
 
-    text2.transition().duration(1000)
+    text2.transition().duration(duration)
         .attrTween("transform", function(d) {
             this._current = this._current || d;
             var interpolate = d3.interpolate(this._current, d);
@@ -525,7 +525,7 @@ function loadPieFileExt(data) {
     polyline2.enter()
         .append("polyline");
 
-    polyline2.transition().duration(1000)
+    polyline2.transition().duration(duration)
         .attrTween("points", function(d) {
             this._current = this._current || d;
             var interpolate = d3.interpolate(this._current, d);
@@ -742,7 +742,7 @@ function loadBarMtime(data) {
         });
 
     bar
-        .transition().duration(1000)
+        .transition().duration(duration)
         .attr("width", function(d) {
             return x(barValue(d));
         });
@@ -989,7 +989,7 @@ function loadBarFileSizes(data) {
         });
 
     bar2
-        .transition().duration(1000)
+        .transition().duration(duration)
         .attr("width", function(d) {
             return x(barValue(d));
         });

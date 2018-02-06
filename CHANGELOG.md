@@ -1,5 +1,21 @@
 # Diskover Web Change Log
 
+# [1.4.2] - 2018-02-06
+### notice
+- diskover project is now accepting donations on PayPal. Please consider supporting if you are using diskover :) https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72
+- to see directory sizes run diskover again after crawl finishes with -S to calculate directory sizes, this will also help to speed up the analytics pages
+### added
+- index and index2 variables are now in url when navigating pages, you can set these to change the index
+- warning on dashboard if directory sizes not calculated
+### changed
+- improved performance of File Tree page
+- improved load time on Top 50 pages
+- set index in url for api.php
+### fixed
+- crawl thread usage chart on dashboard page y-axis labels getting cut off when file counts very high
+- es index and doctype issues in api.php
+- bug with calculating directory sizes in Analytics pages when path names are similar
+
 # [1.4.1] - 2017-12-15
 ### notice
 - diskover project is now accepting donations on Patreon. Please consider supporting if you are using diskover :) https://www.patreon.com/diskover
@@ -11,7 +27,6 @@
 - newest option to index select page to select the index with most recent creation date
 - reindex and calculate directory size/items buttons to directory search results table (requires diskover socket server running)
 - alert if no files tagged before clicking tag files submit button
-
 ### changed
 - new dark theme (Bootswatch Cyborg)
 - nav bar is now fixed and stays on top when scrolling
@@ -21,7 +36,6 @@
 - any absolute link paths have been changed to relative
 - switched from using server sent events (SSE) to XMLHttpRequests for diskover socket server connections
 - renamed run_command.php to sockethandler.php for handling XMLHttpRequests to diskover socket server
-
 ### fixed
 - slow load times on dashboard
 - incorrect total number of files displayed on dashboard

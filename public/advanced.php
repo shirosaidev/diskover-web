@@ -11,11 +11,25 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 
-// redirect to select indices page if no index cookie
-$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-if (!$esIndex) {
-    header("location:selectindices.php");
-    exit();
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // get index from env var or cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
+}
+// check for index2 in url
+if (isset($_GET['index2'])) {
+    $esIndex2 = $_GET['index2'];
+    setCookie('index2', $esIndex2);
+} else {
+    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
 }
 
 // Get search results from Elasticsearch if the user searched for something
@@ -254,9 +268,11 @@ if (!empty($_REQUEST['submitted'])) {
   </div>
 <form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-horizontal">
 	<fieldset>
-<input type="hidden" name="submitted" value="true" />
-<input type="hidden" name="p" value="1" />
-<input type="hidden" name="resultsize" value="<?php echo getCookie('resultsize') != "" ? getCookie('resultsize') : 100; ?>" />
+    <input type="hidden" name="index" value="<?php echo $esIndex; ?>" />
+    <input type="hidden" name="index2" value="<?php echo $esIndex2; ?>" />
+    <input type="hidden" name="submitted" value="true" />
+    <input type="hidden" name="p" value="1" />
+    <input type="hidden" name="resultsize" value="<?php echo getCookie('resultsize') != "" ? getCookie('resultsize') : 100; ?>" />
 
 <div class="container">
   <div class="form-group">

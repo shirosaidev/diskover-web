@@ -10,13 +10,26 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 
-// redirect to select indices page if no index cookie
-$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-if (!$esIndex) {
-    header("location:selectindices.php");
-    exit();
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // get index from env var or cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
 }
-$esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+// check for index2 in url
+if (isset($_GET['index2'])) {
+    $esIndex2 = $_GET['index2'];
+    setCookie('index2', $esIndex2);
+} else {
+    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+}
 
 require "d3_inc.php";
 
@@ -171,7 +184,7 @@ foreach ($topusers as $key => $value) {
                   foreach ($topusers as $key => $value) {
                     ?>
                     <tr><td width="10"><?php echo $n; ?></td>
-                        <td><i class="glyphicon glyphicon-user" style="color:#D19866; font-size:13px;"></i> <a href="advanced.php?submitted=true&p=1&owner=<?php echo $value['owner']; ?>"><?php echo $value['owner']; ?></a></td>
+                        <td><i class="glyphicon glyphicon-user" style="color:#D19866; font-size:13px;"></i> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&owner=<?php echo $value['owner']; ?>"><?php echo $value['owner']; ?></a></td>
                         <td><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['filesize']); ?></span></td>
                         <td width="20%"><div class="percent" style="width:<?php echo number_format(($value['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
                         <td><?php echo $value['filecount']; ?></td>
@@ -193,17 +206,19 @@ foreach ($topusers as $key => $value) {
     var path = $_GET('path');
     var filter = $_GET('filter');
     var mtime = $_GET('mtime');
+    var index = $_GET('index');
+    var index2 = $_GET('index2');
     $(".button-largest").click(function () {
-        window.location.href = 'top50.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
     $(".button-oldest").click(function () {
-        window.location.href = 'top50_oldest.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50_oldest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
     $(".button-newest").click(function () {
-        window.location.href = 'top50_newest.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50_newest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
     $(".button-user").click(function () {
-        window.location.href = 'top50_users.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50_users.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
 </script>
 </body>

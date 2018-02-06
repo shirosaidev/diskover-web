@@ -4,16 +4,24 @@ Copyright (C) Chris Park 2017
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
- 
+
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 
-// redirect to select indices page if no index cookie
-$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-if (!$esIndex) {
-    header("location:selectindices.php");
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // get index from env var or cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
 }
 
 // remove any trailing slash unless root

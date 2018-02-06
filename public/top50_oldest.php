@@ -10,13 +10,26 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 
-// redirect to select indices page if no index cookie
-$esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-if (!$esIndex) {
-    header("location:selectindices.php");
-    exit();
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // get index from env var or cookie
+    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
 }
-$esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+// check for index2 in url
+if (isset($_GET['index2'])) {
+    $esIndex2 = $_GET['index2'];
+    setCookie('index2', $esIndex2);
+} else {
+    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+}
 
 require "d3_inc.php";
 
@@ -35,61 +48,60 @@ $mtime = $_GET['mtime'] ?: Constants::MTIME; // file mtime
 $mtime = getmtime($mtime);
 $maxdepth = (int)$_GET['maxdepth'] ?: Constants::MAXDEPTH; // maxdepth
 
-function top50dirs($client, $index, $path, $filter, $mtime, $depth, $maxdepth) {
-    $items = [];
-    $subdirs = [];
-    if ($depth == $maxdepth) {
-        return $items;
-    }
-
-    // get directories in current path (not recursive)
-    $subdirs = get_sub_dirs($client, $index, $path, $sort='last_modified', $sortorder='asc');
-
-    // loop through all subdirs and add to items array
-    foreach ($subdirs as $d) {
-        // get dir total size, file count, last modified time
-        $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
-
-        // continue if directory is empty
-        if ($dirinfo[0] == 0 || $dirinfo[1] == 0) {
-            continue;
-        }
-        $items[] = [
-            "name" => $d,
-            "size" => $dirinfo[0],
-            "count" => $dirinfo[1],
-            "modified" => $dirinfo[2],
-            "children" => top50dirs($client, $index, $d, $filter, $mtime, $depth+=1, $maxdepth)
-        ];
-        $depth-=1;
-    }
-    return $items;
-}
-
 // get top 50 directories
 $totaldirsize = 0;
 $totaldircount = 0;
-$data = top50dirs($client, $esIndex, $path, 1, getmtime(0), 0, 2);
-$oldestdirs = [];
-foreach ($data as $arr) {
-    if (isset($arr['count'])) {
-        $oldestdirs[$arr['name']] = [$arr['modified'], $arr['size'], $arr['count']];
-        $totaldirsize += $arr['size'];
-        $totaldircount += $arr['count'];
-    }
-    if (isset($arr['children'])) {
-        foreach ($arr['children'] as $arr1) {
-            if (isset($arr1['count'])) {
-                $oldestdirs[$arr1['name']] = [$arr1['modified'], $arr1['size'], $arr1['count']];
-                $totaldirsize += $arr1['size'];
-                $totaldircount += $arr1['count'];
-            }
-        }
-    }
-}
-asort($oldestdirs);
-$oldestdirs = array_slice($oldestdirs, 0, 50);
 
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'directory';
+
+// Setup search query for largest files
+$searchParams['body'] = [
+    'size' => 50,
+    '_source' => ['filename', 'path_parent', 'filesize', 'items', 'last_modified'],
+    'query' => [
+        'bool' => [
+            'must' => [
+                    'wildcard' => [ 'path_parent' => $path . '*' ]
+            ],
+            'filter' => [
+                'bool' => [
+                    'must' => [
+                        'range' => [
+                            'filesize' => [
+                                'gte' => $filter
+                            ]
+                        ]
+                    ],
+                    'should' => [
+                        'range' => [
+                            'last_modified' => [
+                                'lte' => $mtime
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ],
+    'sort' => [
+        'last_modified' => [
+            'order' => 'asc'
+        ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+$oldestdirs = $queryResponse['hits']['hits'];
+
+foreach ($oldestdirs as $key => $value) {
+    $totaldirsize += $value['_source']['filesize'];
+    $totaldircount += $value['_source']['items'];
+}
 
 // Get search results from Elasticsearch for top 50 oldest files
 $results = [];
@@ -101,7 +113,6 @@ $searchParams['type']  = 'file';
 
 
 // Setup search query for largest files
-$path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
 $searchParams['body'] = [
     'size' => 50,
     '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
@@ -212,7 +223,7 @@ foreach ($oldestfiles as $key => $value) {
                         <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                         <td width="20%"><div class="percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
                         <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
-                        <td class="path"><a href="top50.php?path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
+                        <td class="path"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
                     </tr>
                   <?php $n++; }
                    ?>
@@ -233,6 +244,7 @@ foreach ($oldestfiles as $key => $value) {
                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
                 </div>
     		</div><br />
+            <?php if (count($oldestdirs) > 0) { ?>
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
               <thead>
                 <tr>
@@ -248,22 +260,28 @@ foreach ($oldestfiles as $key => $value) {
             </thead>
             <tbody>
                   <?php
-                  $n = 1;
-                  foreach ($oldestdirs as $key => $value) {
-                    ?>
-                    <tr><td width="10"><?php echo $n; ?></td>
-                        <td class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <a href="top50.php?path=<?php echo $key; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo basename($key); ?></a></td>
-                        <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value[1]); ?></span></td>
-                        <td width="20%"><div class="text-right percent" style="width:<?php echo number_format(($value[1] / $totaldirsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value[1] / $totaldirsize) * 100, 2); ?>%</small></span></td>
-                        <td class="path"><?php echo $value[2]; ?></td>
-                        <td width="20%"><div class="text-right percent" style="width:<?php echo number_format(($value[2] / $totaldircount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value[2] / $totaldircount) * 100, 2); ?>%</small></span></td>
-                        <td class="path"><?php echo $value[0]; ?></td>
-                        <td class="path"><a href="top50.php?path=<?php echo dirname($key); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo dirname($key); ?></a></td>
-                    </tr>
-                  <?php $n++; }
-                   ?>
+                      $n = 1;
+                      foreach ($oldestdirs as $key => $value) {
+                        ?>
+                        <tr><td width="10"><?php echo $n; ?></td>
+                            <td class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent'] . '/' . $value['_source']['filename'] ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['filename']; ?></a></td>
+                            <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
+                            <td width="20%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%</small></span></td>
+                            <td class="text-nowrap"><?php echo $value['_source']['items']; ?></td>
+                            <td width="20%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%</small></span></td>
+                            <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
+                            <td class="path"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
+                        </tr>
+                    <?php $n++; } ?>
                </tbody>
           </table>
+      <?php } else { ?>
+          <div class="col-xs-7">
+          <div class="alert alert-dismissible alert-warning">
+              <button type="button" class="close" data-dismiss="alert">&times;</button><strong><i class="glyphicon glyphicon-info-sign"></i> Directory sizes have not been calculated.</strong> Run diskover again after crawl finishes with -S to calculate directory sizes.
+          </div>
+        </div>
+      <?php } ?>
         </div>
       </div>
   </div>
@@ -288,17 +306,19 @@ foreach ($oldestfiles as $key => $value) {
     var path = $_GET('path');
     var filter = $_GET('filter');
     var mtime = $_GET('mtime');
+    var index = $_GET('index');
+    var index2 = $_GET('index2');
     $(".button-largest").click(function () {
-        window.location.href = 'top50.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
     $(".button-oldest").click(function () {
-        window.location.href = 'top50_oldest.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50_oldest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
     $(".button-newest").click(function () {
-        window.location.href = 'top50_newest.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50_newest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
     $(".button-user").click(function () {
-        window.location.href = 'top50_users.php?path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+        window.location.href = 'top50_users.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
     });
 </script>
 </body>
