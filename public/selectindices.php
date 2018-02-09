@@ -13,19 +13,6 @@ require "../src/diskover/Diskover.php";
 $host = Constants::ES_HOST;
 $port = Constants::ES_PORT;
 
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>diskover &mdash; Index Selector</title>
-<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
-<link rel="stylesheet" href="css/diskover.css" media="screen" />
-<?php
 // set cookies for indices and redirect to index page
 if (isset($_POST['index']) && $_POST['index'] != "newest") {
     createCookie('index', $_POST['index']);
@@ -71,6 +58,16 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
     exit();
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>diskover &mdash; Index Selector</title>
+<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+<link rel="stylesheet" href="css/diskover.css" media="screen" />
 </head>
 
 <body>
