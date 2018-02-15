@@ -1,0 +1,7 @@
+custom tag 1|#C678DD
+custom tag 2|#61AFEF
+custom tag 3|#98C379
+custom tag 4|#ccc
+custom tag 5|#FFF
+fast storage|red
+slow storage|blue

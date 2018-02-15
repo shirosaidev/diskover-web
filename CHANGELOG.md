@@ -1,5 +1,43 @@
 # Diskover Web Change Log
 
+# [1.4.5] - 2018-02-15
+### notice
+- requires index created with diskover >= v1.4.5.
+### added
+- support for diskover v1.4.5 which removed "untagged" from all file/directory tags, and changed is_dupe field to dupe_md5
+- improved search including predictive search and keyword highlight results on simple search page and nav search
+- smart search. You can now use !doc, !img, etc for quick shortcut searching. smart searches can be edited on Admin page and are stored in smartsearches.txt
+- New analytics page "Tags" showing all tag counts and file sizes for each tag and custom tags.
+- New analytics page "Dupes" showing all dupes counts and dupes file sizes for each dupe_md5 md5 sum field (requires running diskover with --tagdupes after crawl to tag dupe files)
+- improved Advanced search page
+- searches in advanced page are now saved to simple search history list
+- escape_chars function to Diskover.php for escaping any paths sent to ES
+- custom tags are now stored in customtags.txt
+- form area to edit custom tags (customtags.txt) on Admin page
+- default 50 results per search page (previously 100) in Constants.php (can change on search results page which will store cookie)
+- filesize change % and items change % (directory) on search results pages when index2 has been selected (data comparison)
+- when adding additional custom fields from plugins on admin page, fields will display up in file/directory view pages as well as on search results pages
+### changed
+- improved tagging system and tagging ui
+- improved search results page and ui
+- improved file view page
+- improved nav search
+- improved index select page including indication if "newest" index is still crawling. Also select dropdown is now sorted by index creation date.
+- improved Top 50 analytics pages
+- improved search results exporting
+- improved Quick Search nav menu
+- improved dashboard page
+- made default search doctype to be "all", previously was file type
+- updated help page
+- improved Admin page and added "Edit custom tags" and "Edit smart searches" forms
+### fixed
+- index and index2 not in url after submitting nav bar search
+- tag counts pie chart on dashboard now includes directories
+- picking none on index select page for index2 causes ES error
+- XSS auditor refused to execute a script error in browser console when searching
+- sort arrows now properly highlight for default sort
+- additional directory fields for diskover plugins not showing up on "additional fields for search results" dropdown lists on Admin page
+
 # [1.4.2] - 2018-02-06
 ### notice
 - diskover project is now accepting donations on PayPal. Please consider supporting if you are using diskover :) https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72

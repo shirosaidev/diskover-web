@@ -6,39 +6,70 @@ LICENSE for the full license text.
 
 /* diskover style sheet */
 
-.keeprow {
-    border-left: 5px solid #983BC9;
-    color: #983BC9;
+.keephighlight_bg {
+    background-color: #52A3BB;
+}
+
+.archivehighlight_bg {
+    background-color: #65C165;
+}
+
+.deletehighlight_bg {
+    background-color: #F69327;
+}
+
+.keeprow .highlight {
+    color: #52A3BB !important;
     opacity: .8;
 }
 
-.keeprow a {
-    color: #5EBFDB;
+.keeprow .highlight a {
+    color: #52A3BB !important;
 }
 
-.archiverow {
-    border-left: 5px solid #47AF48;
-    color: #47AF48;
+.archiverow .highlight {
+    color: #65C165 !important;
     opacity: .8;
 }
 
-.archiverow a {
-    color: #47AF48;
+.archiverow .highlight a {
+    color: #65C165 !important;
 }
 
-.deleterow {
-    border-left: 5px solid #F6962A;
-    color: #F6962A;
+.deleterow .highlight {
+    color: #F69327 !important;
     opacity: .8;
 }
 
-.deleterow a {
-    color: #F6962A;
+.deleterow .highlight a {
+    color: #F69327 !important;
+}
+
+.tagdropdown {
+    opacity: 1 !important;
+}
+
+.tagdropdown a:link {
+    text-decoration: none !important;
+}
+
+.tagdropdown a:visited {
+    text-decoration: none !important;
 }
 
 .path {
     word-wrap: break-word;
     word-break: break-all;
+}
+
+.pathdropdown a:link {
+    color: lightgray !important;
+    text-decoration: none !important;
+}
+
+.pathdropdown a:visited {
+    color: lightgray !important;
+    text-decoration: none !important;
 }
 
 .searchresults {
@@ -50,6 +81,7 @@ LICENSE for the full license text.
     word-wrap: break-word;
     word-break: break-all;
     font-size: 12px;
+    color: gray;
 }
 
 .results tr[visible='false'], .no-result {
@@ -146,4 +178,135 @@ tbody a:hover {
 .chartbox a:hover {
     color: white!important;
     text-decoration: underline!important;
+}
+
+.delete {
+    color: #F69327;
+}
+
+.archive {
+    color: #65C165;
+}
+
+.keep {
+    color: #52A3BB;
+}
+
+.untagged {
+    color: #666666;
+}
+
+#loading {
+   width: 100%;
+   height: 100%;
+   top: 0;
+   left: 0;
+   position: fixed;
+   display: block;
+   opacity: 0.7;
+   background-color: #000;
+   z-index: 99;
+   text-align: center;
+   display: none;
+}
+
+#loading-image {
+  position: absolute;
+  top: 49%;
+  left: 49%;
+  z-index: 100;
+}
+
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+    border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+    float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+}
+
+.essearchreply {
+    display: none;
+    position: absolute;
+    height: 400px;
+    z-index: 99;
+    background-color: #1C1E22;
+    opacity: .9;
+    width: 100%;
+    overflow: hidden;
+    margin-top: 10px;
+    border: 1px solid #555;
+}
+
+.essearchreply-text {
+    display: block;
+    position: relative;
+    padding: 15px;
+    font-size: 14px;
+    text-align: left;
+    line-height: 1.9em;
+    height: 400px;
+    width: 100%;
+    overflow: hidden;
+    color: white;
+    font-weight: bold;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.essearchreply-text a {
+    color: white!important;
+}
+
+.searchpath {
+    color:gray!important;
+    font-size:10px;
+    line-height:0.1em!important;
+}
+
+.searchpath a {
+    color:gray!important;
+    font-size:10px;
+    line-height:0.1em!important;
 }

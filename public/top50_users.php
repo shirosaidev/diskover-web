@@ -132,20 +132,7 @@ foreach ($topusers as $key => $value) {
   <title>diskover &mdash; Top 50 Users</title>
 	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="css/diskover.css" media="screen" />
-	<style>
-    .percent {
-        background-color: #D20915;
-        opacity: .9;
-        border: 1px solid black;
-        display: inline-block;
-        height: 14px;
-        left: 0px;
-        bottom: -2px;
-        position: relative;
-        z-index: 0;
-        overflow: hidden;
-    }
-	</style>
+  <link rel="stylesheet" href="css/diskover-top50.css" media="screen" />
 </head>
 <body>
 <?php include "nav.php"; ?>
@@ -155,7 +142,7 @@ foreach ($topusers as $key => $value) {
         <div id="top50users">
             <div class="row">
     			<div class="col-xs-12">
-    				<h1 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 50 Users</h1>&nbsp;&nbsp;&nbsp;&nbsp;
+    				<h3 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 50 Users</h3>&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
                         <button class="btn btn-default button-largest"> Largest</button>
                         <button class="btn btn-default button-oldest"> Oldest</button>
@@ -165,6 +152,7 @@ foreach ($topusers as $key => $value) {
                     <span style="font-size:10px; color:gray;">*filters on filetree page affect this page</span>
                     <br />
                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
+                    <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='top50_users.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=<?php echo $_GET['doctype']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
                 </div>
     		</div><br />
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -183,12 +171,12 @@ foreach ($topusers as $key => $value) {
                   $n = 1;
                   foreach ($topusers as $key => $value) {
                     ?>
-                    <tr><td width="10"><?php echo $n; ?></td>
+                    <tr><td class="darken" width="10"><?php echo $n; ?></td>
                         <td><i class="glyphicon glyphicon-user" style="color:#D19866; font-size:13px;"></i> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&owner=<?php echo $value['owner']; ?>"><?php echo $value['owner']; ?></a></td>
                         <td><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['filesize']); ?></span></td>
-                        <td width="20%"><div class="percent" style="width:<?php echo number_format(($value['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
+                        <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
                         <td><?php echo $value['filecount']; ?></td>
-                        <td width="20%"><div class="percent" style="width:<?php echo number_format(($value['filecount'] / $totalfilecount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filecount'] / $totalfilecount) * 100, 2); ?>%</small></span></td>
+                        <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['filecount'] / $totalfilecount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filecount'] / $totalfilecount) * 100, 2); ?>%</small></span></td>
                     </tr>
                   <?php $n++; }
                    ?>
@@ -201,25 +189,6 @@ foreach ($topusers as $key => $value) {
 <script language="javascript" src="js/jquery.min.js"></script>
 <script language="javascript" src="js/bootstrap.min.js"></script>
 <script language="javascript" src="js/diskover.js"></script>
-<!-- buttons -->
-<script>
-    var path = $_GET('path');
-    var filter = $_GET('filter');
-    var mtime = $_GET('mtime');
-    var index = $_GET('index');
-    var index2 = $_GET('index2');
-    $(".button-largest").click(function () {
-        window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-    $(".button-oldest").click(function () {
-        window.location.href = 'top50_oldest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-    $(".button-newest").click(function () {
-        window.location.href = 'top50_newest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-    $(".button-user").click(function () {
-        window.location.href = 'top50_users.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-</script>
+<script language="javascript" src="js/top50.js"></script>
 </body>
 </html>

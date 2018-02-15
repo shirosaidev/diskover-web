@@ -78,7 +78,6 @@ $js_threads = json_encode($thread_usage);
 $results = [];
 $searchParams = [];
 
-$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 $totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
 // Setup search query
@@ -86,12 +85,13 @@ $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'file';
 
 // Execute the search
-foreach ($tagCounts as $tag => $value) {
-  $searchParams['body'] = [
+foreach ($totalFilesize as $tag => $value) {
+    if ($tag === "untagged") { $t = ""; } else { $t = $tag; }
+    $searchParams['body'] = [
      'size' => 0,
      'query' => [
        'match' => [
-         'tag' => $tag
+         'tag' => $t
        ]
      ],
       'aggs' => [
@@ -101,16 +101,40 @@ foreach ($tagCounts as $tag => $value) {
           ]
         ]
       ]
-  ];
+    ];
 
-  // Send search query to Elasticsearch
-  $queryResponse = $client->search($searchParams);
+    // Send search query to Elasticsearch
+    $queryResponse = $client->search($searchParams);
 
-  // Get total for tag
-  $tagCounts[$tag] = $queryResponse['hits']['total'];
+    // Get total size of all files with tag
+    $totalFilesize[$tag] = $queryResponse['aggregations']['total_size']['value'];
+}
 
-  // Get total size of all files with tag
-  $totalFilesize[$tag] = $queryResponse['aggregations']['total_size']['value'];
+$results = [];
+$searchParams = [];
+$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'file,directory';
+
+// Execute the search
+foreach ($tagCounts as $tag => $value) {
+    if ($tag === "untagged") { $t = ""; } else { $t = $tag; }
+    $searchParams['body'] = [
+       'size' => 0,
+       'query' => [
+         'match' => [
+           'tag' => $t
+         ]
+       ]
+    ];
+
+    // Send search query to Elasticsearch
+    $queryResponse = $client->search($searchParams);
+
+    // Get total for tag
+    $tagCounts[$tag] = $queryResponse['hits']['total'];
 }
 
 // Get search results from Elasticsearch for duplicate files
@@ -135,8 +159,9 @@ $searchParams['body'] = [
       ]
     ],
     'query' => [
-      'match' => [
-        'is_dupe' => 'true'
+      'query_string' => [
+        'query' => 'dupe_md5:(NOT "")',
+        'analyze_wildcard' => 'true'
       ]
     ]
 ];
@@ -323,6 +348,42 @@ if ($sizecheck > 0 && $itemscheck > 0) {
     $dirsizecalc = true;
 }
 
+
+// Get recommended delete size/count
+$recommended_delete_size = 0;
+$recommended_delete_count = 0;
+
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = "file";
+
+// Setup search query for dupes count
+$searchParams['body'] = [
+   'size' => 0,
+    'aggs' => [
+      'total_size' => [
+        'sum' => [
+          'field' => 'filesize'
+        ]
+      ]
+    ],
+    'query' => [
+      'query_string' => [
+        'query' => 'last_modified:{* TO now-6M} AND last_access:{* TO now-6M}'
+      ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of recommended files to remove
+$recommended_delete_count = $queryResponse['hits']['total'];
+
+// Get total size of allrecommended files to remove
+$recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -377,9 +438,10 @@ if ($sizecheck > 0 && $itemscheck > 0) {
     <div class="col-xs-6">
       <div class="well">
         <h1><i class="glyphicon glyphicon-piggy-bank"></i> Space Savings</h1>
-        <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesize['untagged']+$totalFilesize['delete']+$totalFilesize['archive']+$totalFilesize['keep']); ?></span> of disk space if you delete or archive all your files.
-            There are a total of <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> files and <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> directories.
-            There are <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> duplicate files taking up <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span> space.</p>
+        <p>You could save <span style="font-size:24px;font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesize['untagged']+$totalFilesize['delete']+$totalFilesize['archive']+$totalFilesize['keep']); ?></span> of disk space if you delete or archive all your files.<br />
+            diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo $recommended_delete_count ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime & atime)</span><br />
+            <i class="glyphicon glyphicon-file"></i> Files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> &nbsp;&nbsp; <i class="glyphicon glyphicon-folder-close"></i> Directories: <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span><br />
+            <i class="glyphicon glyphicon-duplicate"></i> Duplicate files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)</p>
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -402,7 +464,7 @@ if ($sizecheck > 0 && $itemscheck > 0) {
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-duplicate"></i> No dupe files found.</h4>
-        <p>Run diskover with the --tagdupes flag after crawl finishes to check for duplicate files.</p>
+        <p>Run diskover with the --finddupes flag after crawl finishes to check for duplicate files.</p>
       </div>
       <?php
       }
@@ -413,7 +475,7 @@ if ($sizecheck > 0 && $itemscheck > 0) {
       <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
-        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;is_dupe=true&amp;sort=filesize&amp;sortorder=desc" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
+        <p>It looks like you have <a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=dupe_md5:(NOT &quot;&quot;)" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
       </div>
       <?php
       }
@@ -424,7 +486,7 @@ if ($sizecheck > 0 && $itemscheck > 0) {
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-tags"></i> Untagged files!</h4>
-        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
+        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
       </div>
       <?php
       }
@@ -539,14 +601,14 @@ if ($sizecheck > 0 && $itemscheck > 0) {
         </div>
         <div class="row">
           <div class="col-xs-6">
-            <div class="panel panel-primary">
+            <div class="panel panel-primary chartbox">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3>
+                <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
             </div>
             <div class="panel-body">
                 <div id="tagcountchart" class="text-center"></div>
                 <div class="chartbox">
-                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo $tagCounts['untagged']; ?></a></span>
+                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
                   <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
                   <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
                   <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
@@ -555,14 +617,14 @@ if ($sizecheck > 0 && $itemscheck > 0) {
             </div>
           </div>
         	<div class="col-xs-6">
-                <div class="panel panel-primary">
+                <div class="panel panel-primary chartbox">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3>
+                    <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
                 </div>
             <div class="panel-body">
                 <div id="filesizechart" class="text-center"></div>
                 <div class="chartbox">
-                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
+                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
                   <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
                   <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
                   <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>

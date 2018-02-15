@@ -74,7 +74,7 @@ function put($endpoint, $input) {
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
-			$searchParams['size'] = 100;
+			$searchParams['size'] = 1000;
 
 			$searchParams['body'] = [
 				 	'query' => [
@@ -110,7 +110,9 @@ function put($endpoint, $input) {
 			// Loop through all the pages of results
 			while ($i <= ceil($total/$searchParams['size'])) {
 				// add files in directory to results array
-				$results = $queryResponse['hits']['hits'];
+                foreach ($queryResponse['hits']['hits'] as $hit) {
+                    $results[] = $hit;
+                }
 
 				// Execute a Scroll request and repeat
 				$queryResponse = $client->scroll([
@@ -438,7 +440,7 @@ function get($endpoint, $query) {
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
-			$searchParams['size'] = 100;
+			$searchParams['size'] = 1000;
 
 			// custom tag
 			if ($output['custom']) {
@@ -481,7 +483,9 @@ function get($endpoint, $query) {
 			// Loop through all the pages of results
 			while ($i <= ceil($total/$searchParams['size'])) {
 				// Get files for tag
-				$results = $queryResponse['hits']['hits'];
+                foreach ($queryResponse['hits']['hits'] as $hit) {
+                    $results[] = $hit;
+                }
 
 				// Execute a Scroll request and repeat
 				$queryResponse = $client->scroll([
@@ -510,7 +514,7 @@ function get($endpoint, $query) {
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
-			$searchParams['size'] = 100;
+			$searchParams['size'] = 1000;
 
 			$searchParams['body'] = [
 					'query' => [
@@ -544,7 +548,9 @@ function get($endpoint, $query) {
 			// Loop through all the pages of results
 			while ($i <= ceil($total/$searchParams['size'])) {
 				// Get files for tag
-				$results = $queryResponse['hits']['hits'];
+                foreach ($queryResponse['hits']['hits'] as $hit) {
+                    $results[] = $hit;
+                }
 
 				// Execute a Scroll request and repeat
 				$queryResponse = $client->scroll([

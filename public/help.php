@@ -44,60 +44,13 @@ require "../src/diskover/Diskover.php";
 
 			<div class="col-xs-6">
 				<h4>Tagging files</h4>
-				<p>To tag files in a diskover index, perform a search and then on the results page click a tag button (<em><span class="text-warning"><i class="glyphicon glyphicon-trash"></i> delete</span>, <span class="text-success"><i class="glyphicon glyphicon-cloud-upload"></i> archive</span> or <span class="text-info"><i class="glyphicon glyphicon-floppy-saved"></i> keep</span></em>) for each file. After you have selected files for tagging, click the <span style="color:red;"><i class="glyphicon glyphicon-tag"></i> Tag files</span> button and the files will be tagged in Elasticsearch. </p><p>Select All buttons and Search within text input select only the results on the current page.</p><p><strong>After tagging you may need to reload the page to see the updated results from Elasticsearch.</strong></p>
-				<br>
-				<h4>Search query examples</h4>
+				<p>To tag files or directories perform a search and then on the results page click a tag button <strong><i class="glyphicon glyphicon-tag"></i></strong> for the file or directory you want to tag. From the drop-down menu you can select from standard tags (<em><span class="delete"><i class="glyphicon glyphicon-trash"></i> delete</span>, <span class="archive"><i class="glyphicon glyphicon-cloud-upload"></i> archive</span> or <span class="keep"><i class="glyphicon glyphicon-floppy-saved"></i> keep</span></em>) or pick one of the custom tags or add a new custom tag. Custom tags are created with "<strong>tag name|#hexcolor</strong>" (no quotes).</p>
+                <p>You can remove a tag and custom tag on the tag menu by clicking the "untagged" and/or "Remove custom tag" menu options.</p>
+                <p>In the tag menu you can also apply tags to all on page to copy the current selected tag to all on the current page. When clicking the tag menu for directories, you also have the option to tag all sub directories (recursively) or tag all files (recursively). This also works to remove all tags recursively if the selected item has no tags.</p>
+                <p><strong>After tagging you may need to reload the page to see the updated results from Elasticsearch.</strong></p>
+                <br />
 
-				<div class="well well-sm">
-					<p><small class="text-success">all files in directory:</small><br>
-						<strong>path_parent:"/Users/shirosai/Downloads"</strong></p>
-					<p><small class="text-success">all files in directory and all subdirs:</small><br>
-						<strong>path_parent:\/Users\/shirosai\/Downloads*</strong></p>
-					<p><small class="text-success">files that haven't been modified in over 3 months and less than 5 years:</small><br>
-						<strong>last_modified: [now-5y TO now-3M]</strong></p>
-					<p><small class="text-success">files that haven't been modified or accessed in over 1 year:</small><br><strong>last_modified:[* TO now-1y] AND last_access:[* TO now-1y]</strong></p>
-					<p><small class="text-success">image files:</small><br>
-						<strong>extension:(jpg OR gif OR png OR tif OR tiff OR dpx OR exr OR psd OR bmp OR tga)</strong></p>
-					<p><small class="text-success">audio files:</small><br>
-						<strong>extension:(aif OR iff OR m3u OR m4a OR mid OR mp3 OR mpa OR wav OR wma)</strong></p>
-					<p><small class="text-success">video files:</small><br>
-						<strong>extension:(asf OR avi OR flv OR m4v OR mov OR mp4 OR mpg OR rm OR vob OR wmv)</strong></p>
-					<p><small class="text-success">temp files:</small><br>
-						<strong>extension:(cache OR tmp OR temp OR bak OR old)</strong></p>
-					<p><small class="text-success">compressed files:</small><br>
-						<strong>extension:(7z OR deb OR gz OR pkg OR rar OR rpm OR tar OR zip OR zipx)</strong></p>
-					<p><small class="text-success">image sequence img001.dpx, img002.dpx, im003.dpx:</small><br>
-						<strong>filename:img*.dpx</strong></p>
-					<p><small class="text-success">duplicate files:</small><br>
-						<strong>is_dupe:true</strong></p>
-					<p><small class="text-success">all files with custom tag "version 8":</small><br>
-						<strong>tag_custom:"version 8"</strong></p>
-					<p><small class="text-success">all files with custom tag "version 8" and larger than 10 MB:</small><br>
-						<strong>tag_custom:"version 8" AND filesize:>10485760</strong></p>
-					<p><small class="text-success">all files tagged delete:</small><br>
-						<strong>tag:"delete"</strong></p>
-				</div>
-
-				<h4>diskover.py socket command examples</h4>
-
-				<div class="well well-sm">
-					<p><small class="text-success">nc (netcat) example:</small></p>
-					<pre>echo -n '{"action": "tagdupes"}' | nc -u 127.0.0.1 9999</pre>
-					<p><small class="text-success">tag duplicate files in index:</small><br>
-						<pre>{"action": "tagdupes", "index": "diskover-2017.04.22"}</pre></p>
-					<p><small class="text-success">crawl directory and save to index:</small><br><pre>{"action": "crawl", "path": "/Users/cp", "index": "diskover-2017.10.06"}</pre></p>
-					<p><small class="text-success">crawl directory (recursive) using 8 threads and save to default index:</small><br><pre>{"action": "crawl", "path": "/Users/cp/Downloads", "threads": 8}</pre></p>
-					<p><small class="text-success">reindex (freshen) directory and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Downloads"}</pre></p>
-					<p><small class="text-success">reindex (freshen) directory and all subdirs and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Documents", "recursive": "true"}</pre></p>
-                    <p><small class="text-success">calculate all directory sizes/items and update default index:</small><br><pre>{"action": "dirsize", "index": "diskover-2017.12.11"}</pre></p>
-                    <p><small class="text-success">calculate single directory size/items and update default index:</small><br><pre>{"action": "dirsize", "path": "/Users/cp/Documents"}</pre></p>
-                </div>
-			</div>
-
-
-			<div class="col-xs-6">
-				<h4>Rest API</h4>
-
+                <h4>Rest API</h4>
 				<div class="well well-sm">
 					<h4>Get (with curl or web browser)</h4>
 					<p>Getting file tag info is done with the GET method.</p>
@@ -164,7 +117,53 @@ require "../src/diskover/Diskover.php";
 					<pre>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagdir</pre>
 					<pre>{"tag_custom”: “version 1“, "path_parent": "/Users/shirosai/Downloads"}</pre>
 				</div>
-
+			</div>
+			<div class="col-xs-6">
+                <h4>Search query examples</h4>
+				<div class="well well-sm">
+					<p><small class="text-success">all files in directory:</small><br>
+						<strong>path_parent:"/Users/shirosai/Downloads"</strong></p>
+					<p><small class="text-success">all files in directory and all subdirs:</small><br>
+						<strong>path_parent:\/Users\/shirosai\/Downloads*</strong></p>
+					<p><small class="text-success">files that haven't been modified in over 3 months and less than 5 years:</small><br>
+						<strong>last_modified: [now-5y TO now-3M]</strong></p>
+					<p><small class="text-success">files that haven't been modified or accessed in over 1 year:</small><br><strong>last_modified:[* TO now-1y] AND last_access:[* TO now-1y]</strong></p>
+					<p><small class="text-success">image files:</small><br>
+						<strong>extension:(jpg OR gif OR png OR tif OR tiff OR dpx OR exr OR psd OR bmp OR tga)</strong></p>
+					<p><small class="text-success">audio files:</small><br>
+						<strong>extension:(aif OR iff OR m3u OR m4a OR mid OR mp3 OR mpa OR wav OR wma)</strong></p>
+					<p><small class="text-success">video files:</small><br>
+						<strong>extension:(asf OR avi OR flv OR m4v OR mov OR mp4 OR mpg OR rm OR vob OR wmv)</strong></p>
+					<p><small class="text-success">temp files:</small><br>
+						<strong>extension:(cache OR tmp OR temp OR bak OR old)</strong></p>
+					<p><small class="text-success">compressed files:</small><br>
+						<strong>extension:(7z OR deb OR gz OR pkg OR rar OR rpm OR tar OR zip OR zipx)</strong></p>
+					<p><small class="text-success">image sequence img001.dpx, img002.dpx, im003.dpx:</small><br>
+						<strong>filename:img*.dpx</strong></p>
+					<p><small class="text-success">duplicate files:</small><br>
+						<strong>dupe_md5:(NOT "")</strong></p>
+					<p><small class="text-success">all files with custom tag "version 8":</small><br>
+						<strong>tag_custom:"version 8"</strong></p>
+					<p><small class="text-success">all files with custom tag "version 8" and larger than 10 MB:</small><br>
+						<strong>tag_custom:"version 8" AND filesize:>10485760</strong></p>
+					<p><small class="text-success">all files tagged delete:</small><br>
+						<strong>tag:"delete"</strong></p>
+				</div>
+                <br />
+                
+                <h4>diskover.py socket command examples</h4>
+				<div class="well well-sm">
+					<p><small class="text-success">nc (netcat) example:</small></p>
+					<pre>echo -n '{"action": "tagdupes"}' | nc -u 127.0.0.1 9999</pre>
+					<p><small class="text-success">tag duplicate files in index:</small><br>
+						<pre>{"action": "tagdupes", "index": "diskover-2017.04.22"}</pre></p>
+					<p><small class="text-success">crawl directory and save to index:</small><br><pre>{"action": "crawl", "path": "/Users/cp", "index": "diskover-2017.10.06"}</pre></p>
+					<p><small class="text-success">crawl directory (recursive) using 8 threads and save to default index:</small><br><pre>{"action": "crawl", "path": "/Users/cp/Downloads", "threads": 8}</pre></p>
+					<p><small class="text-success">reindex (freshen) directory and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Downloads"}</pre></p>
+					<p><small class="text-success">reindex (freshen) directory and all subdirs and update default index:</small><br><pre>{"action": "reindex", "path": "/Users/cp/Documents", "recursive": "true"}</pre></p>
+                    <p><small class="text-success">calculate all directory sizes/items and update default index:</small><br><pre>{"action": "dirsize", "index": "diskover-2017.12.11"}</pre></p>
+                    <p><small class="text-success">calculate single directory size/items and update default index:</small><br><pre>{"action": "dirsize", "path": "/Users/cp/Documents"}</pre></p>
+                </div>
 			</div>
 		</div>
 			<div class="row">

@@ -32,9 +32,12 @@ $p = $_REQUEST['p'];
 // type of export
 $export = $_REQUEST['export'];
 
+// doctype of export
+$export_type = $_REQUEST['export_type'];
+
 // Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = ($_REQUEST['doctype']) ? $_REQUEST['doctype'] : 'file,directory';
+$searchParams['type']  = $export_type;
 
 // Scroll parameter alive time
 $searchParams['scroll'] = "1m";
@@ -46,7 +49,7 @@ if (isset($_REQUEST['resultsize'])) {
 } elseif (getCookie("resultsize") != "") {
     $searchParams['size'] = getCookie("resultsize");
 } else {
-    $searchParams['size'] = 100;
+    $searchParams['size'] = Constants::SEARCH_RESULTS;
 }
 
 // match all if search field empty
@@ -68,23 +71,8 @@ if (empty($_REQUEST['q'])) {
     ];
 }
 
-// Check if we need to sort search differently
-// check request
-if ($_REQUEST['sort']) {
-    $searchParams['body']['sort'] = $_REQUEST['sort'];
-    if ($_REQUEST['sortorder']) {
-        $searchParams['body']['sort'] = [ ''.$_REQUEST['sort'].'' => ['order' => $_REQUEST['sortorder'] ] ];
-    }
-// check cookie
-} elseif (getCookie('sort')) {
-    $searchParams['body']['sort'] = getCookie('sort');
-    if (getCookie('sortorder')) {
-        $searchParams['body']['sort'] = [ ''.getCookie('sort').'' => ['order' => getCookie('sortorder') ] ];
-    }
-} else {
-    // sort by parent path, then filename
-    $searchParams['body']['sort'] = [ 'path_parent' => ['order' => 'asc' ], 'filename' => 'asc' ];
-}
+// Sort search results
+$searchParams = sortSearchResults($_REQUEST, $searchParams);
 
 try {
     // Send search query to Elasticsearch and get scroll id and first page of results
@@ -163,9 +151,16 @@ function array2csv(array &$array)
    return ob_get_clean();
 }
 
-$results_source = [];
+// separate doc source by file and directory (separate exports since different fields)
+$results_source_directory = [];
+$results_source_file = [];
+
 foreach ($results as $arr) {
-    $results_source[] = $arr['_source'];
+    if ($arr['_type'] == "file") {
+        $results_source_file[] = $arr['_source'];
+    } else {
+        $results_source_directory[] = $arr['_source'];
+    }
 }
 
 // output results
@@ -179,13 +174,25 @@ header("Content-Type: application/force-download");
 header("Content-Type: application/octet-stream");
 header("Content-Type: application/download");
 // disposition / encoding on response body
-header("Content-Disposition: attachment;filename=diskover.{$export}");
+header("Content-Disposition: attachment;filename=diskover_export_{$export_type}.{$export}");
 header("Content-Transfer-Encoding: binary");
-if (count($results_source) > 0) {
-    if ($export == "json") {
-        echo json_encode($results_source);
-    } elseif ($export == "csv") {
-        echo array2csv($results_source);
+
+// check if we are exporting file or directory
+if ($export_type == 'file') {
+    if (count($results_source_file) > 0) {
+        if ($export == "json") {
+            echo json_encode($results_source_file);
+        } elseif ($export == "csv") {
+            echo array2csv($results_source_file);
+        }
+    }
+} else {
+    if (count($results_source_directory) > 0) {
+        if ($export == "json") {
+            echo json_encode($results_source_directory);
+        } elseif ($export == "csv") {
+            echo array2csv($results_source_directory);
+        }
     }
 }
 ?>

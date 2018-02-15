@@ -167,20 +167,7 @@ foreach ($largestfiles as $key => $value) {
   <title>diskover &mdash; Top 50 Largest</title>
 	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="css/diskover.css" media="screen" />
-	<style>
-    .percent {
-        background-color: #D20915;
-        opacity: .9;
-        border: 1px solid black;
-        display: inline-block;
-        height: 14px;
-        left: 0px;
-        bottom: -2px;
-        position: relative;
-        z-index: 0;
-        overflow: hidden;
-    }
-	</style>
+  <link rel="stylesheet" href="css/diskover-top50.css" media="screen" />
 </head>
 <body>
 <?php include "nav.php"; ?>
@@ -190,7 +177,7 @@ foreach ($largestfiles as $key => $value) {
         <div id="top50files">
             <div class="row">
     			<div class="col-xs-12">
-    				<h1 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 50 Largest Files</h1>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top50Switch('directory');">Switch to directories</a></h1>&nbsp;&nbsp;&nbsp;&nbsp;
+    				<h2 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 50 Largest Files</h2>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top50Switch('directory');">Switch to directories</a>&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
                         <button class="btn btn-default button-largest active"> Largest</button>
                         <button class="btn btn-default button-oldest"> Oldest</button>
@@ -200,6 +187,7 @@ foreach ($largestfiles as $key => $value) {
                     <span style="font-size:10px; color:gray;">*filters on filetree page affect this page</span>
                     <br />
                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
+                    <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='top50.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=<?php echo $_GET['doctype']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
                 </div>
     		</div><br />
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -218,12 +206,12 @@ foreach ($largestfiles as $key => $value) {
                   $n = 1;
                   foreach ($largestfiles as $key => $value) {
                     ?>
-                    <tr><td width="10"><?php echo $n; ?></td>
+                    <tr><td class="darken" width="10"><?php echo $n; ?></td>
                         <td class="path"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
                         <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
-                        <td width="20%"><div class="percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
-                        <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
-                        <td class="path"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
+                        <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
+                        <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
+                        <td class="path darken"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
                     </tr>
                   <?php $n++; }
                    ?>
@@ -233,7 +221,7 @@ foreach ($largestfiles as $key => $value) {
         <div id="top50dirs" style="display:none;">
             <div class="row">
     			<div class="col-xs-12">
-    				<h1 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 50 Largest Directories</h1>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top50Switch('file');">Switch to files</a></h1>&nbsp;&nbsp;&nbsp;&nbsp;
+    				<h2 style="display: inline;"><i class="glyphicon glyphicon-scale"></i> Top 50 Largest Directories</h2>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="top50Switch('file');">Switch to files</a>&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
                         <button class="btn btn-default button-largest active"> Largest</button>
                         <button class="btn btn-default button-oldest"> Oldest</button>
@@ -242,6 +230,7 @@ foreach ($largestfiles as $key => $value) {
                     </div>
                     <br />
                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
+                    <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='top50.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=<?php echo $_GET['doctype']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
                 </div>
     		</div><br />
             <?php if (count($largestdirs) > 0) { ?>
@@ -263,22 +252,22 @@ foreach ($largestfiles as $key => $value) {
                       $n = 1;
                       foreach ($largestdirs as $key => $value) {
                         ?>
-                        <tr><td width="10"><?php echo $n; ?></td>
-                            <td class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent'] . '/' . $value['_source']['filename'] ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['filename']; ?></a></td>
+                        <tr><td class="darken" width="10"><?php echo $n; ?></td>
+                            <td class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($value['_source']['path_parent'] . '/' . $value['_source']['filename']) ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=directory"><?php echo $value['_source']['filename']; ?></a></td>
                             <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
-                            <td width="20%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%</small></span></td>
+                            <td width="15%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%</small></span></td>
                             <td class="text-nowrap"><?php echo $value['_source']['items']; ?></td>
-                            <td width="20%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%</small></span></td>
-                            <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
-                            <td class="path"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
+                            <td width="15%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%</small></span></td>
+                            <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
+                            <td class="path darken"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
                         </tr>
                     <?php $n++; } ?>
                </tbody>
           </table>
       <?php } else { ?>
-          <div class="col-xs-7">
-          <div class="alert alert-dismissible alert-warning">
-              <button type="button" class="close" data-dismiss="alert">&times;</button><strong><i class="glyphicon glyphicon-info-sign"></i> Directory sizes have not been calculated.</strong> Run diskover again after crawl finishes with -S to calculate directory sizes.
+          <div class="col-xs-6">
+          <div class="alert alert-dismissible alert-info">
+              <button type="button" class="close" data-dismiss="alert">&times;</button><i class="glyphicon glyphicon-info-sign"></i> No directories found or directory size has not been calculated.
           </div>
         </div>
       <?php } ?>
@@ -289,37 +278,6 @@ foreach ($largestfiles as $key => $value) {
 <script language="javascript" src="js/jquery.min.js"></script>
 <script language="javascript" src="js/bootstrap.min.js"></script>
 <script language="javascript" src="js/diskover.js"></script>
-<!-- top 50 switcher -->
-<script>
-    function top50Switch(a) {
-        if (a == 'directory') {
-            document.getElementById('top50files').style.display = 'none';
-            document.getElementById('top50dirs').style.display = 'block';
-        } else {
-            document.getElementById('top50dirs').style.display = 'none';
-            document.getElementById('top50files').style.display = 'block';
-        }
-    }
-</script>
-<!-- buttons -->
-<script>
-    var path = $_GET('path');
-    var filter = $_GET('filter');
-    var mtime = $_GET('mtime');
-    var index = $_GET('index');
-    var index2 = $_GET('index2');
-    $(".button-largest").click(function () {
-        window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-    $(".button-oldest").click(function () {
-        window.location.href = 'top50_oldest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-    $(".button-newest").click(function () {
-        window.location.href = 'top50_newest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-    $(".button-user").click(function () {
-        window.location.href = 'top50_users.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
-    });
-</script>
+<script language="javascript" src="js/top50.js"></script>
 </body>
 </html>

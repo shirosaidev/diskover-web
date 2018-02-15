@@ -5,6 +5,7 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
+header("X-XSS-Protection: 0");
 require '../vendor/autoload.php';
 use diskover\Constants;
 
@@ -32,9 +33,13 @@ if (isset($_GET['index2'])) {
     $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
 }
 
+// Grab all the custom tags from file
+$customtags = get_custom_tags();
+
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
 $total_size = 0;
+$ids_onpage = [];
 
 if (!empty($_REQUEST['submitted'])) {
 
@@ -46,10 +51,10 @@ if (!empty($_REQUEST['submitted'])) {
 
     // Setup search query
     $searchParams['index'] = $esIndex;
-    $searchParams['type']  = ($_REQUEST['doctype']) ? $_REQUEST['doctype'] : 'file,directory';
+    $searchParams['type'] = ($_REQUEST['doctype']) ? $_REQUEST['doctype'] : 'file,directory';
 
     $searchParams['body'] = [];
-    $filterClauses = [];
+    $q = [];
 
     // Scroll parameter alive time
     $searchParams['scroll'] = "1m";
@@ -61,146 +66,110 @@ if (!empty($_REQUEST['submitted'])) {
     } elseif (getCookie("resultsize") != "") {
         $searchParams['size'] = getCookie("resultsize");
     } else {
-        $searchParams['size'] = 100;
+        $searchParams['size'] = Constants::SEARCH_RESULTS;
     }
 
 
     if ($_REQUEST['filename']) {
-        $filterClauses[] = [ 'term' => [ 'filename' => $_REQUEST['filename'] ] ];
+        $q[] = "filename:" . escape_chars($_REQUEST['filename']);
     }
 
     if ($_REQUEST['path_parent']) {
-        $filterClauses[] = [ 'term' => [ 'path_parent' => $_REQUEST['path_parent'] ] ];
+        $q[] = "path_parent:" . escape_chars($_REQUEST['path_parent']);
     }
 
     if ($_REQUEST['tag']) {
-        $filterClauses[] = [ 'term' => [ 'tag' => $_REQUEST['tag'] ] ];
+        $q[] = "tag:" . $_REQUEST['tag'];
     }
 
     if ($_REQUEST['tag_custom']) {
-        $filterClauses[] = [ 'term' => [ 'tag_custom' => $_REQUEST['tag_custom'] ] ];
+        $q[] = "tag_custom:" . '"' . $_REQUEST['tag_custom'] . '"';
     }
 
     if ($_REQUEST['inode']) {
-        $filterClauses[] = [ 'term' => [ 'inode' => $_REQUEST['inode'] ] ];
+        $q[] = "inode:" . $_REQUEST['inode'];
     }
 
-    if ($_REQUEST['last_mod_time_low'] || $_REQUEST['last_mod_time_high']) {
-        $rangeFilter = [];
-        if ($_REQUEST['last_mod_time_low']) {
-            $rangeFilter['gte'] = (string) $_REQUEST['last_mod_time_low'];
-        }
-        if ($_REQUEST['last_mod_time_high']) {
-            $rangeFilter['lte'] = (string) $_REQUEST['last_mod_time_high'];
-        }
-        $filterClauses[] = [ 'range' => [ 'last_modified' => $rangeFilter ] ];
+    if ($_REQUEST['last_mod_time_low'] && $_REQUEST['last_mod_time_high']) {
+        $q[] = "last_modified:{" . (string) $_REQUEST['last_mod_time_low'] . " TO " . (string) $_REQUEST['last_mod_time_high'] . "}";
+    } elseif ($_REQUEST['last_mod_time_low']) {
+        $q[] = "last_modified:{" . (string) $_REQUEST['last_mod_time_low'] . " TO *}";
+    } elseif ($_REQUEST['last_mod_time_high']) {
+        $q[] = "last_modified:{* TO " . (string) $_REQUEST['last_mod_time_high'] . "}";
     }
 
-    if ($_REQUEST['last_access_time_low'] || $_REQUEST['last_access_time_high']) {
-        $rangeFilter = [];
-        if ($_REQUEST['last_access_time_low']) {
-            $rangeFilter['gte'] = (string) $_REQUEST['last_access_time_low'];
-        }
-        if ($_REQUEST['last_access_time_high']) {
-            $rangeFilter['lte'] = (string) $_REQUEST['last_access_time_high'];
-        }
-        $filterClauses[] = [ 'range' => [ 'last_access' => $rangeFilter ] ];
+    if ($_REQUEST['last_access_time_low'] && $_REQUEST['last_access_time_high']) {
+        $q[] = "last_access:{" . (string) $_REQUEST['last_access_time_low'] . " TO " . (string) $_REQUEST['last_access_time_high'] . "}";
+    } elseif ($_REQUEST['last_access_time_low']) {
+        $q[] = "last_access:{" . (string) $_REQUEST['last_access_time_low'] . " TO *}";
+    } elseif ($_REQUEST['last_access_time_high']) {
+        $q[] = "last_access:{* TO " . (string) $_REQUEST['last_access_time_high'] . "}";
     }
 
-    if ($_REQUEST['file_size_bytes_low'] || $_REQUEST['file_size_bytes_high']) {
-        $rangeFilter = [];
-        if ($_REQUEST['file_size_bytes_low']) {
-            $rangeFilter['gte'] = (int) $_REQUEST['file_size_bytes_low'];
-        }
-        if ($_REQUEST['file_size_bytes_high']) {
-            $rangeFilter['lte'] = (int) $_REQUEST['file_size_bytes_high'];
-        }
-        $filterClauses[] = [ 'range' => [ 'filesize' => $rangeFilter ] ];
+    if ($_REQUEST['file_size_bytes_low'] && $_REQUEST['file_size_bytes_high']) {
+        $file_size_bytes_low = convertToBytes($_REQUEST['file_size_bytes_low'], $_REQUEST['file_size_bytes_low_unit']);
+        $file_size_bytes_high = convertToBytes($_REQUEST['file_size_bytes_high'], $_REQUEST['file_size_bytes_high_unit']);
+        $q[] = "filesize:{" . (string) $file_size_bytes_low . " TO " . (string) $file_size_bytes_high . "}";
+    } elseif ($_REQUEST['file_size_bytes_low']) {
+        $file_size_bytes_low = convertToBytes($_REQUEST['file_size_bytes_low'], $_REQUEST['file_size_bytes_low_unit']);
+        $q[] = "filesize:{" . (string) $file_size_bytes_low . " TO *}";
+    } elseif ($_REQUEST['file_size_bytes_high']) {
+        $file_size_bytes_high = convertToBytes($_REQUEST['file_size_bytes_high'], $_REQUEST['file_size_bytes_high_unit']);
+        $q[] = "filesize:{* TO " . (string) $file_size_bytes_high . "}";
     }
 
-    if ($_REQUEST['hardlinks_low'] || $_REQUEST['hardlinks_high']) {
-        $rangeFilter = [];
-        if ($_REQUEST['hardlinks_low']) {
-            $rangeFilter['gte'] = (int) $_REQUEST['hardlinks_low'];
-        }
-        if ($_REQUEST['hardlinks_high']) {
-            $rangeFilter['lte'] = (int) $_REQUEST['hardlinks_high'];
-        }
-        $filterClauses[] = [ 'range' => [ 'hardlinks' => $rangeFilter ] ];
+    if ($_REQUEST['hardlinks_low'] && $_REQUEST['hardlinks_high']) {
+        $q[] = "hardlinks:{" . (string) $_REQUEST['hardlinks_low'] . " TO " . (string) $_REQUEST['hardlinks_high'] . "}";
+    } elseif ($_REQUEST['hardlinks_low']) {
+        $q[] = "hardlinks:{" . (string) $_REQUEST['hardlinks_low'] . " TO *}";
+    } elseif ($_REQUEST['hardlinks_high']) {
+        $q[] = "hardlinks:{* TO " . (string) $_REQUEST['hardlinks_high'] . "}";
     }
 
     if ($_REQUEST['filehash']) {
-        $filterClauses[] = [ 'term' => [ 'filehash' => $_REQUEST['filehash'] ] ];
+        $q[] = "filehash:" . $_REQUEST['filehash'];
     }
 
     if ($_REQUEST['extension']) {
-        $filterClauses[] = [ 'term' => [ 'extension' => $_REQUEST['extension'] ] ];
+        $q[] = "extension:" . $_REQUEST['extension'];
     }
 
     if ($_REQUEST['owner']) {
-        $filterClauses[] = [ 'term' => [ 'owner' => $_REQUEST['owner'] ] ];
+        $q[] = "owner:" . $_REQUEST['owner'];
     }
 
     if ($_REQUEST['group']) {
-        $filterClauses[] = [ 'term' => [ 'group' => $_REQUEST['group'] ] ];
+        $q[] = "group:" . $_REQUEST['group'];
     }
 
-    if ($_REQUEST['index']) {
-        $filterClauses[] = [ 'term' => [ '_index' => $_REQUEST['index'] ] ];
-    }
-
-    if ($_REQUEST['is_dupe'] == "true") {
-        $searchParams['body'] = [
-        'query' => [
-          'query_string' => [
-            'query' => 'is_dupe:true'
-          ]
-        ]
-    ];
+    if ($_REQUEST['dupe_md5']) {
+        $q[] = "dupe_md5:" . $_REQUEST['dupe_md5'];
     }
 
     // Build complete search request body
-    if (count($filterClauses) == 1) {
-        $searchParams['body']['query'] = $filterClauses[0];
-    } elseif (count($filterClauses) > 1) {
-        $searchParams['body']['query']['bool']['filter'] = [ $filterClauses ];
-    } else {
-        if (!$_REQUEST['is_dupe']) {
-            $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
+    if (count($q) == 1) {
+        $querystring = $q[0];
+        $searchParams['body']['query']['query_string']['query'] = $querystring;
+    } elseif (count($q) > 1) {
+        $querystring = "";
+        $i = 0;
+        while($i<=count($q)) {
+            $querystring .= $q[$i];
+            if ($i < count($q)-1) {
+                $querystring .= " AND ";
+            }
+            $i += 1;
         }
+        $searchParams['body']['query']['query_string']['query'] = $querystring;
+    } else {
+        $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
     }
+    $_GET['q'] = $querystring;
+    // Save search query
+    saveSearchQuery($querystring);
 
     // Sort search results
-    if (!$_REQUEST['sort'] && !$_REQUEST['sort2'] && !getCookie("sort") && !getCookie("sort2")) {
-        $searchParams['body']['sort'] = [ 'path_parent' => [ 'order' => 'asc' ], 'filename' => 'asc' ];
-    } else {
-        $searchParams['body']['sort'] = [];
-        if ($_REQUEST['sort'] && !$_REQUEST['sortorder']) {
-            $searchParams['body']['sort'] = $_REQUEST['sort'];
-            createCookie("sort", $_REQUEST['sort']);
-        } elseif ($_REQUEST['sort'] && $_REQUEST['sortorder']) {
-            array_push($searchParams['body']['sort'], [ $_REQUEST['sort'] => [ 'order' => $_REQUEST['sortorder'] ] ]);
-            createCookie("sort", $_REQUEST['sort']);
-            createCookie("sortorder", $_REQUEST['sortorder']);
-        } elseif (getCookie('sort') && !getCookie('sortorder')) {
-            $searchParams['body']['sort'] = getCookie('sort');
-        } elseif (getCookie('sort') && getCookie('sortorder')) {
-            array_push($searchParams['body']['sort'], [ getCookie('sort') => [ 'order' => getCookie('sortorder') ] ]);
-        }
-        // sort 2
-        if ($_REQUEST['sort2'] && !$_REQUEST['sortorder2']) {
-            $searchParams['body']['sort'] = $_REQUEST['sort2'];
-            createCookie("sort2", $_REQUEST['sort2']);
-        } elseif ($_REQUEST['sort2'] && $_REQUEST['sortorder2']) {
-            array_push($searchParams['body']['sort'], [ $_REQUEST['sort2'] => [ 'order' => $_REQUEST['sortorder2'] ] ]);
-            createCookie("sort2", $_REQUEST['sort2']);
-            createCookie("sortorder2", $_REQUEST['sortorder2']);
-        } elseif (getCookie('sort2') && !getCookie('sortorder2')) {
-            $searchParams['body']['sort'] = getCookie('sort2');
-        } elseif (getCookie('sort2') && getCookie('sortorder2')) {
-            array_push($searchParams['body']['sort'], [ getCookie('sort2') => [ 'order' => getCookie('sortorder2') ] ]);
-        }
-    }
+    $searchParams = sortSearchResults($_REQUEST, $searchParams);
 
     // Send search query to Elasticsearch and get tag scroll id and first page of results
     $queryResponse = $client->search($searchParams);
@@ -222,6 +191,9 @@ if (!empty($_REQUEST['submitted'])) {
             // Add to total filesize
             for ($x=0; $x<=count($results[$i]); $x++) {
                 $total_size += (int)$results[$i][$x]['_source']['filesize'];
+                // store the id and doctype in ids_onpage array
+                $ids_onpage[$x]['id'] = $results[$i][$x]['_id'];
+                $ids_onpage[$x]['type'] = $results[$i][$x]['_type'];
             }
             // end loop
             break;
@@ -255,7 +227,8 @@ if (!empty($_REQUEST['submitted'])) {
 <?php include "nav.php"; ?>
 
 <?php if (!isset($_REQUEST['submitted'])) {
-    ?>
+$resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constants::SEARCH_RESULTS;
+?>
 
 <div class="container" style="margin-top:70px;">
   <div class="row">
@@ -272,18 +245,22 @@ if (!empty($_REQUEST['submitted'])) {
     <input type="hidden" name="index2" value="<?php echo $esIndex2; ?>" />
     <input type="hidden" name="submitted" value="true" />
     <input type="hidden" name="p" value="1" />
-    <input type="hidden" name="resultsize" value="<?php echo getCookie('resultsize') != "" ? getCookie('resultsize') : 100; ?>" />
-
+    <input type="hidden" id="queryinput" name="q" value="<?php echo $_REQUEST['q']; ?>" />
+    <input type="hidden" name="resultsize" value="<?php echo $resultSize; ?>" />
 <div class="container">
   <div class="form-group">
 	<div class="row">
 	  <div class="col-xs-6">
 		<label for="filename">Filename is...</label>
-		<input name="filename" value="<?php echo $_REQUEST['filename']; ?>" placeholder="somefile.m4a" class="form-control" />
+		<input name="filename" value="<?php echo $_REQUEST['filename']; ?>" placeholder="somefile.m4a or someimg*.png or directory_name" class="form-control" />
 	  </div>
-	  <div class="col-xs-4">
+	  <div class="col-xs-2">
 		<label for="filehash">Filehash is...</label>
-		<input name="filehash" value="<?php echo $_REQUEST['filehash']; ?>" placeholder="md5 hash" class="form-control" />
+		<input name="filehash" value="<?php echo $_REQUEST['filehash']; ?>" placeholder="hash" class="form-control" />
+	  </div>
+      <div class="col-xs-2">
+		<label for="filehash">Dupe MD5 Sum is...</label>
+		<input name="dupe_md5" value="<?php echo $_REQUEST['dupe_md5']; ?>" placeholder="md5 sum" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="inode">Inode is...</label>
@@ -295,17 +272,33 @@ if (!empty($_REQUEST['submitted'])) {
 	<div class="row">
 	  <div class="col-xs-12">
 		<label for="path_parent">Parent path is...  </label>
-		<input name="path_parent" value="<?php echo $_REQUEST['path_parent']; ?>" placeholder="/Users/shirosai/Music" class="form-control" />
+		<input name="path_parent" value="<?php echo $_REQUEST['path_parent']; ?>" placeholder="/Users/shirosai/Music or /Users/shirosai/Downloads*" class="form-control" />
 	  </div>
 	</div>
   </div>
   <div class="form-group">
 	<div class="row">
-	  <div class="col-xs-4">
+	  <div class="col-xs-3">
 		<label for="file_size_bytes_low">File size is between...</label>
-		<input name="file_size_bytes_low" value="<?php echo $_REQUEST['file_size_bytes_low']; ?>" type="number" placeholder="bytes" class="form-control" />
+		<input name="file_size_bytes_low" value="<?php echo $_REQUEST['file_size_bytes_low']; ?>" type="number" placeholder="size" class="form-control" />
 		<label for="file_size_bytes_high">and</label>
-		<input name="file_size_bytes_high" value="<?php echo $_REQUEST['file_size_bytes_high']; ?>" type="number" placeholder="bytes" class="form-control" />
+		<input name="file_size_bytes_high" value="<?php echo $_REQUEST['file_size_bytes_high']; ?>" type="number" placeholder="size" class="form-control" />
+	  </div>
+      <div class="col-xs-1">
+        <label>&nbsp;</label>
+		<select class="form-control" name="file_size_bytes_low_unit">
+		  <option value="bytes">Bytes</option>
+		  <option value="KB">KB</option>
+		  <option value="MB">MB</option>
+		  <option value="GB">GB</option>
+		</select>
+        <label>&nbsp;</label>
+        <select class="form-control" name="file_size_bytes_high_unit">
+		  <option value="bytes">Bytes</option>
+		  <option value="KB">KB</option>
+		  <option value="MB">MB</option>
+		  <option value="GB">GB</option>
+		</select>
 	  </div>
 	  <div class="col-xs-2">
 		<label for="hardlinks_low">Hardlinks is between...</label>
@@ -314,16 +307,16 @@ if (!empty($_REQUEST['submitted'])) {
 		<input name="hardlinks_high" value="<?php echo $_REQUEST['hardlinks_high']; ?>" type="number" placeholder="10" class="form-control" />
 	  </div>
 	  <div class="col-xs-3">
-		<label for="last_mod_time_low">Last modified time is between...</label>
-		<input name="last_mod_time_low" value="<?php echo $_REQUEST['last_mod_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control" />
+		<label for="last_mod_time_low">Last modified time (utc) is between...</label>
+		<input name="last_mod_time_low" value="<?php echo $_REQUEST['last_mod_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00 or 2016-01-22" class="form-control" />
 		<label for="last_mod_time_high">and</label>
-		<input name="last_mod_time_high" value="<?php echo $_REQUEST['last_mod_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control" />
+		<input name="last_mod_time_high" value="<?php echo $_REQUEST['last_mod_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00 or now-6M/d" class="form-control" />
 	  </div>
 	  <div class="col-xs-3">
-		<label for="last_access_time_low">Last access time is between...</label>
-		<input name="last_access_time_low" value="<?php echo $_REQUEST['last_access_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00" class="form-control" />
+		<label for="last_access_time_low">Last access time (utc) is between...</label>
+		<input name="last_access_time_low" value="<?php echo $_REQUEST['last_access_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00 or now-2w" class="form-control" />
 		<label for="last_access_time_high">and</label>
-		<input name="last_access_time_high" value="<?php echo $_REQUEST['last_access_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00" class="form-control" />
+		<input name="last_access_time_high" value="<?php echo $_REQUEST['last_access_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00 or now-1y" class="form-control" />
 	  </div>
 	</div>
   </div>
@@ -331,7 +324,7 @@ if (!empty($_REQUEST['submitted'])) {
 	<div class="row">
 	  <div class="col-xs-2">
 		<label for="owner">Owner is...  </label>
-		<input name="owner" value="<?php echo $_REQUEST['owner']; ?>" placeholder="shirosai" class="form-control" />
+		<input name="owner" value="<?php echo $_REQUEST['owner']; ?>" placeholder="shirosai or (NOT root)" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="group">Group is...  </label>
@@ -339,13 +332,13 @@ if (!empty($_REQUEST['submitted'])) {
 	  </div>
 	  <div class="col-xs-2">
 		<label for="extension">Extension is...</label>
-		<input name="extension" value="<?php echo $_REQUEST['extension']; ?>" type="string" placeholder="zip" class="form-control" />
+		<input name="extension" value="<?php echo $_REQUEST['extension']; ?>" type="string" placeholder="zip or (tmp OR cache)" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="tag">Tag is...</label>
 		<select class="form-control" name="tag">
 		  <option value="<?php echo $_REQUEST['tag']; ?>" selected><?php echo $_REQUEST['tag']; ?></option>
-		  <option value="untagged">untagged</option>
+		  <option value="">untagged</option>
 		  <option value="delete">delete</option>
 		  <option value="archive">archive</option>
 		  <option value="keep">keep</option>
@@ -353,15 +346,12 @@ if (!empty($_REQUEST['submitted'])) {
 	  </div>
 	  <div class="col-xs-4">
 		<label for="tag_custom">Custom Tag is...</label>
-		<input name="tag_custom" value="<?php echo $_REQUEST['tag_custom']; ?>" type="string" placeholder="version 8" class="form-control" />
-	  </div>
-	</div>
-  </div>
-  <div class="form-group">
-	<div class="row">
-	  <div class="col-xs-4">
-		<label for="index">Index is...</label>
-		<input name="index" value="<?php echo $_REQUEST['index']; ?>" type="string" placeholder="diskover-2017.05.24" class="form-control" />
+		<select name="tag_custom" class="form-control">
+        <option value="<?php echo $_REQUEST['tag_custom']; ?>" selected><?php echo $_REQUEST['tag_custom']; ?></option>
+        <?php foreach($customtags as $key => $value) { ?>
+            <option value="<?php echo $value[0]; ?>"><?php echo $value[0]; ?></option>
+        <?php } ?>
+        </select>
 	  </div>
 	</div>
   </div>
@@ -424,9 +414,9 @@ if (!empty($_REQUEST['submitted'])) {
       <div class="col-xs-2">
 		<label for="sortorder">Doc type...</label>
           <select class="form-control" name="doctype">
-            <option value="file" selected>file</option>
-            <option value="directory">directory</option>
-            <option value="">all</option>
+              <option value="file" <?php echo $_REQUEST['doctype'] == "file" ? "selected" : ""; ?>>file</option>
+              <option value="directory" <?php echo $_REQUEST['doctype'] == "directory" ? "selected" : ""; ?>>directory</option>
+              <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>
           </select>
       </div>
     </div>
@@ -463,9 +453,14 @@ if (isset($_REQUEST['submitted'])) {
 <script language="javascript" src="js/bootstrap.min.js"></script>
 <script language="javascript" src="js/diskover.js"></script>
 <script>
-// listen for msgs from diskover socket server
-listenSocketServer();
+$(document).ready(function () {
+    // listen for msgs from diskover socket server
+    listenSocketServer();
+});
 </script>
+<div id="loading">
+  <img id="loading-image" width="32" height="32" src="images/ajax-loader.gif" alt="Updating..." />
+</div>
 <iframe name="hiddeniframe" width=0 height=0 style="display:none;"></iframe>
 </body>
 </html>

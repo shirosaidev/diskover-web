@@ -6,59 +6,6 @@ LICENSE for the full license text.
 
 $(document).ready(function () {
 
-    $('.tagfiles').submit(function() {
-        if (changeTagCount == 0) {
-            alert("no files tagged")
-            return false;
-        }
-        return true;
-    });
-
-	// select all buttons on search results pages
-	$(".tagAllDelete").click(function () {
-		$(".tagDeleteInput").prop('checked', true);
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning active');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success');
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info');
-		$(".tagDeleteLabel").closest('tr').attr('class', 'warning');
-		changeTagCount =  $('#results-tbody tr').length;
-		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
-		$('.unsavedChangesAlert').show();
-	});
-
-	$(".tagAllArchive").click(function () {
-		$(".tagArchiveInput").prop('checked', true);
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success active');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning');
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info');
-		$(".tagArchiveLabel").closest('tr').attr('class', 'success');
-		changeTagCount =  $('#results-tbody tr').length;
-		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
-		$('.unsavedChangesAlert').show();
-	});
-
-	$(".tagAllKeep").click(function () {
-		$(".tagKeepInput").prop('checked', true);
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info active');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning');
-		$(".tagKeepLabel").closest('tr').attr('class', 'info');
-		changeTagCount =  $('#results-tbody tr').length;
-		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
-		$('.unsavedChangesAlert').show();
-	});
-
-	$(".tagAllUntagged").click(function () {
-		$(".tagUntaggedInput").prop('checked', true);
-		$(".tagKeepLabel").attr('class', 'tagKeepLabel btn btn-xs btn-info');
-		$(".tagArchiveLabel").attr('class', 'tagArchiveLabel btn btn-xs btn-success');
-		$(".tagDeleteLabel").attr('class', 'tagDeleteLabel btn btn-xs btn-warning');
-		$(".tagUntaggedLabel").closest('tr').attr('class', 'untagged');
-		changeTagCount =  $('#results-tbody tr').length;
-		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
-		$('.unsavedChangesAlert').show();
-	});
-
 	// reload page button on search results page
 	$(".reload-results").click(function () {
 		location.reload(true);
@@ -69,15 +16,6 @@ $(document).ready(function () {
 		$(this).closest('form').trigger('submit');
 	});
 
-	// copy custom tag button on search results page
-	$(".copyCustomTag").click(function () {
-		var customtag = $(this).closest('tr').find('.custom-tag-input').val();
-		$(".custom-tag-input").val(customtag);
-		changeTagCount =  $('#results-tbody tr').length;
-		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
-		$('.unsavedChangesAlert').show();
-	});
-
 	// reload page button on analytics pages
 	$("#reload").click(function () {
 		console.log("removing path cookie because reload");
@@ -86,34 +24,18 @@ $(document).ready(function () {
 		sessionStorage.removeItem("diskover-filetree");
 		sessionStorage.removeItem("diskover-treemap");
         sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-dupes");
 		location.reload(true);
 	});
 
-	// highlight results table rows when radio buttons pressed
-	$("#highlightRowDelete input").change(function () {
-		$(this).closest('tr').attr('class', 'warning');
-	});
-
-	$("#highlightRowArchive input").change(function () {
-		$(this).closest('tr').attr('class', 'success');
-	});
-
-	$("#highlightRowKeep input").change(function () {
-		$(this).closest('tr').attr('class', 'info');
-	});
-
-	$("#highlightRowUntagged input").change(function () {
-		$(this).closest('tr').attr('class', 'untagged');
-	});
-
 	// search within text input
-	$(".search").keyup(function () {
-		var searchTerm = $(".search").val();
+	$("#searchwithin").keyup(function () {
+		var searchTerm = $("#searchwithin").val();
 		var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
 
 		$.extend($.expr[':'], {
 			'containsi': function (elem, i, match, array) {
-				return (elem.getElementsByTagName("input")[4].value || elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+				return (elem.innerText || elem.textContent || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
 			}
 		});
 
@@ -135,37 +57,35 @@ $(document).ready(function () {
 		}
 	});
 
-	// number of changes on results page that need to be tagged (saved in Elasticsearch)
-	$(".custom-tag-input").keyup(function (e) {
-		this.changed = typeof(this.changed) === 'undefined' ? false : this.changed;
-		if (!this.changed) {
-			changeTagCount += 1;
-			this.changed = true;
-		}
-
-		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
-
-		if (changeTagCount > 0) {
-			$('.unsavedChangesAlert').show();
-		} else {
-			$('.unsavedChangesAlert').hide();
-		}
-	});
-
-	$(".tagButtons").change(function (e) {
-		this.changed = typeof(this.changed) === 'undefined' ? false : this.changed;
-		if (!this.changed) {
-			changeTagCount += 1;
-			this.changed = true;
-		}
-
-		$('.changetagcounter').text(changeTagCount + ' changes unsaved');
-
-		if (changeTagCount > 0) {
-			$('.unsavedChangesAlert').show();
-		} else {
-			$('.unsavedChangesAlert').hide();
-		}
+    // search items in ES on keypress on nav search
+	$("#searchnavinput").keyup(function () {
+        if ($('#searchnavinput').val() === "") {
+            $('#essearchreply-text-nav').html("");
+            $('#essearchreply-nav').hide();
+            return false;
+        }
+        var results;
+        $.ajax({
+            type:'GET',
+            url:'searchkeypress.php',
+            data: $('#searchnav').serialize(),
+            success: function(data) {
+            		if (data != "") {
+                        // set width and position of search results div to match search input
+                        var w = $('#searchnavbox').width();
+                        var p = $('#searchnavbox').position();
+                        console.log(p)
+                        $("#essearchreply-nav").css({left: p.left, position:'absolute'});
+                        $('#essearchreply-nav').width(w);
+            			$('#essearchreply-nav').show();
+                        $('#essearchreply-text-nav').html(data);
+            		} else {
+                        $('#essearchreply-text-nav').html("");
+                        $('#essearchreply-nav').hide();
+            		}
+                }
+        });
+        return false;
 	});
 
     // update visualization links
@@ -253,23 +173,27 @@ function updateVisLinks() {
     var index = ($_GET('index')) ? $_GET('index') : getCookie('index');
     var index2 = ($_GET('index2')) ? $_GET('index2') : getCookie('index2');
 	var url = "filetree.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
-	window.parent.document.getElementById("filetreelink").setAttribute("href", url);
+	document.getElementById("filetreelink").setAttribute("href", url);
 	var url = "treemap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
-	window.parent.document.getElementById("treemaplink").setAttribute("href", url);
+	document.getElementById("treemaplink").setAttribute("href", url);
     var url = "heatmap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
-	window.parent.document.getElementById("heatmaplink").setAttribute("href", url);
+	document.getElementById("heatmaplink").setAttribute("href", url);
     var url = "top50.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime;
-	window.parent.document.getElementById("top50link").setAttribute("href", url);
+	document.getElementById("top50link").setAttribute("href", url);
+    var url = "tags.php?index=" + index + "&index2=" + index2;
+	document.getElementById("tagslink").setAttribute("href", url);
+    var url = "dupes.php?index=" + index + "&index2=" + index2;
+	document.getElementById("dupeslink").setAttribute("href", url);
 	return false;
 }
 
 // listen for msgs from diskover socket server and display progress bar on screen
 // using XMLHttpRequest
 function listenSocketServer() {
-    var socketlistening = document.getElementById('socketlistening').value;
-    if (socketlistening == 0) {
-        return false;
-    }
+    var socketlistening = document.getElementById('socketlistening');
+    if (socketlistening === null) return false;
+    socketlistening = document.getElementById('socketlistening').value;
+    if (socketlistening == 0) return false;
     console.log('listening for xhr msgs from diskover socket server')
     /*xhr.onprogress = function() {
         console.log(this.responseText)

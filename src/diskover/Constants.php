@@ -9,7 +9,7 @@ namespace diskover;
 
 class Constants {
     // diskover-web version
-    const VERSION = '1.4.2';
+    const VERSION = '1.4.5';
     // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // set to your Elasticsearch port, default 9200
@@ -30,4 +30,6 @@ class Constants {
     const MAXDEPTH = 2;
     // default don't use count (use size)
     const USE_COUNT = 0;
+    // default results per search page
+    const SEARCH_RESULTS = 50;
 }

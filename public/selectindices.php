@@ -13,6 +13,64 @@ require "../src/diskover/Diskover.php";
 $host = Constants::ES_HOST;
 $port = Constants::ES_PORT;
 
+// find newest index and check if it's still building (crawl in progress)
+
+// Connect to Elasticsearch
+$client = connectES();
+
+// Get cURL resource
+$curl = curl_init();
+// Set curl options
+curl_setopt_array($curl, array(
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*?pretty'
+));
+// Send the request & save response to $curlresp
+$curlresp = curl_exec($curl);
+$indices = json_decode($curlresp, true);
+// Close request to clear up some resources
+curl_close($curl);
+// sort indices by creation_date
+$indices_sorted = [];
+foreach ($indices as $key => $val) {
+    $indices_sorted[$indices[$key]['settings']['index']['creation_date']] = $key;
+}
+krsort($indices_sorted);
+$newest_index = reset($indices_sorted);
+
+// check if it's finished building (crawl stopped)
+
+$results = [];
+$searchParams = [];
+
+$searchParams['index'] = $newest_index;
+$searchParams['type']  = 'crawlstat_stop';
+
+$searchParams['body'] = [
+    'size' => 1,
+    'query' => [
+            'match_all' => (object) []
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'desc'
+         ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+$crawlstoptime = $queryResponse['hits']['hits'][0]['_source']['stop_time'];
+$crawlelapsedtime = $queryResponse['hits']['hits'][0]['_source']['elapsed_time'];
+$crawlfinished = ($crawlstoptime) ? true : false;
+
+// create cookies for default search sort if none already created
+if (!getCookie('sort') && !getCookie('sort2')) {
+    createCookie('sort', 'path_parent');
+    createCookie('sortorder', 'asc');
+    createCookie('sort2', 'filename');
+    createCookie('sortorder2', 'asc');
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -26,48 +84,22 @@ $port = Constants::ES_PORT;
 <link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 <link rel="stylesheet" href="css/diskover.css" media="screen" />
 <?php
+$indexselected = "";
+$index2selected = "";
 // set cookies for indices and redirect to index page
-if (isset($_POST['index']) && $_POST['index'] != "newest") {
-    createCookie('index', $_POST['index']);
+if (isset($_POST['index'])) {
+    $indexselected = trim(str_replace(['<- newest','*crawl still running*'], '', $_POST['index']));
+    createCookie('index', $indexselected);
     if (isset($_POST['index2']) && $_POST['index2'] != "none") {
+        $index2selected = $_POST['index2'];
         createCookie('index2', $_POST['index2']);
     } else if (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "" )) {
         deleteCookie('index2');
     }
     // delete existing path cookie
     deleteCookie('path');
-    header("location: /index.php?index=".$_POST['index']."&index2=".$_POST['index2']."");
-    exit();
-} elseif (isset($_POST['index']) && $_POST['index'] == "newest") {
-    // Get cURL resource
-    $curl = curl_init();
-    // Set curl options
-    curl_setopt_array($curl, array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*?pretty'
-    ));
-    // Send the request & save response to $curlresp
-    $curlresp = curl_exec($curl);
-    $indices = json_decode($curlresp, true);
-    // Close request to clear up some resources
-    curl_close($curl);
-    // sort indices by creation_date
-    $indices_sorted = [];
-    foreach ($indices as $key => $val) {
-        $indices_sorted[$indices[$key]['settings']['index']['creation_date']] = $key;
-    }
-    krsort($indices_sorted);
-    $newest_index = reset($indices_sorted);
-
-    createCookie('index', $newest_index);
-    if (isset($_POST['index2']) && $_POST['index2'] != "none") {
-        createCookie('index2', $_POST['index2']);
-    } else if (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "" )) {
-        deleteCookie('index2');
-    }
-    // delete existing path cookie
-    deleteCookie('path');
-    header("location: /index.php?index=".$newest_index."&index2=".$_POST['index2']."");
+    // redirect to index dashboard page
+    header("location: /index.php?index=".$indexselected."&index2=".$index2selected."");
     exit();
 }
 ?>
@@ -77,15 +109,15 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
 
 <div class="container" style="margin-top:100px;">
 <div class="row">
-	<div class="col-xs-12">
-		<center><img src="images/diskover.png" alt="diskover" width="249" height="189" /></center>
-		<center><span class="text-success small"><?php echo "diskover-web v".Constants::VERSION; ?></span></center>
+	<div class="col-xs-12 text-center">
+		<img src="images/diskover.png" alt="diskover" width="249" height="189" /><br />
+        <span class="text-success small"><?php echo "diskover-web v".Constants::VERSION; ?></span>
 	</div>
 </div>
 <div class="row">
     <br />
 <div class="col-xs-6 col-xs-offset-3">
-	<form action="" method="post" class="form-horizontal">
+	<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
 	<fieldset>
 		<div class="form-group">
 			<?php
@@ -110,28 +142,32 @@ if (isset($_POST['index']) && $_POST['index'] != "newest") {
             <?php } else { ?>
                 <div class="alert alert-dismissible alert-info">
                   <button type="button" class="close" data-dismiss="alert">&times;</button>
-                  <i class="glyphicon glyphicon-cog"></i> Please select the Elasticsearch diskover indices you want to use.
+                  <i class="glyphicon glyphicon-cog"></i> Please select the Elasticsearch diskover indices you want to use. Indices are sorted by creation date.
                 </div>
             <?php } ?>
-            <strong>Index </strong> <small>*required</small>
+            <strong>Index</strong> <small>*required</small><br />
 			<select name="index" id="index" class="form-control">
                 <option selected><?php echo getCookie('index') ? getCookie('index') : ""; ?></option>
-                echo "<option>newest</option>";
                 <?php
-				foreach ($indices as $key => $val) {
-					echo "<option>".$key."</option>";
+				foreach ($indices_sorted as $key => $val) {
+                    if ($val == $newest_index && !$crawlfinished) {
+                        echo "<option>".$val." <- newest *crawl still running*</option>";
+                    } elseif ($val == $newest_index && $crawlfinished){
+                        echo "<option>".$val." <- newest</option>";
+                    } else {
+                        echo "<option>".$val."</option>";
+                    }
 				}
 				?></select>
-            <br />
-            <strong>Index 2 </strong> <small>(previous index for data comparison)</small>
+            <strong>Index 2</strong> <small>(previous index for data comparison)</small><br />
             <select name="index2" id="index2" class="form-control">
                 <option selected><?php echo getCookie('index2') ? getCookie('index2') : ""; ?></option>
                 <?php
-				foreach ($indices as $key => $val) {
-					echo "<option>".$key."</option>";
+				foreach ($indices_sorted as $key => $val) {
+					echo "<option>".$val."</option>";
 				}
                 echo "<option>none</option>";
-				?></select>
+                ?></select>
 		</div>
 		<div class="form-group text-center">
 			<button type="submit" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-saved"></i> Select</button>

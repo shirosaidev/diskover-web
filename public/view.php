@@ -27,11 +27,26 @@ if (empty($_REQUEST['id'])) {
             'index' => $_REQUEST['index'],
             'type'  => $_REQUEST['doctype']
         ]);
+        $fileid = $file['_id'];
+        $filedoctype = $file['_type'];
         $file = $file['_source'];
     } catch (Missing404Exception $e) {
         $message = 'Doc ID not found, please go back and reload page.';
     }
 }
+
+// see if there are any extra custom fields to add
+$extra_fields = [];
+for ($i=1; $i < 5; $i++) {
+    if (getCookie('field'.$i.'')) {
+        $value = (getCookie('field'.$i.'-desc')) ? getCookie('field'.$i.'-desc') : getCookie('field'.$i.'');
+        $extra_fields[getCookie('field'.$i.'')] = $value;
+    }
+}
+
+// Grab all the custom tags from file
+$customtags = get_custom_tags();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -64,20 +79,141 @@ exit();
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; ?> <a href="advanced.php?submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>"><?php echo $file['filename']; ?></a></h2>
+      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; ?> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $file['filename']; ?></a></h2>
+      <!-- tag dropdown -->
+      <form id="changetag" name="changetag" class="form-inline">
+      <input type="hidden" name="id" value="<?php echo $fileid; ?>">
+      <input type="hidden" name="doctype" value="<?php echo $filedoctype; ?>">
+      <input type="hidden" name="tag" value="" id="tag">
+      <input type="hidden" name="tag_custom" value="" id="tag_custom">
+      <div class="dropdown">
+          <?php
+          $tags = "";
+          if ($file['tag']) {
+              if ($file['tag'] === "delete") {
+                  $tags .= "<i class=\"glyphicon glyphicon-trash delete\"></i> <span class=\"delete\">delete</span>";
+              } elseif ($file['tag'] === "archive") {
+                  $tags .= "<i class=\"glyphicon glyphicon-cloud-upload archive\"></i> <span class=\"archive\">archive</span>";
+              } elseif ($file['tag'] === "keep") {
+                  $tags .= "<i class=\"glyphicon glyphicon-floppy-saved keep\"></i> <span class=\"keep\">keep</span>";
+              }
+          }
+          if ($file['tag_custom']) {
+              if ($file['tag']) {
+                  $tags .= "&nbsp;&nbsp;";
+              }
+              $color = get_custom_tag_color($file['tag_custom']);
+              $tags .= "<span style=\"color:". $color ."\"><i class=\"glyphicon glyphicon-tag\"></i> " . $file['tag_custom'] . "</span>";
+          }
+          ?>
+          <button title="tags" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><?php if ($tags) { echo $tags; } else { echo "<i class=\"glyphicon glyphicon-tag\"></i> <strong>Untagged</strong>. Add tag..."; } ?>
+              <span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                  <li onclick="$('#tag').val('delete'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-trash delete"></i> <span class="delete">delete</span></a></li>
+                  <li onclick="$('#tag').val('archive'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-cloud-upload archive"></i> <span class="archive">archive</span></a></li>
+                  <li onclick="$('#tag').val('keep'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-floppy-saved keep"></i> <span class="keep">keep</span></a></li>
+                  <li onclick="$('#tag').val('null'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-remove-sign" style="color:#555;"></i> <span class="untagged">untagged</span></a></li>
+                  <li class="divider"></li>
+                  <?php foreach ($customtags as $key => $value) { ?>
+                    <li onclick="$('#tag_custom').val('<?php echo $value[0]; ?>'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-tag" style="color:<?php echo $value[1]; ?>"></i> <span style="color:<?php echo $value[1]; ?>"><?php echo $value[0]; ?></span></a></li>
+                  <?php } ?>
+                  <li onclick="$('#tag_custom').val('null'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-remove" style="color:gray"></i> <span style="color:gray">remove custom tag</span></a></li>
+                  <li>
+                          <input type="text" name="tagtext" id="tagtext" class="form-control input" style="margin-left:12px;" value="" placeholder="Add new...">
+                          <button class="btn btn-default btn-sm" onclick="$('#tag_custom').val(document.getElementById('tagtext').value); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;" type="submit"> <i class="glyphicon glyphicon-plus"></i></button><br />
+                          <span style="margin:0px;padding:0px;margin-left:22px;font-size:11px;color:#666;">tag name|#hexcolor</span>
+                  </li>
+                  <li class="divider"></li>
+                  <?php if ($result['_type'] == 'directory') { ?>
+                  <li onclick="$('#tag').val('tagall_subdirs_recurs'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-folder-open" style="color:gray"></i> <span style="color:gray">Apply tags to subdirs (recursive)</span></a></li>
+                  <li onclick="$('#tag').val('tagall_files_recurs'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-file" style="color:gray"></i> <span style="color:gray">Apply tags to files (recursive)</span></a></li>
+                  <?php } ?>
+                  </form>
+                  <li><a href="admin.php?index=<?php echo $esIndex;?>&amp;index2=<?php echo $esIndex2;?>"><span style="color:darkgray">Edit tags</span></a></li>
+              </ul>
+          </div>
+         <!-- end tag dropdown -->
       <h4 class="path">Full path: <?php echo $file['path_parent']."/".$file['filename']; ?></h4>
-      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> Parent path: <a href="advanced.php?submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>"><?php echo $file['path_parent']; ?></a></h5>
+      <?php if ($_REQUEST['doctype'] == 'directory') { ?>
+          <div class="dropdown" style="display:inline-block;">
+              <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-stats"></i>
+                  <span class="caret"></span></button>
+                  <ul class="dropdown-menu">
+                      <li class="small"><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-tree-conifer"></i> filetree</a></li>
+                      <li class="small"><a href="treemap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-large"></i> treemap</a></li>
+                      <li class="small"><a href="heatmap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> heatmap</a></li>
+                      <li class="small"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-list"></i> top 50</a></li>
+                      </ul>
+              </div>
+              <div class="dropdown" style="display:inline-block;">
+                  <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-filter"></i>
+                      <span class="caret"></span></button>
+                      <ul class="dropdown-menu">
+                          <li class="small"><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
+                          <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo escape_chars($file['path_parent'] . '/' . $file['filename'] . '*'); ?>"><i class="glyphicon glyphicon-filter"></i> filter (recursive)</a></li>
+                          </ul>
+                  </div>
+      <br />
+      <?php } ?>
+      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> <span style="color:gray">Parent path: <?php echo $file['path_parent']; ?> </span></h5>
+      <div class="dropdown" style="display:inline-block;">
+          <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-stats"></i>
+              <span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                  <li class="small"><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-tree-conifer"></i> filetree</a></li>
+                  <li class="small"><a href="treemap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-large"></i> treemap</a></li>
+                  <li class="small"><a href="heatmap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> heatmap</a></li>
+                  <li class="small"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-list"></i> top 50</a></li>
+                  </ul>
+          </div>
+          <div class="dropdown" style="display:inline-block;">
+              <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-filter"></i>
+                  <span class="caret"></span></button>
+                  <ul class="dropdown-menu">
+                      <li class="small"><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
+                      <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo escape_chars($file['path_parent'] . '*'); ?>"><i class="glyphicon glyphicon-filter"></i> filter (recursive)</a></li>
+                      </ul>
+              </div>
+      <br /><br />
     </div>
   </div>
   <div class="row">
     <div class="col-xs-6">
       <ul class="list-group">
         <li class="list-group-item">
+            <span class="pull-right">&nbsp;
+            <!-- show comparison file size -->
+            <?php if ($esIndex2 != "") { ?>
+            <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
+            if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
+                $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
+            }
+            if ($filesize_change != 0) { ?>
+            <small><?php echo formatBytes($fileinfo_index2[0]); ?>
+                <span style="color:<?php echo $filesize_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $filesize_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
+            <?php echo $filesize_change; ?>%)</span></small>
+        <?php } } ?>
+         <!-- end show comparison file size -->
+          </span>
           <span class="badge"><?php echo formatBytes($file['filesize']); ?></span>
           Filesize
         </li>
         <?php if ($_REQUEST['doctype'] == 'directory') { ?>
         <li class="list-group-item">
+            <span class="pull-right">&nbsp;
+            <!-- show comparison items -->
+            <?php if ($esIndex2 != "") { ?>
+            <?php
+            if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
+                $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
+            }
+            if ($diritems_change != 0) { ?>
+            <small><?php echo $fileinfo_index2[1]; ?>
+                <span style="color:<?php echo $diritems_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
+            <?php echo $diritems_change; ?>%)</span></small>
+        <?php } } ?>
+        <!-- end show comparison items -->
+        </span>
             <span class="badge"><?php echo $file['items']; ?></span>
             Items
         </li>
@@ -110,10 +246,21 @@ exit();
           <a href="advanced.php?submitted=true&amp;p=1&amp;filehash=<?php echo $file['filehash']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Filehash</a>
         </li>
         <li class="list-group-item">
-          <span class="badge"><?php echo $file['is_dupe']; ?></span>
-          <a href="advanced.php?submitted=true&amp;p=1&amp;is_dupe=<?php echo $file['is_dupe']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Is dupe</a>
+          <span class="badge"><?php echo $file['dupe_md5']; ?></span>
+          <a href="advanced.php?submitted=true&amp;p=1&amp;dupe_md5=<?php echo $file['dupe_md5']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Dupe MD5</a>
         </li>
         <?php } ?>
+    </ul>
+    <ul class="list-group">
+        <?php
+        if (count($extra_fields) > 0) {
+          foreach ($extra_fields as $key => $value) { ?>
+              <li class="list-group-item">
+                  <span class="badge"><?php echo $file[$key]; ?></span>
+                  <?php echo $value; ?>
+              </li>
+          <?php }
+          } ?>
     </ul>
       </div>
       <div class="col-xs-6">
@@ -141,26 +288,14 @@ exit();
             Indexed on (utc)
           </li>
         </ul>
-        <ul class="list-group">
-          <li class="list-group-item">
-            <span class="badge"><?php echo $file['tag']; ?></span>
-            <a href="advanced.php?submitted=true&amp;p=1&amp;tag=<?php echo $file['tag']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Tag</a>
-          </li>
-          <li class="list-group-item">
-            <span class="badge"><?php echo $file['tag_custom']; ?></span>
-            <a href="advanced.php?submitted=true&amp;p=1&amp;tag_custom=<?php echo $file['tag_custom']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Custom Tag</a>
-          </li>
-        </ul>
       </div>
     </div>
-  <div class="row">
-    <div class="col-xs-2">
-      <p><a class="btn btn-primary btn-lg" onclick="window.history.back()">< </a></p>
-    </div>
-  </div>
 </div>
 <script language="javascript" src="js/jquery.min.js"></script>
 <script language="javascript" src="js/bootstrap.min.js"></script>
 <script language="javascript" src="js/diskover.js"></script>
+<div id="loading">
+  <img id="loading-image" width="32" height="32" src="images/ajax-loader.gif" alt="Updating..." />
+</div>
 </body>
 </html>

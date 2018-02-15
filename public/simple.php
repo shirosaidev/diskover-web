@@ -5,6 +5,7 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
+header("X-XSS-Protection: 0");
 require '../vendor/autoload.php';
 use diskover\Constants;
 
@@ -25,14 +26,38 @@ if (isset($_GET['index'])) {
     }
 }
 
+// check for index2 in url
+if (isset($_GET['index2'])) {
+    $esIndex2 = $_GET['index2'];
+    setCookie('index2', $esIndex2);
+} else {
+    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+}
+
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
 $total_size = 0;
+$ids_onpage = [];
 
 if (!empty($_REQUEST['submitted'])) {
 
+    // Grab all the smart searches from file
+    $smartsearches = get_smartsearches();
+
+    // Check if smart search was submitted
+    if (strpos($_REQUEST['q'], '!') === 0) {  # ! smart search keyword
+        foreach($smartsearches as $arr) {
+            if(in_array($_REQUEST['q'], $arr)) {
+                $smartsearch_query = $arr[1];
+            }
+        }
+        $request = $smartsearch_query;
+    } else {
+        $request = $_REQUEST['q'];
+    }
+
     // Save search query
-    saveSearchQuery($_REQUEST['q']);
+    saveSearchQuery($request);
 
     // Connect to Elasticsearch
     $client = connectES();
@@ -54,11 +79,11 @@ if (!empty($_REQUEST['submitted'])) {
     } elseif (getCookie("resultsize") != "") {
         $searchParams['size'] = getCookie("resultsize");
     } else {
-        $searchParams['size'] = 100;
+        $searchParams['size'] = Constants::SEARCH_RESULTS;
     }
 
     // match all if search field empty
-    if (empty($_REQUEST['q'])) {
+    if (empty($request)) {
         $searchParams['body'] = [
             'query' => [
                 'match_all' => (object) []
@@ -69,7 +94,7 @@ if (!empty($_REQUEST['submitted'])) {
         $searchParams['body'] = [
             'query' => [
                 'query_string' => [
-                    'query' => $_REQUEST['q'],
+                    'query' => $request,
                     'analyze_wildcard' => 'true'
                 ]
             ]
@@ -77,36 +102,7 @@ if (!empty($_REQUEST['submitted'])) {
     }
 
     // Sort search results
-    if (!$_REQUEST['sort'] && !$_REQUEST['sort2'] && !getCookie("sort") && !getCookie("sort2")) {
-        $searchParams['body']['sort'] = [ 'path_parent' => [ 'order' => 'asc' ], 'filename' => 'asc' ];
-    } else {
-        $searchParams['body']['sort'] = [];
-        if ($_REQUEST['sort'] && !$_REQUEST['sortorder']) {
-            $searchParams['body']['sort'] = $_REQUEST['sort'];
-            createCookie("sort", $_REQUEST['sort']);
-        } elseif ($_REQUEST['sort'] && $_REQUEST['sortorder']) {
-            array_push($searchParams['body']['sort'], [ $_REQUEST['sort'] => [ 'order' => $_REQUEST['sortorder'] ] ]);
-            createCookie("sort", $_REQUEST['sort']);
-            createCookie("sortorder", $_REQUEST['sortorder']);
-        } elseif (getCookie('sort') && !getCookie('sortorder')) {
-            $searchParams['body']['sort'] = getCookie('sort');
-        } elseif (getCookie('sort') && getCookie('sortorder')) {
-            array_push($searchParams['body']['sort'], [ getCookie('sort') => [ 'order' => getCookie('sortorder') ] ]);
-        }
-        // sort 2
-        if ($_REQUEST['sort2'] && !$_REQUEST['sortorder2']) {
-            $searchParams['body']['sort'] = $_REQUEST['sort2'];
-            createCookie("sort2", $_REQUEST['sort2']);
-        } elseif ($_REQUEST['sort2'] && $_REQUEST['sortorder2']) {
-            array_push($searchParams['body']['sort'], [ $_REQUEST['sort2'] => [ 'order' => $_REQUEST['sortorder2'] ] ]);
-            createCookie("sort2", $_REQUEST['sort2']);
-            createCookie("sortorder2", $_REQUEST['sortorder2']);
-        } elseif (getCookie('sort2') && !getCookie('sortorder2')) {
-            $searchParams['body']['sort'] = getCookie('sort2');
-        } elseif (getCookie('sort2') && getCookie('sortorder2')) {
-            array_push($searchParams['body']['sort'], [ getCookie('sort2') => [ 'order' => getCookie('sortorder2') ] ]);
-        }
-    }
+    $searchParams = sortSearchResults($_REQUEST, $searchParams);
 
     try {
         // Send search query to Elasticsearch and get scroll id and first page of results
@@ -132,6 +128,9 @@ if (!empty($_REQUEST['submitted'])) {
             // Add to total filesize
             for ($x=0; $x<=count($results[$i]); $x++) {
                 $total_size += (int)$results[$i][$x]['_source']['filesize'];
+                // store the id and doctype in ids_onpage array
+                $ids_onpage[$x]['id'] = $results[$i][$x]['_id'];
+                $ids_onpage[$x]['type'] = $results[$i][$x]['_type'];
             }
             // end loop
             break;
@@ -167,7 +166,7 @@ if (!empty($_REQUEST['submitted'])) {
 		<?php include "nav.php"; ?>
 
 		<?php if (!isset($_REQUEST['submitted'])) {
-        $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : 100;
+        $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constants::SEARCH_RESULTS;
     ?>
 
 		<div class="container-fluid" style="margin-top:70px;">
@@ -185,26 +184,28 @@ if (!empty($_REQUEST['submitted'])) {
 			</div>
 			<div class="row">
 				<div class="col-xs-8 col-xs-offset-2">
-					<p class="text-center">
-						<form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-inline text-center">
+						<form id="simplesearch" method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-inline text-center">
                             <input type="hidden" name="index" value="<?php echo $esIndex; ?>" />
                             <input type="hidden" name="index2" value="<?php echo $esIndex2; ?>" />
-                            <input name="q" value="<?php echo $_REQUEST['q']; ?>" type="text" placeholder="Elasticsearch query string syntax" class="form-control input-lg" size="70" />
-							<input type="hidden" name="submitted" value="true" />
+                            <input name="q" id="search" autocomplete="off" value="<?php echo $request; ?>" type="text" placeholder="Elasticsearch query string syntax" class="form-control input-lg" style="width:75%;" />
+                            <input type="hidden" name="submitted" value="true" />
 							<input type="hidden" name="p" value="1" />
                             <input type="hidden" name="resultsize" value="<?php echo $resultSize; ?>" />
                     		<select class="form-control input-lg" name="doctype">
-                    		  <option value="file" selected>file</option>
-                              <option value="directory">directory</option>
-                              <option value="">all</option>
+                                <option value="file" <?php echo $_REQUEST['doctype'] == "file" ? "selected" : ""; ?>>file</option>
+                                <option value="directory" <?php echo $_REQUEST['doctype'] == "directory" ? "selected" : ""; ?>>directory</option>
+                                <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>
                     		</select>
 							<button type="submit" class="btn btn-primary btn-lg">Search</button>
 						</form>
-					</p>
+                        <div class="essearchreply" id="essearchreply">
+                            <div class="essearchreply-text" id="essearchreply-text"></div>
+                        </div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-xs-8 col-xs-offset-2">
+                    <br />
 					<p class="text-center">
 						<a href="help.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Search examples</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Query string syntax help</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -241,9 +242,45 @@ if (isset($_REQUEST['submitted'])) {
 	<script language="javascript" src="js/bootstrap.min.js"></script>
 	<script language="javascript" src="js/diskover.js"></script>
     <script>
-    // listen for msgs from diskover socket server
-    listenSocketServer();
+    $(document).ready(function () {
+
+        // search items in ES on keypress on simple search page
+    	$("#search").keyup(function () {
+            if ($('#search').val() === "") {
+                $('#essearchreply-text').html("");
+                $('#essearchreply').hide();
+                return false;
+            }
+            var results;
+            $.ajax({
+                type:'GET',
+                url:'searchkeypress.php',
+                data: $('#simplesearch').serialize(),
+                success: function(data) {
+                		if (data != "") {
+                            // set width and position of search results div to match search input
+                            var w = $('#search').width();
+                            var p = $('#search').position();
+                            $("#essearchreply").css({left: p.left, position:'absolute'});
+                            $('#essearchreply').width(w+30);
+                			$('#essearchreply').show();
+                            $('#essearchreply-text').html(data);
+                		} else {
+                            $('#essearchreply-text').html("");
+                            $('#essearchreply').hide();
+                		}
+                    }
+            });
+            return false;
+    	});
+
+        // listen for msgs from diskover socket server
+        listenSocketServer();
+    });
     </script>
+<div id="loading">
+  <img id="loading-image" width="32" height="32" src="images/ajax-loader.gif" alt="Updating..." />
+</div>
 <iframe name="hiddeniframe" width=0 height=0 style="display:none;"></iframe>
 </body>
 
