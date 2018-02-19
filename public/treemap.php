@@ -24,9 +24,14 @@ if (isset($_GET['index'])) {
     }
 }
 
-// remove any trailing slash unless root
-if (!empty($_GET['path']) && $_GET['path'] !== "/") {
-    $path = rtrim($_GET['path'], '/');
+$path = $_GET['path'] ?: getCookie('path');
+// check if no path (grab one from ES)
+if (empty($path)) {
+    $path = get_es_path($client, $esIndex);
+    createCookie('path', $path);
+} elseif ($path !== "/") {
+    // remove any trailing slash
+    $path = rtrim($path, '/');
 }
 ?>
 

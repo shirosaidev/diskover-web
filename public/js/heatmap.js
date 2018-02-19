@@ -40,7 +40,7 @@ function getESJsonData() {
     // load json data from Elasticsearch
     d3.json(chartConfig.data_url, function(error, data) {
 
-        // display error if data has error message
+        // display error if data has error message or no index2 selected
         if ((data && data.error) || error) {
             spinner.stop();
             console.warn("nothing found in Elasticsearch: " + error);
@@ -294,10 +294,10 @@ function renderTreeMap(data) {
 
         t.select("rect")
             .attr("width", function(d) {
-                return kx * d.dx - 1;
+                return kx * d.dx;
             })
             .attr("height", function(d) {
-                return ky * d.dy - 1;
+                return ky * d.dy;
             });
 
         t.select("text")
@@ -348,97 +348,102 @@ function renderTreeMap(data) {
         .style("opacity", 0);
 }
 
-var path = decodeURIComponent($_GET('path'));
-// remove any trailing slash
-if (path !== '/') {
-    path = path.replace(/\/$/, "");
-}
-var filter = $_GET('filter') || FILTER, // min file size filter
-    mtime = $_GET('mtime') || MTIME, // min modified time filter
-    maxdepth = $_GET('maxdepth') || getCookie('maxdepth') || MAXDEPTH, // max directory depth
-    root,
-    node,
-    min,
-    max;
-
-var use_count = parseInt($_GET('use_count'));
-(!use_count || use_count === 0) ? use_count = 0 : use_count = 1;
-(use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
-
-console.log("PATH:" + path);
-console.log("SIZE_FILTER:" + filter);
-console.log("MTIME_FILTER:" + mtime);
-console.log("MAXDEPTH:" + maxdepth);
-console.log("USECOUNT:" + use_count);
-
-console.time('loadtime')
-
-// d3 treemap
-var w = window.innerWidth - 40,
-    h = window.innerHeight - 140,
-    x = d3.scale.linear().range([0, w]),
-    y = d3.scale.linear().range([0, h]);
-
-var svg = d3.select("#heatmap-container")
-    .append("svg")
-    .attr("class", "chart")
-    .style("width", w + "px")
-    .style("height", h + "px")
-    .attr("width", w)
-    .attr("height", h)
-    .append("g")
-    .attr("transform", "translate(.5,.5)");
-
-
-// heatmap
-
-window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-                               window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-
-function get(id) {
-    return document.getElementById(id);
-}
-
-get('heatmap-overlay').width = w;
-get('heatmap-overlay').height = h;
-
-var heatmapdata = [];
-
-var heat = simpleheat('heatmap-overlay'),
-    frame;
-
-function draw() {
-    console.time('draw');
-    heat.clear();
-    heat.data(heatmapdata);
-    heat.max(+maxs.value);
-    console.log('HEATMAP_MAX:'+maxs.value)
-    heat.radius(+radius.value, +blur.value);
-    console.log('HEATMAP_RADIUS:'+radius.value)
-    console.log('HEATMAP_BLUR:'+blur.value)
-    heat.draw();
-    console.timeEnd('draw');
-    frame = null;
-}
-
-var radius = get('radius'),
-    blur = get('blur'),
-    maxs = get('maxs'),
-    changeType = 'oninput' in radius ? 'oninput' : 'onchange';
-
-radius[changeType] = blur[changeType] = maxs[changeType] = function (e) {
-    frame = frame || window.requestAnimationFrame(draw);
-};
-
-
-// check if json data stored in session storage
-root = JSON.parse(sessionStorage.getItem("diskover-heatmap"));
-
-// get data from Elasticsearh if no json in session storage or path diff
-if (!root || root[0].name !== path) {
-    getESJsonData();
+// display message if no index2 selected
+if (getCookie('index2') === "") {
+    document.getElementById('index2req').style.display = 'block';
 } else {
-    renderTreeMap(root);
-}
+    var path = decodeURIComponent($_GET('path'));
+    // remove any trailing slash
+    if (path !== '/') {
+        path = path.replace(/\/$/, "");
+    }
+    var filter = $_GET('filter') || FILTER, // min file size filter
+        mtime = $_GET('mtime') || MTIME, // min modified time filter
+        maxdepth = $_GET('maxdepth') || getCookie('maxdepth') || MAXDEPTH, // max directory depth
+        root,
+        node,
+        min,
+        max;
 
-console.timeEnd('loadtime');
+    var use_count = parseInt($_GET('use_count'));
+    (!use_count || use_count === 0) ? use_count = 0 : use_count = 1;
+    (use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
+
+    console.log("PATH:" + path);
+    console.log("SIZE_FILTER:" + filter);
+    console.log("MTIME_FILTER:" + mtime);
+    console.log("MAXDEPTH:" + maxdepth);
+    console.log("USECOUNT:" + use_count);
+
+    console.time('loadtime')
+
+    // d3 treemap
+    var w = window.innerWidth - 40,
+        h = window.innerHeight - 140,
+        x = d3.scale.linear().range([0, w]),
+        y = d3.scale.linear().range([0, h]);
+
+    var svg = d3.select("#heatmap-container")
+        .append("svg")
+        .attr("class", "chart")
+        .style("width", w + "px")
+        .style("height", h + "px")
+        .attr("width", w)
+        .attr("height", h)
+        .append("g")
+        .attr("transform", "translate(.5,.5)");
+
+
+    // heatmap
+
+    window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                                   window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+    function get(id) {
+        return document.getElementById(id);
+    }
+
+    get('heatmap-overlay').width = w;
+    get('heatmap-overlay').height = h;
+
+    var heatmapdata = [];
+
+    var heat = simpleheat('heatmap-overlay'),
+        frame;
+
+    function draw() {
+        console.time('draw');
+        heat.clear();
+        heat.data(heatmapdata);
+        heat.max(+maxs.value);
+        console.log('HEATMAP_MAX:'+maxs.value)
+        heat.radius(+radius.value, +blur.value);
+        console.log('HEATMAP_RADIUS:'+radius.value)
+        console.log('HEATMAP_BLUR:'+blur.value)
+        heat.draw();
+        console.timeEnd('draw');
+        frame = null;
+    }
+
+    var radius = get('radius'),
+        blur = get('blur'),
+        maxs = get('maxs'),
+        changeType = 'oninput' in radius ? 'oninput' : 'onchange';
+
+    radius[changeType] = blur[changeType] = maxs[changeType] = function (e) {
+        frame = frame || window.requestAnimationFrame(draw);
+    };
+
+
+    // check if json data stored in session storage
+    root = JSON.parse(sessionStorage.getItem("diskover-heatmap"));
+
+    // get data from Elasticsearh if no json in session storage or path diff
+    if (!root || root[0].name !== path) {
+        getESJsonData();
+    } else {
+        renderTreeMap(root);
+    }
+
+    console.timeEnd('loadtime');
+}

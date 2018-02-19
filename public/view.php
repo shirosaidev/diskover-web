@@ -35,6 +35,31 @@ if (empty($_REQUEST['id'])) {
     }
 }
 
+$path = $_GET['path'] ?: getCookie('path');
+// check if no path (grab one from ES)
+if (empty($path)) {
+    $path = get_es_path($client, $esIndex);
+    createCookie('path', $path);
+} elseif ($path !== "/") {
+    // remove any trailing slash
+    $path = rtrim($path, '/');
+}
+
+// set fullpath, parentpath and filename and check for root /
+if ($path === "/" && $file['path_parent'] === "/") {
+    $fullpath = '/' . $file['filename'];
+    $parentpath = $file['path_parent'];
+    if ($file['filename'] === "") { // root /
+        $filename = '/';
+    } else {
+        $filename = $file['filename'];
+    }
+} else {
+    $fullpath = $file['path_parent'] . '/' . $file['filename'];
+    $parentpath = $file['path_parent'];
+    $filename = $file['filename'];
+}
+
 // see if there are any extra custom fields to add
 $extra_fields = [];
 for ($i=1; $i < 5; $i++) {
@@ -79,7 +104,7 @@ exit();
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; ?> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $file['filename']; ?></a></h2>
+      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; ?> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $filename; ?></a></h2>
       <!-- tag dropdown -->
       <form id="changetag" name="changetag" class="form-inline">
       <input type="hidden" name="id" value="<?php echo $fileid; ?>">
@@ -133,29 +158,29 @@ exit();
               </ul>
           </div>
          <!-- end tag dropdown -->
-      <h4 class="path">Full path: <?php echo $file['path_parent']."/".$file['filename']; ?></h4>
+      <h4 class="path">Full path: <?php echo $fullpath; ?></h4>
       <?php if ($_REQUEST['doctype'] == 'directory') { ?>
           <div class="dropdown" style="display:inline-block;">
               <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-stats"></i>
                   <span class="caret"></span></button>
                   <ul class="dropdown-menu">
-                      <li class="small"><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-tree-conifer"></i> filetree</a></li>
-                      <li class="small"><a href="treemap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-large"></i> treemap</a></li>
-                      <li class="small"><a href="heatmap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> heatmap</a></li>
-                      <li class="small"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-list"></i> top 50</a></li>
+                      <li class="small"><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-tree-conifer"></i> filetree</a></li>
+                      <li class="small"><a href="treemap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-large"></i> treemap</a></li>
+                      <li class="small"><a href="heatmap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> heatmap</a></li>
+                      <li class="small"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-list"></i> top 50</a></li>
                       </ul>
               </div>
               <div class="dropdown" style="display:inline-block;">
                   <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-filter"></i>
                       <span class="caret"></span></button>
                       <ul class="dropdown-menu">
-                          <li class="small"><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent'] . '/' . $file['filename']); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
-                          <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo escape_chars($file['path_parent'] . '/' . $file['filename'] . '*'); ?>"><i class="glyphicon glyphicon-filter"></i> filter (recursive)</a></li>
+                          <li class="small"><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($fullpath); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
+                          <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath . '*')); ?>"><i class="glyphicon glyphicon-filter"></i> filter (recursive)</a></li>
                           </ul>
                   </div>
       <br />
       <?php } ?>
-      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> <span style="color:gray">Parent path: <?php echo $file['path_parent']; ?> </span></h5>
+      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> <span style="color:gray">Parent path: <?php echo $parentpath; ?> </span></h5>
       <div class="dropdown" style="display:inline-block;">
           <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-stats"></i>
               <span class="caret"></span></button>

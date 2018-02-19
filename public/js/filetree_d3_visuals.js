@@ -272,7 +272,7 @@ function changePie(data) {
         .attr("dy", "1.5em")
         .attr("class", "label-info")
         .text(function() {
-            return node.count + ' files' + ', ' + format(node.size);
+            return node.count + ' items' + ', ' + format(node.size);
         });
 
     /* ------- TEXT LABELS -------*/
@@ -458,7 +458,9 @@ function loadPieFileExt(data) {
             if (!d.data.label) {
                 extension = '""';
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:>=' + filter  + ' AND last_modified:[' + getMtime() + ']';
+            window.location.href = 'simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +
+            ' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:>=' + filter +
+            ' AND last_modified:[' + getMtime() + '] AND _type:file';
         })
         .attr("class", "slice");
 
@@ -738,7 +740,8 @@ function loadBarMtime(data) {
                 var last_mod_time_high = 'now-10y/d';
                 var last_mod_time_low = '*';
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter;
+            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
+            ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter + ' AND _type:file';
         });
 
     bar
@@ -985,7 +988,8 @@ function loadBarFileSizes(data) {
                 var filesize_high = '*';
                 var filesize_low = 17179869184;
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND filesize:>=' + filter + ' AND last_modified:[' + getMtime() + ']'
+            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) +
+            ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file'
         });
 
     bar2

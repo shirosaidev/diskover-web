@@ -183,8 +183,8 @@ foreach ($tagCountsCustom as $tag => $value) {
                   </div>
                 <div class="col-xs-6">
                     <div id="filesizechart" class="text-center"></div>
-                    <br /><hr />
-                    <div class="chartbox text-center">
+                    <br /><br /><hr />
+                    <div class="chartbox text-center" style="display:absolute;">
                       <span class="label" style="font-size:16px;background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
                       <span class="label" style="font-size:16px;background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
                       <span class="label" style="font-size:16px;background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
@@ -214,288 +214,299 @@ foreach ($tagCountsCustom as $tag => $value) {
 		<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
 
         <!-- d3 charts -->
-        	<script>
-                var count_untagged = <?php echo $tagCounts['untagged'] ?>;
-        		var count_delete = <?php echo $tagCounts['delete'] ?>;
-        		var count_archive = <?php echo $tagCounts['archive'] ?>;
-        		var count_keep = <?php echo $tagCounts['keep'] ?>;
-                <?php foreach($customtags as $key => $value) {
-                ?>
-                var count_custom_<?php echo $key ?> = <?php echo $tagCountsCustom[$value[0]] ?>;
-                <?php } ?>
+    	<script>
+            var count_untagged = <?php echo $tagCounts['untagged'] ?>;
+    		var count_delete = <?php echo $tagCounts['delete'] ?>;
+    		var count_archive = <?php echo $tagCounts['archive'] ?>;
+    		var count_keep = <?php echo $tagCounts['keep'] ?>;
+            <?php foreach($customtags as $key => $value) {
+            ?>
+            var count_custom_<?php echo $key ?> = <?php echo $tagCountsCustom[$value[0]] ?>;
+            <?php } ?>
 
-                var showuntagged = document.getElementById('showuntagged').checked;
+            var showuntagged = document.getElementById('showuntagged').checked;
 
-                var dataset = [];
-                if (showuntagged) {
-                    dataset.push({
-            			label: 'untagged',
-            			count: count_untagged
-            		});
-                }
-
+            var dataset = [];
+            if (showuntagged) {
                 dataset.push({
-        			label: 'delete',
-        			count: count_delete
-        		}, {
-        			label: 'archive',
-        			count: count_archive
-        		}, {
-        			label: 'keep',
-        			count: count_keep
-        		}
-                <?php foreach($customtags as $key => $value) {
-                ?>
-                , { label: '<?php echo $value[0] ?>', count: <?php echo $tagCountsCustom[$value[0]] ?> }
-                <?php } ?>
-                );
+        			label: 'untagged',
+        			count: count_untagged
+        		});
+            }
 
-                var totalcount = d3.sum(dataset, function(d) {
-                    return d.count;
+            dataset.push({
+    			label: 'delete',
+    			count: count_delete
+    		}, {
+    			label: 'archive',
+    			count: count_archive
+    		}, {
+    			label: 'keep',
+    			count: count_keep
+    		}
+            <?php foreach($customtags as $key => $value) {
+            ?>
+            , { label: '<?php echo $value[0] ?>', count: <?php echo $tagCountsCustom[$value[0]] ?> }
+            <?php } ?>
+            );
+
+            var totalcount = d3.sum(dataset, function(d) {
+                return d.count;
+            });
+
+    		var width = 720;
+    		var height = 500;
+    		var radius = Math.min(width, height) / 2;
+
+            var color_range = [];
+
+            if (showuntagged) {
+                color_range.push("#666666");
+            }
+
+            color_range.push(
+                "#F69327",
+                "#65C165",
+                "#52A3BB"
+            <?php foreach($customtags as $key => $value) { ?>
+            <?php echo ", \"".$value[1]."\"" ?>
+            <?php } ?>
+            );
+
+    		var color = d3.scale.ordinal()
+    			.range(color_range);
+
+    		var svg = d3.select("#tagcountchart")
+    			.append('svg')
+    			.attr('width', width)
+    			.attr('height', height)
+    			.append('g')
+    			.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+
+            var tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .html(function(d) {
+                    var percent = (d.value / totalcount * 100).toFixed(1) + '%';
+                    return "<span style='font-size:12px;color:white;'>" + d.data.label + "</span><br><span style='font-size:12px; color:red;'>" + d.value + " (" + percent + ")</span>";
                 });
 
-        		var width = 720;
-        		var height = 500;
-        		var radius = Math.min(width, height) / 2;
+            svg.call(tip);
 
-                var color_range = [];
+            d3.select("#tagcountchart").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
 
-                if (showuntagged) {
-                    color_range.push("#666666");
-                }
+    		var pie = d3.layout.pie()
+    			.value(function(d) {
+    				return d.count;
+    			})
+    			.sort(null);
 
-                color_range.push(
-                    "#F69327",
-                    "#65C165",
-                    "#52A3BB"
-                <?php foreach($customtags as $key => $value) { ?>
-                <?php echo ", \"".$value[1]."\"" ?>
-                <?php } ?>
-                );
+    		var path = d3.svg.arc()
+    			.outerRadius(radius - 10)
+    			.innerRadius(0);
 
-        		var color = d3.scale.ordinal()
-        			.range(color_range);
+    		var label = d3.svg.arc()
+    			.outerRadius(radius - 40)
+    			.innerRadius(radius - 40);
 
-        		var svg = d3.select("#tagcountchart")
-        			.append('svg')
-        			.attr('width', width)
-        			.attr('height', height)
-        			.append('g')
-        			.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+    		var arc = svg.selectAll('.arc')
+    			.data(pie(dataset))
+    			.enter().append('g')
+    			.attr('class', 'arc');
 
-                var tip = d3.tip()
-                    .attr('class', 'd3-tip')
-                    .html(function(d) {
-                        var percent = (d.value / totalcount * 100).toFixed(1) + '%';
-                        return "<span style='font-size:12px;color:white;'>" + d.data.label + "</span><br><span style='font-size:12px; color:red;'>" + d.value + " (" + percent + ")</span>";
-                    });
-
-                svg.call(tip);
-
-                d3.select("#tagcountchart").append("div")
-                    .attr("class", "tooltip")
-                    .style("opacity", 0);
-
-        		var pie = d3.layout.pie()
-        			.value(function(d) {
-        				return d.count;
-        			})
-        			.sort(null);
-
-        		var path = d3.svg.arc()
-        			.outerRadius(radius - 10)
-        			.innerRadius(0);
-
-        		var label = d3.svg.arc()
-        			.outerRadius(radius - 40)
-        			.innerRadius(radius - 40);
-
-        		var arc = svg.selectAll('.arc')
-        			.data(pie(dataset))
-        			.enter().append('g')
-        			.attr('class', 'arc');
-
-        		arc.append('path')
-        			.attr('d', path)
-                    .attr('class', path)
-        			.attr('fill', function(d) {
-        				return color(d.data.label);
-        			})
-                    .on("mouseover", function(d) {
-                        tip.show(d);
-                    })
-                    .on("mouseout", function(d) {
-                        tip.hide(d);
-                    })
-                    .on('mousemove', function() {
-                        if (d3.event.pageY > window.innerHeight - 50) {
-                            // change tip for bottom of screen
-                            return tip
-                                .style("top", (d3.event.pageY - 40) + "px")
-                                .style("left", (d3.event.pageX + 10) + "px");
-                        } else if (d3.event.pageX > window.innerWidth - 200) {
-                            // change tip for right side of screen
-                            return tip
-                                .style("top", (d3.event.pageY + 10) + "px")
-                                .style("left", (d3.event.pageX - 200) + "px");
-                        } else {
-                            return tip
-                                .style("top", (d3.event.pageY - 10) + "px")
-                                .style("left", (d3.event.pageX + 10) + "px");
-                        }
-                    });
-
-        		arc.append('text')
-        			.attr("transform", function(d) {
-        				return "translate(" + label.centroid(d) + ")";
-        			})
-        			.attr("dy", "0.35em")
-                    .style("font-size", "10px")
-        			.text(function(d) {
-        				return d.data.label;
-        			});
-        	</script>
-
-        	<script>
-                var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
-        		var size_delete = <?php echo $totalFilesize['delete'] ?>;
-        		var size_archive = <?php echo $totalFilesize['archive'] ?>;
-        		var size_keep = <?php echo $totalFilesize['keep'] ?>;
-                <?php foreach($customtags as $key => $value) {
-                ?>
-                var size_custom_<?php echo $key ?> = <?php echo $totalFilesizeCustom[$value[0]] ?>;
-                <?php } ?>
-
-                var showuntagged = document.getElementById('showuntagged').checked;
-
-                var dataset = [];
-                if (showuntagged) {
-                    dataset.push({
-            			label: 'untagged',
-            			size: size_untagged
-            		});
-                }
-
-                dataset.push({
-        			label: 'delete',
-        			size: size_delete
-        		}, {
-        			label: 'archive',
-        			size: size_archive
-        		}, {
-        			label: 'keep',
-        			size: size_keep
-        		}
-                <?php foreach($customtags as $key => $value) {
-                ?>
-                , { label: '<?php echo $value[0] ?>', size: <?php echo $totalFilesizeCustom[$value[0]] ?> }
-                <?php } ?>
-                );
-
-                var totalsize = d3.sum(dataset, function(d) {
-                    return d.size;
+    		arc.append('path')
+    			.attr('d', path)
+                .attr('class', path)
+    			.attr('fill', function(d) {
+    				return color(d.data.label);
+    			})
+                .on("mouseover", function(d) {
+                    tip.show(d);
+                })
+                .on("mouseout", function(d) {
+                    tip.hide(d);
+                })
+                .on('mousemove', function() {
+                    return tip
+                        .style("top", (d3.event.pageY - 10) + "px")
+                        .style("left", (d3.event.pageX + 10) + "px");
                 });
 
-        		var width = 720;
-        		var height = 500;
-        		var radius = Math.min(width, height) / 2;
+    		arc.append('text')
+    			.attr("transform", function(d) {
+    				return "translate(" + label.centroid(d) + ")";
+    			})
+    			.attr("dy", "0.35em")
+                .style("font-size", "10px")
+    			.text(function(d) {
+                    if (d.value>0) { return d.data.label };
+    			});
+    	</script>
 
-                var color_range = [];
+        <script>
+            // Bar chart (dupes size)
+            var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
+            var size_delete = <?php echo $totalFilesize['delete'] ?>;
+            var size_archive = <?php echo $totalFilesize['archive'] ?>;
+            var size_keep = <?php echo $totalFilesize['keep'] ?>;
+            <?php foreach($customtags as $key => $value) {
+            ?>
+            var size_custom_<?php echo $key ?> = <?php echo $totalFilesizeCustom[$value[0]] ?>;
+            <?php } ?>
 
-                if (showuntagged) {
-                    color_range.push("#666666");
-                }
+            var showuntagged = document.getElementById('showuntagged').checked;
 
-                color_range.push(
-                    "#F69327",
-                    "#65C165",
-                    "#52A3BB"
-                <?php foreach($customtags as $key => $value) { ?>
-                <?php echo ", \"".$value[1]."\"" ?>
-                <?php } ?>
-                );
+            var dataset = [];
+            if (showuntagged) {
+                dataset.push({
+                    label: 'untagged',
+                    size: size_untagged
+                });
+            }
 
-        		var color = d3.scale.ordinal()
-        		      .range(color_range);
+            dataset.push({
+                label: 'delete',
+                size: size_delete
+            }, {
+                label: 'archive',
+                size: size_archive
+            }, {
+                label: 'keep',
+                size: size_keep
+            }
+            <?php foreach($customtags as $key => $value) {
+            ?>
+            , { label: '<?php echo $value[0] ?>', size: <?php echo $totalFilesizeCustom[$value[0]] ?> }
+            <?php } ?>
+            );
 
-                var svg = d3.select("#filesizechart")
-        			.append('svg')
-        			.attr('width', width)
-        			.attr('height', height)
-        			.append('g')
-        			.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+            var valueLabelWidth = 40; // space reserved for value labels (right)
+            var barHeight = 15; // height of one bar
+            var barLabelWidth = 200; // space reserved for bar labels
+            var barLabelPadding = 10; // padding between bar and bar labels (left)
+            var gridChartOffset = 0; // space between start of grid and first bar
+            var maxBarWidth = 400; // width of the bar with the max value
 
-                var tip2 = d3.tip()
-                    .attr('class', 'd3-tip')
-                    .html(function(d) {
-                        var percent = (d.value / totalsize * 100).toFixed(1) + '%';
-                        return "<span style='font-size:12px;color:white;'>" + d.data.label + "</span><br><span style='font-size:12px; color:red;'>" + format(d.value) + " (" + percent + ")</span>";
-                    });
+            var totalsize = d3.sum(dataset, function(d) {
+                return d.size;
+            });
 
-                svg.call(tip2);
+            // svg container element
+            var svg = d3.select('#filesizechart').append("svg")
+                .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth);
 
-                d3.select("#filesizechart").append("div")
-                    .attr("class", "tooltip")
-                    .style("opacity", 0);
+            svg.append("g")
+                .attr("class", "bars");
+            svg.append("g")
+                .attr("class", "barvaluelabel");
+            svg.append("g")
+                .attr("class", "barlabel");
 
-        		var pie = d3.layout.pie()
-        			.value(function(d) {
-        				return d.size;
-        			})
-        			.sort(null);
+            /* ------- TOOLTIP -------*/
 
-        		var path = d3.svg.arc()
-        			.outerRadius(radius - 10)
-        			.innerRadius(0);
+            var tip2 = d3.tip()
+                .attr('class', 'd3-tip')
+                .html(function(d) {
+                    var percent = (d.size / totalsize * 100).toFixed(1) + '%';
+                    return "<span style='font-size:12px;color:white;'>dupe_md5: " + d.label + "</span><br><span style='font-size:12px; color:red;'>size: " + format(d.size) + " (" + percent + ")</span>";
+                });
 
-        		var label = d3.svg.arc()
-        			.outerRadius(radius - 40)
-        			.innerRadius(radius - 40);
+            svg.call(tip2);
 
-        		var arc = svg.selectAll('.arc')
-        			.data(pie(dataset))
-        			.enter().append('g')
-        			.attr('class', 'arc');
+            d3.select("filesizechart").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
 
-        		arc.append('path')
-        			.attr('d', path)
-        			.attr('fill', function(d) {
-        				return color(d.data.label);
-        			})
-                    .on("mouseover", function(d) {
-                        tip2.show(d);
-                    })
-                    .on("mouseout", function(d) {
-                        tip2.hide(d);
-                    })
-                    .on('mousemove', function() {
-                        if (d3.event.pageY > window.innerHeight - 50) {
-                            // change tip for bottom of screen
-                            return tip2
-                                .style("top", (d3.event.pageY - 40) + "px")
-                                .style("left", (d3.event.pageX + 10) + "px");
-                        } else if (d3.event.pageX > window.innerWidth - 200) {
-                            // change tip for right side of screen
-                            return tip2
-                                .style("top", (d3.event.pageY + 10) + "px")
-                                .style("left", (d3.event.pageX - 200) + "px");
-                        } else {
-                            return tip2
-                                .style("top", (d3.event.pageY - 10) + "px")
-                                .style("left", (d3.event.pageX + 10) + "px");
-                        }
-                    });
+            /* ------- BARS -------*/
 
-        		arc.append('text')
-        			.attr("transform", function(d) {
-        				return "translate(" + label.centroid(d) + ")";
-        			})
-        			.attr("dy", "0.35em")
-                    .style("font-size", "10px")
-        			.text(function(d) {
-        				return d.data.label;
-        			});
-        	</script>
+            // accessor functions
+            var barLabel = function(d) {
+                return d['label'];
+            };
+            var barValue = function(d) {
+                return d['size'];
+            };
+
+            // scales
+            var yScale = d3.scale.ordinal().domain(d3.range(0, dataset.length)).rangeBands([0, dataset.length * barHeight]);
+            var y = function(d, i) {
+                return yScale(i);
+            };
+            var yText = function(d, i) {
+                return y(d, i) + yScale.rangeBand() / 2;
+            };
+            var x = d3.scale.linear().domain([0, d3.max(dataset, barValue)]).range([0, maxBarWidth]);
+
+            // bars
+            var bar = svg.select(".bars").selectAll("rect")
+                   .data(dataset.sort(function(x, y) { return d3.descending(x.size, y.size); }));
+
+            bar.enter().append("rect")
+                .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
+                .attr('height', yScale.rangeBand())
+                .attr('y', y)
+                .attr('class', 'bars')
+                .style('fill', function(d) {
+    				return color(d.label);
+    			})
+                .attr('width', function(d) {
+                    return x(barValue(d));
+                })
+                .on("mouseover", function(d) {
+                    tip2.show(d);
+                })
+                .on('mouseout', function(d) {
+                    tip2.hide(d)
+                })
+                .on('mousemove', function() {
+                    return tip2
+                        .style("top", (d3.event.pageY - 10) + "px")
+                        .style("left", (d3.event.pageX + 10) + "px");
+                });
+
+
+            bar
+                .transition().duration(750)
+                .attr("width", function(d) {
+                    return x(barValue(d));
+                });
+
+            bar.exit().remove();
+
+            // bar labels
+            var barlabel = svg.select(".barlabel").selectAll('text').data(dataset);
+
+            barlabel.enter().append('text')
+                .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + gridChartOffset + ')')
+                .attr('y', yText)
+                .attr("dy", ".35em") // vertical-align: middle
+                .attr("class", "barlabel")
+                .text(barLabel);
+
+            barlabel.exit().remove();
+
+            // bar value labels
+            var barvaluelabel = svg.select(".barvaluelabel").selectAll('text').data(dataset);
+
+            barvaluelabel.enter().append("text")
+                .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
+                .attr("dx", 3) // padding-left
+                .attr("dy", ".35em") // vertical-align: middle
+                .attr("class", "barvaluelabel");
+
+            barvaluelabel
+                .attr("x", function(d) {
+                    return x(barValue(d));
+                })
+                .attr("y", yText)
+                .text(function(d) {
+                    return format(barValue(d));
+                });
+
+            barvaluelabel.exit().remove();
+
+    	</script>
 	</body>
 
 	</html>

@@ -10,6 +10,8 @@ use diskover\Constants;
 
 error_reporting(E_ALL ^ E_NOTICE);
 
+$path = $_GET['path'] ?: getCookie('path');
+
 // see if there are any extra custom fields to add
 $extra_fields = [];
 for ($i=1; $i < 5; $i++) {
@@ -97,7 +99,7 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
 		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
-          <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
+          <?php if (($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') && !strpos($_GET['q'], '_type:file')) { ?>
           <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
           <?php } ?>
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
@@ -149,9 +151,25 @@ if (count($results[$p]) > 0) {
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'deleterow'; } elseif ($file['tag'] == 'archive') { echo 'archiverow'; } elseif ($file['tag'] == 'keep') { echo 'keeprow'; }?>">
         <th scope="row" class="text-nowrap <?php if ($file['tag'] == 'delete') { echo 'deletehighlight_bg'; } elseif ($file['tag'] == 'archive') { echo 'archivehighlight_bg'; } elseif ($file['tag'] == 'keep') { echo 'keephighlight_bg'; }?>" style="color:#555;"><?php echo $i; ?></th>
         <td class="path highlight">
-            <?php echo ($result['_type'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i>'; ?> <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'] . '/' . $file['filename'])) ?> OR path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'] . '/' . $file['filename'] . '/*')); ?>&amp;submitted=true&amp;p=1"><?php echo $file['filename']; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><span style="color:#666;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></span></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><?php echo $file['filename']; ?></a><?php } ?>
+            <?php
+            // set fullpath, parentpath and filename vars and check for root /
+            if ($file['path_parent'] === "/" && $file['filename'] === "") {  // / root
+                $fullpath = $file['path_parent'] . $file['filename'];
+                $parentpath = $file['path_parent'];
+                $filename = "/";
+            } elseif ($file['path_parent'] === "/" && $file['filename'] !== "") { // directory in /
+                $fullpath = $file['path_parent'] . $file['filename'];
+                $parentpath = $file['path_parent'];
+                $filename = $file['filename'];
+            } else {
+                $fullpath = $file['path_parent'] . '/' . $file['filename'];
+                $parentpath = $file['path_parent'];
+                $filename = $file['filename'];
+            }
+            ?>
+            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><span style="color:#666;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></span></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <?php echo $filename; ?></a><?php } ?>
             <!-- socket command buttons -->
-            <?php if ($socketlistening) { ?><?php if ($result['_type'] == 'directory') { $cmd = "{\"action\": \"dirsize\", \"path\": \"".$file['path_parent'].'/'.$file['filename']."\", \"index\": \"".$esIndex."\"}"; ?> <a onclick='runCommand(<?php echo $cmd; ?>);' href="#"><label title="calculate directory size" class="btn btn-default btn-xs file-cmd-btns run-btn"><i class="glyphicon glyphicon-hdd"></i></label></a>&nbsp;<?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$file['path_parent'].'/'.$file['filename']."\", \"index\": \"".$esIndex."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#"><label title="reindex directory (non-recursive)" class="btn btn-default btn-xs file-cmd-btns run-btn"><i class="glyphicon glyphicon-repeat"></i></label></a><?php } } ?>
+            <?php if ($socketlistening) { ?><?php if ($result['_type'] == 'directory') { $cmd = "{\"action\": \"dirsize\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\"}"; ?> <a onclick='runCommand(<?php echo $cmd; ?>);' href="#"><label title="calculate directory size" class="btn btn-default btn-xs file-cmd-btns run-btn"><i class="glyphicon glyphicon-hdd"></i></label></a>&nbsp;<?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#"><label title="reindex directory (non-recursive)" class="btn btn-default btn-xs file-cmd-btns run-btn"><i class="glyphicon glyphicon-repeat"></i></label></a><?php } } ?>
             <!-- end socket command buttons -->
         </td>
             <td class="text-nowrap tagdropdown">
@@ -231,7 +249,7 @@ if (count($results[$p]) > 0) {
                           <span class="caret"></span></button>
                           <ul class="dropdown-menu">
                               <li class="small"><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
-                              <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo escape_chars($file['path_parent'] . '*'); ?>"><i class="glyphicon glyphicon-filter"></i> filter (recursive)</a></li>
+                              <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'] . '*')); ?>"><i class="glyphicon glyphicon-filter"></i> filter (recursive)</a></li>
                               </ul>
                       </div>
               <!-- end path buttons -->

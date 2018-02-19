@@ -17,7 +17,13 @@ if (isset($_GET['index'])) {
 } else {
     // get index from env var or cookie
     $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (!$esIndex) {
+        header("location:selectindices.php");
+        exit();
+    }
 }
+
 // check for index2 in url
 if (isset($_GET['index2'])) {
     $esIndex2 = $_GET['index2'];
@@ -26,15 +32,14 @@ if (isset($_GET['index2'])) {
     $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
 }
 
-// redirect to select indices page if no index or index2
-if (!$esIndex || !$esIndex2) {
-    header("location:selectindices.php");
-    exit();
-}
-
-// remove any trailing slash unless root
-if (!empty($_GET['path']) && $_GET['path'] !== "/") {
-    $path = rtrim($_GET['path'], '/');
+$path = $_GET['path'] ?: getCookie('path');
+// check if no path (grab one from ES)
+if (empty($path)) {
+    $path = get_es_path($client, $esIndex);
+    createCookie('path', $path);
+} elseif ($path !== "/") {
+    // remove any trailing slash
+    $path = rtrim($path, '/');
 }
 ?>
 
@@ -58,6 +63,14 @@ if (!empty($_GET['path']) && $_GET['path'] !== "/") {
 				<div class="alert alert-dismissible alert-danger col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
 					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again or check browser console and Elasticsearch for errors.
+				</div>
+			</div>
+		</div>
+        <div class="container" id="index2req" style="display:none; margin-top:70px;">
+			<div class="row">
+				<div class="alert alert-dismissible alert-info col-xs-8">
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>No index2 selected.</strong> Go to the <a href="selectindices.php">select index</a> page to add a previous index for data comparison.
 				</div>
 			</div>
 		</div>

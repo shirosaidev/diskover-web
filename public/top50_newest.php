@@ -208,7 +208,7 @@ foreach ($newestfiles as $key => $value) {
                   foreach ($newestfiles as $key => $value) {
                     ?>
                     <tr><td class="darken" width="10"><?php echo $n; ?></td>
-                        <td class="path"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
+                        <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <?php echo $value['_source']['filename']; ?></a></td>
                         <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                         <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
                         <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
@@ -252,9 +252,23 @@ foreach ($newestfiles as $key => $value) {
                   <?php
                       $n = 1;
                       foreach ($newestdirs as $key => $value) {
+                          // set fullpath, parentpath and filename and check for root /
+                          if ($path === "/" && $value['_source']['path_parent'] === "/") {
+                              $fullpath = '/' . $value['_source']['filename'];
+                              $parentpath = $value['_source']['path_parent'];
+                              if ($value['_source']['filename'] === "") { // root /
+                                  $filename = '/';
+                              } else {
+                                  $filename = $value['_source']['filename'];
+                              }
+                          } else {
+                              $fullpath = $value['_source']['path_parent'] . '/' . $value['_source']['filename'];
+                              $parentpath = $value['_source']['path_parent'];
+                              $filename = $value['_source']['filename'];
+                          }
                         ?>
                         <tr><td class="darken" width="10"><?php echo $n; ?></td>
-                            <td class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <a href="top50_newest.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($value['_source']['path_parent'] . '/' . $value['_source']['filename']) ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=directory"><?php echo $value['_source']['filename']; ?></a></td>
+                            <td class="path"><a href="top50_newest.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=directory"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <?php echo $filename; ?></a></td>
                             <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                             <td width="15%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%</small></span></td>
                             <td class="text-nowrap"><?php echo $value['_source']['items']; ?></td>

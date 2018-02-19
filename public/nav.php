@@ -139,6 +139,7 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
                         <li><a href="top50.php" id="top50link">Top 50</a></li>
                         <li><a href="tags.php" id="tagslink">Tags</a></li>
                         <li><a href="dupes.php" id="dupeslink">Dupes</a></li>
+                        <li><a href="smartsearches.php" id="smartsearcheslink">Smart Searches</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -168,9 +169,9 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
     					<input id="searchnavinput" autocomplete="off" type="text" name="q" class="form-control input" style="background-color: #424242!important;" placeholder="Search or !smartsearch" value='<?php echo $request; ?>'>
                         <span class="input-group-addon" style="width: 1%; margin: 1px; padding: 1px; height:20px;">
                             <select id="searchdoctype" name="doctype" class="form-control input-sm">
+                              <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>
                               <option value="file" <?php echo $_REQUEST['doctype'] == "file" ? "selected" : ""; ?>>file</option>
                               <option value="directory" <?php echo $_REQUEST['doctype'] == "directory" ? "selected" : ""; ?>>directory</option>
-                              <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>
                             </select>
                         </span>
                         <span class="input-group-addon" style="width: 1%; margin: 1px; padding: 1px; height:20px;">

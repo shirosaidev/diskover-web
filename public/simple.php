@@ -41,20 +41,8 @@ $ids_onpage = [];
 
 if (!empty($_REQUEST['submitted'])) {
 
-    // Grab all the smart searches from file
-    $smartsearches = get_smartsearches();
-
-    // Check if smart search was submitted
-    if (strpos($_REQUEST['q'], '!') === 0) {  # ! smart search keyword
-        foreach($smartsearches as $arr) {
-            if(in_array($_REQUEST['q'], $arr)) {
-                $smartsearch_query = $arr[1];
-            }
-        }
-        $request = $smartsearch_query;
-    } else {
-        $request = $_REQUEST['q'];
-    }
+    // get request string from predict_search
+    $request = predict_search($_REQUEST['q']);
 
     // Save search query
     saveSearchQuery($request);
@@ -187,14 +175,14 @@ if (!empty($_REQUEST['submitted'])) {
 						<form id="simplesearch" method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-inline text-center">
                             <input type="hidden" name="index" value="<?php echo $esIndex; ?>" />
                             <input type="hidden" name="index2" value="<?php echo $esIndex2; ?>" />
-                            <input name="q" id="search" autocomplete="off" value="<?php echo $request; ?>" type="text" placeholder="Elasticsearch query string syntax" class="form-control input-lg" style="width:75%;" />
+                            <input name="q" id="search" autocomplete="off" value="<?php echo $request; ?>" type="text" placeholder="Press ! to start a smartsearch or / for paths or ES query syntax" class="form-control input-lg" style="width:70%;" />
                             <input type="hidden" name="submitted" value="true" />
 							<input type="hidden" name="p" value="1" />
                             <input type="hidden" name="resultsize" value="<?php echo $resultSize; ?>" />
                     		<select class="form-control input-lg" name="doctype">
-                                <option value="file" <?php echo $_REQUEST['doctype'] == "file" ? "selected" : ""; ?>>file</option>
-                                <option value="directory" <?php echo $_REQUEST['doctype'] == "directory" ? "selected" : ""; ?>>directory</option>
-                                <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>
+                                <option value="">all</option>
+                                <option value="file">file</option>
+                                <option value="directory">directory</option>
                     		</select>
 							<button type="submit" class="btn btn-primary btn-lg">Search</button>
 						</form>
@@ -209,7 +197,8 @@ if (!empty($_REQUEST['submitted'])) {
 					<p class="text-center">
 						<a href="help.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Search examples</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Query string syntax help</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Switch to advanced search</a></p>
+						<a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Switch to advanced search</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="admin.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Edit smart searches</a></p>
 				</div>
 			</div>
             <?php $savedsearches = getSavedSearchQuery();

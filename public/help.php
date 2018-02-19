@@ -119,6 +119,38 @@ require "../src/diskover/Diskover.php";
 				</div>
 			</div>
 			<div class="col-xs-6">
+                <h4>Smart search examples</h4>
+				<div class="well well-sm">
+					<p><small class="text-success">all files in directory:</small><br>
+						<strong>/Users/shirosai/Downloads</strong></p>
+					<p><small class="text-success">all files in directory and all subdirs:</small><br>
+						<strong>/Users/shirosai/Downloads*</strong></p>
+					<p><small class="text-success">image files:</small><br>
+						<strong>!img</strong></p>
+					<p><small class="text-success">audio files:</small><br>
+						<strong>!aud</strong></p>
+					<p><small class="text-success">video files:</small><br>
+						<strong>!vid</strong></p>
+                    <p><small class="text-success">document files:</small><br>
+						<strong>!doc</strong></p>
+					<p><small class="text-success">temp files:</small><br>
+						<strong>!tmp</strong></p>
+					<p><small class="text-success">compressed files:</small><br>
+						<strong>!compress</strong></p>
+                    <p><small class="text-success">database files:</small><br>
+						<strong>!datab</strong></p>
+                    <p><small class="text-success">disc image files:</small><br>
+						<strong>!discimg</strong></p>
+                    <p><small class="text-success">executable files:</small><br>
+						<strong>!exe</strong></p>
+                    <p><small class="text-success">web files:</small><br>
+						<strong>!web</strong></p>
+                    <p><small class="text-success">code files:</small><br>
+						<strong>!code</strong></p>
+                    <p><small class="text-success">system files:</small><br>
+						<strong>!sys</strong></p>
+				</div>
+
                 <h4>Search query examples</h4>
 				<div class="well well-sm">
 					<p><small class="text-success">all files in directory:</small><br>
@@ -150,7 +182,7 @@ require "../src/diskover/Diskover.php";
 						<strong>tag:"delete"</strong></p>
 				</div>
                 <br />
-                
+
                 <h4>diskover.py socket command examples</h4>
 				<div class="well well-sm">
 					<p><small class="text-success">nc (netcat) example:</small></p>
@@ -166,15 +198,8 @@ require "../src/diskover/Diskover.php";
                 </div>
 			</div>
 		</div>
-			<div class="row">
-				<div class="col-xs-2">
-					<p>
-						<a class="btn btn-primary btn-lg" onclick="window.history.back()">
-							<</a>
-					</p>
-				</div>
-			</div>
 		</div>
+        <br />
 		<script language="javascript" src="js/jquery.min.js"></script>
 		<script language="javascript" src="js/bootstrap.min.js"></script>
 		<script language="javascript" src="js/diskover.js"></script>

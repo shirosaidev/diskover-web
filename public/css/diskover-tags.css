@@ -4,7 +4,41 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
-/* d3 dupes */
+/* d3 tags */
+
+#filesizechart {
+    top: 70px;
+    position: relative;
+}
+#filesizechart svg {
+    overflow: visible;
+    width: 720px;
+    height: 400px;
+}
+.bars rect {
+    fill: none;
+    stroke: #272B30;
+    stroke-width: 1px;
+    cursor: pointer;
+}
+
+.bars rect:hover {
+    opacity: .8;
+}
+
+.barlabel text {
+    fill: gray;
+    font-size: 10px;
+    text-anchor: end;
+    pointer-events: none;
+}
+
+.barvaluelabel text {
+    fill: lightgray;
+    font-size: 10px;
+    text-anchor: start;
+    pointer-events: none;
+}
 
 path {
     stroke-width: 1px;
@@ -19,6 +53,7 @@ text {
     fill: black;
     font-size: 10px;
     pointer-events: none;
+    text-anchor: middle;
 }
 .d3-tip {
     font-size: 11px;

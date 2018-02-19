@@ -23,40 +23,12 @@ if (isset($_GET['index'])) {
 require "d3_inc.php";
 
 // Get search results from Elasticsearch for duplicate files
-$results = [];
-$searchParams = [];
 
-// Setup search query
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = 'file';
-
-// Execute the search
-$searchParams['body'] = [
- 'size' => 0,
- 'query' => [
-   'query_string' => [
-       'query' => 'dupe_md5:(NOT "")'
-   ]
- ],
-  'aggs' => [
-    'total_size' => [
-      'sum' => [
-        'field' => 'filesize'
-      ]
-    ]
-  ]
-];
-
-// Send search query to Elasticsearch
-$queryResponse = $client->search($searchParams);
-
-// Get total size of all files which contain dupe_md5 text
-$totalFilesize = $queryResponse['aggregations']['total_size']['value'];
-
-// find all the unique dupe_md5 values
+// find all the files with dupe_md5 values that are not empty ""
 $md5s = [];
 $results = [];
 $searchParams = [];
+$totalMd5Count = 0;
 $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'file';
 $searchParams['size'] = 1000;
@@ -108,7 +80,6 @@ foreach ($results as $arr) {
 // just get unique md5s
 $md5s_unique = array_unique($md5s);
 
-
 // find files that match each md5
 $md5s_files = [];
 $results = [];
@@ -140,6 +111,7 @@ foreach ($md5s_unique as $key => $value) {
 $results = [];
 $searchParams = [];
 $md5_counts = [];
+$totalFilesize = 0;
 
 // Setup search query
 $searchParams['index'] = $esIndex;
@@ -169,16 +141,20 @@ foreach ($md5s_unique as $key => $value) {
     // Get total count of files for md5
     $md5_counts[$value] = $queryResponse['hits']['total'];
     $md5_sizes[$value] = $queryResponse['aggregations']['total_size']['value'];
+    $totalFilesize += $md5_sizes[$value];
 }
 
 // build data array for d3
 foreach($md5s_unique as $key => $value) {
-    $data[] = [
-        "label" => $value,
-        "size" => $md5_sizes[$value],
-        "count" => $md5_counts[$value],
-        "files" => $md5s_files[$value]
-    ];
+    // only include md5's > 0.1 of total size or total dupe count
+    if (($md5_sizes[$value] / $totalFilesize * 100) > 0.1) {
+        $data[] = [
+            "label" => $value,
+            "size" => $md5_sizes[$value],
+            "count" => $md5_counts[$value],
+            "files" => $md5s_files[$value]
+        ];
+    }
 }
 
 echo json_encode($data);

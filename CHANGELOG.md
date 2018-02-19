@@ -1,5 +1,38 @@
 # Diskover Web Change Log
 
+# [1.4.6] - 2018-02-19
+### added
+- improved predictive search
+- more info for searches on simple search and Help page
+- improved load time of dupes analytics page
+- improved default smart searches to include more extensions
+- added Smart Searches analytics page
+### changed
+- improved Tags analytics page
+- improved Dupes analytics page
+- show up to 40 threads in crawl thread usage chart on dashboard (prev was 20)
+- improved using paths on simple and nav search
+- heatmap page will show info message when no index2 selected (prev just took you to select index page)
+- File tree now shows total items (file/directory) instead of just files for file tree and pie chart
+- you can click on directory and file icons on search results pages now to search the directory or view file info
+- you can click on directory and file icons on Top 50 pages now to change the directory or view file info
+- tags with 0 value are hidden in Tags analytics charts
+- Dupes analytics page now hides md5's with total file size percent < 0.9 of total dupes file size
+- items table is now hidden when \_type:file is in search query
+### fixed
+- when index path was / (root) would case ES error when loading dashboard page
+- when index path is / (root) view page would show double slashes
+- when index path is / (root) File tree page would show incorrect directory sizes
+- when index path is / (root) Treemap and Heatmap page would not show directory path near Up level button
+- path filter and analytics buttons when index path is / (root)
+- top 50 pages when index path is / (root)
+- predictive search bug when searching paths /dir1/dir2 or escaped paths \/dir1\/dir2
+- nav search field not showing search query after submitting advanced search
+- console errors (javascript) in treemap and heatmap for negative size values for rect width/height
+- advanced search now uses >= and <= (previously was > and <) for low/high numbers when searching for filesize, mtime, atime, hardlinks ranges
+- File tree page bar charts when clicked would load both directory and file doctype. Now loads just file.
+- crawl time on dashboard when crawl elapsed time > 24 hours
+
 # [1.4.5] - 2018-02-15
 ### notice
 - requires index created with diskover >= v1.4.5.

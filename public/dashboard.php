@@ -53,23 +53,23 @@ $searchParams = [];
 $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'file';
 
-$thread_nums = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 $thread_usage = [];
 
-foreach ($thread_nums as $key => $value) {
+# show up to 40 threads in chart
+for ($i=0; $i < 40; $i++) {
     // Execute the search
     $searchParams['body'] = [
      'size' => 0,
      'query' => [
        'match' => [
-         'indexing_thread' => $value
+         'indexing_thread' => $i
        ]
      ]
     ];
 
     // Send search query to Elasticsearch
     $queryResponse = $client->search($searchParams);
-    $thread_usage[$key] = [ 'label' => $key, 'count' => $queryResponse['hits']['total'] ];
+    $thread_usage[$i] = [ 'label' => $i, 'count' => $queryResponse['hits']['total'] ];
 }
 $js_threads = json_encode($thread_usage);
 
@@ -329,17 +329,33 @@ $searchParams['type']  = "directory";
 
 // escape any special characters in path
 $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
-$searchParams['body'] = [
-    'size' => 1,
-    'query' => [
-        'query_string' => [
-            'query' => 'path_parent:' . dirname($escapedpath) . ' AND filename:' . basename($escapedpath)
+if ($escapedpath === '\/') {  // root /
+    $searchParams['body'] = [
+        'size' => 1,
+        '_source' => ["filesize","items"],
+        'query' => [
+            'query_string' => [
+                'query' => 'path_parent:' . $escapedpath . ' AND filename:""'
+                ]
+         ]
+    ];
+} else {
+    $p = addcslashes(dirname($path), '+-&|!(){}[]^"~*?:\/ ');
+    $f = addcslashes(basename($path), '+-&|!(){}[]^"~*?:\/ ');
+    $searchParams['body'] = [
+        'size' => 1,
+        '_source' => ["filesize","items"],
+        'query' => [
+            'query_string' => [
+                'query' => 'path_parent: ' . $p . ' AND filename: ' . $f
             ]
-     ]
-];
+        ]
+    ];
+}
+
 $queryResponse = $client->search($searchParams);
 
-// Get total count of directories
+// Get total size and count of directory
 $sizecheck = $queryResponse['hits']['hits'][0]['_source']['filesize'];
 $itemscheck = $queryResponse['hits']['hits'][0]['_source']['items'];
 
@@ -445,7 +461,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support the diskover project on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
+        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
       </div>
       <?php
       if (!$dirsizecalc) {

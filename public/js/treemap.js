@@ -250,10 +250,10 @@ function renderTreeMap(data) {
 
         t.select("rect")
             .attr("width", function(d) {
-                return kx * d.dx - 1;
+                return kx * d.dx;
             })
             .attr("height", function(d) {
-                return ky * d.dy - 1;
+                return ky * d.dy;
             });
 
         t.select("text")

@@ -329,7 +329,7 @@ function updateTree(data, parent) {
         .style("width", function (d) {
             var value = (use_count) ? (d.count > 0) ? d.count : 1 : d.size;
             var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
-            var percent = (value / parent_value * 100).toFixed(0);
+            var percent = (value / parent_value * 100).toFixed(1);
             return percent + "%";
         });
 
@@ -342,7 +342,7 @@ function updateTree(data, parent) {
             return "(" + percent + "%)";
         });
 
-    // add file count
+    // add file and directory counts
     entered.append("span").attr("class", "filecount")
         .html(function (d) {
             return d.count > 0 ? "(" + d.count + ")" : "";

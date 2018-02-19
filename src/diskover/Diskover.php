@@ -141,7 +141,7 @@ function secondsToTime($seconds) {
     $seconds = (int)$seconds;
     $dtF = new \DateTime('@0');
     $dtT = new \DateTime("@$seconds");
-    return $dtF->diff($dtT)->format('%hh:%im:%ss');
+    return $dtF->diff($dtT)->format('%dd:%hh:%im:%ss');
 }
 
 
@@ -354,4 +354,96 @@ function sortSearchResults($request, $searchParams) {
         }
     }
     return $searchParams;
+}
+
+// predict search request and handle smartsearch requests
+function predict_search($q) {
+    // remove any extra white space
+    $q = trim($q);
+
+    // Grab all the smart searches from file
+    $smartsearches = get_smartsearches();
+
+    // check for path input
+    if (strpos($q, '/') !== false && strpos($q, 'path_parent') === false) {
+        // check for escaped paths
+        if (strpos($q, '\/') !== false) {
+            $request = $q;
+        } else {
+            $request = escape_chars($q);
+        }
+        $request = 'path_parent:' . $request;
+    } elseif (strpos($_REQUEST['q'], '!') === 0) {  # ! smart search keyword
+        if ($q === '!') {
+            echo '<span class="text-info"><i class="glyphicon glyphicon-share-alt"></i> Enter in a smart search name like <strong>!tmp</strong> or <strong>!doc</strong> or <strong>!img</strong>.</span>';
+            echo '<br /><span class="text-info">Smart searches:</span><br />';
+            foreach($smartsearches as $arr) {
+                 echo '<strong>' . $arr[0] . '</strong>&nbsp;&nbsp;';
+            }
+            die();
+        } elseif (preg_match('/^\!(\w+)/', $q) !== false) {
+            // check if requested smart search is in smartsearches array
+            $inarray = false;
+            foreach($smartsearches as $arr) {
+                if(in_array($q, $arr)) {
+                    $inarray = true;
+                    $smartsearch_query = $arr[1];
+                }
+            }
+            if ($inarray) {
+                $request = $smartsearch_query;
+            } else {
+                echo '<span class="text-info"><i class="glyphicon glyphicon-exclamation-sign"></i> No matching smart search name.</span>';
+                echo '<br /><span class="text-info">Smart searches:</span><br />';
+                foreach($smartsearches as $arr) {
+                     echo '<strong>' . $arr[0] . '</strong>&nbsp;&nbsp;';
+                }
+                die();
+            }
+        }
+    } elseif (preg_match('/(\w+):/i', $q) == false) {
+        $request = "";
+        $keyword_clean = preg_replace('/OR|AND|NOT|\(|\)|\[|\]|\*|\\|\/|(\w+):/', '', $q);
+        $keyword_arr = explode(' ', $keyword_clean);
+        $keyword_arr_ext = [];
+        $keyword_arr_path = [];
+        // Add first letter upercase/lowercase versions of keyword
+        foreach ($keyword_arr as $key => $value) {
+                // skip if space
+                if ($value === '') continue;
+                // check if .ext extension and make all extension uppercase version
+                // instead of just first letter
+                if (strpos($value, '.') === 0) {
+                    $keyword_arr_ext[] = strtoupper($value);
+                    $keyword_arr_ext[] = strtolower($value);
+                } else {
+                    $keyword_arr_path[] = ucfirst($value);
+                    $keyword_arr_path[] = lcfirst($value);
+                }
+        }
+        // create es request
+        if (count($keyword_arr_path) > 0) {
+            $request .= '(';
+            foreach ($keyword_arr_path as $key => $value) {
+                $request .= 'path_parent:' . escape_chars($value) . '* ' .
+                            'filename:' . escape_chars($value) . '* ';
+            }
+            $request .= ')';
+        }
+        if (count($keyword_arr_ext) > 0) {
+            if (count($keyword_arr_path) > 0) {
+                $request .= ' AND (';
+            }
+            foreach ($keyword_arr_ext as $key => $value) {
+                    $request .= 'extension:' . escape_chars(str_replace('.', '', $value)) . '* ';
+            }
+            if (count($keyword_arr_path) > 0) {
+                $request .= ')';
+            }
+        }
+    } else {
+        $request = $q;
+    }
+
+    return $request;
 }

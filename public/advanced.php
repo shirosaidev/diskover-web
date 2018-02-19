@@ -43,6 +43,20 @@ $ids_onpage = [];
 
 if (!empty($_REQUEST['submitted'])) {
 
+    // set sort cookies
+    if (!empty($_REQUEST['sort'])) {
+        createCookie('sort', $_REQUEST['sort']);
+    }
+    if (!empty($_REQUEST['sort2'])) {
+        createCookie('sort2', $_REQUEST['sort2']);
+    }
+    if (!empty($_REQUEST['sortorder'])) {
+        createCookie('sortorder', $_REQUEST['sortorder']);
+    }
+    if (!empty($_REQUEST['sortorder2'])) {
+        createCookie('sortorder2', $_REQUEST['sortorder2']);
+    }
+
     // Connect to Elasticsearch
     $client = connectES();
 
@@ -60,7 +74,7 @@ if (!empty($_REQUEST['submitted'])) {
     $searchParams['scroll'] = "1m";
 
     // search size (number of results to return per page)
-    if (isset($_REQUEST['resultsize'])) {
+    if (!empty($_REQUEST['resultsize'])) {
         $searchParams['size'] = $_REQUEST['resultsize'];
         createCookie("resultsize", $_REQUEST['resultsize']);
     } elseif (getCookie("resultsize") != "") {
@@ -70,79 +84,79 @@ if (!empty($_REQUEST['submitted'])) {
     }
 
 
-    if ($_REQUEST['filename']) {
+    if (!empty($_REQUEST['filename'])) {
         $q[] = "filename:" . escape_chars($_REQUEST['filename']);
     }
 
-    if ($_REQUEST['path_parent']) {
+    if (!empty($_REQUEST['path_parent'])) {
         $q[] = "path_parent:" . escape_chars($_REQUEST['path_parent']);
     }
 
-    if ($_REQUEST['tag']) {
+    if (!empty($_REQUEST['tag'])) {
         $q[] = "tag:" . $_REQUEST['tag'];
     }
 
-    if ($_REQUEST['tag_custom']) {
+    if (!empty($_REQUEST['tag_custom'])) {
         $q[] = "tag_custom:" . '"' . $_REQUEST['tag_custom'] . '"';
     }
 
-    if ($_REQUEST['inode']) {
+    if (!empty($_REQUEST['inode'])) {
         $q[] = "inode:" . $_REQUEST['inode'];
     }
 
-    if ($_REQUEST['last_mod_time_low'] && $_REQUEST['last_mod_time_high']) {
-        $q[] = "last_modified:{" . (string) $_REQUEST['last_mod_time_low'] . " TO " . (string) $_REQUEST['last_mod_time_high'] . "}";
-    } elseif ($_REQUEST['last_mod_time_low']) {
-        $q[] = "last_modified:{" . (string) $_REQUEST['last_mod_time_low'] . " TO *}";
-    } elseif ($_REQUEST['last_mod_time_high']) {
-        $q[] = "last_modified:{* TO " . (string) $_REQUEST['last_mod_time_high'] . "}";
+    if (!empty($_REQUEST['last_mod_time_low']) && !empty($_REQUEST['last_mod_time_high'])) {
+        $q[] = "last_modified:[" . (string) $_REQUEST['last_mod_time_low'] . " TO " . (string) $_REQUEST['last_mod_time_high'] . "]";
+    } elseif (!empty($_REQUEST['last_mod_time_low'])) {
+        $q[] = "last_modified:[" . (string) $_REQUEST['last_mod_time_low'] . " TO *]";
+    } elseif (!empty($_REQUEST['last_mod_time_high'])) {
+        $q[] = "last_modified:[* TO " . (string) $_REQUEST['last_mod_time_high'] . "]";
     }
 
-    if ($_REQUEST['last_access_time_low'] && $_REQUEST['last_access_time_high']) {
-        $q[] = "last_access:{" . (string) $_REQUEST['last_access_time_low'] . " TO " . (string) $_REQUEST['last_access_time_high'] . "}";
-    } elseif ($_REQUEST['last_access_time_low']) {
-        $q[] = "last_access:{" . (string) $_REQUEST['last_access_time_low'] . " TO *}";
-    } elseif ($_REQUEST['last_access_time_high']) {
-        $q[] = "last_access:{* TO " . (string) $_REQUEST['last_access_time_high'] . "}";
+    if (!empty($_REQUEST['last_access_time_low']) && !empty($_REQUEST['last_access_time_high'])) {
+        $q[] = "last_access:[" . (string) $_REQUEST['last_access_time_low'] . " TO " . (string) $_REQUEST['last_access_time_high'] . "]";
+    } elseif (!empty($_REQUEST['last_access_time_low'])) {
+        $q[] = "last_access:[" . (string) $_REQUEST['last_access_time_low'] . " TO *]";
+    } elseif (!empty($_REQUEST['last_access_time_high'])) {
+        $q[] = "last_access:[* TO " . (string) $_REQUEST['last_access_time_high'] . "]";
     }
 
-    if ($_REQUEST['file_size_bytes_low'] && $_REQUEST['file_size_bytes_high']) {
+    if (!empty($_REQUEST['file_size_bytes_low']) && !empty($_REQUEST['file_size_bytes_high'])) {
         $file_size_bytes_low = convertToBytes($_REQUEST['file_size_bytes_low'], $_REQUEST['file_size_bytes_low_unit']);
         $file_size_bytes_high = convertToBytes($_REQUEST['file_size_bytes_high'], $_REQUEST['file_size_bytes_high_unit']);
-        $q[] = "filesize:{" . (string) $file_size_bytes_low . " TO " . (string) $file_size_bytes_high . "}";
-    } elseif ($_REQUEST['file_size_bytes_low']) {
+        $q[] = "filesize:[" . (string) $file_size_bytes_low . " TO " . (string) $file_size_bytes_high . "]";
+    } elseif (!empty($_REQUEST['file_size_bytes_low'])) {
         $file_size_bytes_low = convertToBytes($_REQUEST['file_size_bytes_low'], $_REQUEST['file_size_bytes_low_unit']);
-        $q[] = "filesize:{" . (string) $file_size_bytes_low . " TO *}";
-    } elseif ($_REQUEST['file_size_bytes_high']) {
+        $q[] = "filesize:[" . (string) $file_size_bytes_low . " TO *]";
+    } elseif (!empty($_REQUEST['file_size_bytes_high'])) {
         $file_size_bytes_high = convertToBytes($_REQUEST['file_size_bytes_high'], $_REQUEST['file_size_bytes_high_unit']);
-        $q[] = "filesize:{* TO " . (string) $file_size_bytes_high . "}";
+        $q[] = "filesize:[* TO " . (string) $file_size_bytes_high . "]";
     }
 
-    if ($_REQUEST['hardlinks_low'] && $_REQUEST['hardlinks_high']) {
-        $q[] = "hardlinks:{" . (string) $_REQUEST['hardlinks_low'] . " TO " . (string) $_REQUEST['hardlinks_high'] . "}";
-    } elseif ($_REQUEST['hardlinks_low']) {
-        $q[] = "hardlinks:{" . (string) $_REQUEST['hardlinks_low'] . " TO *}";
-    } elseif ($_REQUEST['hardlinks_high']) {
-        $q[] = "hardlinks:{* TO " . (string) $_REQUEST['hardlinks_high'] . "}";
+    if (!empty($_REQUEST['hardlinks_low']) && !empty($_REQUEST['hardlinks_high'])) {
+        $q[] = "hardlinks:[" . (string) $_REQUEST['hardlinks_low'] . " TO " . (string) $_REQUEST['hardlinks_high'] . "]";
+    } elseif (!empty($_REQUEST['hardlinks_low'])) {
+        $q[] = "hardlinks:[" . (string) $_REQUEST['hardlinks_low'] . " TO *]";
+    } elseif (!empty($_REQUEST['hardlinks_high'])) {
+        $q[] = "hardlinks:[* TO " . (string) $_REQUEST['hardlinks_high'] . "]";
     }
 
-    if ($_REQUEST['filehash']) {
+    if (!empty($_REQUEST['filehash'])) {
         $q[] = "filehash:" . $_REQUEST['filehash'];
     }
 
-    if ($_REQUEST['extension']) {
+    if (!empty($_REQUEST['extension'])) {
         $q[] = "extension:" . $_REQUEST['extension'];
     }
 
-    if ($_REQUEST['owner']) {
+    if (!empty($_REQUEST['owner'])) {
         $q[] = "owner:" . $_REQUEST['owner'];
     }
 
-    if ($_REQUEST['group']) {
+    if (!empty($_REQUEST['group'])) {
         $q[] = "group:" . $_REQUEST['group'];
     }
 
-    if ($_REQUEST['dupe_md5']) {
+    if (!empty($_REQUEST['dupe_md5'])) {
         $q[] = "dupe_md5:" . $_REQUEST['dupe_md5'];
     }
 
@@ -164,7 +178,7 @@ if (!empty($_REQUEST['submitted'])) {
     } else {
         $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
     }
-    $_GET['q'] = $querystring;
+    $request = $querystring;
     // Save search query
     saveSearchQuery($querystring);
 
@@ -252,19 +266,19 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	<div class="row">
 	  <div class="col-xs-6">
 		<label for="filename">Filename is...</label>
-		<input name="filename" value="<?php echo $_REQUEST['filename']; ?>" placeholder="somefile.m4a or someimg*.png or directory_name" class="form-control" />
+		<input name="filename" value="" placeholder="somefile.m4a or someimg*.png or directory_name" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="filehash">Filehash is...</label>
-		<input name="filehash" value="<?php echo $_REQUEST['filehash']; ?>" placeholder="hash" class="form-control" />
+		<input name="filehash" value="" placeholder="hash" class="form-control" />
 	  </div>
       <div class="col-xs-2">
 		<label for="filehash">Dupe MD5 Sum is...</label>
-		<input name="dupe_md5" value="<?php echo $_REQUEST['dupe_md5']; ?>" placeholder="md5 sum" class="form-control" />
+		<input name="dupe_md5" value="" placeholder="md5 sum" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="inode">Inode is...</label>
-		<input name="inode" value="<?php echo $_REQUEST['inode']; ?>" placeholder="inode num" class="form-control" />
+		<input name="inode" value="" placeholder="inode num" type="number" class="form-control" />
 	  </div>
 	</div>
   </div>
@@ -272,7 +286,7 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	<div class="row">
 	  <div class="col-xs-12">
 		<label for="path_parent">Parent path is...  </label>
-		<input name="path_parent" value="<?php echo $_REQUEST['path_parent']; ?>" placeholder="/Users/shirosai/Music or /Users/shirosai/Downloads*" class="form-control" />
+		<input name="path_parent" value="" placeholder="/Users/shirosai/Music or /Users/shirosai/Downloads*" class="form-control" />
 	  </div>
 	</div>
   </div>
@@ -280,9 +294,9 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	<div class="row">
 	  <div class="col-xs-3">
 		<label for="file_size_bytes_low">File size is between...</label>
-		<input name="file_size_bytes_low" value="<?php echo $_REQUEST['file_size_bytes_low']; ?>" type="number" placeholder="size" class="form-control" />
+		<input name="file_size_bytes_low" value="" type="number" placeholder="size" class="form-control" />
 		<label for="file_size_bytes_high">and</label>
-		<input name="file_size_bytes_high" value="<?php echo $_REQUEST['file_size_bytes_high']; ?>" type="number" placeholder="size" class="form-control" />
+		<input name="file_size_bytes_high" value="" type="number" placeholder="size" class="form-control" />
 	  </div>
       <div class="col-xs-1">
         <label>&nbsp;</label>
@@ -302,21 +316,21 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	  </div>
 	  <div class="col-xs-2">
 		<label for="hardlinks_low">Hardlinks is between...</label>
-		<input name="hardlinks_low" value="<?php echo $_REQUEST['hardlinks_low']; ?>" type="number" placeholder="2" class="form-control" />
+		<input name="hardlinks_low" value="" type="number" placeholder="2" class="form-control" />
 		<label for="hardlinks_high">and</label>
-		<input name="hardlinks_high" value="<?php echo $_REQUEST['hardlinks_high']; ?>" type="number" placeholder="10" class="form-control" />
+		<input name="hardlinks_high" value="" type="number" placeholder="10" class="form-control" />
 	  </div>
 	  <div class="col-xs-3">
 		<label for="last_mod_time_low">Last modified time (utc) is between...</label>
-		<input name="last_mod_time_low" value="<?php echo $_REQUEST['last_mod_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00 or 2016-01-22" class="form-control" />
+		<input name="last_mod_time_low" value="" type="string" placeholder="2015-03-06T00:00:00 or 2016-01-22" class="form-control" />
 		<label for="last_mod_time_high">and</label>
-		<input name="last_mod_time_high" value="<?php echo $_REQUEST['last_mod_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00 or now-6M/d" class="form-control" />
+		<input name="last_mod_time_high" value="" type="string" placeholder="2017-03-06T00:00:00 or now-6M/d" class="form-control" />
 	  </div>
 	  <div class="col-xs-3">
 		<label for="last_access_time_low">Last access time (utc) is between...</label>
-		<input name="last_access_time_low" value="<?php echo $_REQUEST['last_access_time_low']; ?>" type="string" placeholder="2015-03-06T00:00:00 or now-2w" class="form-control" />
+		<input name="last_access_time_low" value="" type="string" placeholder="2015-03-06T00:00:00 or now-2w" class="form-control" />
 		<label for="last_access_time_high">and</label>
-		<input name="last_access_time_high" value="<?php echo $_REQUEST['last_access_time_high']; ?>" type="string" placeholder="2017-03-06T00:00:00 or now-1y" class="form-control" />
+		<input name="last_access_time_high" value="" type="string" placeholder="2017-03-06T00:00:00 or now-1y" class="form-control" />
 	  </div>
 	</div>
   </div>
@@ -324,20 +338,20 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	<div class="row">
 	  <div class="col-xs-2">
 		<label for="owner">Owner is...  </label>
-		<input name="owner" value="<?php echo $_REQUEST['owner']; ?>" placeholder="shirosai or (NOT root)" class="form-control" />
+		<input name="owner" value="" placeholder="shirosai or (NOT root)" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="group">Group is...  </label>
-		<input name="group" value="<?php echo $_REQUEST['group']; ?>" placeholder="staff" class="form-control" />
+		<input name="group" value="" placeholder="staff" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="extension">Extension is...</label>
-		<input name="extension" value="<?php echo $_REQUEST['extension']; ?>" type="string" placeholder="zip or (tmp OR cache)" class="form-control" />
+		<input name="extension" value="" type="string" placeholder="zip or (tmp OR cache)" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="tag">Tag is...</label>
 		<select class="form-control" name="tag">
-		  <option value="<?php echo $_REQUEST['tag']; ?>" selected><?php echo $_REQUEST['tag']; ?></option>
+          <option value="" selected></option>
 		  <option value="">untagged</option>
 		  <option value="delete">delete</option>
 		  <option value="archive">archive</option>
@@ -347,7 +361,7 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	  <div class="col-xs-4">
 		<label for="tag_custom">Custom Tag is...</label>
 		<select name="tag_custom" class="form-control">
-        <option value="<?php echo $_REQUEST['tag_custom']; ?>" selected><?php echo $_REQUEST['tag_custom']; ?></option>
+             <option value="" selected></option>
         <?php foreach($customtags as $key => $value) { ?>
             <option value="<?php echo $value[0]; ?>"><?php echo $value[0]; ?></option>
         <?php } ?>
@@ -359,48 +373,48 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	<div class="row">
 	  <div class="col-xs-2">
 		<label for="sort">Sort by...</label>
-		<select class="form-control" name="sort">
-		  <option value="<?php echo getCookie('sort'); ?>" selected><?php echo getCookie('sort'); ?></option>
-		  <option value="filename">filename</option>
-		  <option value="path_parent">path_parent</option>
-		  <option value="filesize">filesize</option>
-		  <option value="owner">owner</option>
-		  <option value="group">group</option>
-		  <option value="last_modified">last_modified</option>
-		  <option value="last_access">last_access</option>
-		  <option value="tag">tag</option>
-		  <option value="tag_custom">tag_custom</option>
+		<select class="form-control" name="sort" id="sort">
+          <option value=""></option>
+		  <option value="filename" <?php echo (getCookie('sort') === 'filename') ? 'selected' : ''; ?>>filename</option>
+		  <option value="path_parent" <?php echo (getCookie('sort') === 'path_parent') ? 'selected' : ''; ?>>path_parent</option>
+		  <option value="filesize" <?php echo (getCookie('sort') === 'filesize') ? 'selected' : ''; ?>>filesize</option>
+		  <option value="owner" <?php echo (getCookie('sort') === 'owner') ? 'selected' : ''; ?>>owner</option>
+		  <option value="group" <?php echo (getCookie('sort') === 'group') ? 'selected' : ''; ?>>group</option>
+		  <option value="last_modified" <?php echo (getCookie('sort') === 'last_modified') ? 'selected' : ''; ?>>last_modified</option>
+		  <option value="last_access" <?php echo (getCookie('sort') === 'last_access') ? 'selected' : ''; ?>>last_access</option>
+		  <option value="tag" <?php echo (getCookie('sort') === 'tag') ? 'selected' : ''; ?>>tag</option>
+		  <option value="tag_custom" <?php echo (getCookie('sort') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
 		</select>
 	  </div>
 	  <div class="col-xs-2">
 		<label for="sortorder">Sort order...</label>
-		<select class="form-control" name="sortorder">
-		  <option value="<?php echo getCookie('sortorder'); ?>" selected><?php echo getCookie('sortorder'); ?></option>
-		  <option value="asc">asc</option>
-		  <option value="desc">desc</option>
+		<select class="form-control" name="sortorder" id="sortorder">
+          <option value=""></option>
+		  <option value="asc" <?php echo (getCookie('sortorder') === 'asc') ? 'selected' : ''; ?>>asc</option>
+		  <option value="desc" <?php echo (getCookie('sortorder') === 'desc') ? 'selected' : ''; ?>>desc</option>
 		</select>
 	  </div>
       <div class="col-xs-2">
 		<label for="sort">Sort2 by...</label>
-		<select class="form-control" name="sort2">
-		  <option value="<?php echo getCookie('sort2'); ?>" selected><?php echo getCookie('sort2'); ?></option>
-		  <option value="filename">filename</option>
-		  <option value="path_parent">path_parent</option>
-		  <option value="filesize">filesize</option>
-		  <option value="owner">owner</option>
-		  <option value="group">group</option>
-		  <option value="last_modified">last_modified</option>
-		  <option value="last_access">last_access</option>
-		  <option value="tag">tag</option>
-		  <option value="tag_custom">tag_custom</option>
+		<select class="form-control" name="sort2" id="sort2">
+          <option value=""></option>
+		  <option value="filename" <?php echo (getCookie('sort2') === 'filename') ? 'selected' : ''; ?>>filename</option>
+		  <option value="path_parent" <?php echo (getCookie('sort2') === 'path_parent') ? 'selected' : ''; ?>>path_parent</option>
+		  <option value="filesize" <?php echo (getCookie('sort2') === 'filesize') ? 'selected' : ''; ?>>filesize</option>
+		  <option value="owner" <?php echo (getCookie('sort2') === 'owner') ? 'selected' : ''; ?>>owner</option>
+		  <option value="group" <?php echo (getCookie('sort2') === 'group') ? 'selected' : ''; ?>>group</option>
+		  <option value="last_modified" <?php echo (getCookie('sort2') === 'last_modified') ? 'selected' : ''; ?>>last_modified</option>
+		  <option value="last_access" <?php echo (getCookie('sort2') === 'last_access') ? 'selected' : ''; ?>>last_access</option>
+		  <option value="tag" <?php echo (getCookie('sort2') === 'tag') ? 'selected' : ''; ?>>tag</option>
+		  <option value="tag_custom" <?php echo (getCookie('sort2') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
 		</select>
 	  </div>
 	  <div class="col-xs-2">
 		<label for="sortorder">Sort2 order...</label>
-		<select class="form-control" name="sortorder2">
-		  <option value="<?php echo getCookie('sortorder2'); ?>" selected><?php echo getCookie('sortorder2'); ?></option>
-		  <option value="asc">asc</option>
-		  <option value="desc">desc</option>
+		<select class="form-control" name="sortorder2" id="sortorder2">
+          <option value=""></option>
+		  <option value="asc" <?php echo (getCookie('sortorder2') === 'asc') ? 'selected' : ''; ?>>asc</option>
+		  <option value="desc" <?php echo (getCookie('sortorder2') === 'desc') ? 'selected' : ''; ?>>desc</option>
 		</select>
 	  </div>
 	</div>
@@ -414,9 +428,9 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
       <div class="col-xs-2">
 		<label for="sortorder">Doc type...</label>
           <select class="form-control" name="doctype">
-              <option value="file" <?php echo $_REQUEST['doctype'] == "file" ? "selected" : ""; ?>>file</option>
-              <option value="directory" <?php echo $_REQUEST['doctype'] == "directory" ? "selected" : ""; ?>>directory</option>
-              <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>
+              <option value="">all</option>
+              <option value="file">file</option>
+              <option value="directory">directory</option>
           </select>
       </div>
     </div>

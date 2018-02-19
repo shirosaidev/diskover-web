@@ -12,7 +12,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 // Connect to Elasticsearch
 $client = connectES();
 
-// Get total directory size, count, mtime from Elasticsearch (recursive)
+// Get total directory size, count, mtime from Elasticsearch (recursive) for path
 function get_dir_info($client, $index, $path, $filter, $mtime) {
     $totalsize = 0;
     $totalcount = 0;
@@ -31,10 +31,11 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     if ($escapedpath === '\/') {  // root /
         $searchParams['body'] = [
             'size' => 1,
-            '_source' => ["path_parent","filename","filesize","items","last_modified"],
+            '_source' => ["filesize","items","last_modified"],
             'query' => [
                 'query_string' => [
-                    'query' => 'path_parent: ' . $escapedpath . ' AND filename: ' . $escapedpath . ''
+                    'query' => 'path_parent: ' . $escapedpath . ' AND filename: ""
+                    AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
                 ]
             ]
         ];
@@ -43,10 +44,11 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
         $f = addcslashes(basename($path), '+-&|!(){}[]^"~*?:\/ ');
         $searchParams['body'] = [
             'size' => 1,
-            '_source' => ["path_parent","filename","filesize","items","last_modified"],
+            '_source' => ["filesize","items","last_modified"],
             'query' => [
                 'query_string' => [
-                    'query' => 'path_parent: ' . $p . ' AND filename: ' . $f . ' AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
+                    'query' => 'path_parent: ' . $p . ' AND filename: ' . $f . '
+                    AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
                 ]
             ]
         ];
@@ -64,41 +66,102 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     // Get last modified time
     $last_modified = $queryResponse['hits']['hits'][0]['_source']['last_modified'];
 
-    // check if directory size and count is 0 and search for files
-    // that are in the directory and subdirs
+
+    // check if directory size and count is 0 and search for files and directories
+    // that are in the directory and subdirs (directory sizes have not been calculated)
     if ($totalcount === 0 && $totalsize === 0) {
         // Setup search query
         $searchParams['index'] = $index;
         $searchParams['type'] = 'file';
 
-        $searchParams['body'] = [
-            'size' => 0,
-            '_source' => ["path_parent","filename","filesize","items","last_modified"],
-                'query' => [
-                    'query_string' => [
-                        'query' => '(path_parent: ' . $escapedpath . ' OR path_parent: ' . $escapedpath . '\/*) AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
-                    ]
-                ],
-                'aggs' => [
-                    'dir_size' => [
-                        'sum' => [
-                            'field' => 'filesize'
+        if ($escapedpath === '\/') {  // root /
+            $searchParams['body'] = [
+                'size' => 0,
+                '_source' => [],
+                    'query' => [
+                        'query_string' => [
+                            'query' => 'path_parent: ' . $escapedpath . '* AND filesize: >=' . $filter . '
+                            AND last_modified: {* TO ' . $mtime . '}',
+                            'analyze_wildcard' => 'true'
+                        ]
+                    ],
+                    'aggs' => [
+                        'dir_size' => [
+                            'sum' => [
+                                'field' => 'filesize'
+                            ]
                         ]
                     ]
-                ]
-            ];
+                ];
+        } else {
+            $searchParams['body'] = [
+                'size' => 0,
+                '_source' => [],
+                    'query' => [
+                        'query_string' => [
+                            'query' => '(path_parent: ' . $escapedpath . ' OR
+                            path_parent: ' . $escapedpath . '\/*) AND
+                            filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}',
+                            'analyze_wildcard' => 'true'
+                        ]
+                    ],
+                    'aggs' => [
+                        'dir_size' => [
+                            'sum' => [
+                                'field' => 'filesize'
+                            ]
+                        ]
+                    ]
+                ];
+        }
 
         // Send search query to Elasticsearch
         $queryResponse = $client->search($searchParams);
 
-        // Get total count of directory and all subdirs
+        // Get total count of files (recursive)
         $totalcount = (int)$queryResponse['hits']['total'];
 
-        // Get total size of directory and all subdirs
+        // Get total size of directory and all subdirs (total file size)
         $totalsize = (int)$queryResponse['aggregations']['dir_size']['value'];
+
+        // Get directory doc counts
+        $searchParams['type'] = 'directory';
+
+        if ($escapedpath === '\/') {  // root /
+            $searchParams['body'] = [
+                'size' => 0,
+                '_source' => [],
+                    'query' => [
+                        'query_string' => [
+                            'query' => 'path_parent: ' . $escapedpath . '*
+                            AND last_modified: {* TO ' . $mtime . '}',
+                            'analyze_wildcard' => 'true'
+                        ]
+                    ]
+                ];
+        } else {
+            $searchParams['body'] = [
+                'size' => 0,
+                '_source' => [],
+                    'query' => [
+                        'query_string' => [
+                            'query' => '(path_parent: ' . $escapedpath . ' OR
+                            path_parent: ' . $escapedpath . '\/*) AND
+                            last_modified: {* TO ' . $mtime . '}',
+                            'analyze_wildcard' => 'true'
+                        ]
+                    ]
+                ];
+        }
+
+        // Send search query to Elasticsearch
+        $queryResponse = $client->search($searchParams);
+
+        // Add total count of directories
+        $totalcount += (int)$queryResponse['hits']['total'];
     }
 
-    // Create dirinfo list with size, count (items) and last modified time
+    // Create dirinfo list with total size (of all files), total count (items) and last modified time
     $dirinfo = [$totalsize, $totalcount, $last_modified];
 
     return $dirinfo;
@@ -121,7 +184,8 @@ function get_files($client, $index, $path, $filter, $mtime) {
                 '_source' => ["path_parent","filename","filesize"],
                 'query' => [
                     'query_string' => [
-                        'query' => 'path_parent: "' . $path . '" AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
+                        'query' => 'path_parent: "' . $path . '" AND
+                        filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
                     ]
                 ],
                 'sort' => [
@@ -259,10 +323,11 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
     $subdirs_size = [];
     $subdirs_count = [];
     //$subdirs_mtime = [];
+
     foreach ($subdirs as $d) {
         // get dir total size and file count
         $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
-        // continue if directory is empty
+        // continue if directory is empty (size or item count is 0)
         if ($dirinfo[0] === 0 || $dirinfo[1] === 0) {
             continue;
         }

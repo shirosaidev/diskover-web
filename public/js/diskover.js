@@ -184,6 +184,8 @@ function updateVisLinks() {
 	document.getElementById("tagslink").setAttribute("href", url);
     var url = "dupes.php?index=" + index + "&index2=" + index2;
 	document.getElementById("dupeslink").setAttribute("href", url);
+    var url = "smartsearches.php?index=" + index + "&index2=" + index2;
+	document.getElementById("smartsearcheslink").setAttribute("href", url);
 	return false;
 }
 

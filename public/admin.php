@@ -67,8 +67,8 @@ pre {
     <div class="col-xs-6">
         <h1 class="text-nowrap"><i class="glyphicon glyphicon-cog"></i> Admin Panel</h1>
         <span class="text-success"><?php echo "diskover-web v".Constants::VERSION; ?></span><br />
-        Elasticsearch health: <span id="eshealthheart" style="font-size:18px;color:gray"><strong><i class="glyphicon glyphicon-heart-empty"></i></strong></span><br />
-        <small><i class="glyphicon glyphicon-download-alt"></i> <a target="_blank" href="https://github.com/shirosaidev/diskover-web/releases/latest">Check for updates</a></small>
+        <small><i class="glyphicon glyphicon-download-alt"></i> <a target="_blank" href="https://github.com/shirosaidev/diskover-web/releases/latest">Check for updates</a></small><br />
+        Elasticsearch health: <span id="eshealthheart" style="font-size:18px;color:gray"><strong><i class="glyphicon glyphicon-heart-empty"></i></strong></span>
 </div>
 <div class="col-xs-6">
 <pre>    __               __
