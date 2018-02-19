@@ -13,14 +13,17 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 
 ## Screenshots
 
-![diskover-web dashboard](docs/diskover-web-dashboard-screenshot.png?raw=true)
-![diskover-web file tree](docs/diskover-web-filetree-screenshot.png?raw=true)
-![diskover-web treemap](docs/diskover-web-treemap-screenshot.png?raw=true)
-![diskover-web treemap](docs/diskover-web-heatmap-screenshot.png?raw=true)
-![diskover-web simple search](docs/diskover-web-simplesearch-screenshot.png?raw=true)
-![diskover-web advanced search](docs/diskover-web-advancedsearch-screenshot.png?raw=true)
-![diskover-web search results](docs/diskover-web-searchresults-screenshot.png?raw=true)
-![diskover-web admin panel](docs/diskover-web-adminpanel-screenshot.png?raw=true)
+<img src="docs/diskover-web-dashboard-screenshot.png?raw=true" alt="diskover-web dashboard" width="400" align="left">
+<img src="docs/diskover-web-filetree-screenshot.png?raw=true" alt="diskover-web file tree" width="400" align="left">
+<img src="docs/diskover-web-treemap-screenshot.png?raw=true" alt="diskover-web treemap" width="400" align="left">
+<img src="docs/diskover-web-heatmap-screenshot.png?raw=true" alt="diskover-web heatmap" width="400" align="left">
+<img src="docs/diskover-web-tags-screenshot.png?raw=true" alt="diskover-web tags" width="400" align="left">
+<img src="docs/diskover-web-dupes-screenshot.png?raw=true" alt="diskover-web dupes" width="400" align="left">
+<img src="docs/diskover-web-smartsearches-screenshot.png?raw=true" alt="diskover-web smart searches" width="400" align="left">
+<img src="docs/diskover-web-simplesearch-screenshot.png?raw=true" alt="diskover-web simple search" width="400" align="left">
+<img src="docs/diskover-web-advancedsearch-screenshot.png?raw=true" alt="diskover-web advanced search" width="400" align="left">
+<img src="docs/diskover-web-searchresults-screenshot.png?raw=true" alt="diskover-web search results" width="400" align="left">
+<img src="docs/diskover-web-adminpanel-screenshot.png?raw=true" alt="diskover-web admin panel" width="400" align="left">
 
 ## Installation Guide
 
