@@ -23,7 +23,8 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 <img src="docs/diskover-web-simplesearch-screenshot.png?raw=true" alt="diskover-web simple search" width="400" align="left">
 <img src="docs/diskover-web-advancedsearch-screenshot.png?raw=true" alt="diskover-web advanced search" width="400" align="left">
 <img src="docs/diskover-web-searchresults-screenshot.png?raw=true" alt="diskover-web search results" width="400" align="left">
-<img src="docs/diskover-web-adminpanel-screenshot.png?raw=true" alt="diskover-web admin panel" width="400" align="left">
+<img src="docs/diskover-web-adminpanel-screenshot.png?raw=true" alt="diskover-web admin panel" width="400">
+
 
 ## Installation Guide
 
