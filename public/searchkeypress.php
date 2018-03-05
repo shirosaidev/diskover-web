@@ -7,27 +7,10 @@ LICENSE for the full license text.
 
 require '../vendor/autoload.php';
 use diskover\Constants;
-
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
+require "vars_inc.php";
 
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-}
-
-$path = $_GET['path'] ?: getCookie('path');
-// check if no path (grab one from ES)
-if (empty($path)) {
-    $path = get_es_path($client, $esIndex);
-    createCookie('path', $path);
-} elseif ($path !== "/") {
-    // remove any trailing slash
-    $path = rtrim($path, '/');
-}
 
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
@@ -61,6 +44,8 @@ if (isset($_GET)) {
             'query' => [
                 'query_string' => [
                     'query' => $request,
+                    'fields' => ['filename^5','path_parent','extension'],
+                    'default_operator' => 'OR',
                     'analyze_wildcard' => 'true'
                 ]
             ]
@@ -94,19 +79,19 @@ if (isset($_GET)) {
     die("no get data");
 }
 
-echo '<span style="color:#666;font-size:10px;">' . $request . '</span>';
+echo '<span style="color:#666;font-size:10px;line-height:1.2em;display:block;">' . $request . '</span>';
 echo '<span class="pull-right" style="font-size:11px;color:#ccc;"><strong>' . $total . ' items found</strong></span><br />';
 
 if (count($results) === 0) {
     echo "<i class=\"glyphicon glyphicon-eye-close\"></i> No results found";
 } else {
     // replace any words and characters that we don't want to highlight in red with a space
-    $keywords_clean = preg_replace('/OR|AND|NOT|\(|\)|\[|\]|\*|\\|\/|(\w+):/', ' ', $request);
+    $keywords_clean = preg_replace('/\bOR\b|\bAND\b|\bNOT\b|\(|\)|\[|\]|\*|\\|\/|_|-|\'s|&|(\w+):/i', ' ', $request);
 
     // find and replace any keyword in file with highlighted red html keyword
     foreach($files as $key => $value) {
         // find all words in keywords_clean and add to matches
-        preg_match_all('/\w+/', $keywords_clean, $matches);
+        preg_match_all('/(\w+)/i', $keywords_clean, $matches);
         if($matches) {
             $reg_exp = '/\b(' . implode('|', $matches[0]) . ')\b/i';
             $file_highlighted = preg_replace($reg_exp, '<span style="font-weight:bolder;color:red!important;">$0</span>', $value[1]);
@@ -114,7 +99,7 @@ if (count($results) === 0) {
 
         if ($value[0] == 'file') {
             // output html with keyword highlights for each file
-            echo '<i class="glyphicon glyphicon-file" style="color:#555;"></i> <a href="simple.php?submitted=true&p=1&q=path_parent:' . rawurlencode(escape_chars($value[2])) .' AND filename: ' . rawurlencode(escape_chars($value[1])) . '">' . $file_highlighted . '</a>&nbsp;&nbsp;<span class="searchpath"><a href="simple.php?submitted=true&p=1&q=path_parent:' . rawurlencode(escape_chars($value[2])) . '">' . $value[2] . '</a></span><br />';
+            echo '<i class="glyphicon glyphicon-file" style="color:#555;display:inline-block;line-height:2.1em;margin:0 auto;"></i> <a href="simple.php?submitted=true&p=1&q=path_parent:' . rawurlencode(escape_chars($value[2])) .' AND filename: ' . rawurlencode(escape_chars($value[1])) . '">' . $file_highlighted . '</a>&nbsp;&nbsp;<span class="searchpath"><a href="simple.php?submitted=true&p=1&q=path_parent:' . rawurlencode(escape_chars($value[2])) . '">' . $value[2] . '</a></span><br />';
         } else {  // directory
             $parentpath = "";
             if ($value[2] === '/') {
@@ -122,7 +107,7 @@ if (count($results) === 0) {
             } else {
                 $parentpath = rawurlencode(escape_chars($value[2] . '/' . $value[1]));
             }
-            echo '<i class="glyphicon glyphicon-folder-close" style="color:#555;"></i> <a href="simple.php?submitted=true&p=1&q=path_parent:' . $parentpath . '">' . $file_highlighted . '</a>&nbsp;&nbsp;<span class="searchpath"><a href="simple.php?submitted=true&p=1&q=path_parent:' . rawurlencode(escape_chars($value[2])) . '">' . $value[2] . '</a></span><br />';
+            echo '<i class="glyphicon glyphicon-folder-close" style="color:#555;display:inline-block;line-height:2.1em;margin:0 auto;"></i> <a href="simple.php?submitted=true&p=1&q=path_parent:' . $parentpath . '">' . $file_highlighted . '</a>&nbsp;&nbsp;<span class="searchpath"><a href="simple.php?submitted=true&p=1&q=path_parent:' . rawurlencode(escape_chars($value[2])) . '">' . $value[2] . '</a></span><br />';
         }
     }
 }

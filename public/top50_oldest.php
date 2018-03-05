@@ -8,45 +8,11 @@ LICENSE for the full license text.
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-// check for index2 in url
-if (isset($_GET['index2'])) {
-    $esIndex2 = $_GET['index2'];
-    setCookie('index2', $esIndex2);
-} else {
-    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
-}
-
 require "d3_inc.php";
+require "vars_inc.php";
 
-$path = $_GET['path'] ?: getCookie('path');
-// check if no path (grab one from ES)
-if (empty($path)) {
-    $path = get_es_path($client, $esIndex);
-    createCookie('path', $path);
-} elseif ($path !== "/") {
-    // remove any trailing slash
-    $path = rtrim($path, '/');
-}
-$filter = (int)$_GET['filter'] ?: Constants::FILTER; // file size
-$mtime = $_GET['mtime'] ?: Constants::MTIME; // file mtime
-// get mtime in ES format
-$mtime = getmtime($mtime);
-$maxdepth = (int)$_GET['maxdepth'] ?: Constants::MAXDEPTH; // maxdepth
 
 // get top 50 directories
 $totaldirsize = 0;
@@ -184,10 +150,10 @@ foreach ($oldestfiles as $key => $value) {
                         <button class="btn btn-default button-newest"> Newest</button>
                         <button class="btn btn-default button-user"> Users</button>
                     </div>
-                    <span style="font-size:10px; color:gray;">*filters on filetree page affect this page</span>
+                    <span style="font-size:10px; color:gray;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page</span>
                     <br />
                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
-                    <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='top50_oldest.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=<?php echo $_GET['doctype']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
+                    <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
                 </div>
     		</div><br />
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -207,11 +173,11 @@ foreach ($oldestfiles as $key => $value) {
                   foreach ($oldestfiles as $key => $value) {
                     ?>
                     <tr><td class="darken" width="10"><?php echo $n; ?></td>
-                        <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <?php echo $value['_source']['filename']; ?></a></td>
+                        <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $value['_source']['filename']; ?></a></td>
                         <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                         <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totalfilesize) * 100, 2); ?>%</small></span></td>
                         <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
-                        <td class="path darken"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
+                        <td class="path darken"><a href="<?php echo build_url('path', $value['_source']['path_parent']); ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
                     </tr>
                   <?php $n++; }
                    ?>
@@ -230,8 +196,7 @@ foreach ($oldestfiles as $key => $value) {
                     </div>
                     <br />
                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
-                    <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='top50_oldest.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=<?php echo $_GET['doctype']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
-                </div>
+                    <span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
     		</div><br />
             <?php if (count($oldestdirs) > 0) { ?>
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -267,13 +232,13 @@ foreach ($oldestfiles as $key => $value) {
                           }
                         ?>
                         <tr><td class="darken" width="10"><?php echo $n; ?></td>
-                            <td class="path"><a href="top50_oldest.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;doctype=directory"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <?php echo $filename; ?></a></td>
+                            <td class="path"><a href="<?php echo build_url('path', $fullpath); ?>&amp;doctype=directory"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a></td>
                             <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                             <td width="15%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totaldirsize) * 100, 2); ?>%</small></span></td>
                             <td class="text-nowrap"><?php echo $value['_source']['items']; ?></td>
                             <td width="15%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['items'] / $totaldircount) * 100, 2); ?>%</small></span></td>
                             <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
-                            <td class="path darken"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo $value['_source']['path_parent']; ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=<?php echo $_GET['mtime']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
+                            <td class="path darken"><a href="<?php echo build_url('path', $value['_source']['path_parent']); ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
                         </tr>
                     <?php $n++; } ?>
                </tbody>

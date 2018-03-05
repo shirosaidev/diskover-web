@@ -4,7 +4,7 @@ Copyright (C) Chris Park 2017
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
- 
+
 header('Cache-Control: no-cache');
 // Set time limit to indefinite execution
 set_time_limit(0);
@@ -12,6 +12,7 @@ set_time_limit(0);
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 
 $host = Constants::SOCKET_LISTENER_HOST;

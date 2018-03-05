@@ -8,26 +8,10 @@ LICENSE for the full license text.
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-
-// remove any trailing slash unless root
-if (isset($_GET['path']) && $_GET['path'] !== "/") {
-    $path = rtrim($_GET['path'], '/');
-}
+require "d3_inc.php";
+require "vars_inc.php";
 
 ?>
 
@@ -48,61 +32,61 @@ if (isset($_GET['path']) && $_GET['path'] !== "/") {
 		<?php include "nav.php"; ?>
 		<div class="container" id="error" style="display:none; margin-top:70px;">
 			<div class="row">
-				<div class="alert alert-dismissible alert-danger col-xs-8">
+				<div class="alert alert-dismissible alert-warning col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again or check browser console and Elasticsearch for errors.
+					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
 				</div>
 			</div>
 		</div>
 		<div class="container-fluid" id="mainwindow" style="margin-top:70px;">
             <div class="row">
-				<div class="col-xs-8">
+				<div class="col-xs-7">
 						<form class="form-inline" id="path-container" style="display:none;">
 							<div class="form-group">
-								<input type="text" size="100" class="form-control input-sm" style="color:#66C266!important;font-weight:bold;" name="pathinput" id="pathinput" value="">
+								<input type="text" size="90" class="form-control input-sm" style="color:#66C266!important;font-weight:bold;" name="pathinput" id="pathinput" value="">
 							</div>
 							<button title="change path" type="submit" id="changepath" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-circle-arrow-right"></i> Go</button>
-                            <span style="margin-right:10px;"><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode(getParentDir($path)); ?>&amp;filter=<?php echo getCookie('filter'); ?>&amp;mtime=<?php echo getCookie('mtime'); ?>&amp;use_count=<?php echo getCookie('use_count'); ?>'"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
-						</form>
+                            <button title="<?php echo getParentDir($path); ?>" type="button" class="btn btn-primary btn-sm" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>'; return false;"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</button>
+                        </form>
 				</div>
-                <div class="col-xs-4 pull-right text-right" id="chart-buttons" style="display:none;">
+                <div class="col-xs-5 pull-right text-right" id="chart-buttons" style="display:none;">
                     <button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
                         <div class="btn-group">
                             <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Min Size Filter
     <span class="caret"></span></button>
                             <ul class="dropdown-menu">
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=1&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">1 Bytes (default)</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=1024&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">1 KB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=8192&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">8 KB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=65536&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">64 KB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=262144&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">256 KB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=524288&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">512 KB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=1048576&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">1 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=2097152&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">2 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=5242880&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">5 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=10485760&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">10 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=26214400&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">25 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=52428800&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">50 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=104857600&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">100 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=209715200&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">200 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=524288000&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">500 MB</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=1073741824&amp;mtime=<?php echo $_GET['mtime']; ?>&amp;use_count=<?php echo $_GET['use_count']; ?>">1 GB</a></li>
+                                <li><a href="<?php echo build_url('filter', 1); ?>">1 Bytes (default)</a></li>
+                                <li><a href="<?php echo build_url('filter', 1024); ?>">1 KB</a></li>
+                                <li><a href="<?php echo build_url('filter', 8192); ?>">8 KB</a></li>
+                                <li><a href="<?php echo build_url('filter', 65536); ?>">64 KB</a></li>
+                                <li><a href="<?php echo build_url('filter', 262144); ?>">256 KB</a></li>
+                                <li><a href="<?php echo build_url('filter', 524288); ?>">512 KB</a></li>
+                                <li><a href="<?php echo build_url('filter', 1048576); ?>">1 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 2097152); ?>">2 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 5242880); ?>">5 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 10485760); ?>">10 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 26214400); ?>">25 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 52428800); ?>">50 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 104857600); ?>">100 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 209715200); ?>">200 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 524288000); ?>">500 MB</a></li>
+                                <li><a href="<?php echo build_url('filter', 1073741824); ?>">1 GB</a></li>
                             </ul>
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Mtime Filter
     <span class="caret"></span></button>
                             <ul class="dropdown-menu">
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=0&amp;use_count=<?php echo $_GET['use_count']; ?>">0 (default)</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=1d&amp;use_count=<?php echo $_GET['use_count']; ?>">1 day</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=1w&amp;use_count=<?php echo $_GET['use_count']; ?>">1 week</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=1m&amp;use_count=<?php echo $_GET['use_count']; ?>">1 month</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=3m&amp;use_count=<?php echo $_GET['use_count']; ?>">3 months</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=6m&amp;use_count=<?php echo $_GET['use_count']; ?>">6 months</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=1y&amp;use_count=<?php echo $_GET['use_count']; ?>">1 year</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=2y&amp;use_count=<?php echo $_GET['use_count']; ?>">2 years</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=3y&amp;use_count=<?php echo $_GET['use_count']; ?>">3 years</a></li>
-                                <li><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;mtime=5y&amp;use_count=<?php echo $_GET['use_count']; ?>">5 years</a></li>
+                                <li><a href="<?php echo build_url('mtime', '0'); ?>">0 (default)</a></li>
+                                <li><a href="<?php echo build_url('mtime', '1d'); ?>">1 day</a></li>
+                                <li><a href="<?php echo build_url('mtime', '1w'); ?>">1 week</a></li>
+                                <li><a href="<?php echo build_url('mtime', '1m'); ?>">1 month</a></li>
+                                <li><a href="<?php echo build_url('mtime', '3m'); ?>">3 months</a></li>
+                                <li><a href="<?php echo build_url('mtime', '6m'); ?>">6 months</a></li>
+                                <li><a href="<?php echo build_url('mtime', '1y'); ?>">1 year</a></li>
+                                <li><a href="<?php echo build_url('mtime', '2y'); ?>">2 years</a></li>
+                                <li><a href="<?php echo build_url('mtime', '3y'); ?>">3 years</a></li>
+                                <li><a href="<?php echo build_url('mtime', '5y'); ?>">5 years</a></li>
                             </ul>
                         </div>
                     <div class="btn-group">
@@ -121,11 +105,10 @@ if (isset($_GET['path']) && $_GET['path'] !== "/") {
                         <button class="btn btn-default btn-sm" id="size"> Size</button>
                         <button class="btn btn-default btn-sm" id="count"> Count</button>
                     </div>
+                    <span style="font-size:11px; color:gray;">Show files </span><span style="position:relative; top:8px;"><label class="switch"><input id="showfiles" name="showfiles" type="checkbox"><span class="slider round"></span></label></span>
                     <div id="statustext" class="statustext">
-                        <span id="statusfilters">
-                        </span><span id="statushidethresh">
-                        </span>
-                        *filters affect all analytics pages
+                        <i class="glyphicon glyphicon-filter"></i> File filters: <span id="statusfilters"></span><span id="statushidethresh"></span>
+                        &nbsp;&nbsp;<i class="glyphicon glyphicon-info-sign"></i> filters affect all analytics pages
                     </div>
                 </div>
             </div>
@@ -135,19 +118,19 @@ if (isset($_GET['path']) && $_GET['path'] !== "/") {
                 </div>
                 <div class="col-xs-8" id="chart-container" style="display:none;">
                     <div class="row">
-                        <div class="col-xs-12">
+                        <div class="col-xs-12 text-center">
                             <div id="piechart"></div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-xs-4">
+                        <div class="col-xs-4 text-center">
                             <div id="piechart-ext"></div>
                         </div>
-                        <div class="col-xs-4">
+                        <div class="col-xs-4 text-center">
                             <div id="barchart-filesizes"></div>
                         </div>
-                        <div class="col-xs-4">
-                            <div id="barchart-mtime" class="barchart"></div>
+                        <div class="col-xs-4 text-center">
+                            <div id="barchart-mtime"></div>
                         </div>
                     </div>
                 </div>

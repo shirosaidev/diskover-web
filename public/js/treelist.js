@@ -1,11 +1,11 @@
-/**
- * Implements a simple layout for rendering trees in a list style view as seen in file system browsers
- * @author Patrick Oladimeji
- * @date 5/24/14 12:21:50 PM
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
  */
-/*jshint unused: true, undef: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global d3*/
+
+// Implements a simple layout for rendering trees in a list style view as seen in file system browsers
+// global d3
 (function (d3) {
     d3.layout.treelist = function () {
         "use strict";

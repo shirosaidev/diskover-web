@@ -7,10 +7,7 @@ LICENSE for the full license text.
 
 require '../vendor/autoload.php';
 use diskover\Constants;
-
 error_reporting(E_ALL ^ E_NOTICE);
-
-$path = $_GET['path'] ?: getCookie('path');
 
 // see if there are any extra custom fields to add
 $extra_fields = [];
@@ -48,15 +45,21 @@ if (count($results[$p]) > 0) {
 ?>
 <div class="container-fluid searchresults" style="margin-top: 70px;">
   <div class="row">
-		<div class="col-xs-6">
+		<div class="col-xs-7">
 			<div class="row">
 				<div class="alert alert-dismissible alert-success col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-search"></i> <strong><?php echo $total; ?> items found. (<?php echo formatBytes($total_size); ?> total this page)</strong>
+                    <?php
+                        $rs = $searchParams['size'];
+                        $cp = $_GET['p'];
+                        $ei = $rs * $cp;
+                        $si = $ei - $rs + 1;
+                    ?>
+					<i class="glyphicon glyphicon-search"></i> Showing <strong><?php echo $si; ?></strong> to <strong><?php echo $ei; ?></strong> of <?php echo $total; ?> items found. <small>(<?php echo formatBytes($total_size); ?> total this page)</small>
 				</div>
 			</div>
 		</div>
-        <div class="col-xs-6 text-right">
+        <div class="col-xs-5 text-right">
             <div class="row">
                 <span style="margin-right: 10px;">
                 <?php if($socketlistening) { ?>
@@ -99,7 +102,7 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
 		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
-          <?php if (($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') && !strpos($_GET['q'], '_type:file')) { ?>
+          <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
           <?php } ?>
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
@@ -167,10 +170,20 @@ if (count($results[$p]) > 0) {
                 $filename = $file['filename'];
             }
             ?>
-            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;"></i> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><span style="color:#666;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></span></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;"></i> <?php echo $filename; ?></a><?php } ?>
-            <!-- socket command buttons -->
-            <?php if ($socketlistening) { ?><?php if ($result['_type'] == 'directory') { $cmd = "{\"action\": \"dirsize\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\"}"; ?> <a onclick='runCommand(<?php echo $cmd; ?>);' href="#"><label title="calculate directory size" class="btn btn-default btn-xs file-cmd-btns run-btn"><i class="glyphicon glyphicon-hdd"></i></label></a>&nbsp;<?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#"><label title="reindex directory (non-recursive)" class="btn btn-default btn-xs file-cmd-btns run-btn"><i class="glyphicon glyphicon-repeat"></i></label></a><?php } } ?>
-            <!-- end socket command buttons -->
+            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><span style="color:#666;font-size:13px;top:1px;position:relative;padding-left:2px;padding-right:2px"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></span></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php } ?>
+            <!-- socket commands dropdown -->
+            <?php if ($socketlistening) {
+            if ($result['_type'] == 'directory') { ?>
+            <div class="dropdown pathdropdown" style="display:inline-block;">
+                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs run-btn file-cmd-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-tasks"></i>
+                    <span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                        <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (non-recursive)</a></li>
+                        <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"recursive\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (recursive)</a></li>
+                </ul>
+            </div>
+            <!-- end socket command dropdown -->
+            <?php } } ?>
         </td>
             <td class="text-nowrap tagdropdown">
             <!-- tag dropdown -->
@@ -387,11 +400,11 @@ if (count($results[$p]) > 0) {
 	</div>
   </div>
 </div>
-<div class="alert alert-dismissible alert-danger" id="errormsg-container" style="display:none; width:400px; position: fixed; right: 50px; bottom: 20px; z-index:2">
+<div class="alert alert-dismissible alert-danger" id="errormsg-container" style="display:none; width:400px; position: fixed; left: 50px; bottom: 20px; z-index:2">
             <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
-<div id="progress-container" class="alert alert-dismissible alert-info" style="display:none; width:400px; height:80px; position: fixed; right: 50px; bottom: 20px; z-index:2">
-  <strong>Task running</strong>, keep this window open until done.<br />
+<div id="progress-container" class="alert alert-dismissible alert-info" style="display:none; width:400px; height:80px; position: fixed; left: 50px; bottom: 20px; z-index:2">
+  <strong>Task running, keep this window open until done.</strong><br />
   <div id="progress" class="progress">
     <div id="progressbar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 0%; color:white; font-weight:bold; height:20px;">
       0%
@@ -407,7 +420,7 @@ else {
   <div class="row">
     <div class="alert alert-dismissible alert-info col-xs-8">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no items found :(</strong> Change a few things up and try searching again.
+      <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no items found :(</strong> Change a few things up and try searching again. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
     </div>
   </div>
 </div>

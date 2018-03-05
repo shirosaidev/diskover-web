@@ -7,18 +7,10 @@ LICENSE for the full license text.
 
 require '../vendor/autoload.php';
 use diskover\Constants;
-
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
+require "vars_inc.php";
 
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-}
 
 // Get search results from Elasticsearch
 $results = [];
@@ -43,7 +35,7 @@ $searchParams['type']  = $export_type;
 $searchParams['scroll'] = "1m";
 
 // search size (number of results to return per page)
-if (isset($_REQUEST['resultsize'])) {
+if (!empty($_REQUEST['resultsize'])) {
     $searchParams['size'] = $_REQUEST['resultsize'];
     createCookie("resultsize", $_REQUEST['resultsize']);
 } elseif (getCookie("resultsize") != "") {

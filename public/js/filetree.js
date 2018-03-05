@@ -19,7 +19,8 @@ LICENSE for the full license text.
          var f = getCookie('filter');
          var m = getCookie('mtime');
          var u = getCookie('use_count');
-         location.href = "filetree.php?index=" + index +"&index2=" + index2 +"&path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u;
+         var s = getCookie('show_files');
+         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u + "&show_files=" + s;
          return false;
      });
 
@@ -28,7 +29,7 @@ LICENSE for the full license text.
          setCookie('use_count', 0);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "filetree.php?index=" + index +"&index2=" + index2 +"&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
      });
 
      d3.select("#count").on("click", function() {
@@ -36,8 +37,18 @@ LICENSE for the full license text.
          setCookie('use_count', 1);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "filetree.php?index=" + index +"&index2=" + index2 +"&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
      });
+
+     d3.select("#showfiles").on("change", function() {
+         var show_files = document.getElementById('showfiles').checked;
+         show_files === true ? show_files = 1 : show_files = 0;
+         setCookie('show_files', show_files)
+         console.log("removing json data on local storage because show files changed");
+ 		sessionStorage.removeItem("diskover-filetree");
+         location.href="filetree.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
+     });
+
      getJSON();
  });
 
@@ -63,7 +74,7 @@ function getChildJSON(d) {
     // config references
     chartConfig = {
         target: 'mainwindow',
-        data_url: 'd3_data.php?path=' + encodeURIComponent(d.name) + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
+        data_url: 'd3_data.php?path=' + encodeURIComponent(d.name) + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count + '&show_files=' + show_files
     };
 
     // loader settings
@@ -119,7 +130,7 @@ function getJSON() {
 		return true;
 	}
     // get new json data from ES if filters changed
-	if ($_GET('filter') !== getCookie('filter') || $_GET('mtime') !== getCookie('mtime') || $_GET('use_count') !== getCookie('use_count')) {
+	if ($_GET('filter') !== getCookie('filter') || $_GET('mtime') !== getCookie('mtime') || $_GET('use_count') !== getCookie('use_count') || $_GET('show_files') !== getCookie('show_files')) {
 		console.log("removing json data on local storage because filters changed");
 		sessionStorage.removeItem("diskover-filetree");
 		getESJsonData();
@@ -145,7 +156,7 @@ function getJSON() {
         // config references
         chartConfig = {
             target: 'mainwindow',
-            data_url: 'd3_data.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count
+            data_url: 'd3_data.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count + '&show_files=' + show_files
         };
 
         // loader settings
@@ -205,6 +216,7 @@ function getJSON() {
         (filter) ? setCookie('filter', filter) : setCookie('filter', FILTER);
         (mtime) ? setCookie('mtime', mtime): setCookie('mtime', MTIME);
         (use_count) ? setCookie('use_count', use_count): setCookie('use_count', USE_COUNT);
+        (show_files) ? setCookie('show_files', show_files): setCookie('show_files', SHOW_FILES);
 
 		// load file size/count pie chart
 		changePie(root);
@@ -236,7 +248,7 @@ function click(d) {
     if (d.name == root.name) {
         return null;
     }
-    if (d.count > 0 && !d.children && !d._children) {
+    if (d.count > 1 && !d.children && !d._children) {
         // check if there are any children in Elasticsearch
         getChildJSON(d);
     } else if (d._children) {
@@ -283,14 +295,14 @@ function updateTree(data, parent) {
 
 	//add arrows if it is a folder
 	entered.append("span").attr("class", function (d) {
-		var icon = d.children ? " glyphicon-chevron-down" :
-			d._children ? "glyphicon-chevron-right" : "";
+		var icon = (d.children) ? " glyphicon-chevron-down" :
+			(d._children) ? "glyphicon-chevron-right" : "";
 		return "downarrow glyphicon " + icon;
 	});
 
 	//add icons for folder for file
 	entered.append("span").attr("class", function (d) {
-		var icon = d.count > 0 ? "glyphicon-folder-close" : "glyphicon-file";
+		var icon = (d.count > 0 || d.type === 'directory') ? "glyphicon-folder-close" : "glyphicon-file";
 		return "glyphicon " + icon;
 	})
     .style('cursor', 'pointer')
@@ -298,7 +310,7 @@ function updateTree(data, parent) {
         click(d);
     })
     .on("mouseover", function (d) {
-        if (d.count > 0 && !d.children && !d._children) {
+        if (d.count > 1 && !d.children && !d._children) {
             // check if there are any children in Elasticsearch
             getChildJSON(d);
         }
@@ -345,7 +357,7 @@ function updateTree(data, parent) {
     // add file and directory counts
     entered.append("span").attr("class", "filecount")
         .html(function (d) {
-            return d.count > 0 ? "(" + d.count + ")" : "";
+            return (d.count > 0 || d.type === 'directory') ? "(" + d.count + ")" : "";
         });
 
 	//add text for filename
@@ -358,7 +370,7 @@ function updateTree(data, parent) {
         })
         .on("mouseover", function (d) {
             d3.select(this).classed("selected", true);
-            if (d.count > 0 && !d.children && !d._children) {
+            if (d.count > 1 && !d.children && !d._children) {
                 // check if there are any children in Elasticsearch
                 getChildJSON(d);
             }
@@ -371,7 +383,7 @@ function updateTree(data, parent) {
 	entered.append("span").attr("class", "filetree-btns")
         .html(function (d) {
             if (d.count > 0) {
-                return '<a href="simple.php?submitted=true&amp;p=1&amp;q=path_parent: ' + escapeHTML(d.name) + '*"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
+                return '<a href="simple.php?submitted=true&amp;p=1&amp;q=path_parent:' + escapeHTML(d.name) + ' OR path_parent:' + escapeHTML(d.name) + '\\/*"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
             }
         });
 
@@ -397,7 +409,7 @@ var root,
 	id = 0;
 
 var tree = d3.layout.treelist()
-	.childIndent(15)
-	.nodeHeight(18);
+	.childIndent(20)
+	.nodeHeight(20);
 
 var ul = d3.select("#tree-container").append("ul").classed("treelist", "true");

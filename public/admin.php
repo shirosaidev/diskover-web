@@ -8,34 +8,45 @@ LICENSE for the full license text.
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
+
 
 // unset command
 if(isset($_GET['command'])) {
 	unset($_GET['command']);
 }
 
-$host = Constants::ES_HOST;
-$port = Constants::ES_PORT;
-
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // redirect to select indices page if no index cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
+// curl function to get ES data
+function curl_es($url, $request=null, $return_json=true) {
+    $host = Constants::ES_HOST;
+    $port = Constants::ES_PORT;
+    $username = Constants::ES_USER;
+    $password = Constants::ES_PASS;
+    // Get cURL resource
+    $curl = curl_init();
+    // Set curl options
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    if ($request === "DELETE") {
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    } elseif ($request === "POST") {
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
     }
-}
-// check for index2 in url
-if (isset($_GET['index2'])) {
-    $esIndex2 = $_GET['index2'];
-    setCookie('index2', $esIndex2);
-} else {
-    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
+    curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.$url);
+    // Add user/pass if using ES auth
+    if (!empty($username) && !empty($password)) {
+        curl_setopt($curl, CURLOPT_USERPWD, "$username:$password");
+        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    }
+    // Send the request & save response to $curlresp
+    $curlresp = curl_exec($curl);
+    // Close request to clear up some resources
+    curl_close($curl);
+    if ($return_json) {
+        return json_decode($curlresp, true);
+    } else {
+        return $curlresp;
+    }
 }
 
 ?>
@@ -55,6 +66,52 @@ pre {
     background-color:#060606!important;
     color: #56B6C2!important;
     border: none;
+    overflow: visible;
+    opacity: 0.5;
+}
+textarea::-webkit-scrollbar-track
+{
+	background-color: #060606;
+}
+
+textarea::-webkit-scrollbar-corner
+{
+	background-color: #060606;
+}
+
+textarea::-webkit-scrollbar
+{
+	width: 8px;
+    height: 8px;
+	background-color: #060606;
+}
+
+textarea::-webkit-scrollbar-thumb
+{
+	background-color: #31363A;
+    border-radius: 5px;
+}
+select::-webkit-scrollbar-track
+{
+	background-color: #060606;
+}
+
+select::-webkit-scrollbar-corner
+{
+	background-color: #060606;
+}
+
+select::-webkit-scrollbar
+{
+	width: 8px;
+    height: 8px;
+	background-color: #060606;
+}
+
+select::-webkit-scrollbar-thumb
+{
+	background-color: #31363A;
+    border-radius: 5px;
 }
 </style>
 </head>
@@ -66,7 +123,7 @@ pre {
 <div class="row">
     <div class="col-xs-6">
         <h1 class="text-nowrap"><i class="glyphicon glyphicon-cog"></i> Admin Panel</h1>
-        <span class="text-success"><?php echo "diskover-web v".Constants::VERSION; ?></span><br />
+        <span style="color:#D20915;"><?php echo "diskover-web v".Constants::VERSION; ?></span><br />
         <small><i class="glyphicon glyphicon-download-alt"></i> <a target="_blank" href="https://github.com/shirosaidev/diskover-web/releases/latest">Check for updates</a></small><br />
         Elasticsearch health: <span id="eshealthheart" style="font-size:18px;color:gray"><strong><i class="glyphicon glyphicon-heart-empty"></i></strong></span>
 </div>
@@ -89,25 +146,23 @@ pre {
 	<div class="col-xs-6">
         <div class="well">
             <h5>diskover indices selected</h5>
-            Index: <?php echo $esIndex; ?><br />
-            Index 2: <?php echo $esIndex2; ?><br />
-            <small><a href="selectindices.php">Change</a></small>
+            <?php
+            $indexstats = curl_es('/'.$esIndex.'/_stats/store,docs');
+            $indexsize = $indexstats['_all']['total']['store']['size_in_bytes'];
+            $indexdoccount = $indexstats['_all']['total']['docs'];
+            ?>
+            <strong>Index: <span class="text-success"><?php echo $esIndex; ?></span></strong><br />
+            <span style="color:gray"><small><i class="glyphicon glyphicon-stats"></i> docs (count/deleted): <?php echo $indexdoccount['count'].'/'.$indexdoccount['deleted']; ?> size: <?php echo formatBytes($indexsize); ?></small></span><br />
+            <span class="text-info"><small><i class="glyphicon glyphicon-info-sign"></i> If deleted count is high you may want to optimize the index (below) to reduce size.</small></span><br />
+            <strong>Index 2:</strong> <?php echo $esIndex2; ?><br />
+            <small><i class="glyphicon glyphicon-cog"></i> <a href="selectindices.php">Change</a></small>
         </div>
 
         <hr />
         <?php
-            // Get cURL resource
-            $curl = curl_init();
-            // Set curl options
-            curl_setopt_array($curl, array(
-                    CURLOPT_RETURNTRANSFER => 1,
-                    CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*?pretty'
-            ));
-            // Send the request & save response to $curlresp
-            $curlresp = curl_exec($curl);
-            $json = json_decode($curlresp, true);
-            $fields_file = $json[$esIndex]['mappings']['file']['properties'];
-            $fields_dir = $json[$esIndex]['mappings']['directory']['properties'];
+            $diskover_indices = curl_es('/diskover-*?pretty');
+            $fields_file = $diskover_indices[$esIndex]['mappings']['file']['properties'];
+            $fields_dir = $diskover_indices[$esIndex]['mappings']['directory']['properties'];
             // combine file and directory fields and find unique
             $fields = [];
             foreach ($fields_file as $key => $value) {
@@ -117,8 +172,6 @@ pre {
                 $fields[] = $key;
             }
             $fields = array_unique($fields);
-            // Close request to clear up some resources
-            curl_close($curl);
         ?>
         <h4>Additional fields for search results</h4>
         <fieldset>
@@ -143,7 +196,7 @@ pre {
     <div class="col-xs-6">
         <div class="form-group">
         <h4>Edit smart searches</h4>
-        <span style="color:#666;">!name|es query string</span>
+        <span class="text-info">!name|es query string</span>
 		<?php
 
 // configuration
@@ -175,7 +228,7 @@ $smartsearchtext = file_get_contents($file_smartsearches);
 						<div class="form-group">
 							<button type="reset" class="btn btn-default">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($smartsearchsaved) { ?><script>alert("smart searches saved");</script><?php } ?>
+                            <?php if ($smartsearchsaved) { ?><script>alert("smart searches saved"); window.location.reload();</script><?php } ?>
 						</div>
 					</div>
 				</fieldset>
@@ -216,8 +269,6 @@ if ($result == "pong") {
         <select class="form-control" id="commandset" name="commandset" style="width:200px; display: inline;">
             <?php $cmd = '{"action": "finddupes", "index": "'.$esIndex.'"}'; ?>
           <option value='<?php echo $cmd; ?>'>Find duplicate files</option>
-            <?php $cmd = '{"action": "dirsize", "index": "'.$esIndex.'"}'; ?>
-          <option value='<?php echo $cmd; ?>'>Calculate all directory sizes/items</option>
         </select>
     </div>
     <div class="form-group">
@@ -259,7 +310,7 @@ $configtext = file_get_contents($file_config);
 						<div class="form-group">
 							<button type="reset" class="btn btn-default">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($configsaved) { ?><script>alert("config saved");</script><?php } ?>
+                            <?php if ($configsaved) { ?><script>alert("config saved"); window.location.reload();</script><?php } ?>
 						</div>
 					</div>
 				</fieldset>
@@ -270,56 +321,60 @@ $configtext = file_get_contents($file_config);
 		<button type="submit" class="btn btn-primary" onclick=clearCache()>Clear</button>
 
         <hr />
-        <h4>Delete diskover indices</h4>
-        <span style="color:red"><strong>*careful, index will be deleted permanently</strong></span>
-    	<form "deleteindices" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
+        <h4>Optimize diskover indices</h4>
+        <span style="color:yellow"><strong><i class="glyphicon glyphicon-warning-sign"></i> Could cause temp high load on ES</strong></span>
+    	<form name="optimizeindices" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
     	<fieldset>
             <div class="col-xs-12">
     		<div class="form-group">
     			<?php
     				// delete indices
-    				if (isset($_POST['indices'])) {
-    					foreach ($_POST['indices'] as $i) {
-    						// Get cURL resource
-    						$curl = curl_init();
-    						// Set curl options
-    						curl_setopt_array($curl, array(
-    								CURLOPT_RETURNTRANSFER => 1,
-    								CURLOPT_CUSTOMREQUEST => 'DELETE',
-    								CURLOPT_URL => 'http://'.$host.':'.$port.'/'.$i.'?pretty'
-    						));
-    						// Send the request & save response to $curlresp
-    						$curlresp = curl_exec($curl);
-    						// Close request to clear up some resources
-    						curl_close($curl);
+    				if (isset($_POST['optimizeindices'])) {
+    					foreach ($_POST['optimizeindices'] as $i) {
+                            curl_es('/' . $i . '/_forcemerge?only_expunge_deletes=true', 'POST', false);
     					}
-    				}
-
-    				// Get cURL resource
-    				$curl = curl_init();
-    				// Set curl options
-    				curl_setopt_array($curl, array(
-    						CURLOPT_RETURNTRANSFER => 1,
-    						CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*?pretty'
-    				));
-    				// Send the request & save response to $curlresp
-    				$curlresp = curl_exec($curl);
-    				$indices = json_decode($curlresp, true);
-
-    				// Close request to clear up some resources
-    				curl_close($curl);
-    				?>
-    			<select multiple="" name="indices[]" id="indices" class="form-control"><?php
-    				foreach ($indices as $key => $val) {
+                    ?>
+                    <script>alert("selected indices optimized"); window.location.reload();</script>
+    				<?php } ?>
+    			<select multiple="" name="optimizeindices[]" id="optimizeindices" class="form-control"><?php
+    				foreach ($diskover_indices as $key => $val) {
     					echo "<option>".$key."</option>";
     				}
     				?></select>
     		</div>
     		<div class="form-group">
-    			<button type="submit" class="btn btn-danger" onclick="delIndex()">Delete</button>
+    			<button type="submit" class="btn btn-success" onclick="optimizeIndex()">Optimize</button>
     		</div>
         </div>
         </fieldset>
+    </form>
+    <hr />
+    <h4>Delete diskover indices</h4>
+    <span style="color:red"><strong><i class="glyphicon glyphicon-warning-sign"></i> Careful, index will be deleted permanently!</strong></span>
+    <form name="deleteindices" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
+    <fieldset>
+        <div class="col-xs-12">
+        <div class="form-group">
+            <?php
+                // delete indices
+                if (isset($_POST['delindices'])) {
+                    foreach ($_POST['delindices'] as $i) {
+                        curl_es('/' . $i . '?pretty', 'DELETE', false);
+                    }
+                ?>
+                <script>alert("selected indices deleted"); window.location.reload();</script>
+                <?php } ?>
+            <select multiple="" name="delindices[]" id="delindices" class="form-control"><?php
+                foreach ($diskover_indices as $key => $val) {
+                    echo "<option>".$key."</option>";
+                }
+                ?></select>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-danger" onclick="delIndex()">Delete</button>
+        </div>
+    </div>
+    </fieldset>
     </form>
 </div>
 
@@ -327,7 +382,7 @@ $configtext = file_get_contents($file_config);
         <div class="form-group">
         <hr />
         <h4>Edit custom tags</h4>
-        <span style="color:#666;">tag name|#hexcolor</span>
+        <span class="text-info">tag name|#hexcolor</span>
 		<?php
 
 // configuration
@@ -359,7 +414,7 @@ $tagtext = file_get_contents($file_customtags);
 						<div class="form-group">
 							<button type="reset" class="btn btn-default">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($tagssaved) { ?><script>alert("tags saved");</script><?php } ?>
+                            <?php if ($tagssaved) { ?><script>alert("tags saved"); window.location.reload();</script><?php } ?>
 						</div>
 					</div>
 				</fieldset>
@@ -368,39 +423,18 @@ $tagtext = file_get_contents($file_customtags);
 
 		<div class="form-group">
             <?php
-            // Get cURL resource
-            $curl = curl_init();
-            // Set curl options
-            curl_setopt_array($curl, array(
-                    CURLOPT_RETURNTRANSFER => 1,
-                    CURLOPT_URL => 'http://'.$host.':'.$port.'/diskover-*/_stats?pretty'
-            ));
-            // Send the request & save response to $curlresp_esinfo
-            $curlresp_esinfo = curl_exec($curl);
-            // Close request to clear up some resources
-            curl_close($curl);
-
-            // Get cURL resource
-            $curl = curl_init();
-            // Set curl options
-            curl_setopt_array($curl, array(
-                    CURLOPT_RETURNTRANSFER => 1,
-                    CURLOPT_URL => 'http://'.$host.':'.$port.'/_cat/indices?v'
-            ));
-            // Send the request & save response to $curlresp_esinfo
-            $curlresp_eshealth = curl_exec($curl);
-            // Close request to clear up some resources
-            curl_close($curl);
+            $curlresp_esindices = curl_es('/diskover-*?pretty', 'null', false);
+            $curlresp_esinfo = curl_es('/diskover-*/_stats?pretty', 'null', false);
             ?>
             <hr />
-            <h4>Index info</h4>
-			<textarea name="curlresp" id="curlresp" class="form-control" rows=12><?php echo htmlspecialchars($curlresp) ?></textarea>
+            <h4>Indices info</h4>
+			<textarea name="curlresp" id="curlresp" class="form-control" rows=20><?php echo htmlspecialchars($curlresp_esindices) ?></textarea>
 		</div>
 
 		<div class="form-group">
             <hr />
             <h4>Elasticsearch info</h4>
-			<textarea name="curlresp_esinfo" id="curlresp_esinfo" class="form-control" rows=12><?php echo htmlspecialchars($curlresp_esinfo) ?></textarea>
+			<textarea name="curlresp_esinfo" id="curlresp_esinfo" class="form-control" rows=20><?php echo htmlspecialchars($curlresp_esinfo) ?></textarea>
 		</div>
     </div>
     </fieldset>
@@ -411,6 +445,7 @@ $tagtext = file_get_contents($file_customtags);
         <hr />
 		<h4 style="display:inline-block">Elasticsearch health / index sizes</h4>
         <?php
+        $curlresp_eshealth = curl_es('/_cat/indices?v', 'null', false);
         if (strpos($curlresp_eshealth, 'green')) {
             $eshealth = 'green';
         } elseif(strpos($curlresp_eshealth, 'yellow')) {
@@ -455,6 +490,7 @@ function clearCache() {
 	deleteCookie('hide_thresh');
 	deleteCookie('path');
 	deleteCookie('use_count');
+    deleteCookie('show_files');
 	deleteCookie('sort');
 	deleteCookie('sortorder');
     deleteCookie('sort2');
@@ -470,10 +506,17 @@ function clearCache() {
     deleteCookie('field2-desc');
     deleteCookie('field3-desc');
     deleteCookie('field4-desc');
+    deleteCookie('running_task_id')
+    deleteCookie('tagsshowuntagged');
+    deleteCookie('tagsshowfiles');
+    deleteCookie('tagsshowdirectories');
+    deleteCookie('tagsshowall');
+    deleteCookie('showotherfiles');
     deleteCookie('PHPSESSID');
 	sessionStorage.removeItem("diskover-filetree");
 	sessionStorage.removeItem("diskover-treemap");
     sessionStorage.removeItem("diskover-heatmap");
+    sessionStorage.removeItem("diskover-dupes");
 	alert('cleared, please restart browser');
     return true;
 }
@@ -529,9 +572,17 @@ function clearFields() {
 	return true;
 }
 
-// Curl command
+// del index check
 function delIndex() {
-	var indices = document.getElementById('indices').value;
+	var indices = document.getElementById('delindices').value;
+	if (!indices) {
+		alert("select at least one index")
+		return false;
+	}
+}
+// optimize index check
+function optimizeIndex() {
+	var indices = document.getElementById('optimizeindices').value;
 	if (!indices) {
 		alert("select at least one index")
 		return false;

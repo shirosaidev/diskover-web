@@ -70,7 +70,7 @@ function renderDupesCharts(dataset) {
          return d.count;
      });
 
-     var width = 960;
+     var width = 720;
      var height = 600;
      var radius = Math.min(width, height) / 2;
 
@@ -147,7 +147,7 @@ function renderDupesCharts(dataset) {
 
          var valueLabelWidth = 40; // space reserved for value labels (right)
          var barHeight = 10; // height of one bar
-         var barLabelWidth = 300; // space reserved for bar labels
+         var barLabelWidth = 200; // space reserved for bar labels
          var barLabelPadding = 10; // padding between bar and bar labels (left)
          var gridChartOffset = 0; // space between start of grid and first bar
          var maxBarWidth = 400; // width of the bar with the max value
@@ -158,7 +158,8 @@ function renderDupesCharts(dataset) {
 
          // svg container element
          var svg = d3.select('#filesizechart').append("svg")
-             .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth);
+             .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth + barLabelPadding)
+             .attr('height', '600px');
 
          //var color = d3.scale.category20b();
 

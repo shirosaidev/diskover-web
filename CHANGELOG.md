@@ -1,5 +1,53 @@
 # Diskover Web Change Log
 
+# [1.5.0] - 2018-03-06
+### notice
+- requires index created with diskover >= 1.5.0
+### added
+- login page (edit Constants.php to change username and password from default (user: diskover, pass: darkdata)
+- login required for all pages and includes timeout of 1 hour if inactive
+- show files option (checkbox) to file tree, treemap, heatmap pages for hiding files and just show directories, this helps to speed up treemap and heatmap
+- Auth.php (in ../src/diskover/) to handle auth check and require login
+- vars_inc.php - sets important vars like index,index2,path and added as require include at top of each php page
+- build_url function in Diskover.php to help clean up code in php pages
+- indexed percent bar chart to dashboard page in disk space overview
+- improved rest api (see wiki or Help page for how-to and examples)
+- you can now disable smartsearch with "\" key before entering in query
+- improved crawl stats and select indices page for handling parallel crawls
+- optimize indices section to Admin page (index optimization is done by expunging deleted docs which come from any doc updates or deletes), try this if your index sizes are large and have high deleted doc count (shown on admin page)
+- toggle buttons for only showing files/directories on Tags analytics page
+- "Untagged + no custom tag" options to quick search menu
+- new d3 colors for analytics (switched to category20b)
+- Smart Searches analytics page now remembers "show other files" setting (cookie)
+- optimized d3_inc.php for faster load times of analytics pages
+- improved filetree page for empty directories
+- img extension to smartsearches !discimg
+- better default colors for custom tag templates (customtags.txt)
+### changed
+- scroll bars colors now match theme
+- improved ui on help and admin pages
+- improved ui on all analytics pages
+- improved chart layout and filetree for browser rendering/size on filetree page
+- treemap page now changes paths to parent directory on click (same as heatmap) instead of zooming in
+- improved results info box on search results page
+- improved dashboard
+- improved predictive search/keyword highlighting
+- rest api = you can now tag directory and all items (recursive) using tagdir (see Help page or wiki for command examples)
+- improved ui on smarsearches, tags and dupes analytics pages
+- changed crawlstats es mapping and add_crawl_stats function to use only crawlstat doctype
+- removed check for dirsizes since it is done during diskover crawl now
+- removed calc dir sizes buttons for diskover socket server
+- removed es search queries in d3_inc.php for directories that are 0 filesize/items since dir sizes are calculated during crawl now (diskover >= 1.5.0)
+### fixed
+- selectindices and admin pages would not load indexes if using ES authentication (X-pack)
+- * wildcard search would show no results (predictive search)
+- "duplicate files" and "untagged files" links on dashboard
+- bug with export
+- tags analytics page not showing sizes for directories which are tagged
+- untagged links on Tags analytics page not showing just untagged files
+- bug with quick search dropdown and "with any tag" option
+- bug with Up level button on file tree page
+
 # [1.4.6] - 2018-02-19
 ### added
 - improved predictive search

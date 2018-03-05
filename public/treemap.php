@@ -8,31 +8,11 @@ LICENSE for the full license text.
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
+require "d3_inc.php";
+require "vars_inc.php";
 
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-
-$path = $_GET['path'] ?: getCookie('path');
-// check if no path (grab one from ES)
-if (empty($path)) {
-    $path = get_es_path($client, $esIndex);
-    createCookie('path', $path);
-} elseif ($path !== "/") {
-    // remove any trailing slash
-    $path = rtrim($path, '/');
-}
 ?>
 
 	<!DOCTYPE html>
@@ -51,10 +31,10 @@ if (empty($path)) {
 	<body>
 		<?php include "nav.php"; ?>
 		<div class="container" id="error" style="display:none; margin-top:70px;">
-			<div class="row">
-				<div class="alert alert-dismissible alert-danger col-xs-8">
+            <div class="row">
+				<div class="alert alert-dismissible alert-warning col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again or check browser console and Elasticsearch for errors.
+					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again.
 				</div>
 			</div>
 		</div>
@@ -63,7 +43,7 @@ if (empty($path)) {
 				<div class="col-xs-12">
 					<div id="buttons-container" style="display:none;">
                         <span id="path" class="text-success" style="font-size:14px; font-weight: bold;"><?php echo $path; ?></span>
-                        <span style="margin-right:10px;"><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='treemap.php?path=<?php echo getParentDir($path); ?>&amp;filter=<?php echo $_GET['filter']; ?>&amp;maxdepth=<?php echo $_GET['maxdepth']; ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
+                        <button title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" style="margin-right:20px;" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</button>
 						<button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"> <i class="glyphicon glyphicon-refresh"></i></button>
 						<div class="btn-group" data-toggle="buttons">
 							<button class="btn btn-default btn-sm" id="size"> Size</button>
@@ -77,7 +57,8 @@ if (empty($path)) {
                                 <button class="btn btn-default btn-sm" id="depth4">4</button>
                                 <button class="btn btn-default btn-sm" id="depth5">5</button>
                             </div>
-                            <span style="font-size:10px; color:gray;">*filters on filetree page affect this page</span>
+                            <span style="font-size:11px; color:gray;">Show files </span><span style="position:relative; top:8px;"><label class="switch"><input id="showfiles" name="showfiles" type="checkbox"><span class="slider round"></span></label></span>
+                            <span style="font-size:10px; color:gray; margin:10px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page</span>
 					</div>
 				</div>
 			</div>

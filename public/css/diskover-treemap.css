@@ -6,6 +6,61 @@ LICENSE for the full license text.
 
 /* d3 tree map */
 
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #555;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 13px;
+  width: 13px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #33A0D4;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #33A0D4;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(13px);
+  -ms-transform: translateX(13px);
+  transform: translateX(13px);
+}
+
+.slider.round {
+  border-radius: 17px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 .chart {
     display: block;
     margin-top: 10px;
@@ -19,16 +74,16 @@ text {
 
 rect {
     fill: none;
-    stroke: #272B30;
-    stroke-width: .5px;
+    stroke: #060606;
+    stroke-width: 1px;
     cursor: pointer;
     opacity: .8;
 }
 
 rect:hover {
     fill-opacity: .8;
-    stroke: black;
-    stroke-width: 1px;
+    stroke: #060606;
+    stroke-width: 2px;
 }
 
 .d3-tip {

@@ -11,9 +11,22 @@ LICENSE for the full license text.
     position: absolute;
     top: 40px;
 }
-#filesizechart svg {
+#dupescountchart svg {
     height: 600px;
     width: 720px;
+}
+#dupefiles {
+   width: 90%;
+   height: 90%;
+   top: 70px;
+   left: 15px;
+   position: fixed;
+   display: block;
+   z-index: -99;
+   text-align: left;
+   font-size: 12px;
+   color: #ccc;
+   opacity: 0.7;
 }
 .bars rect {
     fill: none;
@@ -67,17 +80,4 @@ text {
     pointer-events: none;
     word-break: break-all;
     word-wrap: break-word;
-}
-#dupefiles {
-   width: 90%;
-   height: 90%;
-   top: 70px;
-   left: 15px;
-   position: fixed;
-   display: block;
-   z-index: -99;
-   text-align: left;
-   font-size: 12px;
-   color: #ccc;
-   opacity: 0.7;
 }

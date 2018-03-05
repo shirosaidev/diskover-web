@@ -8,30 +8,12 @@ LICENSE for the full license text.
 header("X-XSS-Protection: 0");
 require '../vendor/autoload.php';
 use diskover\Constants;
-
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
+require "d3_inc.php";
+require "vars_inc.php";
 
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-// check for index2 in url
-if (isset($_GET['index2'])) {
-    $esIndex2 = $_GET['index2'];
-    setCookie('index2', $esIndex2);
-} else {
-    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
-}
 
 // Grab all the custom tags from file
 $customtags = get_custom_tags();

@@ -8,23 +8,11 @@ LICENSE for the full license text.
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-
 require "d3_inc.php";
+require "vars_inc.php";
+
 
 // Grab all the custom tags from file
 $customtags = get_custom_tags();
@@ -40,9 +28,36 @@ foreach($customtags as $key => $value) {
     $totalFilesizeCustom[$value[0]] = 0;
 }
 
-// Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = 'file';
+
+// determine doc type based on toggle switches
+if ($_GET['toggleonly'] === "showdirectories") {
+    $doctype = 'directory';
+    createCookie('tagsshowdirectories', 'true');
+    createCookie('tagsshowfiles', 'false');
+    createCookie('tagsshowall', 'false');
+}
+if ($_GET['toggleonly'] === "showfiles") {
+    $doctype = 'file';
+    createCookie('tagsshowfiles', 'true');
+    createCookie('tagsshowdirectories', 'false');
+    createCookie('tagsshowall', 'false');
+}
+if ($_GET['toggleonly'] === "showall") {
+    $doctype = 'file,directory';
+    createCookie('tagsshowall', 'true');
+    createCookie('tagsshowfiles', 'false');
+    createCookie('tagsshowdirectories', 'false');
+}
+if (!isset($_GET)) {
+    $doctype = 'file,directory';
+    createCookie('tagsshowall', 'true');
+    createCookie('tagsshowfiles', 'false');
+    createCookie('tagsshowdirectories', 'false');
+}
+$searchParams['type']  = $doctype;
+
+// grab all the file and directory sizes
 
 // Execute the search
 foreach ($totalFilesize as $tag => $value) {
@@ -94,6 +109,7 @@ foreach ($totalFilesizeCustom as $tag => $value) {
     $totalFilesizeCustom[$tag] = $queryResponse['aggregations']['total_size']['value'];
 }
 
+// grab the tag counts for both file and directory
 $results = [];
 $searchParams = [];
 $tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
@@ -106,7 +122,7 @@ foreach($customtags as $key => $value) {
 
 // Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = 'file,directory';
+$searchParams['type']  = $doctype;
 
 // Execute the search
 foreach ($tagCounts as $tag => $value) {
@@ -170,40 +186,51 @@ foreach ($tagCountsCustom as $tag => $value) {
                 <div class="col-xs-6">
                       <div id="tagcountchart" class="text-center"></div>
                       <br /><hr />
-                      <div class="chartbox text-center">
-                        <span class="label" style="font-size:16px;background-color:#666666"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
-                        <span class="label" style="font-size:16px;background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
-                        <span class="label" style="font-size:16px;background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
-                        <span class="label" style="font-size:16px;background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
-                        <br /><br />
-                        <?php foreach($customtags as $key => $value) { ?>
-                        <span class="label" style="font-size:12px;background-color:<?php echo $value[1]; ?>"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag_custom=<?php echo rawurlencode($value[0]) ?>"><?php echo $value[0]; ?> <?php echo $tagCountsCustom[$value[0]]; ?></a></span>
-                        <?php } ?>
-                    </div>
                   </div>
                 <div class="col-xs-6">
                     <div id="filesizechart" class="text-center"></div>
-                    <br /><br /><hr />
-                    <div class="chartbox text-center" style="display:absolute;">
-                      <span class="label" style="font-size:16px;background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
-                      <span class="label" style="font-size:16px;background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
-                      <span class="label" style="font-size:16px;background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
-                      <span class="label" style="font-size:16px;background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
-                      <br /><br />
-                      <?php foreach($customtags as $key => $value) { ?>
-                      <span class="label" style="font-size:12px;background-color:<?php echo $value[1]; ?>"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag_custom=<?php echo rawurlencode($value[0]) ?>"><?php echo $value[0]; ?> <?php echo formatBytes($totalFilesizeCustom[$value[0]]); ?></a></span>
-                      <?php } ?>
-                  </div>
-            </div>
+                    <br /><hr />
+              </div>
 				</div>
                 <div class="row">
-                    <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <div class="chartbox text-center">
+                          <span class="label" style="font-size:16px;background-color:#666666"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
+                          <span class="label" style="font-size:16px;background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
+                          <span class="label" style="font-size:16px;background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
+                          <span class="label" style="font-size:16px;background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
+                          <br /><br />
+                          <?php foreach($customtags as $key => $value) { ?>
+                          <span class="label" style="font-size:12px;background-color:<?php echo $value[1]; ?>"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag_custom=<?php echo rawurlencode($value[0]) ?>"><?php echo $value[0]; ?> <?php echo $tagCountsCustom[$value[0]]; ?></a></span>
+                          <?php } ?>
+                      </div>
+                  </div>
+                  <div class="col-xs-6">
+                      <div class="chartbox text-center" style="display:absolute;">
+                        <span class="label" style="font-size:16px;background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
+                        <span class="label" style="font-size:16px;background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
+                        <span class="label" style="font-size:16px;background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
+                        <span class="label" style="font-size:16px;background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
                         <br /><br />
-                        <form class="form-inline" name="showuntaggedform" id="showuntaggedform" method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-                            <div class="checkbox">
-                                <label><input onchange="$('#showuntaggedform').submit();" type="checkbox" id="showuntagged" name="showuntagged" <?php if ($_GET['showuntagged'] == "on") { echo "checked"; } ?>> show untagged</label>
-                            </div>
+                        <?php foreach($customtags as $key => $value) { ?>
+                        <span class="label" style="font-size:12px;background-color:<?php echo $value[1]; ?>"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag_custom=<?php echo rawurlencode($value[0]) ?>"><?php echo $value[0]; ?> <?php echo formatBytes($totalFilesizeCustom[$value[0]]); ?></a></span>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <br />
+                        <form class="form-inline" style="display:inline-block" name="toggleform" id="toggleform" method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                                <span style="font-size:11px; color:gray;">Show untagged </span><span style="position:relative; top:8px;"><label class="switch"><input onchange="setCookie('tagsshowuntagged', document.getElementById('showuntagged').checked); $('#toggleform').submit();" id="showuntagged" name="showuntagged" type="checkbox"><span class="slider round"></span></label></span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <span style="font-size:11px; color:gray;">Show files only </span><span style="position:relative; top:8px;"><label class="switch"><input onchange="setCookie('tagsshowfiles', document.getElementById('showfiles').checked); $('#toggleform').submit();" id="showfiles" name="toggleonly" value="showfiles" type="radio"><span class="slider round"></span></label></span>
+                            &nbsp;
+                            <span style="font-size:11px; color:gray;">Show directories only </span><span style="position:relative; top:8px;"><label class="switch"><input onchange="setCookie('tagsshowdirectories', document.getElementById('showdirectories').checked); $('#toggleform').submit();" id="showdirectories" name="toggleonly" value="showdirectories" type="radio"><span class="slider round"></span></label></span>
+                            &nbsp;
+                            <span style="font-size:11px; color:gray;">Show all </span><span style="position:relative; top:8px;"><label class="switch"><input onchange="setCookie('tagsshowall', document.getElementById('showall').checked); $('#toggleform').submit();" id="showall" name="toggleonly" value="showall" type="radio"><span class="slider round"></span></label></span>
                         </form>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span><a href="admin.php">Edit custom tags</a></span>
                     </div>
                 </div>
 			</div>
@@ -212,6 +239,22 @@ foreach ($tagCountsCustom as $tag => $value) {
 		<script language="javascript" src="js/diskover.js"></script>
 		<script language="javascript" src="js/d3.v3.min.js"></script>
 		<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
+
+        <!-- button toggle script -->
+        <script>
+            if (getCookie('tagsshowuntagged') === "true") {
+                $('#showuntagged').prop('checked', true);
+            }
+            if (getCookie('tagsshowfiles') === "true") {
+                $('#showfiles').prop('checked', true);
+            }
+            if (getCookie('tagsshowdirectories') === "true") {
+                $('#showdirectories').prop('checked', true);
+            }
+            if (getCookie('tagsshowall') === "true") {
+                $('#showall').prop('checked', true);
+            }
+        </script>
 
         <!-- d3 charts -->
     	<script>

@@ -5,26 +5,15 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
+session_start();
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-
 require "d3_inc.php";
+require "vars_inc.php";
+
 
 // Grab all the smart searches from file
 $smartsearches = get_smartsearches();
@@ -145,31 +134,36 @@ foreach ($SmartSearchesQueries as $key => $value) {
                 <div class="col-xs-6">
                       <div id="sscountchart" class="text-center"></div>
                       <br /><hr />
-                      <div class="chartbox text-center">
-                          <span class="label" style="font-size:12px;background-color:#666666;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $otherfiles_query . '_type:file'; ?>">other files <?php echo $totalCountOtherFiles; ?></a></span>
-                        <?php foreach($smartsearches as $key => $value) { ?>
-                        <span class="label" id="<?php echo $value[0] . '_count' ?>" style="font-size:12px;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $value[1]; ?>"><?php echo $value[0]; ?> <?php echo $totalCountSmartSearches[$value[0]]; ?></a></span>
-                        <?php } ?>
-                    </div>
                   </div>
                 <div class="col-xs-6">
                     <div id="ssfilesizechart" class="text-center"></div>
-                    <br /><br /><hr />
-                    <div class="chartbox text-center" style="display:absolute;">
-                        <span class="label" style="font-size:12px;background-color:#666666;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $otherfiles_query . '_type:file'; ?>">other files <?php echo formatBytes($totalFilesizeOtherFiles); ?></a></span>
-                      <?php foreach($smartsearches as $key => $value) { ?>
-                      <span class="label" id="<?php echo $value[0] . '_size' ?>" style="font-size:12px;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $value[1]; ?>"><?php echo $value[0]; ?> <?php echo formatBytes($totalFilesizeSmartSearches[$value[0]]); ?></a></span>
-                      <?php } ?>
-                  </div>
-            </div>
+                    <br /><hr />
+              </div>
 				</div>
                 <div class="row">
+                    <div class="col-xs-6">
+                        <div class="chartbox text-center">
+                            <span class="label" style="font-size:12px;background-color:#666666;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $otherfiles_query . '_type:file'; ?>">other files <?php echo $totalCountOtherFiles; ?></a></span>
+                          <?php foreach($smartsearches as $key => $value) { ?>
+                          <span class="label" id="<?php echo $value[0] . '_count' ?>" style="font-size:12px;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $value[1]; ?>"><?php echo $value[0]; ?> <?php echo $totalCountSmartSearches[$value[0]]; ?></a></span>
+                          <?php } ?>
+                      </div>
+                  </div>
+                  <div class="col-xs-6">
+                      <div class="chartbox text-center" style="display:absolute;">
+                          <span class="label" style="font-size:12px;background-color:#666666;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $otherfiles_query . '_type:file'; ?>">other files <?php echo formatBytes($totalFilesizeOtherFiles); ?></a></span>
+                        <?php foreach($smartsearches as $key => $value) { ?>
+                        <span class="label" id="<?php echo $value[0] . '_size' ?>" style="font-size:12px;"><a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=<?php echo $value[1]; ?>"><?php echo $value[0]; ?> <?php echo formatBytes($totalFilesizeSmartSearches[$value[0]]); ?></a></span>
+                        <?php } ?>
+                    </div>
+                </div>
+              </div>
+                <div class="row">
                     <div class="col-xs-12">
-                        <br /><br />
+                        <br />
                         <form class="form-inline" name="showotherfilesform" id="showotherfilesform" method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-                            <div class="checkbox">
-                                <label><input onchange="$('#showotherfilesform').submit();" type="checkbox" id="showotherfiles" name="showotherfiles" <?php if ($_GET['showotherfiles'] == "on") { echo "checked"; } ?>> show other files</label>
-                            </div>
+                            <span style="font-size:11px; color:gray;">Show other files </span><span style="position:relative; top:8px;"><label class="switch"><input onchange="setCookie('showotherfiles', document.getElementById('showotherfiles').checked); $('#showotherfilesform').submit();" id="showotherfiles" name="showotherfiles" type="checkbox" <?php if (getCookie('ssshowotherfiles') === "true") { echo "checked"; } ?>><span class="slider round"></span></label></span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span><a href="admin.php">Edit smart searches</a></span>
                         </form>
                     </div>
                 </div>
@@ -180,6 +174,12 @@ foreach ($SmartSearchesQueries as $key => $value) {
 		<script language="javascript" src="js/d3.v3.min.js"></script>
 		<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
 
+        <!-- show other files toggle -->
+            <script>
+                if (getCookie('showotherfiles') === "true") {
+                    $('#showotherfiles').prop('checked', true);
+                }
+            </script>
         <!-- d3 charts -->
         	<script>
                 var count_otherfiles = <?php echo $totalCountOtherFiles; ?>;
@@ -328,7 +328,8 @@ foreach ($SmartSearchesQueries as $key => $value) {
 
                 // svg container element
                 var svg = d3.select('#ssfilesizechart').append("svg")
-                    .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth);
+                    .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth + barLabelPadding)
+                    .attr('height', '500px');
 
                 //var color = d3.scale.category20b();
 
@@ -345,7 +346,7 @@ foreach ($SmartSearchesQueries as $key => $value) {
                     .attr('class', 'd3-tip')
                     .html(function(d) {
                         var percent = (d.size / totalsize * 100).toFixed(1) + '%';
-                        return "<span style='font-size:12px;color:white;'>dupe_md5: " + d.label + "</span><br><span style='font-size:12px; color:red;'>size: " + format(d.size) + " (" + percent + ")</span>";
+                        return "<span style='font-size:12px;color:white;'>" + d.label + "</span><br><span style='font-size:12px; color:red;'>size: " + format(d.size) + " (" + percent + ")</span>";
                     });
 
                 svg.call(tip2);

@@ -5,7 +5,6 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
-session_start();
 use diskover\Constants;
 use Elasticsearch\ClientBuilder;
 
@@ -49,6 +48,52 @@ function connectES() {
   }
 
   return $client;
+}
+
+
+// return time in ES format
+function getmtime($mtime) {
+    // default 0 days mtime filter
+    if (empty($mtime) || $mtime === "now" || $mtime === 0) {
+        $mtime = 'now';
+    } elseif ($mtime === "today") {
+        $mtime = 'now/d';
+    } elseif ($mtime === "tomorrow") {
+        $mtime = 'now+1d/d';
+    } elseif ($mtime === "yesterday") {
+        $mtime = 'now-1d/d';
+    } elseif ($mtime === "1d") {
+        $mtime = 'now-1d/d';
+    } elseif ($mtime === "1w") {
+        $mtime = 'now-1w/d';
+    } elseif ($mtime === "1m") {
+        $mtime = 'now-1M/d';
+    } elseif ($mtime === "3m") {
+        $mtime = 'now-3M/d';
+    } elseif ($mtime === "6m") {
+        $mtime = 'now-6M/d';
+    } elseif ($mtime === "1y") {
+        $mtime = 'now-1y/d';
+    } elseif ($mtime === "2y") {
+        $mtime = 'now-2y/d';
+    } elseif ($mtime === "3y") {
+        $mtime = 'now-3y/d';
+    } elseif ($mtime === "6y") {
+        $mtime = 'now-6y/d';
+    } elseif ($mtime === "10y") {
+        $mtime = 'now-10y/d';
+    }
+    return $mtime;
+}
+
+
+// update url param with new value and return url
+function build_url($param, $val) {
+    parse_str($_SERVER['QUERY_STRING'], $queries);
+    $queries[$param] = $val;
+    $q = http_build_query($queries, null, '&', PHP_QUERY_RFC3986);
+    $url = $_SERVER['PHP_SELF'] . "?" . $q;
+    return $url;
 }
 
 
@@ -364,21 +409,35 @@ function predict_search($q) {
     // Grab all the smart searches from file
     $smartsearches = get_smartsearches();
 
+    // check for escape character to disable smartsearch
+    if (strpos($q, '\\') === 0 || strpos($q, '!\\') === 0) {
+        $request = preg_replace('/\\\|!\\\/', '', $q);
     // check for path input
-    if (strpos($q, '/') !== false && strpos($q, 'path_parent') === false) {
+    } elseif (strpos($q, '/') !== false && strpos($q, 'path_parent') === false) {
         // check for escaped paths
         if (strpos($q, '\/') !== false) {
             $request = $q;
         } else {
             $request = escape_chars($q);
         }
-        $request = 'path_parent:' . $request;
-    } elseif (strpos($_REQUEST['q'], '!') === 0) {  # ! smart search keyword
+        if (preg_match('/\.(\w)$|\.(\w){1,4}$/', $request)) {
+            $request = rtrim($request, '\\');
+            $filearr = explode('.', basename($request));
+            $request = 'path_parent:' . dirname($request) . ' AND filename:' . $filearr[0] . '* AND extension:' . $filearr[1] . '*';
+        } elseif (preg_match('/\*$/', $request)) {
+            $request = 'path_parent:' . $request;
+        } else {
+            $request = rtrim($request, '\/*');
+            $request = 'path_parent:' . $request . '* NOT path_parent:' . $request . '\/*';
+        }
+    } elseif (strpos($q, '*') === 0) {  # wildcard search keyword
+        $request = $q;
+    } elseif (strpos($q, '!') === 0) {  # ! smart search keyword
         if ($q === '!') {
-            echo '<span class="text-info"><i class="glyphicon glyphicon-share-alt"></i> Enter in a smart search name like <strong>!tmp</strong> or <strong>!doc</strong> or <strong>!img</strong>.</span>';
+            echo '<span class="text-info"><i class="glyphicon glyphicon-share-alt"></i> Enter in a smart search name like <strong>!tmp</strong> or <strong>!doc</strong> or <strong>!img</strong>. Disable by pressing \.</span>';
             echo '<br /><span class="text-info">Smart searches:</span><br />';
             foreach($smartsearches as $arr) {
-                 echo '<strong>' . $arr[0] . '</strong>&nbsp;&nbsp;';
+                 echo '<strong><a href="simple.php?p=1&submitted=true&q='.$arr[1].'">' . $arr[0] . '</a></strong>&nbsp;&nbsp;';
             }
             die();
         } elseif (preg_match('/^\!(\w+)/', $q) !== false) {
@@ -401,22 +460,21 @@ function predict_search($q) {
                 die();
             }
         }
-    } elseif (preg_match('/(\w+):/i', $q) == false) {
+    } elseif (preg_match('/(\w+):/i', $q) == false && !empty($q)) {
         $request = "";
-        $keyword_clean = preg_replace('/OR|AND|NOT|\(|\)|\[|\]|\*|\\|\/|(\w+):/', '', $q);
+        $keyword_clean = preg_replace('/\bOR\b|\bAND\b|\bNOT\b|\bthe\b|\bof\b|\(|\)|\[|\]|\*|\/|\'s|&|(\w+):/i', '', $q);
         $keyword_arr = explode(' ', $keyword_clean);
         $keyword_arr_ext = [];
         $keyword_arr_path = [];
-        // Add first letter upercase/lowercase versions of keyword
         foreach ($keyword_arr as $key => $value) {
-                // skip if space
-                if ($value === '') continue;
-                // check if .ext extension and make all extension uppercase version
-                // instead of just first letter
+                // check if .ext extension and make extension lowercase/uppercase version
                 if (strpos($value, '.') === 0) {
                     $keyword_arr_ext[] = strtoupper($value);
                     $keyword_arr_ext[] = strtolower($value);
+                // Add first letter upercase/lowercase and all lowercase/uppercase versions of keyword
                 } else {
+                    $keyword_arr_path[] = strtoupper($value);
+                    $keyword_arr_path[] = strtolower($value);
                     $keyword_arr_path[] = ucfirst($value);
                     $keyword_arr_path[] = lcfirst($value);
                 }
@@ -424,18 +482,22 @@ function predict_search($q) {
         // create es request
         if (count($keyword_arr_path) > 0) {
             $request .= '(';
-            foreach ($keyword_arr_path as $key => $value) {
-                $request .= 'path_parent:' . escape_chars($value) . '* ' .
-                            'filename:' . escape_chars($value) . '* ';
+            foreach (['filename', 'path_parent'] as $field) {
+                $request .= $field.':(';
+                foreach ($keyword_arr_path as $key => $value) {
+                    if ($value == "") continue;
+                    $request .= '*' . escape_chars($value) . '* ';
+                }
+                $request .= ') ';
             }
-            $request .= ')';
+            $request .= ') ';
         }
         if (count($keyword_arr_ext) > 0) {
             if (count($keyword_arr_path) > 0) {
-                $request .= ' AND (';
+                $request .= ' AND extension:(';
             }
             foreach ($keyword_arr_ext as $key => $value) {
-                    $request .= 'extension:' . escape_chars(str_replace('.', '', $value)) . '* ';
+                    $request .= '' . escape_chars(str_replace('.', '', $value)) . '* ';
             }
             if (count($keyword_arr_path) > 0) {
                 $request .= ')';

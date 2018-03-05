@@ -5,27 +5,13 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
-session_start();
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-
 require "d3_inc.php";
+require "vars_inc.php";
 
 ?>
 
@@ -48,19 +34,23 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no duplicate files found. Run diskover using --finddupes to search for duplicate files.
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found. Run diskover using --finddupes to search for duplicate files.
 				</div>
 			</div>
 		</div>
 		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
             <div id="dupescharts-wrapper" style="display:none;">
-                <div class="pull-right"><button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button></div>
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <h1>Dupes</h1>
                     </div>
                 </div>
-    			<div class="row">
+                <div class="row">
+                    <div class="col-xs-12 text-right">
+                        <button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-xs-6">
                           <div id="dupescountchart" class="text-center"></div>
                       </div>

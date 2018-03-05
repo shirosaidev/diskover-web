@@ -5,44 +5,13 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
-session_start();
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-    setCookie('index', $esIndex);
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-    // redirect to select indices page if no index cookie
-    if (!$esIndex) {
-        header("location:selectindices.php");
-        exit();
-    }
-}
-// check for index2 in url
-if (isset($_GET['index2'])) {
-    $esIndex2 = $_GET['index2'];
-    setCookie('index2', $esIndex2);
-} else {
-    $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
-}
-
 require "d3_inc.php";
-
-$path = $_GET['path'] ?: getCookie('path');
-// check if no path (grab one from ES)
-if (empty($path)) {
-    $path = get_es_path($client, $esIndex);
-    createCookie('path', $path);
-} elseif ($path !== "/") {
-    // remove any trailing slash
-    $path = rtrim($path, '/');
-}
+require "vars_inc.php";
 
 
 // Get search results from Elasticsearch for thread usage
@@ -79,6 +48,7 @@ $results = [];
 $searchParams = [];
 
 $totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
+$totalFilesizeAll = 0;
 
 // Setup search query
 $searchParams['index'] = $esIndex;
@@ -108,6 +78,7 @@ foreach ($totalFilesize as $tag => $value) {
 
     // Get total size of all files with tag
     $totalFilesize[$tag] = $queryResponse['aggregations']['total_size']['value'];
+    $totalFilesizeAll += $totalFilesize[$tag];
 }
 
 $results = [];
@@ -180,12 +151,33 @@ $searchParams = [];
 
 // Setup search query
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = 'crawlstat_start';
+$searchParams['type']  = 'crawlstat';
 
 $searchParams['body'] = [
+    '_source' => ['indexing_date'],
     'size' => 1,
     'query' => [
-            'match_all' => (object) []
+            'match' => [
+                'event' => 'start'
+            ]
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'asc'
+         ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+$firstcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+
+$searchParams['body'] = [
+    '_source' => ['indexing_date'],
+    'size' => 1,
+    'query' => [
+            'match' => [
+                'event' => 'start'
+            ]
      ],
      'sort' => [
          'indexing_date' => [
@@ -195,18 +187,15 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-$crawlstarttime = $queryResponse['hits']['hits'][0]['_source']['start_time'];
-
-$results = [];
-$searchParams = [];
-
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = 'crawlstat_stop';
+$lastcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
 $searchParams['body'] = [
+    '_source' => ['indexing_date'],
     'size' => 1,
     'query' => [
-            'match_all' => (object) []
+            'match' => [
+                'event' => 'stop'
+            ]
      ],
      'sort' => [
          'indexing_date' => [
@@ -216,9 +205,28 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-$crawlstoptime = $queryResponse['hits']['hits'][0]['_source']['stop_time'];
-$crawlelapsedtime = $queryResponse['hits']['hits'][0]['_source']['elapsed_time'];
-$crawlfinished = ($crawlstoptime) ? true : false;
+$lastcrawlstoptime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+
+$searchParams['body'] = [
+   'size' => 0,
+    'aggs' => [
+      'total_elapsed' => [
+        'sum' => [
+          'field' => 'elapsed_time'
+        ]
+      ]
+    ],
+    'query' => [
+            'match_all' => (object) []
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total elapsed time (in seconds) of crawl(s)
+$crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
+
+// determine if crawl is finished by seeing if last crawlstarttime is newer than last crawlstoptime
+$crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
 
 
 // Get search results from Elasticsearch for number of files
@@ -319,51 +327,6 @@ if ($esIndex2 != "") {
     $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 }
 
-// Check if directory sizes have been calculated
-$results = [];
-$searchParams = [];
-
-// Setup search query
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = "directory";
-
-// escape any special characters in path
-$escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
-if ($escapedpath === '\/') {  // root /
-    $searchParams['body'] = [
-        'size' => 1,
-        '_source' => ["filesize","items"],
-        'query' => [
-            'query_string' => [
-                'query' => 'path_parent:' . $escapedpath . ' AND filename:""'
-                ]
-         ]
-    ];
-} else {
-    $p = addcslashes(dirname($path), '+-&|!(){}[]^"~*?:\/ ');
-    $f = addcslashes(basename($path), '+-&|!(){}[]^"~*?:\/ ');
-    $searchParams['body'] = [
-        'size' => 1,
-        '_source' => ["filesize","items"],
-        'query' => [
-            'query_string' => [
-                'query' => 'path_parent: ' . $p . ' AND filename: ' . $f
-            ]
-        ]
-    ];
-}
-
-$queryResponse = $client->search($searchParams);
-
-// Get total size and count of directory
-$sizecheck = $queryResponse['hits']['hits'][0]['_source']['filesize'];
-$itemscheck = $queryResponse['hits']['hits'][0]['_source']['items'];
-
-$dirsizecalc = false;
-if ($sizecheck > 0 && $itemscheck > 0) {
-    $dirsizecalc = true;
-}
-
 
 // Get recommended delete size/count
 $recommended_delete_size = 0;
@@ -411,6 +374,15 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
 	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="css/diskover.css" media="screen" />
 	<style>
+        .darken {
+            color: gray !important;
+        }
+        .darken a {
+            color: gray !important;
+        }
+        .darken a:hover {
+            color: gray !important;
+        }
 		.arc text {
 			font: 10px sans-serif;
 			text-anchor: middle;
@@ -419,18 +391,34 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
 			stroke: #0B0C0E;
 		}
         #diskspacechart rect {
-            fill: #D20915;
+            fill: #BD1B00;
             stroke: black;
         }
         #diskspacechart text {
             font-size: 10px;
             fill: white;
+            font-weight: bold;
         }
         #diskspacechart {
             height: 22px;
             width: 400px;
             border:1px solid #000;
-            background-color: #ccc;
+            background-color: #7EB26D;
+        }
+        #diskspacechart-indexed rect {
+            fill: #DA722C;
+            stroke: black;
+        }
+        #diskspacechart-indexed text {
+            font-size: 8px;
+            fill: white;
+        }
+        #diskspacechart-indexed {
+            height: 18px;
+            width: 400px;
+            border:1px solid #000;
+            background-color: #282C34;
+            margin-bottom: 10px;
         }
         .axis {
 	        font: 10px sans-serif;
@@ -454,26 +442,15 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
     <div class="col-xs-6">
       <div class="well">
         <h1><i class="glyphicon glyphicon-piggy-bank"></i> Space Savings</h1>
-        <p>You could save <span style="font-size:24px;font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesize['untagged']+$totalFilesize['delete']+$totalFilesize['archive']+$totalFilesize['keep']); ?></span> of disk space if you delete or archive all your files.<br />
-            diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo $recommended_delete_count ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime & atime)</span><br />
-            <i class="glyphicon glyphicon-file"></i> Files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> &nbsp;&nbsp; <i class="glyphicon glyphicon-folder-close"></i> Directories: <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span><br />
-            <i class="glyphicon glyphicon-duplicate"></i> Duplicate files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)</p>
+        <p>You could save <span style="font-size:24px;font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files.<br />
+            diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo $recommended_delete_count ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime & atime)</span></p>
+        <p><i class="glyphicon glyphicon-file" style="color:#738291;size:13px;font-weight:bold;"></i> Files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> &nbsp;&nbsp; <i class="glyphicon glyphicon-folder-close" style="color:skyblue;size:13px;font-weight:bold;"></i> Directories: <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> &nbsp;&nbsp;
+            <i class="glyphicon glyphicon-duplicate" style="color:#738291;size:13px;font-weight:bold;"></i> Dupes: <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)</p>
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
       </div>
-      <?php
-      if (!$dirsizecalc) {
-      ?>
-      <div class="alert alert-dismissible alert-warning">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <h4><i class="glyphicon glyphicon-exclamation-sign"></i> Directory sizes not calculated.</h4>
-        <p>Run diskover with the --dirsize flag after crawl finishes to calculate directory sizes. This improves performance of analytics pages.</p>
-      </div>
-      <?php
-      }
-      ?>
       <?php
       if ($totalDupes === 0) {
       ?>
@@ -488,10 +465,10 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       <?php
       if ($totalDupes > 0) {
       ?>
-      <div class="alert alert-dismissible alert-danger">
+      <div class="alert alert-dismissible alert-warning">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
-        <p>It looks like you have <a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=dupe_md5:(NOT &quot;&quot;)" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
+        <p>It looks like you have <a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=dupe_md5:(NOT &quot;&quot;)&amp;doctype=file" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
       </div>
       <?php
       }
@@ -502,7 +479,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-tags"></i> Untagged files!</h4>
-        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
+        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
       </div>
       <?php
       }
@@ -512,20 +489,21 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       ?>
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <i class="glyphicon glyphicon-thumbs-up"></i> <strong>Well done!</strong> It looks like all files have been tagged.
+        <i class="glyphicon glyphicon-thumbs-up"></i> <strong>Good job!</strong> It looks like all files have been tagged.
       </div>
       <?php
       }
       ?>
       <div class="well">
-          <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Last Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
-              <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $crawlstarttime; ?></span> UTC.<br />
+          <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
+              <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawlstarttime; ?></span> UTC.<br />
               <?php if ($crawlfinished) { ?>
-                  <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $crawlstoptime; ?></span> UTC.<br />
-                  <i class="glyphicon glyphicon-time"></i> Crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
-              <?php } else { ?>
+                  <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawlstoptime; ?></span> UTC.<br />
+                  <i class="glyphicon glyphicon-time"></i> Total crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
+                  <?php } else { ?>
                   <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
               <?php } ?>
+              <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> If running parallel crawls, start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
       </div>
       <div class="panel panel-primary">
       <div class="panel-heading">
@@ -543,9 +521,10 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
     </div>
     <div class="col-xs-6">
         <div class="well">
-          <h4><i class="glyphicon glyphicon-eye-open"></i> Disk Space Overview</h4>
+          <h4><i class="glyphicon glyphicon-hdd"></i> Disk Space Overview</h4>
           <p>Path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span></p>
           <div id="diskspacechart"></div>
+          <div id="diskspacechart-indexed"></div>
           <?php
           if ($esIndex2 != "") {
               $diskspace_used_change = number_format(changePercent($diskspace_used, $diskspace2_used), 2);
@@ -603,11 +582,11 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                   $n = 1;
                   foreach ($largestfiles as $key => $value) {
                     ?>
-                    <tr><td><?php echo $n; ?></td>
+                    <tr><td class="darken"><?php echo $n; ?></td>
                         <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
-                        <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
-                        <td class="text-nowrap"><?php echo $value['_source']['last_modified']; ?></td>
-                        <td class="path"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
+                        <td class="text-nowrap darken"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
+                        <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
+                        <td class="path darken"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
                     </tr>
                   <?php $n++; }
                    ?>
@@ -900,7 +879,47 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
             .attr('text-anchor', 'middle')
             .text(function(d) {
                 percent = d3.round(d / size_total * 100, 2) + "%";
+                return percent + ' used';
+            });
+
+	</script>
+    <script>
+		var size_total = <?php echo $diskspace_total; ?>;
+        var size_indexed = <?php echo $totalFilesizeAll; ?>;
+
+		var height = 16,
+            maxBarWidth = 400;
+
+		var svg = d3.select("#diskspacechart-indexed")
+			.append('svg')
+			.attr('width', maxBarWidth)
+			.attr('height', height)
+			.append('g');
+
+        var bar = svg.selectAll('.bar')
+			.data([size_indexed])
+			.enter().append('g')
+			.attr('class', 'bar');
+
+		bar.append('rect')
+            .attr('height', height)
+            .attr('class', 'bar')
+            .attr('width', function(d) {
+                percent = parseInt(d / size_total * 100) + "%";
                 return percent;
+            });
+
+        var label = svg.selectAll(".label")
+            .data([size_indexed])
+            .enter()
+            .append('text')
+            .attr('transform', 'translate(' + maxBarWidth / 2 + ',0)')
+            .attr("dy", "1.3em")
+            .attr('class', 'label')
+            .attr('text-anchor', 'middle')
+            .text(function(d) {
+                percent = d3.round(d / size_total * 100, 2) + "%";
+                return percent + ' indexed';
             });
 
 	</script>

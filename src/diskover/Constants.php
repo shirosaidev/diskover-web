@@ -9,7 +9,7 @@ namespace diskover;
 
 class Constants {
     // diskover-web version
-    const VERSION = '1.4.6';
+    const VERSION = '1.5.0';
     // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // set to your Elasticsearch port, default 9200
@@ -17,6 +17,9 @@ class Constants {
     // set following two lines if using X-Pack http-auth
     const ES_USER = '';
     const ES_PASS = '';
+    // login auth for diskover-web
+    const DISKOVER_USER = 'diskover';
+    const DISKOVER_PASS = 'darkdata';
     // set to true if using AWS
     const AWS = false;
     // diskover.py socket listener
@@ -30,6 +33,8 @@ class Constants {
     const MAXDEPTH = 2;
     // default don't use count (use size)
     const USE_COUNT = 0;
+    // default show files on analytics pages
+    const SHOW_FILES = 1;
     // default results per search page
     const SEARCH_RESULTS = 50;
 }

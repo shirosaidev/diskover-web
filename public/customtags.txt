@@ -1,7 +1,7 @@
-custom tag 1|#C678DD
-custom tag 2|#61AFEF
-custom tag 3|#98C379
-custom tag 4|#ccc
-custom tag 5|#FFF
-fast storage|red
-slow storage|blue
+custom tag 1|#FD6461
+custom tag 2|#F7A650
+custom tag 3|#F4CD56
+custom tag 4|#71CA58
+custom tag 5|#51BAF2
+custom tag 6|#D08CE0
+custom tag 7|#A5A5A7

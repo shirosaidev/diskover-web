@@ -6,6 +6,29 @@ LICENSE for the full license text.
 
 /* diskover style sheet */
 
+body::-webkit-scrollbar-track
+{
+	background-color: #060606;
+}
+
+body::-webkit-scrollbar-corner
+{
+	background-color: #060606;
+}
+
+body::-webkit-scrollbar
+{
+	width: 10px;
+    height: 8px;
+	background-color: #060606;
+}
+
+body::-webkit-scrollbar-thumb
+{
+	background-color: #31363A;
+    border-radius: 5px;
+}
+
 .keephighlight_bg {
     background-color: #52A3BB;
 }
@@ -98,7 +121,8 @@ LICENSE for the full license text.
 }
 
 thead, tfoot {
-    color: #6C9EF8;
+    color: #FFF;
+    font-weight: bold;
 }
 
 .button-tagfiles {
@@ -117,6 +141,7 @@ thead, tfoot {
     left: 4px;
     color: #333;
     font-size: 9px;
+    font-weight: bold;
 }
 
 .sortarrow-desc {
@@ -125,22 +150,27 @@ thead, tfoot {
     left: 4px;
     color: #333;
     font-size: 9px;
+    font-weight: bold;
 }
 
 .sortarrow-asc:hover {
-    color: #D89333;
+    color: #33A0D4;
+    font-weight: bold;
 }
 
 .sortarrow-desc:hover {
-    color: #D89333;
+    color: #33A0D4;
+    font-weight: bold;
 }
 
 .sortarrow-asc-active {
-    color: #D89333;
+    color: #33A0D4;
+    font-weight: bold;
 }
 
 .sortarrow-desc-active {
-    color: #D89333;
+    color: #33A0D4;
+    font-weight: bold;
 }
 
 .customtag {

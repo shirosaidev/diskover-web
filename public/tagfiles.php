@@ -7,17 +7,10 @@ LICENSE for the full license text.
 
 require '../vendor/autoload.php';
 use diskover\Constants;
-
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
+require "vars_inc.php";
 
-// check for index in url
-if (isset($_GET['index'])) {
-    $esIndex = $_GET['index'];
-} else {
-    // get index from env var or cookie
-    $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
-}
 
 $docsupdated = 0;
 

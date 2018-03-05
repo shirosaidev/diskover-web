@@ -7,7 +7,6 @@ LICENSE for the full license text.
 
 require '../vendor/autoload.php';
 use diskover\Constants;
-
 error_reporting(E_ALL ^ E_NOTICE);
 
 $esIndex = $_GET['index'] ?: getCookie('index');
@@ -35,12 +34,13 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
                         <li class="dropdown-submenu">
                             <a href="#">Files</a>
                             <ul class="dropdown-menu">
-						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&amp;doctype=file">Untagged</a></li>
+						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;doctype=file">Untagged</a></li>
+                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;tag_custom=&quot;&quot;">Untagged + no custom tag</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=delete&amp;doctype=file">Tagged delete</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=archive&amp;doctype=file">Tagged archive</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=keep&amp;doctype=file">Tagged keep</a></li>
                         <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=NOT tag_custom:&quot;&quot;&amp;doctype=file">With custom tag</a></li>
-                        <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=NOT tag:&quot;&quot; NOT tag_custom:&quot;&quot;&amp;doctype=file">With any tag</a></li>
+                        <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=(NOT tag:&quot;&quot;) (NOT tag_custom:&quot;&quot;)&amp;doctype=file">With any tag</a></li>
 						<li class="divider"></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;doctype=file">Last modified >3 months</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-6 months ")); ?>&amp;doctype=file">Lst modified >6 months</a></li>
@@ -68,12 +68,13 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
                 <li class="dropdown-submenu">
                     <a tabindex="-1" href="#">Directories</a>
                     <ul class="dropdown-menu">
-                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&amp;doctype=directory"">Untagged</a></li>
+                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;doctype=directory"">Untagged</a></li>
+                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;tag_custom=&quot;&quot;">Untagged + no custom tag</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=delete&amp;doctype=directory">Tagged delete</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=archive&amp;doctype=directory">Tagged archive</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=keep&amp;doctype=directory">Tagged keep</a></li>
                         <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=NOT tag_custom:&quot;&quot;&amp;doctype=directory">With custom tag</a></li>
-                        <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=NOT tag:&quot;&quot; NOT tag_custom:&quot;&quot;&amp;doctype=directory">With any tag</a></li>
+                        <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=(NOT tag:&quot;&quot;) (NOT tag_custom:&quot;&quot;)&amp;doctype=directory">With any tag</a></li>
                         <li class="divider"></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>&amp;doctype=directory">Last modified >3 months</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-6 months ")); ?>&amp;doctype=directory">Lst modified >6 months</a></li>
@@ -98,12 +99,13 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
                 <li class="dropdown-submenu">
                     <a tabindex="-1" href="#">All</a>
                     <ul class="dropdown-menu">
-                    <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=">Untagged</a></li>
+                    <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;">Untagged</a></li>
+                    <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;tag_custom=&quot;&quot;">Untagged + no custom tag</a></li>
                     <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">Tagged delete</a></li>
                     <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">Tagged archive</a></li>
                     <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">Tagged keep</a></li>
                     <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=NOT tag_custom:&quot;&quot;">With custom tag</a></li>
-                    <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=NOT tag:&quot;&quot; NOT tag_custom:&quot;&quot;">With any tag</a></li>
+                    <li><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=(NOT tag:&quot;&quot;) (NOT tag_custom:&quot;&quot;)">With any tag</a></li>
                     <li class="divider"></li>
                     <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-3 months ")); ?>">Last modified >3 months</a></li>
                     <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=<?php echo gmdate("Y-m-d\TH:i:s", strtotime("-6 months ")); ?>">Lst modified >6 months</a></li>
@@ -146,7 +148,8 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
 			<ul class="nav navbar-nav navbar-right">
 				<li><a href="admin.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>">Admin</a></li>
 				<li><a href="help.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>">Help</a></li>
-				<li><a href="https://github.com/shirosaidev/diskover" target="_blank">View on Github</a></li>
+				<li><a href="https://github.com/shirosaidev/diskover" target="_blank"><img src="images/github.png" width="20" height="20" title="View on GitHub" alt="github" style="opacity:.5;"/></a></li>
+                <li><a href="logout.php"><i class="glyphicon glyphicon-log-out"></i> Logout</a></li>
 			</ul>
             <form method="get" action="simple.php" class="navbar-form" role="search" id="searchnav">
                 <input type="hidden" name="index" value="<?php echo $esIndex; ?>" />
@@ -168,7 +171,7 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
                         </span>
     					<input id="searchnavinput" autocomplete="off" type="text" name="q" class="form-control input" style="background-color: #424242!important;" placeholder="Search or !smartsearch" value='<?php echo $request; ?>'>
                         <span class="input-group-addon" style="width: 1%; margin: 1px; padding: 1px; height:20px;">
-                            <select id="searchdoctype" name="doctype" class="form-control input-sm">
+                            <select id="searchdoctype" name="doctype" class="form-control input-sm" style="background-color:#424242!important;">
                               <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>
                               <option value="file" <?php echo $_REQUEST['doctype'] == "file" ? "selected" : ""; ?>>file</option>
                               <option value="directory" <?php echo $_REQUEST['doctype'] == "directory" ? "selected" : ""; ?>>directory</option>

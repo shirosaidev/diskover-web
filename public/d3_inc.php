@@ -9,6 +9,22 @@ require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 
+
+// set analytics vars
+$filter = isset($_GET['filter']) ? (int)$_GET['filter'] : Constants::FILTER; // file size
+$mtime = isset($_GET['mtime']) ? $_GET['mtime'] : Constants::MTIME; // file mtime
+// get mtime in ES format
+$mtime = getmtime($mtime);
+$maxdepth = isset($_GET['maxdepth']) ? (int)$_GET['maxdepth'] : Constants::MAXDEPTH; // maxdepth
+// get use_count
+$use_count = isset($_GET['use_count']) ? (int)$_GET['use_count'] : Constants::USE_COUNT; // use count
+$use_count = ($use_count === 0) ? false : true;
+settype($use_count, 'bool');
+// get show_files
+$show_files = isset($_GET['show_files']) ? (int)$_GET['show_files'] : Constants::SHOW_FILES; // show files
+$show_files = ($show_files === 0) ? false : true;
+settype($show_files, 'bool');
+
 // Connect to Elasticsearch
 $client = connectES();
 
@@ -18,8 +34,7 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     $totalcount = 0;
     $searchParams['body'] = [];
 
-    // try to get dir size and items from directory doc first
-    // if directory size has been calculated
+    // get dir size and items from directory doc
 
     // Setup search query
     $searchParams['index'] = $index;
@@ -28,7 +43,7 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     // escape any special characters in path
     $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
 
-    if ($escapedpath === '\/') {  // root /
+    if ($path === '/') {  // root /
         $searchParams['body'] = [
             'size' => 1,
             '_source' => ["filesize","items","last_modified"],
@@ -58,108 +73,13 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     $queryResponse = $client->search($searchParams);
 
     // Get total count of directory and all subdirs
-    $totalcount = (int)$queryResponse['hits']['hits'][0]['_source']['items'];
+    $totalcount = (int)$queryResponse['hits']['hits'][0]['_source']['items'];  // add itself
 
     // Get total size of directory and all subdirs
     $totalsize = (int)$queryResponse['hits']['hits'][0]['_source']['filesize'];
 
     // Get last modified time
     $last_modified = $queryResponse['hits']['hits'][0]['_source']['last_modified'];
-
-
-    // check if directory size and count is 0 and search for files and directories
-    // that are in the directory and subdirs (directory sizes have not been calculated)
-    if ($totalcount === 0 && $totalsize === 0) {
-        // Setup search query
-        $searchParams['index'] = $index;
-        $searchParams['type'] = 'file';
-
-        if ($escapedpath === '\/') {  // root /
-            $searchParams['body'] = [
-                'size' => 0,
-                '_source' => [],
-                    'query' => [
-                        'query_string' => [
-                            'query' => 'path_parent: ' . $escapedpath . '* AND filesize: >=' . $filter . '
-                            AND last_modified: {* TO ' . $mtime . '}',
-                            'analyze_wildcard' => 'true'
-                        ]
-                    ],
-                    'aggs' => [
-                        'dir_size' => [
-                            'sum' => [
-                                'field' => 'filesize'
-                            ]
-                        ]
-                    ]
-                ];
-        } else {
-            $searchParams['body'] = [
-                'size' => 0,
-                '_source' => [],
-                    'query' => [
-                        'query_string' => [
-                            'query' => '(path_parent: ' . $escapedpath . ' OR
-                            path_parent: ' . $escapedpath . '\/*) AND
-                            filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}',
-                            'analyze_wildcard' => 'true'
-                        ]
-                    ],
-                    'aggs' => [
-                        'dir_size' => [
-                            'sum' => [
-                                'field' => 'filesize'
-                            ]
-                        ]
-                    ]
-                ];
-        }
-
-        // Send search query to Elasticsearch
-        $queryResponse = $client->search($searchParams);
-
-        // Get total count of files (recursive)
-        $totalcount = (int)$queryResponse['hits']['total'];
-
-        // Get total size of directory and all subdirs (total file size)
-        $totalsize = (int)$queryResponse['aggregations']['dir_size']['value'];
-
-        // Get directory doc counts
-        $searchParams['type'] = 'directory';
-
-        if ($escapedpath === '\/') {  // root /
-            $searchParams['body'] = [
-                'size' => 0,
-                '_source' => [],
-                    'query' => [
-                        'query_string' => [
-                            'query' => 'path_parent: ' . $escapedpath . '*
-                            AND last_modified: {* TO ' . $mtime . '}',
-                            'analyze_wildcard' => 'true'
-                        ]
-                    ]
-                ];
-        } else {
-            $searchParams['body'] = [
-                'size' => 0,
-                '_source' => [],
-                    'query' => [
-                        'query_string' => [
-                            'query' => '(path_parent: ' . $escapedpath . ' OR
-                            path_parent: ' . $escapedpath . '\/*) AND
-                            last_modified: {* TO ' . $mtime . '}',
-                            'analyze_wildcard' => 'true'
-                        ]
-                    ]
-                ];
-        }
-
-        // Send search query to Elasticsearch
-        $queryResponse = $client->search($searchParams);
-
-        // Add total count of directories
-        $totalcount += (int)$queryResponse['hits']['total'];
-    }
 
     // Create dirinfo list with total size (of all files), total count (items) and last modified time
     $dirinfo = [$totalsize, $totalcount, $last_modified];
@@ -168,7 +88,7 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
 }
 
 function get_files($client, $index, $path, $filter, $mtime) {
-    // gets all the files in the current directory (path)
+    // gets the 100 largest files in the current directory (path)
     $items = [];
     $searchParams['body'] = [];
 
@@ -179,12 +99,12 @@ function get_files($client, $index, $path, $filter, $mtime) {
     // search size
     $searchParams['size'] = 100;
 
-    $path = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
+    $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
     $searchParams['body'] = [
                 '_source' => ["path_parent","filename","filesize"],
                 'query' => [
                     'query_string' => [
-                        'query' => 'path_parent: "' . $path . '" AND
+                        'query' => 'path_parent: ' . $escapedpath . ' AND
                         filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
                     ]
                 ],
@@ -203,15 +123,17 @@ function get_files($client, $index, $path, $filter, $mtime) {
 
     // Add files to items array
     foreach ($results as $result) {
-        if ($path === '\/') {  // root /
+        if ($path === '/') {  // root /
             $items[] = [
                 "name" => $result['_source']['path_parent'] . $result['_source']['filename'],
-                "size" => $result['_source']['filesize']
+                "size" => $result['_source']['filesize'],
+                "type" => 'file'
             ];
         } else {
             $items[] = [
                 "name" => $result['_source']['path_parent'] . '/' . $result['_source']['filename'],
-                "size" => $result['_source']['filesize']
+                "size" => $result['_source']['filesize'],
+                "type" => 'file'
             ];
         }
     }
@@ -250,7 +172,9 @@ function get_es_path($client, $index) {
     return $path;
 }
 
-function get_sub_dirs($client, $index, $path) {
+function get_sub_dirs($client, $index, $path, $use_count) {
+    // gets the largest sub dirs by filesize or item count (use_count true)
+    // non-recursive
     $dirs = [];
 
     $searchParams['body'] = [];
@@ -267,8 +191,8 @@ function get_sub_dirs($client, $index, $path) {
         $query = 'path_parent: \/ NOT path_parent: \/*\/* NOT filename: ""';
     } else {
         // escape special characters
-        $path = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
-        $query = 'path_parent: ' . $path . ' NOT path_parent: ' . $path . '\/*';
+        $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
+        $query = 'path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*';
     }
 
     $searchParams['body'] = [
@@ -277,13 +201,23 @@ function get_sub_dirs($client, $index, $path) {
                 'query_string' => [
                 'query' => $query
             ]
-        ],
-        'sort' => [
+        ]
+    ];
+
+    // sort directories by size or file count
+    if ($use_count) {
+        $searchParams['body']['sort'] = [
+            'items' => [
+                'order' => 'desc'
+            ]
+        ];
+    } else {
+        $searchParams['body']['sort'] = [
             'filesize' => [
                 'order' => 'desc'
             ]
-        ]
-    ];
+        ];
+    }
 
     // Send search query to Elasticsearch and get results
     $queryResponse = $client->search($searchParams);
@@ -302,17 +236,20 @@ function get_sub_dirs($client, $index, $path) {
     return $dirs;
 }
 
-function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $use_count=false) {
+function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $use_count=false, $show_files=true) {
     $items = [];
     $subdirs = [];
     if ($depth === $maxdepth) {
         return $items;
     }
+
     // get files in current path (not recursive)
-    $items = get_files($client, $index, $path, $filter, $mtime);
+    if ($show_files) {
+        $items = get_files($client, $index, $path, $filter, $mtime);
+    }
 
     // get directories in current path (not recursive)
-    $subdirs = get_sub_dirs($client, $index, $path);
+    $subdirs = get_sub_dirs($client, $index, $path, $use_count);
 
     // return if there are no sub directories
     if (count($subdirs) === 0) {
@@ -327,13 +264,15 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
     foreach ($subdirs as $d) {
         // get dir total size and file count
         $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
-        // continue if directory is empty (size or item count is 0)
+        // if directory is empty, set it's item count to 1 for itself
         if ($dirinfo[0] === 0 || $dirinfo[1] === 0) {
-            continue;
+            $subdirs_size[$d] = 0;
+            $subdirs_count[$d] = 1;  // add 1 for itself
+        } else {
+            $subdirs_size[$d] = $dirinfo[0];
+            $subdirs_count[$d] = $dirinfo[1];
+            //$subdirs_mtime[$d] = $dirinfo[2];
         }
-        $subdirs_size[$d] = $dirinfo[0];
-        $subdirs_count[$d] = $dirinfo[1];
-        //$subdirs_mtime[$d] = $dirinfo[2];
     }
 
     // create new subdirs array with reverse sort by size or count
@@ -346,7 +285,8 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
             "name" => $key,
             "size" => $subdirs_size[$key],
             "count" => $subdirs_count[$key],
-            "children" => walk_tree($client, $index, $key, $filter, $mtime, $depth+=1, $maxdepth, $use_count)
+            "type" => 'directory',
+            "children" => walk_tree($client, $index, $key, $filter, $mtime, $depth+=1, $maxdepth, $use_count, $show_files)
         ];
         $depth-=1;
     }
@@ -354,40 +294,6 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
     return $items;
 }
 
-// return time in ES format
-function getmtime($mtime) {
-    // default 0 days mtime filter
-    if (empty($mtime) || $mtime === "now" || $mtime === 0) {
-        $mtime = 'now';
-    } elseif ($mtime === "today") {
-        $mtime = 'now/d';
-    } elseif ($mtime === "tomorrow") {
-        $mtime = 'now+1d/d';
-    } elseif ($mtime === "yesterday") {
-        $mtime = 'now-1d/d';
-    } elseif ($mtime === "1d") {
-        $mtime = 'now-1d/d';
-    } elseif ($mtime === "1w") {
-        $mtime = 'now-1w/d';
-    } elseif ($mtime === "1m") {
-        $mtime = 'now-1M/d';
-    } elseif ($mtime === "3m") {
-        $mtime = 'now-3M/d';
-    } elseif ($mtime === "6m") {
-        $mtime = 'now-6M/d';
-    } elseif ($mtime === "1y") {
-        $mtime = 'now-1y/d';
-    } elseif ($mtime === "2y") {
-        $mtime = 'now-2y/d';
-    } elseif ($mtime === "3y") {
-        $mtime = 'now-3y/d';
-    } elseif ($mtime === "6y") {
-        $mtime = 'now-6y/d';
-    } elseif ($mtime === "10y") {
-        $mtime = 'now-10y/d';
-    }
-    return $mtime;
-}
 
 function get_file_mtime($client, $index, $path, $filter, $mtime) {
     // gets file modified ranges in the current directory (path)

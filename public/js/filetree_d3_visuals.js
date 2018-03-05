@@ -17,8 +17,12 @@ if (path !== '/') {
 }
 
 var use_count = parseInt($_GET('use_count'));
-(!use_count) ? use_count = 0 : "";
+(!use_count || use_count === 0) ? use_count = 0 : use_count = 1;
 (use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
+
+var show_files = getCookie('show_files');
+(!show_files || show_files === '1') ? show_files = 1 : show_files = 0;
+(show_files === 1) ? $('#showfiles').prop('checked', true) : $('#showfiles').prop('checked', false);
 
 var hide_thresh = parseInt(getCookie('hide_thresh'));
 (!hide_thresh) ? hide_thresh = 0.9 : "";
@@ -34,6 +38,7 @@ console.log("PATH:" + path);
 console.log("SIZE_FILTER:" + filter);
 console.log("MTIME_FILTER:" + mtime);
 console.log("USECOUNT:" + use_count);
+console.log("SHOWFILES:" + show_files);
 console.log("HIDETHRESH:" + hide_thresh);
 
 var root,
@@ -116,7 +121,7 @@ var key = function(d) {
     return d.data.label;
 };
 
-var color = d3.scale.category20c();
+var color = d3.scale.category20b();
 
 function pieData(data) {
 
@@ -361,11 +366,11 @@ svg2.append("g")
 svg2.append("g")
     .attr("class", "lines");
 
-var width2 = 360,
+var width2 = 320,
     height2 = 300,
     radius2 = Math.min(width2, height2) / 2.5;
 
-var color2 = d3.scale.category20c();
+var color2 = d3.scale.category20b();
 
 var pie2 = d3.layout.pie()
     .sort(null)
@@ -460,7 +465,7 @@ function loadPieFileExt(data) {
             }
             window.location.href = 'simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +
             ' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:>=' + filter +
-            ' AND last_modified:[' + getMtime() + '] AND _type:file';
+            ' AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file';
         })
         .attr("class", "slice");
 
@@ -586,6 +591,16 @@ function changePieFileExt(node) {
     });
 }
 
+/*
+ * d3 bar chart settings for diskover-web
+ */
+
+var valueLabelWidth = 40; // space reserved for value labels (right)
+var barHeight = 15; // height of one bar
+var barLabelWidth = 80; // space reserved for bar labels
+var barLabelPadding = 10; // padding between bar and bar labels (left)
+var gridChartOffset = 0; // space between start of grid and first bar
+var maxBarWidth = 200; // width of the bar with the max value
 
 /*
  * d3 Mtime bar chart for diskover-web
@@ -593,18 +608,11 @@ function changePieFileExt(node) {
 
 var root3;
 
-var valueLabelWidth = 40; // space reserved for value labels (right)
-var barHeight = 20; // height of one bar
-var barLabelWidth = 80; // space reserved for bar labels
-var barLabelPadding = 10; // padding between bar and bar labels (left)
-var gridChartOffset = 0; // space between start of grid and first bar
-var maxBarWidth = 200; // width of the bar with the max value
-
 // svg container element
 var svg3 = d3.select('#barchart-mtime').append("svg")
-    .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth);
+    .attr('width', maxBarWidth + valueLabelWidth + barLabelPadding + barLabelWidth);
 
-var color3 = d3.scale.category20c();
+var color3 = d3.scale.category20b();
 
 svg3.append("g")
     .attr("class", "bars");
@@ -740,8 +748,8 @@ function loadBarMtime(data) {
                 var last_mod_time_high = 'now-10y/d';
                 var last_mod_time_low = '*';
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
-            ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter + ' AND _type:file';
+            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) +
+            ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter + ' AND _type:file&doctype=file';
         });
 
     bar
@@ -835,18 +843,11 @@ function changeBarMtime(node) {
 
 var root4;
 
-var valueLabelWidth = 40; // space reserved for value labels (right)
-var barHeight = 15; // height of one bar
-var barLabelWidth = 80; // space reserved for bar labels
-var barLabelPadding = 10; // padding between bar and bar labels (left)
-var gridChartOffset = 0; // space between start of grid and first bar
-var maxBarWidth = 200; // width of the bar with the max value
-
 // svg container element
 var svg4 = d3.select('#barchart-filesizes').append("svg")
-    .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth);
+    .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth + barLabelPadding);
 
-var color4 = d3.scale.category20c();
+var color4 = d3.scale.category20b();
 
 svg4.append("g")
     .attr("class", "bars");
@@ -989,7 +990,7 @@ function loadBarFileSizes(data) {
                 var filesize_low = 17179869184;
             }
             window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) +
-            ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file'
+            ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file'
         });
 
     bar2

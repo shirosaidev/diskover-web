@@ -4,6 +4,16 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
+// default constants
+var FILTER = 1;
+var MAXDEPTH = 2;
+var MTIME = 0;
+var USE_COUNT = 0;
+var SHOW_FILES = 0;
+
+var xhr = new XMLHttpRequest();
+var changeTagCount = 0;
+
 $(document).ready(function () {
 
 	// reload page button on search results page
@@ -170,13 +180,14 @@ function updateVisLinks() {
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : MTIME;
 	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : MAXDEPTH;
     var use_count = (getCookie('use_count')) ? getCookie('use_count') : USE_COUNT;
+    var show_files = (getCookie('show_files')) ? getCookie('show_files') : SHOW_FILES;
     var index = ($_GET('index')) ? $_GET('index') : getCookie('index');
     var index2 = ($_GET('index2')) ? $_GET('index2') : getCookie('index2');
-	var url = "filetree.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count;
+	var url = "filetree.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
 	document.getElementById("filetreelink").setAttribute("href", url);
-	var url = "treemap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+	var url = "treemap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
 	document.getElementById("treemaplink").setAttribute("href", url);
-    var url = "heatmap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count;
+    var url = "heatmap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
 	document.getElementById("heatmaplink").setAttribute("href", url);
     var url = "top50.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime;
 	document.getElementById("top50link").setAttribute("href", url);
@@ -292,12 +303,3 @@ function runCommand(command) {
     xhr.open("GET", "sockethandler.php?command="+command, true);
     xhr.send();
 }
-
-var xhr = new XMLHttpRequest();
-var changeTagCount = 0;
-
-// default constants
-var FILTER = 1;
-var MAXDEPTH = 2;
-var MTIME = 0;
-var USE_COUNT = 0;

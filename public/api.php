@@ -5,10 +5,14 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
+/* diskover REST API v1
+ */
+
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
+
 
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];
@@ -52,34 +56,36 @@ function put($endpoint, $input) {
 
 	// Setup search query
 	$searchParams['index'] = $endpoint[0]; // which index to search
-	$searchParams['type']  = 'file';  // which type within the index to search
 
 	$files = [];
 	$files = $input['files'];
 	$path_parent = $input['path_parent'];
 	$tag = $input['tag'];
 	$tag_custom = $input['tag_custom'];
+    $recursive = $input['recursive'];
+    $tagfiles = $input['tagfiles'];
 
 	switch ($endpoint) {
-		// tag all files in directory
+		// tag directory doc and items in directory
 		case $endpoint[1] == 'tagdir':
-			$numfiles = 0;
+			$numitems = 0;
 
-			// first let's get all the file id's
-
-			$searchParams = [];
+            // first let's get the directory doc id
+            $results = [];
 			$queryResponse = [];
 
-			// Scroll parameter alive time
-			$searchParams['scroll'] = "1m";
+            $searchParams['size'] = 1;
 
-			// scroll size
-			$searchParams['size'] = 1000;
+            // doc type
+			$searchParams['type'] = 'directory';
 
-			$searchParams['body'] = [
+            $pp = addcslashes(dirname($path_parent), '+-&|!(){}[]^"~*?:\/ ');
+            $f = addcslashes(basename($path_parent), '+-&|!(){}[]^"~*?:\/ ');
+            $searchParams['body'] = [
+                    '_source' => [],
 				 	'query' => [
-				   		'match' => [
-					 		'path_parent' => $path_parent
+				   		'query_string' => [
+                            'query' => 'path_parent:' . $pp .' AND filename:' . $f
 				   		]
 				 	]
 			 ];
@@ -93,39 +99,91 @@ function put($endpoint, $input) {
 				echo "0\r\n";
 			}
 
-			// check if any files found
+			// check if directory found
 			if (!$queryResponse['hits']['hits']) {
 				echo "path_parent not found: " . $path_parent . "\r\n";
 				die();
 			}
 
-			// set total hits
-			$total = $queryResponse['hits']['total'];
+            // store the directory doc data
+            $directory_hit = $queryResponse['hits']['hits'][0];
 
-			// Get the first scroll_id
-			$scroll_id = $queryResponse['_scroll_id'];
+            // add directory doc data to results
+            $results[] = $directory_hit;
 
-			$i = 1;
-			$results = [];
-			// Loop through all the pages of results
-			while ($i <= ceil($total/$searchParams['size'])) {
-				// add files in directory to results array
-                foreach ($queryResponse['hits']['hits'] as $hit) {
-                    $results[] = $hit;
+            // now let's get all the doc id's in the directory
+
+            if ($recursive === "true" || $get_files === "true") {
+                $queryResponse = [];
+
+    			// Scroll parameter alive time
+    			$searchParams['scroll'] = "1m";
+
+    			// scroll size
+    			$searchParams['size'] = 1000;
+
+                if ($recursive === "true") {
+                    $type = ($tagfiles === "true") ? 'file,directory' : 'directory';
+                    // doc type
+        			$searchParams['type'] = $type;
+                    $searchParams['body'] = [
+                            '_source' => [],
+        				 	'query' => [
+        				   		'query_string' => [
+                                    'query' => 'path_parent:' . $pp . '*',
+                                    'analyze_wildcard' => 'true'
+        				   		]
+        				 	]
+        			 ];
+                } elseif ($tagfiles === "true") {
+        			$searchParams['type'] = 'file';
+                    $searchParams['body'] = [
+                            '_source' => [],
+        				 	'query' => [
+        				   		'query_string' => [
+                                    'query' => 'path_parent:' . $pp,
+                                    'analyze_wildcard' => 'true'
+        				   		]
+        				 	]
+        			 ];
                 }
 
-				// Execute a Scroll request and repeat
-				$queryResponse = $client->scroll([
-					"scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-					"scroll" => "1m"           // and the same timeout window
-				]);
+    			try {
+    				// Send search query to Elasticsearch
+    				$queryResponse = $client->search($searchParams);
+    			}
+    			catch (Exception $e) {
+    				error('Message: ' . $e);
+    				echo "0\r\n";
+    			}
 
-				// Get the scroll_id for next page of results
-				$scroll_id = $queryResponse['_scroll_id'];
-				$i += 1;
-			}
+    			// set total hits
+    			$total = $queryResponse['hits']['total'];
 
-			// loop through all the files in results and update tag
+    			// Get the first scroll_id
+    			$scroll_id = $queryResponse['_scroll_id'];
+
+    			$i = 1;
+    			// Loop through all the pages of results
+    			while ($i <= ceil($total/$searchParams['size'])) {
+    				// add files in directory to results array
+                    foreach ($queryResponse['hits']['hits'] as $hit) {
+                        $results[] = $hit;
+                    }
+
+    				// Execute a Scroll request and repeat
+    				$queryResponse = $client->scroll([
+    					"scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+    					"scroll" => "1m"           // and the same timeout window
+    				]);
+
+    				// Get the scroll_id for next page of results
+    				$scroll_id = $queryResponse['_scroll_id'];
+    				$i += 1;
+    			}
+            }
+
+			// loop through all the items in results and update tag
 
 			foreach ($results as $r) {
 				$searchParams = [];
@@ -134,11 +192,12 @@ function put($endpoint, $input) {
 				// get id and index of file
 				$id = $r['_id'];
 				$index = $r['_index'];
+                $type = $r['_type'];
 
 				$searchParams = array();
 				$searchParams['id'] = $id;
 				$searchParams['index'] = $index;
-				$searchParams['type'] = 'file';
+				$searchParams['type'] = $type;
 
 				try {
 					$queryResponse = $client->get($searchParams);
@@ -148,9 +207,10 @@ function put($endpoint, $input) {
 					echo "0\r\n";
 				}
 
-				if ($tag_custom) {
+				if (isset($tag_custom)) {
 					$queryResponse['_source']['tag_custom'] = $tag_custom;
-				} elseif ($tag) {
+				}
+                if (isset($tag)) {
 					$queryResponse['_source']['tag'] = $tag;
 				}
 
@@ -158,27 +218,27 @@ function put($endpoint, $input) {
 
 				try {
 					$queryResponse = $client->update($searchParams);
-					$numfiles += 1;
+					$numitems += 1;
 				}
 				catch (Exception $e) {
 					error('Message: ' . $e);
-					$numfiles -= 1;
+					$numitems -= 1;
 
 				}
 
 		  	}
-			// print number of files updated
-			echo $numfiles . "\r\n";
+			// print number of docs updated
+			echo $numitems . "\r\n";
 			break;
 
 		// tag files
-		case $endpoint[1] == 'tagfiles':
+		case $endpoint[1] == 'tagfile':
 			$numfiles = 0;
 
 			// update existing tag field with new value
 			foreach ($files as $f) {
-				$searchParams = [];
 				$queryResponse = [];
+                $searchParams['type'] = 'file';
 				$path_parent = dirname($f);
 				$filename = basename($f);
 
@@ -222,9 +282,10 @@ function put($endpoint, $input) {
 					echo "0\r\n";
 				}
 
-				if ($tag_custom) {
+				if (isset($tag_custom)) {
 					$queryResponse['_source']['tag_custom'] = $tag_custom;
-				} elseif ($tag) {
+				}
+                if (isset($tag)) {
 					$queryResponse['_source']['tag'] = $tag;
 				}
 
@@ -256,185 +317,300 @@ function get($endpoint, $query) {
 
 	// Setup search query
 	$searchParams['index'] = $endpoint[0]; // which index to search
-	$searchParams['type']  = 'file';  // which type within the index to search
+    parse_str($query, $output);
+	$searchParams['type'] = $output['type'];  // which type within the index to search
+
 
 	switch ($endpoint) {
-		case $endpoint[1] == 'tagcounts':
-			// Get search results from Elasticsearch for tags
-			$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
-
-			foreach ($tagCounts as $tag => $value) {
-				$searchParams['body'] = [
-					'size' => 0,
-				 	'query' => [
-				   		'match' => [
-					 		'tag' => $tag
-				   		]
-				 	]
-			  	];
-
-				try {
-					// Send search query to Elasticsearch
-					$queryResponse = $client->search($searchParams);
-				}
-
-				catch (Exception $e) {
-					error('Message: ' . $e);
-				}
-
-			  	// Get total for tag
-			  	$tagCounts[$tag] = $queryResponse['hits']['total'];
-			}
-			// print results
-			header('Content-Type: application/json');
-			echo json_encode($tagCounts, JSON_PRETTY_PRINT);
-			break;
 
 		case $endpoint[1] == 'tagcount':
-			$tag = $query ?: error('missing tag');
-			parse_str($query, $output);
-			// custom tag
-			if ($output['custom']) {
-				$tag = $output['custom'];
-				$searchParams['body'] = [
-					'size' => 0,
-					'query' => [
-						'match' => [
-							'tag_custom' => $tag
-						]
-					]
-				];
-			} else {
-				$searchParams['body'] = [
-					'size' => 0,
-					'query' => [
-						'match' => [
-							'tag' => $tag
-						]
-					]
-				];
-			}
 
-			// Get search results from Elasticsearch for tag
-			$tagCount = 0;
+            if (isset($output['tag']) || isset($output['tag_custom'])) {
+    			// custom tag only
+    			if ($output['tag_custom'] && !isset($output['tag'])) {
+    				$searchParams['body'] = [
+    					'size' => 0,
+    					'query' => [
+    						'match' => [
+    							'tag_custom' => $output['tag_custom']
+    						]
+    					]
+    				];
+                // tag only
+                } elseif (($output['tag'] || empty($output['tag'])) && !isset($output['tag_custom'])) {
+                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+                    $searchParams['body'] = [
+                        'size' => 0,
+                        'query' => [
+                            'match' => [
+                                'tag' => $t
+                            ]
+                        ]
+                    ];
+                // tag and custom tag
+                } elseif (($output['tag'] || empty($output['tag'])) && $output['tag_custom']) {
+                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+    				$searchParams['body'] = [
+    					'size' => 0,
+    					'query' => [
+    						'query_string' => [
+    							'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+    						]
+    					]
+    				];
+    			} else {
+                    error('missing tag');
+                }
 
-			try {
-				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);
-			}
+    			// Get search results from Elasticsearch for tag
+    			$tagCount = 0;
 
-			catch (Exception $e) {
-				error('Message: ' . $e);
-			}
+    			try {
+    				// Send search query to Elasticsearch
+    				$queryResponse = $client->search($searchParams);
+    			}
 
-			// Get total for tag
-			$tagCount = $queryResponse['hits']['total'];
+    			catch (Exception $e) {
+    				error('Message: ' . $e);
+    			}
 
-			// print results
-			header('Content-Type: application/json');
-			echo json_encode($tagCount, JSON_PRETTY_PRINT);
-			break;
+    			// Get total for tag
+    			$tagCount = $queryResponse['hits']['total'];
 
-		case $endpoint[1] == 'tagsizes':
-			// Get search results from Elasticsearch for tags
-			$totalFilesize = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
+    			// print results
+    			header('Content-Type: application/json');
+    			echo json_encode($tagCount, JSON_PRETTY_PRINT);
+    			break;
+            } else {
+                // Get search results from Elasticsearch for tags
+    			$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
-			foreach ($totalFilesize as $tag => $value) {
-				$searchParams['body'] = [
-					'size' => 0,
-					'query' => [
-				   		'match' => [
-						'tag' => $tag
-				  		]
-					],
-				  	'aggs' => [
-						'total_size' => [
-					  		'sum' => [
-								'field' => 'filesize'
-					  		]
-						]
-				  	]
-			  	];
+                foreach ($tagCounts as $tag => $value) {
+                    ($tag === "untagged") ? $t = "" : $t = $tag;
+    				$searchParams['body'] = [
+    					'size' => 0,
+    				 	'query' => [
+    				   		'match' => [
+    					 		'tag' => $t
+    				   		]
+    				 	]
+    			  	];
 
-				try {
-				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);
-				}
+    				try {
+    					// Send search query to Elasticsearch
+    					$queryResponse = $client->search($searchParams);
+    				}
 
-				catch (Exception $e) {
-					error('Message: ' . $e);
-				}
+    				catch (Exception $e) {
+    					error('Message: ' . $e);
+    				}
 
-				// Get total size of all files with tag
-			  	$totalFilesize[$tag] = $queryResponse['aggregations']['total_size']['value'];
-			}
-			// print results
-			header('Content-Type: application/json');
-			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);
-			break;
+    			  	// Get total for tag
+    			  	$tagCounts[$tag] = $queryResponse['hits']['total'];
+    			}
+
+                // Grab all the custom tags from file and add to tagCounts
+                $customtags = get_custom_tags();
+                $tagCountsCustom = [];
+                foreach ($customtags as $tag) {
+                    $tagCountsCustom[$tag[0]] = 0;
+                }
+
+                foreach ($tagCountsCustom as $tag => $value) {
+    				$searchParams['body'] = [
+    					'size' => 0,
+    				 	'query' => [
+    				   		'match' => [
+    					 		'tag_custom' => $tag
+    				   		]
+    				 	]
+    			  	];
+
+    				try {
+    					// Send search query to Elasticsearch
+    					$queryResponse = $client->search($searchParams);
+    				}
+
+    				catch (Exception $e) {
+    					error('Message: ' . $e);
+    				}
+
+    			  	// Get total for tag
+    			  	$tagCountsCustom[$tag] = $queryResponse['hits']['total'];
+    			}
+
+                $tagCountsAll = [];
+                $tagCountsAll['tag'] = $tagCounts;
+                $tagCountsAll['tag_custom'] = $tagCountsCustom;
+
+    			// print results
+    			header('Content-Type: application/json');
+                echo json_encode($tagCountsAll, JSON_PRETTY_PRINT);
+    			break;
+            }
 
 		case $endpoint[1] == 'tagsize':
-			$tag = $query ?: error('missing tag');
-			parse_str($query, $output);
-			// custom tag
-			if ($output['custom']) {
-				$tag = $output['custom'];
-				$searchParams['body'] = [
-					'size' => 0,
-					'query' => [
-						'match' => [
-							'tag_custom' => $tag
-						]
-					],
-				  	'aggs' => [
-						'total_size' => [
-					  		'sum' => [
-								'field' => 'filesize'
-					  		]
-						]
-				  	]
-			  	];
-			} else {
-				$searchParams['body'] = [
-					'size' => 0,
-					'query' => [
-						'match' => [
-							'tag' => $tag
-						]
-					],
-					'aggs' => [
-						'total_size' => [
-					  		'sum' => [
-								'field' => 'filesize'
-					  		]
-						]
-				  	]
-			  	];
-			}
 
-			// Get search results from Elasticsearch for tag
-			$totalFilesize = 0;
+            if (isset($output['tag']) || isset($output['tag_custom'])) {
+                // custom tag only
+                if ($output['tag_custom'] && !isset($output['tag'])) {
+                    $searchParams['body'] = [
+                        'size' => 0,
+                        'query' => [
+                            'match' => [
+                            'tag_custom' => $output['tag_custom']
+                            ]
+                        ],
+                        'aggs' => [
+                            'total_size' => [
+                                'sum' => [
+                                    'field' => 'filesize'
+                                ]
+                            ]
+                        ]
+                    ];
+                // tag only
+                } elseif (($output['tag'] || empty($output['tag'])) && !isset($output['tag_custom'])) {
+                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+                    $searchParams['body'] = [
+                        'size' => 0,
+                        'query' => [
+                            'match' => [
+                            'tag' => $t
+                            ]
+                        ],
+                        'aggs' => [
+                            'total_size' => [
+                                'sum' => [
+                                    'field' => 'filesize'
+                                ]
+                            ]
+                        ]
+                    ];
+                // tag and custom tag
+                } elseif (($output['tag'] || empty($output['tag'])) && $output['tag_custom']) {
+                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+                    $searchParams['body'] = [
+                        'size' => 0,
+                        'query' => [
+                            'query_string' => [
+                            'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+                            ]
+                        ],
+                        'aggs' => [
+                            'total_size' => [
+                                'sum' => [
+                                    'field' => 'filesize'
+                                ]
+                            ]
+                        ]
+                    ];
+                } else {
+                    error('missing tag');
+                }
 
-			try {
-				// Send search query to Elasticsearch
-				$queryResponse = $client->search($searchParams);
-			}
+                // Get search results from Elasticsearch for tag
+                $tagSize = 0;
 
-			catch (Exception $e) {
-				error('Message: ' . $e);
-			}
+                try {
+                    // Send search query to Elasticsearch
+                    $queryResponse = $client->search($searchParams);
+                }
 
-			// Get total size of all files with tag
-			$totalFilesize = $queryResponse['aggregations']['total_size']['value'];
+                catch (Exception $e) {
+                    error('Message: ' . $e);
+                }
 
-			// print results
-			header('Content-Type: application/json');
-			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);
-			break;
+                // Get total for tag
+                $tagSize = $queryResponse['aggregations']['total_size']['value'];
 
-		case $endpoint[1] == 'tagfiles':
-			$tag = $query ?: error('missing tag');
-			parse_str($query, $output);
+                // print results
+                header('Content-Type: application/json');
+                echo json_encode($tagSize, JSON_PRETTY_PRINT);
+                break;
+            } else {
+                // Get search results from Elasticsearch for tags
+                $tagSizes = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
+
+                foreach ($tagSizes as $tag => $value) {
+                    ($tag === "untagged") ? $t = "" : $t = $tag;
+                    $searchParams['body'] = [
+    					'size' => 0,
+    					'query' => [
+    				   		'match' => [
+    						'tag' => $t
+    				  		]
+    					],
+    				  	'aggs' => [
+    						'total_size' => [
+    					  		'sum' => [
+    								'field' => 'filesize'
+    					  		]
+    						]
+    				  	]
+    			  	];
+
+                    try {
+                        // Send search query to Elasticsearch
+                        $queryResponse = $client->search($searchParams);
+                    }
+
+                    catch (Exception $e) {
+                        error('Message: ' . $e);
+                    }
+
+                    // Get total size of all files with tag
+    			  	$tagSizes[$tag] = $queryResponse['aggregations']['total_size']['value'];
+                }
+
+                // Grab all the custom tags from file and add to tagSizesCustom
+                $customtags = get_custom_tags();
+                $tagSizesCustom = [];
+                foreach ($customtags as $tag) {
+                    $tagSizesCustom[$tag[0]] = 0;
+                }
+
+                foreach ($tagSizesCustom as $tag => $value) {
+                    $searchParams['body'] = [
+    					'size' => 0,
+    					'query' => [
+    				   		'match' => [
+    						'tag_custom' => $tag
+    				  		]
+    					],
+    				  	'aggs' => [
+    						'total_size' => [
+    					  		'sum' => [
+    								'field' => 'filesize'
+    					  		]
+    						]
+    				  	]
+    			  	];
+
+                    try {
+                        // Send search query to Elasticsearch
+                        $queryResponse = $client->search($searchParams);
+                    }
+
+                    catch (Exception $e) {
+                        error('Message: ' . $e);
+                    }
+
+                    // Get total size of all files with tag
+    			  	$tagSizesCustom[$tag] = $queryResponse['aggregations']['total_size']['value'];
+                }
+
+                $tagSizesAll = [];
+                $tagSizesAll['tag'] = $tagSizes;
+                $tagSizesAll['tag_custom'] = $tagSizesCustom;
+
+                // print results
+                header('Content-Type: application/json');
+                echo json_encode($tagSizesAll, JSON_PRETTY_PRINT);
+                break;
+            }
+
+		case $endpoint[1] == 'tags':
 
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
@@ -442,32 +618,48 @@ function get($endpoint, $query) {
 			// scroll size
 			$searchParams['size'] = 1000;
 
-			// custom tag
-			if ($output['custom']) {
-				$tag = $output['custom'];
-				$searchParams['body'] = [
-					'query' => [
-						'match' => [
-							'tag_custom' => $tag
-						]
-					]
-				];
-			} else {
-				$searchParams['body'] = [
-					'query' => [
-						'match' => [
-							'tag' => $tag
-						]
-					]
-				];
-			}
+            if (isset($output['tag']) || isset($output['tag_custom'])) {
+                // custom tag only
+                if ($output['tag_custom'] && !isset($output['tag'])) {
+                    $searchParams['body'] = [
+                        'query' => [
+                            'match' => [
+                            'tag_custom' => $output['tag_custom']
+                            ]
+                        ]
+                    ];
+                // tag only
+                } elseif (($output['tag'] || empty($output['tag'])) && !isset($output['tag_custom'])) {
+                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+                    $searchParams['body'] = [
+                        'query' => [
+                            'match' => [
+                            'tag' => $t
+                            ]
+                        ]
+                    ];
+                // tag and custom tag
+                } elseif (($output['tag'] || empty($output['tag'])) && $output['tag_custom']) {
+                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+                    $searchParams['body'] = [
+                        'query' => [
+                            'query_string' => [
+                                'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+                            ]
+                        ]
+                    ];
+                } else {
+                    error('missing tag');
+                }
+            } else {
+                error('missing tag');
+            }
 
 			// Send search query to Elasticsearch and get scroll id and first page of results
 			try {
 				// Send search query to Elasticsearch
 				$queryResponse = $client->search($searchParams);
 			}
-
 			catch (Exception $e) {
 				error('Message: ' . $e);
 			}
@@ -508,22 +700,23 @@ function get($endpoint, $query) {
 			break;
 
 		case $endpoint[1] == 'dupes':
-			$tag = $query;
 
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
+
+            $searchParams['type'] = "file";
 
 			// scroll size
 			$searchParams['size'] = 1000;
 
 			$searchParams['body'] = [
 					'query' => [
-          				'match' => [
-            				'is_dupe' => 'true'
+          				'query_string' => [
+                            'query' => 'dupe_md5:(NOT "")'
           				]
         			],
         			'sort' => [
-          				'filehash'
+          				'dupe_md5'
          			]
 			];
 
@@ -578,8 +771,8 @@ function get($endpoint, $query) {
 			$searchParams['body'] = [
 				'size' => 0,
 				'query' => [
-					'match' => [
-					'is_dupe' => 'true'
+					'query_string' => [
+					'query' => 'dupe_md5:(NOT "")'
 					]
 				],
 				'aggs' => [

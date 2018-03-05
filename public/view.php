@@ -9,7 +9,9 @@ require '../vendor/autoload.php';
 use diskover\Constants;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 error_reporting(E_ALL ^ E_NOTICE);
+require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
+require "vars_inc.php";
 
 $message = $_REQUEST['message'];
 
@@ -33,16 +35,6 @@ if (empty($_REQUEST['id'])) {
     } catch (Missing404Exception $e) {
         $message = 'Doc ID not found, please go back and reload page.';
     }
-}
-
-$path = $_GET['path'] ?: getCookie('path');
-// check if no path (grab one from ES)
-if (empty($path)) {
-    $path = get_es_path($client, $esIndex);
-    createCookie('path', $path);
-} elseif ($path !== "/") {
-    // remove any trailing slash
-    $path = rtrim($path, '/');
 }
 
 // set fullpath, parentpath and filename and check for root /
@@ -310,7 +302,7 @@ exit();
           </li>
           <li class="list-group-item">
             <span class="badge"><?php echo $file['indexing_date']; ?></span>
-            Indexed on (utc)
+            Indexed at (utc)
           </li>
         </ul>
       </div>

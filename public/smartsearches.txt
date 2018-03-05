@@ -3,7 +3,7 @@
 !img|extension:(jpg OR jpeg OR gif OR png OR tif OR tiff OR dpx OR exr OR psd OR bmp OR tga OR ai OR ico OR ps OR svg)
 !aud|extension:(aif OR cda OR  iff OR m3u OR m4a OR mid OR mp3 OR mpa OR wav OR wma OR ogg OR wpl)
 !vid|extension:(asf OR avi OR flv OR m4v OR mov OR mp4 OR mpg OR mpeg OR rm OR vob OR wmv OR 3g2 OR 3gp OR h264 OR mkv OR swf)
-!discimg|extension:(bin OR dmg OR iso OR toast OR vcd)
+!discimg|extension:(img OR bin OR dmg OR iso OR toast OR vcd)
 !datab|extension:(csv OR dat OR db OR dbf OR log OR mdb OR sav OR sql OR tar OR xml OR data OR sqlite OR sqlite3)
 !exe|extension:(apk OR bat OR bin OR cgi OR pl OR com OR exe OR gadget OR jar OR py OR wsf)
 !web|extension:(asp OR aspx OR cer OR cfm OR cgi OR pl OR css OR htm OR html OR js OR jsp OR part OR php OR py OR rss OR xhtml)
