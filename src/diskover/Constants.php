@@ -18,6 +18,7 @@ class Constants {
     const ES_USER = '';
     const ES_PASS = '';
     // login auth for diskover-web
+    const LOGIN_REQUIRED = FALSE;
     const DISKOVER_USER = 'diskover';
     const DISKOVER_PASS = 'darkdata';
     // set to true if using AWS

@@ -61,6 +61,29 @@ for ($i=1; $i < 5; $i++) {
     }
 }
 
+// get crawl elased time for directory
+if ($filedoctype == 'directory') {
+    $searchParams = [];
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'crawlstat';
+    $searchParams['body'] = [
+        '_source' => ['elapsed_time'],
+        'size' => 1,
+        'query' => [
+                'match' => [
+                    'path' => $fullpath
+                ]
+         ],
+         'sort' => [
+             'elapsed_time' => [
+                 'order' => 'desc'
+             ]
+         ]
+    ];
+    $queryResponse = $client->search($searchParams);
+    $crawltime = $queryResponse['hits']['hits'][0]['_source']['elapsed_time'];
+}
+
 // Grab all the custom tags from file
 $customtags = get_custom_tags();
 
@@ -303,6 +326,10 @@ exit();
           <li class="list-group-item">
             <span class="badge"><?php echo $file['indexing_date']; ?></span>
             Indexed at (utc)
+          </li>
+          <li class="list-group-item">
+            <span class="badge"><?php echo secondsToTime($crawltime); ?></span>
+            Crawl time
           </li>
         </ul>
       </div>

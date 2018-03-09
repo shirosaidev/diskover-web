@@ -142,6 +142,7 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
                         <li><a href="tags.php" id="tagslink">Tags</a></li>
                         <li><a href="dupes.php" id="dupeslink">Dupes</a></li>
                         <li><a href="smartsearches.php" id="smartsearcheslink">Smart Searches</a></li>
+                        <li><a href="crawlstats.php" id="crawlstatslink">Crawl Stats</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -149,7 +150,9 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
 				<li><a href="admin.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>">Admin</a></li>
 				<li><a href="help.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>">Help</a></li>
 				<li><a href="https://github.com/shirosaidev/diskover" target="_blank"><img src="images/github.png" width="20" height="20" title="View on GitHub" alt="github" style="opacity:.5;"/></a></li>
+                <?php if (Constants::LOGIN_REQUIRED) { ?>
                 <li><a href="logout.php"><i class="glyphicon glyphicon-log-out"></i> Logout</a></li>
+                <?php } ?>
 			</ul>
             <form method="get" action="simple.php" class="navbar-form" role="search" id="searchnav">
                 <input type="hidden" name="index" value="<?php echo $esIndex; ?>" />

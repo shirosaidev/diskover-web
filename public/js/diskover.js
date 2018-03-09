@@ -99,7 +99,7 @@ $(document).ready(function () {
 	});
 
     // update visualization links
-    updateVisLinks();
+    //updateVisLinks();
 });
 
 // cookie functions
@@ -174,7 +174,7 @@ function changePercent(a,b) {
 }
 
 // update url links in nav bar for visualizations
-function updateVisLinks() {
+/*function updateVisLinks() {
 	var path = ($_GET('path')) ? $_GET('path') : getCookie('path');
 	var filter = (getCookie('filter')) ? getCookie('filter') : FILTER;
 	var mtime = (getCookie('mtime')) ? getCookie('mtime') : MTIME;
@@ -197,8 +197,11 @@ function updateVisLinks() {
 	document.getElementById("dupeslink").setAttribute("href", url);
     var url = "smartsearches.php?index=" + index + "&index2=" + index2;
 	document.getElementById("smartsearcheslink").setAttribute("href", url);
+    var url = "crawlstats.php?index=" + index + "&index2=" + index2;
+	document.getElementById("crawlstatslink").setAttribute("href", url);
 	return false;
 }
+*/
 
 // listen for msgs from diskover socket server and display progress bar on screen
 // using XMLHttpRequest

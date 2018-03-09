@@ -13,19 +13,118 @@ require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 require "vars_inc.php";
 
+// check if crawl has finished
+// Get search results from Elasticsearch for index stats and to see if crawl finished
+// return boolean if crawl finished (true)
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'crawlstat';
+
+$searchParams['body'] = [
+    '_source' => ['indexing_date'],
+    'size' => 1,
+    'query' => [
+            'match' => [
+                'event' => 'start'
+            ]
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'asc'
+         ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+$firstcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+
+$searchParams['body'] = [
+    '_source' => ['indexing_date'],
+    'size' => 1,
+    'query' => [
+            'match' => [
+                'event' => 'start'
+            ]
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'desc'
+         ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+$lastcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+
+$searchParams['body'] = [
+    '_source' => ['indexing_date'],
+    'size' => 1,
+    'query' => [
+            'match' => [
+                'event' => 'stop'
+            ]
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'desc'
+         ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+$lastcrawlstoptime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+
+$searchParams['body'] = [
+   'size' => 0,
+    'aggs' => [
+      'total_elapsed' => [
+        'sum' => [
+          'field' => 'elapsed_time'
+        ]
+      ]
+    ],
+    'query' => [
+            'match_all' => (object) []
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total elapsed time (in seconds) of crawl(s)
+$crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
+
+// determine if crawl is finished by seeing if last crawlstarttime is newer than last crawlstoptime
+$crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
+
 
 // Get search results from Elasticsearch for thread usage
 $results = [];
 $searchParams = [];
 
 // Setup search query
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = 'file';
-
 $thread_usage = [];
 
 # show up to 40 threads in chart
 for ($i=0; $i < 40; $i++) {
+    // Execute the search
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'file';
+    $searchParams['body'] = [
+     'size' => 0,
+     'query' => [
+       'match' => [
+         'indexing_thread' => $i
+       ]
+     ]
+    ];
+    // Send search query to Elasticsearch
+    $queryResponseFile = $client->search($searchParams);
+
+    // Execute the search
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'directory';
     // Execute the search
     $searchParams['body'] = [
      'size' => 0,
@@ -37,8 +136,10 @@ for ($i=0; $i < 40; $i++) {
     ];
 
     // Send search query to Elasticsearch
-    $queryResponse = $client->search($searchParams);
-    $thread_usage[$i] = [ 'label' => $i, 'count' => $queryResponse['hits']['total'] ];
+    $queryResponseDir = $client->search($searchParams);
+    if ($queryResponseFile['hits']['total'] || $queryResponseDir['hits']['total'] > 0) {
+        $thread_usage[$i] = [ 'thread' => $i, 'file' => $queryResponseFile['hits']['total'], 'directory' => $queryResponseDir['hits']['total'] ];
+    }
 }
 $js_threads = json_encode($thread_usage);
 
@@ -143,91 +244,6 @@ $totalDupes = $queryResponse['hits']['total'];
 
 // Get total size of all duplicate files
 $totalFilesizeDupes = $queryResponse['aggregations']['total_size']['value'];
-
-
-// Get search results from Elasticsearch for index stats
-$results = [];
-$searchParams = [];
-
-// Setup search query
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = 'crawlstat';
-
-$searchParams['body'] = [
-    '_source' => ['indexing_date'],
-    'size' => 1,
-    'query' => [
-            'match' => [
-                'event' => 'start'
-            ]
-     ],
-     'sort' => [
-         'indexing_date' => [
-             'order' => 'asc'
-         ]
-     ]
-];
-$queryResponse = $client->search($searchParams);
-
-$firstcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
-
-$searchParams['body'] = [
-    '_source' => ['indexing_date'],
-    'size' => 1,
-    'query' => [
-            'match' => [
-                'event' => 'start'
-            ]
-     ],
-     'sort' => [
-         'indexing_date' => [
-             'order' => 'desc'
-         ]
-     ]
-];
-$queryResponse = $client->search($searchParams);
-
-$lastcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
-
-$searchParams['body'] = [
-    '_source' => ['indexing_date'],
-    'size' => 1,
-    'query' => [
-            'match' => [
-                'event' => 'stop'
-            ]
-     ],
-     'sort' => [
-         'indexing_date' => [
-             'order' => 'desc'
-         ]
-     ]
-];
-$queryResponse = $client->search($searchParams);
-
-$lastcrawlstoptime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
-
-$searchParams['body'] = [
-   'size' => 0,
-    'aggs' => [
-      'total_elapsed' => [
-        'sum' => [
-          'field' => 'elapsed_time'
-        ]
-      ]
-    ],
-    'query' => [
-            'match_all' => (object) []
-     ]
-];
-$queryResponse = $client->search($searchParams);
-
-// Get total elapsed time (in seconds) of crawl(s)
-$crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
-
-// determine if crawl is finished by seeing if last crawlstarttime is newer than last crawlstoptime
-$crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
-
 
 // Get search results from Elasticsearch for number of files
 $results = [];
@@ -430,6 +446,11 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
     	  stroke: #000;
     	  shape-rendering: crispEdges;
         }
+        #threadchart {
+            width: 700px;
+            height: 250px;
+            position: relative;
+        }
         #threadchart rect {
             stroke: black;
         }
@@ -451,6 +472,22 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
       </div>
+      <div class="panel panel-primary chartbox">
+      <div class="panel-heading">
+          <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Thread Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
+      </div>
+      <div class="panel-body">
+          <div id="threadchart" class="text-center"></div>
+      <div>
+          <?php foreach ($thread_usage as $key => $value) {
+      ?>
+        <span class="label" style="background-color: #393D77;">file thread-<?php echo $key; ?> <?php echo $value['file']; ?></span>
+        <span class="label" style="background-color: #5256A1;">dir thread-<?php echo $key; ?> <?php echo $value['directory']; ?></span>
+      <?php
+      } ?>
+      </div>
+      </div>
+    </div>
       <?php
       if ($totalDupes === 0) {
       ?>
@@ -494,30 +531,40 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       <?php
       }
       ?>
-      <div class="well">
-          <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
-              <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawlstarttime; ?></span> UTC.<br />
-              <?php if ($crawlfinished) { ?>
-                  <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawlstoptime; ?></span> UTC.<br />
-                  <i class="glyphicon glyphicon-time"></i> Total crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
-                  <?php } else { ?>
-                  <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
-              <?php } ?>
-              <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> If running parallel crawls, start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
+    <div class="row">
+      <div class="col-xs-6">
+        <div class="panel panel-primary chartbox">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
+        </div>
+        <div class="panel-body">
+            <div id="tagcountchart" class="text-center"></div>
+            <div class="chartbox">
+              <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
+              <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
+              <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
+              <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
+          </div>
+        </div>
+        </div>
       </div>
-      <div class="panel panel-primary">
-      <div class="panel-heading">
-          <h3 class="panel-title"><i class="glyphicon glyphicon-tasks"></i> Crawl Thread Usage</h3>
-      </div>
-  <div class="panel-body">
-      <div id="threadchart" class="text-center"></div>
-      <div>
-          <?php foreach($thread_usage as $key => $value) { if ($value['count'] > 0) { ?>
-        <span class="label" style="background-color: black;">thread-<?php echo $key; ?> <?php echo $value['count']; ?></span>
-    <?php } } ?>
+        <div class="col-xs-6">
+            <div class="panel panel-primary chartbox">
+            <div class="panel-heading">
+                <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
+            </div>
+        <div class="panel-body">
+            <div id="filesizechart" class="text-center"></div>
+            <div class="chartbox">
+              <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
+              <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
+              <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
+              <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
+          </div>
+        </div>
+        </div>
     </div>
-  </div>
-  </div>
+    </div>
     </div>
     <div class="col-xs-6">
         <div class="well">
@@ -537,9 +584,20 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
               Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
               Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
         </div>
+        <div class="well">
+            <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
+                <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawlstarttime; ?></span> UTC.<br />
+                <?php if ($crawlfinished) { ?>
+                    <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawlstoptime; ?></span> UTC.<br />
+                    <i class="glyphicon glyphicon-time"></i> Total crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
+                    <?php } else { ?>
+                    <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
+                <?php } ?>
+                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> If running parallel crawls, start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
+        </div>
         <div class="panel panel-primary chartbox">
             <div class="panel-heading">
-                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Directories</a></small>
+                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a></small>
             </div>
             <div class="panel-body">
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -583,7 +641,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                   foreach ($largestfiles as $key => $value) {
                     ?>
                     <tr><td class="darken"><?php echo $n; ?></td>
-                        <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><?php echo $value['_source']['filename']; ?></a></td>
+                        <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=file'; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $value['_source']['filename']; ?></a></td>
                         <td class="text-nowrap darken"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
                         <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
                         <td class="path darken"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>&amp;doctype=file"><?php echo $value['_source']['path_parent']; ?></a></td>
@@ -594,41 +652,66 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
           </table>
         </div>
         </div>
-        <div class="row">
-          <div class="col-xs-6">
-            <div class="panel panel-primary chartbox">
+        <div class="panel panel-primary chartbox">
             <div class="panel-heading">
-                <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
+                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Directories</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a></small>
             </div>
             <div class="panel-body">
-                <div id="tagcountchart" class="text-center"></div>
-                <div class="chartbox">
-                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
-                  <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
-                  <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
-                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
-              </div>
-            </div>
-            </div>
-          </div>
-        	<div class="col-xs-6">
-                <div class="panel panel-primary chartbox">
-                <div class="panel-heading">
-                    <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
-                </div>
-            <div class="panel-body">
-                <div id="filesizechart" class="text-center"></div>
-                <div class="chartbox">
-                  <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
-                  <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
-                  <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
-                  <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
-              </div>
-            </div>
-        	</div>
-        </div>
-        </div>
+            <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
+              <thead>
+                <tr>
+                  <th class="text-nowrap">#</th>
+                  <th class="text-nowrap">Name</th>
+                  <th class="text-nowrap">File Size</th>
+                  <th class="text-nowrap">Modified (utc)</th>
+                  <th class="text-nowrap">Path</th>
+              </tr>
+            </thead>
+            <tbody>
+                  <?php
+                  // Get search results from Elasticsearch for top 10 largest directories
+                  $results = [];
+                  $searchParams = [];
 
+                  // Setup search query
+                  $searchParams['index'] = $esIndex;
+                  $searchParams['type']  = 'directory';
+
+
+                  // Setup search query for largest files
+                  $searchParams['body'] = [
+                      'size' => 10,
+                      '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
+                      'query' => [
+                        'query_string' => [
+                          'query' => 'path_parent: "' . $path . '"\/*',
+                          'analyze_wildcard' => 'true'
+                        ]
+                      ],
+                      'sort' => [
+                          'filesize' => [
+                              'order' => 'desc'
+                          ]
+                      ]
+                  ];
+                  $queryResponse = $client->search($searchParams);
+
+                  $largestdirs = $queryResponse['hits']['hits'];
+                  $n = 1;
+                  foreach ($largestdirs as $key => $value) {
+                    ?>
+                    <tr><td class="darken"><?php echo $n; ?></td>
+                        <td class="path"><a href="view.php?id=<?php echo $value['_id'] . '&amp;index=' . $value['_index'] . '&amp;doctype=directory'; ?>"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i> <?php echo $value['_source']['filename']; ?></a></td>
+                        <td class="text-nowrap darken"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
+                        <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
+                        <td class="path darken"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo $value['_source']['path_parent']; ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
+                    </tr>
+                  <?php $n++; }
+                   ?>
+               </tbody>
+          </table>
+        </div>
+        </div>
       </div>
   </div>
 </div>
@@ -636,73 +719,8 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
 <script language="javascript" src="js/bootstrap.min.js"></script>
 <script language="javascript" src="js/diskover.js"></script>
 <script language="javascript" src="js/d3.v3.min.js"></script>
+<script language="javascript" src="js/spin.min.js"></script>
 <!-- d3 charts -->
-    <script>
-        var margin = {top: 20, right: 20, bottom: 30, left: 70},
-        width = 600 - margin.left - margin.right,
-        height = 250 - margin.top - margin.bottom;
-
-        var color = d3.scale.category20c();
-
-        var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
-
-        var y = d3.scale.linear().range([height, 0]);
-
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
-
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left")
-            .ticks(10);
-
-        var svg = d3.select("#threadchart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform",
-                  "translate(" + margin.left + "," + margin.top + ")");
-
-        var data = <?php echo $js_threads ?>;
-
-        data.forEach(function(d) {
-            d.label = d.label;
-            d.value = d.count;
-        });
-
-        x.domain(data.map(function(d) { return (d.value > 0) ? d.label : ''; }));
-        y.domain([0, d3.max(data, function(d) { return d.value; })]);
-
-        svg.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis)
-        .selectAll("text")
-          .style("text-anchor", "end")
-          .attr("dx", "-.8em")
-          .attr("dy", "-.55em")
-          .attr("transform", "rotate(-90)" );
-
-        svg.append("g")
-          .attr("class", "y axis")
-          .call(yAxis)
-        .append("text")
-          .attr("transform", "rotate(-90)")
-          .attr("y", 6)
-          .attr("dy", ".71em")
-          .style("text-anchor", "end")
-          .text("Queue items");
-
-        svg.selectAll("bar")
-          .data(data)
-        .enter().append("rect")
-          .style("fill", color)
-          .attr("x", function(d) { return x(d.label); })
-          .attr("width", x.rangeBand())
-          .attr("y", function(d) { return y(d.value); })
-          .attr("height", function(d) { return height - y(d.value); });
-    </script>
 	<script>
 		var count_untagged = <?php echo $tagCounts['untagged'] ?>;
 		var count_delete = <?php echo $tagCounts['delete'] ?>;
@@ -923,5 +941,183 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
             });
 
 	</script>
+
+    <script>
+        var data;
+        var indexname = '<?php echo $esIndex; ?>';
+
+        // init thread chart
+        var margin = {top: 20, right: 20, bottom: 30, left: 70},
+        width = 700 - margin.left - margin.right,
+        height = 250 - margin.top - margin.bottom;
+
+        var svg_threads = d3.select("#threadchart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+        function getjsondata(refreshcharts) {
+            // config references
+            var chartConfig = {
+                target: 'threadchart',
+                data_url: 'd3_data_threads.php?index=' + indexname
+            };
+
+            // loader settings
+            var opts = {
+                lines: 12, // The number of lines to draw
+                length: 5, // The length of each line
+                width: 3, // The line thickness
+                radius: 6, // The radius of the inner circle
+                color: '#EE3124', // #rgb or #rrggbb or array of colors
+                speed: 1.9, // Rounds per second
+                trail: 40, // Afterglow percentage
+                className: 'spinner', // The CSS class to assign to the spinner
+            };
+
+            // loader settings
+            var target = document.getElementById(chartConfig.target);
+            if (refreshcharts === false) {
+                // trigger loader
+                var spinner = new Spinner(opts).spin(target);
+            }
+
+            // load json data from Elasticsearch
+            d3.json(chartConfig.data_url, function(error, dataset) {
+
+                // update global data vars
+                data = dataset;
+
+                if (refreshcharts === false) {
+                    // stop spin.js loader
+                    spinner.stop();
+                } else {
+                    svg_threads.selectAll("*").remove();
+                }
+                // load chart
+                loadthreadchart()
+            });
+        }
+
+        function loadthreadchart() {
+
+            var xData = ['file', 'directory'];
+
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .35);
+
+            var y = d3.scale.linear()
+                .rangeRound([height, 0]);
+
+            var color = d3.scale.category20b();
+
+            var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10);
+
+            var dataIntermediate=xData.map(function (c){
+                return data.map(function(d) {
+                    return {x: d.thread, y: d[c]};
+                });
+            });
+
+            var dataStackLayout = d3.layout.stack()(dataIntermediate);
+
+            x.domain(dataStackLayout[0].map(function(d) {
+                return d.x;
+            }));
+
+            y.domain([0,
+                d3.max(dataStackLayout[dataStackLayout.length - 1],
+                    function (d) { return d.y0 + d.y;})
+                ])
+                .nice();
+
+            var layer = svg_threads.selectAll(".stack")
+                .data(dataStackLayout)
+                .enter().append("g")
+                .attr("class", "stack")
+                .style("fill", function (d, i) {
+                    return color(i);
+                });
+
+            layer.selectAll("rect")
+                .data(function (d) {
+                    return d;
+                })
+                .enter().append("rect")
+                .attr("x", function (d) {
+                    return x(d.x);
+                })
+                .attr("y", function (d) {
+                    return y(d.y + d.y0);
+                })
+                .attr("height", function (d) {
+                    return y(d.y0) - y(d.y + d.y0);
+                })
+                .attr("width", x.rangeBand());
+
+            svg_threads.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg_threads.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0,0)")
+                .call(yAxis)
+                .append("text")
+                  .attr("transform", "rotate(-90)")
+                  .attr("y", 0)
+                  .attr("x", 0)
+                  .attr("dy", ".71em")
+                  .style("text-anchor", "end")
+                  .text("Queue items");
+        }
+
+        var crawlfinished = '<?php echo $crawlfinished ? "true" : "false"; ?>';
+        var thread_refreshtime = 2000;
+        // get json data for threads chart and load vis
+        getjsondata(false);
+        // auto refresh the threads chart
+        var auto_refresh;
+        if (crawlfinished === 'false') {
+            autorefresh(thread_refreshtime)
+        } else {  // crewl is finished so disable interval
+            thread_refreshtime = 0;
+            autorefresh(thread_refreshtime)
+        }
+        function autorefresh(n) {
+            thread_refreshtime = n
+            if (thread_refreshtime == 0) {
+                clearInterval(auto_refresh);
+                $('#autorefresh_off').attr('style', 'color: #000 !important');
+                $('#autorefresh_2s').attr('style', 'color: #FFF !important');
+                $('#autorefresh_1s').attr('style', 'color: #FFF !important');
+            } else {
+                auto_refresh = setInterval(
+                    function () {
+                        // reload data for threads chart
+                        getjsondata(true);
+                    }, thread_refreshtime); // refresh every n ms
+                    if (thread_refreshtime == 1000) {
+                        $('#autorefresh_1s').attr('style', 'color: #000 !important');
+                        $('#autorefresh_2s').attr('style', 'color: #FFF !important');
+                        $('#autorefresh_off').attr('style', 'color: #FFF !important');
+                    } else if (thread_refreshtime == 2000) {
+                        $('#autorefresh_2s').attr('style', 'color: #000 !important');
+                        $('#autorefresh_1s').attr('style', 'color: #FFF !important');
+                        $('#autorefresh_off').attr('style', 'color: #FFF !important');
+                    }
+            }
+        };
+    </script>
 </body>
 </html>

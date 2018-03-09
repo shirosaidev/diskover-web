@@ -1,11 +1,26 @@
 # Diskover Web Change Log
 
-# [1.5.0] - 2018-03-06
+# [1.5.0-beta.3] - 2018-03-09
 ### notice
 - requires index created with diskover >= 1.5.0
+- this is a beta pre-release for v 1.5.0
 ### added
-- login page (edit Constants.php to change username and password from default (user: diskover, pass: darkdata)
-- login required for all pages and includes timeout of 1 hour if inactive
+- option in Constants.php to disable logins
+- new dashboard layout
+- new crawl thread usage chart with auto-refresh on dashboard (d3_data_threads.php)
+- new Crawl Stats analytics page with auto-refresh (for parallel crawling) (crawlstats.php, d3_data_crawlstats.php)
+- top 10 directories on dashboard
+- crawl time to directory view pages (for parallel crawling)
+### fixed
+- total crawl time when running parallel crawls
+- bug with smartsearch and using "\" escape for regular es query
+
+# [1.5.0-beta.1] - 2018-03-06
+### notice
+- requires index created with diskover >= 1.5.0
+- this is a beta pre-release for v 1.5.0
+### added
+- login page (edit Constants.php to change if login is required (default is TRUE) and username and password from default (user: diskover, pass: darkdata); user will be logged out after 1 hour if inactive
 - show files option (checkbox) to file tree, treemap, heatmap pages for hiding files and just show directories, this helps to speed up treemap and heatmap
 - Auth.php (in ../src/diskover/) to handle auth check and require login
 - vars_inc.php - sets important vars like index,index2,path and added as require include at top of each php page

@@ -250,7 +250,7 @@ function sortURL($sort) {
 
 // escape special characters
 function escape_chars($text) {
-   $chr = '/()[] &<>+-|!{}^~?:';
+   $chr = '<>+-&|!(){}[]^"~*?:\/ ';
    return addcslashes($text, $chr);
 }
 
@@ -411,7 +411,7 @@ function predict_search($q) {
 
     // check for escape character to disable smartsearch
     if (strpos($q, '\\') === 0 || strpos($q, '!\\') === 0) {
-        $request = preg_replace('/\\\|!\\\/', '', $q);
+        $request = preg_replace('/^\\\|!\\\/', '', $q);
     // check for path input
     } elseif (strpos($q, '/') !== false && strpos($q, 'path_parent') === false) {
         // check for escaped paths

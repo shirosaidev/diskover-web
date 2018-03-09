@@ -107,7 +107,7 @@ require "vars_inc.php";
                     </div>
                     <span style="font-size:11px; color:gray;">Show files </span><span style="position:relative; top:8px;"><label class="switch"><input id="showfiles" name="showfiles" type="checkbox"><span class="slider round"></span></label></span>
                     <div id="statustext" class="statustext">
-                        <i class="glyphicon glyphicon-filter"></i> File filters: <span id="statusfilters"></span><span id="statushidethresh"></span>
+                        <i class="glyphicon glyphicon-filter"></i> Filters: <span id="statusfilters"></span><span id="statushidethresh"></span>
                         &nbsp;&nbsp;<i class="glyphicon glyphicon-info-sign"></i> filters affect all analytics pages
                     </div>
                 </div>

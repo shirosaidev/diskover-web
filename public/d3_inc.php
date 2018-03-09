@@ -11,8 +11,8 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 
 // set analytics vars
-$filter = isset($_GET['filter']) ? (int)$_GET['filter'] : Constants::FILTER; // file size
-$mtime = isset($_GET['mtime']) ? $_GET['mtime'] : Constants::MTIME; // file mtime
+$filter = isset($_GET['filter']) ? (int)$_GET['filter'] : Constants::FILTER; // filesize filter
+$mtime = isset($_GET['mtime']) ? $_GET['mtime'] : Constants::MTIME; // mtime
 // get mtime in ES format
 $mtime = getmtime($mtime);
 $maxdepth = isset($_GET['maxdepth']) ? (int)$_GET['maxdepth'] : Constants::MAXDEPTH; // maxdepth
@@ -41,29 +41,27 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     $searchParams['type'] = 'directory';
 
     // escape any special characters in path
-    $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
+    $escapedpath = escape_chars($path);
 
     if ($path === '/') {  // root /
         $searchParams['body'] = [
             'size' => 1,
-            '_source' => ["filesize","items","last_modified"],
+            '_source' => ["filesize","items"],
             'query' => [
                 'query_string' => [
-                    'query' => 'path_parent: ' . $escapedpath . ' AND filename: ""
-                    AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
+                    'query' => 'path_parent: ' . $escapedpath . ' AND filename: ""'
                 ]
             ]
         ];
     } else {
-        $p = addcslashes(dirname($path), '+-&|!(){}[]^"~*?:\/ ');
-        $f = addcslashes(basename($path), '+-&|!(){}[]^"~*?:\/ ');
+        $p = escape_chars(dirname($path));
+        $f = escape_chars(basename($path));
         $searchParams['body'] = [
             'size' => 1,
             '_source' => ["filesize","items","last_modified"],
             'query' => [
                 'query_string' => [
-                    'query' => 'path_parent: ' . $p . ' AND filename: ' . $f . '
-                    AND filesize: >=' . $filter . ' AND last_modified: {* TO ' . $mtime . '}'
+                    'query' => 'path_parent: ' . $p . ' AND filename: ' . $f
                 ]
             ]
         ];
@@ -78,11 +76,8 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
     // Get total size of directory and all subdirs
     $totalsize = (int)$queryResponse['hits']['hits'][0]['_source']['filesize'];
 
-    // Get last modified time
-    $last_modified = $queryResponse['hits']['hits'][0]['_source']['last_modified'];
-
-    // Create dirinfo list with total size (of all files), total count (items) and last modified time
-    $dirinfo = [$totalsize, $totalcount, $last_modified];
+    // Create dirinfo list with total size (of all files), total count (items)
+    $dirinfo = [$totalsize, $totalcount];
 
     return $dirinfo;
 }
@@ -172,7 +167,7 @@ function get_es_path($client, $index) {
     return $path;
 }
 
-function get_sub_dirs($client, $index, $path, $use_count) {
+function get_sub_dirs($client, $index, $path, $filter, $use_count) {
     // gets the largest sub dirs by filesize or item count (use_count true)
     // non-recursive
     $dirs = [];
@@ -188,11 +183,11 @@ function get_sub_dirs($client, $index, $path, $use_count) {
 
     // diff query if root path /
     if ($path === '/') {
-        $query = 'path_parent: \/ NOT path_parent: \/*\/* NOT filename: ""';
+        $query = '(path_parent: \/ NOT path_parent: \/*\/* NOT filename: "") AND filesize: >=' . $filter;
     } else {
         // escape special characters
         $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
-        $query = 'path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*';
+        $query = '(path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*) AND filesize: >=' . $filter;
     }
 
     $searchParams['body'] = [
@@ -249,7 +244,7 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
     }
 
     // get directories in current path (not recursive)
-    $subdirs = get_sub_dirs($client, $index, $path, $use_count);
+    $subdirs = get_sub_dirs($client, $index, $path, $filter, $use_count);
 
     // return if there are no sub directories
     if (count($subdirs) === 0) {
@@ -271,7 +266,6 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
         } else {
             $subdirs_size[$d] = $dirinfo[0];
             $subdirs_count[$d] = $dirinfo[1];
-            //$subdirs_mtime[$d] = $dirinfo[2];
         }
     }
 

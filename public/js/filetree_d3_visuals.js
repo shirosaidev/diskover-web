@@ -28,8 +28,8 @@ var hide_thresh = parseInt(getCookie('hide_thresh'));
 (!hide_thresh) ? hide_thresh = 0.9 : "";
 
 // add filtersto statustext
-var status_filter = ($_GET('filter')) ? 'size:' + format($_GET('filter')) : 'size:1 Bytes';
-var status_mtime = ($_GET('mtime')) ? ' mtime:' + $_GET('mtime') : ' mtime:0';
+var status_filter = ($_GET('filter')) ? 'file/dir minsize:' + format($_GET('filter')) + ', ' : 'file/dir minsize:1 Bytes, ';
+var status_mtime = ($_GET('mtime')) ? ' file mtime:' + $_GET('mtime') + ', ' : ' file mtime:0, ';
 document.getElementById('statusfilters').append(status_filter);
 document.getElementById('statusfilters').append(status_mtime);
 document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
