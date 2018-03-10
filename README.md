@@ -9,9 +9,9 @@
 
 diskover-web is an open-source file manager and storage analytics software for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search across your storage servers using your diskover Elasticsearch indices. With diskover-web you can visualize using the analytics pages to see the file meta data from your diskover crawls and get better insights into your data.
 
-With diskover-veb you can also do file tagging and provide detailed disk usage analytics for your file systems. Files and directories can be tagged for archival or delete or whatever you want with custom tags and from there you can use the api to provide any data moving you wish to do. 
+With diskover-web you can also do file tagging and provide detailed disk usage analytics for your file systems. Files and directories can be tagged for archival or delete, or whatever you want with custom tags, and from there you can use the API to provide any data moving you wish to do. 
 
-With "smartsearches" in diskover-web you can create any ES query and visualize those queries using the smartsearch analytics. Included are some common search queries such as image files, audio, video, documents, etc.
+With "smartsearches" in diskover-web, you can create any ES query and visualize those queries using the smartsearch analytics. Included are some common search queries such as image files, audio, video, documents, etc.
 
 diskover-web allows exporting of file lists to json/csv, also the diskover-web REST API can be integrated into your pipeline and used to view or update data, such as tags, in your diskover indices.
 
