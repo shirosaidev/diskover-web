@@ -5,6 +5,8 @@
 [![Donate Patreon](https://img.shields.io/badge/Donate%20%24-Patreon-brightgreen.svg)](https://www.patreon.com/diskover)
 [![Donate PayPal](https://img.shields.io/badge/Donate%20%24-PayPal-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72)
 
+<img align="left" width="249" height="189" src="docs/diskover.png?raw=true" hspace="5" vspace="5" alt="diskover">
+
 diskover-web is an open-source file manager and storage analytics software for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search across your storage servers using your diskover Elasticsearch indices. With diskover-web you can visualize using the analytics pages to see the file meta data from your diskover crawls and get better insights into your data.
 
 With diskover-veb you can also do file tagging and provide detailed disk usage analytics for your file systems. Files and directories can be tagged for archival or delete or whatever you want with custom tags and from there you can use the api to provide any data moving you wish to do. 
