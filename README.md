@@ -5,9 +5,15 @@
 [![Donate Patreon](https://img.shields.io/badge/Donate%20%24-Patreon-brightgreen.svg)](https://www.patreon.com/diskover)
 [![Donate PayPal](https://img.shields.io/badge/Donate%20%24-PayPal-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72)
 
-diskover-web is the web file manager and storage analytics application for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search your file system (using Elasticsearch diskover indices), file tagging and provide detailed disk usage analytics for your file system.
+<img align="left" width="249" height="189" src="https://github.com/shirosaidev/diskover/blob/master/docs/diskover.png?raw=true" hspace="5" vspace="5" alt="diskover">
 
-diskover-web allows exporting of file lists in json/csv, also REST API can be used to view or update data in diskover indices.
+diskover-web is an open-source file manager and storage analytics software for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search across your storage servers using your diskover Elasticsearch indices. With diskover-web you can visualize using the analytics pages to see the file meta data from your diskover crawls and get better insights into your data.
+
+With diskover-web you can also do file tagging and provide detailed disk usage analytics for your file systems. Files and directories can be tagged for archival or delete, or whatever you want with custom tags, and from there you can use the API to provide any data moving you wish to do. 
+
+With "smartsearches" in diskover-web, you can create any ES query and visualize those queries using the smartsearch analytics. Included are some common search queries such as image files, audio, video, documents, etc.
+
+diskover-web allows exporting of file lists to json/csv, also the diskover-web REST API can be integrated into your pipeline and used to view or update data, such as tags, in your diskover indices.
 
 It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](http://getbootstrap.com/) and [D3.js](https://d3js.org).
 
