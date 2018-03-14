@@ -11,7 +11,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
-require "vars_inc.php";
+
 
 // check if crawl has finished
 // Get search results from Elasticsearch for index stats and to see if crawl finished
@@ -593,7 +593,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                     <?php } else { ?>
                     <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
                 <?php } ?>
-                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> If running parallel crawls, start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
+                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> If running parallel crawls/reindexing, start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
         </div>
         <div class="panel panel-primary chartbox">
             <div class="panel-heading">

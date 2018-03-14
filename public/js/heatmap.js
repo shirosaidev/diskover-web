@@ -365,32 +365,20 @@ function renderTreeMap(data) {
         .style("opacity", 0);
 }
 
-var index = getCookie('index');
-var index2 = getCookie('index2');
 
 // display message if no index2 selected
 if (index2 === "") {
     document.getElementById('index2req').style.display = 'block';
 } else {
-    var path = decodeURIComponent($_GET('path'));
-    // remove any trailing slash
-    if (path !== '/') {
-        path = path.replace(/\/$/, "");
-    }
-    var filter = $_GET('filter') || FILTER, // min file size filter
-        mtime = $_GET('mtime') || MTIME, // min modified time filter
-        maxdepth = $_GET('maxdepth') || getCookie('maxdepth') || MAXDEPTH, // max directory depth
-        root,
+    var root,
         node,
         min,
         max;
 
-    var use_count = parseInt($_GET('use_count'));
-    (!use_count || use_count === 0) ? use_count = 0 : use_count = 1;
+    (use_count === '' || use_count === 0) ? use_count = 0 : use_count = 1;
     (use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
 
-    var show_files = getCookie('show_files');
-    (!show_files || show_files === '1') ? show_files = 1 : show_files = 0;
+    (show_files === '' || show_files === 1) ? show_files = 1 : show_files = 0;
     (show_files === 1) ? $('#showfiles').prop('checked', true) : $('#showfiles').prop('checked', false);
 
     console.log("PATH:" + path);

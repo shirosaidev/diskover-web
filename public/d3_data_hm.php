@@ -10,8 +10,9 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
-require "vars_inc.php";
 
+// get mtime in ES format
+$mtime = getmtime($mtime);
 
 // create list of indices
 $indices = [$esIndex, $esIndex2];

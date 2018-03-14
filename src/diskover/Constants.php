@@ -9,7 +9,7 @@ namespace diskover;
 
 class Constants {
     // diskover-web version
-    const VERSION = '1.5.0-beta.3';
+    const VERSION = '1.5.0-beta.4';
     // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // set to your Elasticsearch port, default 9200
@@ -24,6 +24,7 @@ class Constants {
     // set to true if using AWS
     const AWS = false;
     // diskover.py socket listener
+    const ENABLE_SOCKET_CLIENT = FALSE;
     const SOCKET_LISTENER_HOST = '127.0.0.1';
     const SOCKET_LISTENER_PORT = 9999;
     // default min file size (bytes) filter

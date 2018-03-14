@@ -10,6 +10,68 @@ use Elasticsearch\ClientBuilder;
 
 error_reporting(E_ALL ^ E_NOTICE);
 
+
+// sets important vars and cookies for index, index2, path, etc
+
+// check for index in url
+if (isset($_GET['index'])) {
+    $esIndex = $_GET['index'];
+    setCookie('index', $esIndex);
+} else {
+    // get index from env var or cookie
+    $esIndex = !empty(getenv('APP_ES_INDEX')) ? getenv('APP_ES_INDEX') : getCookie('index');
+    // redirect to select indices page if no index cookie
+    if (empty($esIndex)) {
+        header("location:selectindices.php");
+        exit();
+    }
+}
+// check for index2 in url
+if (isset($_GET['index2'])) {
+    $esIndex2 = $_GET['index2'];
+    setCookie('index2', $esIndex2);
+} else {
+    $esIndex2 = !empty(getenv('APP_ES_INDEX2')) ? getenv('APP_ES_INDEX2') : getCookie('index2');
+}
+
+// set path
+$path = isset($_GET['path']) ? $_GET['path'] : getCookie('path');
+// check if no path grab from session
+if (empty($path)) {
+    $path = $_SESSION['rootpath'];
+    //$path = get_es_path($client, $esIndex);
+    createCookie('path', $path);
+}
+// remove any trailing slash (unless root)
+if ($path !== "/") {
+    $path = rtrim($path, '/');
+}
+
+// set analytics vars
+$filter = isset($_GET['filter']) ? (int)$_GET['filter'] : (int)getCookie('filter'); // filesize filter
+if ($filter === "") {
+    $filter = Constants::FILTER;
+}
+$mtime = isset($_GET['mtime']) ? $_GET['mtime'] : getCookie('mtime'); // mtime
+if ($mtime === "") {
+    $mtime = Constants::MTIME;
+}
+// get use_count
+$use_count = isset($_GET['use_count']) ? (int)$_GET['use_count'] : (int)getCookie('use_count'); // use count
+if ($use_count === "") {
+    $use_count = Constants::USE_COUNT;
+}
+// get show_files
+$show_files = isset($_GET['show_files']) ? (int)$_GET['show_files'] : (int)getCookie('show_files'); // show files
+if ($show_files === "") {
+    $show_files = Constants::SHOW_FILES;
+}
+$maxdepth = isset($_GET['maxdepth']) ? (int)$_GET['maxdepth'] : (int)getCookie('maxdepth'); // maxdepth
+if ($maxdepth === "") {
+    $maxdepth = Constants::MAXDEPTH;
+}
+
+
 function connectES() {
   // Connect to Elasticsearch node
   $esPort = getenv('APP_ES_PORT') ?: Constants::ES_PORT;
@@ -90,6 +152,15 @@ function getmtime($mtime) {
 // update url param with new value and return url
 function build_url($param, $val) {
     parse_str($_SERVER['QUERY_STRING'], $queries);
+    // defaults
+    $queries['index'] = getCookie('index');
+    $queries['index2'] = getCookie('index2');
+    $queries['path'] = getCookie('path');
+    $queries['filter'] = getCookie('filter');
+    $queries['mtime'] = getCookie('mtime');
+    $queries['use_count'] = getCookie('use_count');
+    $queries['show_files'] = getCookie('show_files');
+    // set new param
     $queries[$param] = $val;
     $q = http_build_query($queries, null, '&', PHP_QUERY_RFC3986);
     $url = $_SERVER['PHP_SELF'] . "?" . $q;

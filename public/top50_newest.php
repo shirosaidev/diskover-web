@@ -11,8 +11,9 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
-require "vars_inc.php";
 
+// get mtime in ES format
+$mtime = getmtime($mtime);
 
 // get top 50 directories
 $totaldirsize = 0;

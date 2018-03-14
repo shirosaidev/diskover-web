@@ -130,11 +130,12 @@ select::-webkit-scrollbar-thumb
 <div class="col-xs-6">
 <pre>    __               __
    /\ \  __         /\ \
-   \_\ \/\_\    ____\ \ \/'\     ___   __  __     __   _ __     //
-   /'_` \/\ \  /',__\\ \ , <    / __`\/\ \/\ \  /'__`\/\`'__\  ('>
-  /\ \L\ \ \ \/\__, `\\ \ \\`\ /\ \L\ \ \ \_/ |/\  __/\ \ \/   /rr
-  \ \___,_\ \_\/\____/ \ \_\ \_\ \____/\ \___/ \ \____\\ \_\  *\))_
-   \/__,_ /\/_/\/___/   \/_/\/_/\/___/  \/__/   \/____/ \/_/ v<?php echo CONSTANTS::VERSION; ?>
+   \_\ \/\_\    ____\ \ \/'\     ___   __  __     __   _ __
+   /'_` \/\ \  /',__\\ \ , <    / __`\/\ \/\ \  /'__`\/\`'__\   //
+  /\ \L\ \ \ \/\__, `\\ \ \\`\ /\ \L\ \ \ \_/ |/\  __/\ \ \/   ('>
+  \ \___,_\ \_\/\____/ \ \_\ \_\ \____/\ \___/ \ \____\\ \_\   /rr
+   \/__,_ /\/_/\/___/   \/_/\/_/\/___/  \/__/   \/____/ \/_/  *\))_
+                                                  v<?php echo CONSTANTS::VERSION; ?>
 </pre>
 <div class="text-center">
     <strong><i class="glyphicon glyphicon-heart"></i> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.</strong>
@@ -154,8 +155,8 @@ select::-webkit-scrollbar-thumb
             <strong>Index: <span class="text-success"><?php echo $esIndex; ?></span></strong><br />
             <span style="color:gray"><small><i class="glyphicon glyphicon-stats"></i> docs (count/deleted): <?php echo $indexdoccount['count'].'/'.$indexdoccount['deleted']; ?> size: <?php echo formatBytes($indexsize); ?></small></span><br />
             <span class="text-info"><small><i class="glyphicon glyphicon-info-sign"></i> If deleted count is high you may want to optimize the index (below) to reduce size.</small></span><br />
-            <strong>Index 2:</strong> <?php echo $esIndex2; ?><br />
-            <small><i class="glyphicon glyphicon-cog"></i> <a href="selectindices.php">Change</a></small>
+            <br /><strong>Index 2:</strong> <?php echo $esIndex2; ?><br /><br />
+            <i class="glyphicon glyphicon-cog"></i> <a href="selectindices.php">Change</a>
         </div>
 
         <hr />
@@ -192,52 +193,6 @@ select::-webkit-scrollbar-thumb
 				<button type="submit" class="btn btn-primary" onclick="setFields()">Set</button>
 			</div>
 		</fieldset>
-    </div>
-    <div class="col-xs-6">
-        <div class="form-group">
-        <h4>Edit smart searches</h4>
-        <span class="text-info">!name|es query string</span>
-		<?php
-
-// configuration
-$file_smartsearches = 'smartsearches.txt';
-
-// check if form has been submitted
-if (isset($_POST['smartsearchtext'])) {
-    // save the text contents
-    $smartsearchtext = $_POST['smartsearchtext'];
-    // check for newline at end
-    if (substr($smartsearchtext, -1) != PHP_EOL) {
-        // add newline
-        $smartsearchtext .= PHP_EOL;
-    }
-    file_put_contents($file_smartsearches, $smartsearchtext);
-		$smartsearchsaved = TRUE;
-}
-
-// read the textfile
-$smartsearchtext = file_get_contents($file_smartsearches);
-
-?>
-			<form name="editsmartsearch" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
-				<fieldset>
-					<div class="col-xs-12">
-						<div class="form-group">
-							<textarea class="form-control" rows="15" name="smartsearchtext"><?php echo htmlspecialchars($smartsearchtext) ?></textarea>
-						</div>
-						<div class="form-group">
-							<button type="reset" class="btn btn-default">Cancel</button>
-							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($smartsearchsaved) { ?><script>alert("smart searches saved"); window.location.reload();</script><?php } ?>
-						</div>
-					</div>
-				</fieldset>
-			</form>
-        </div>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-6">
         <br />
         <div class="well">
 			<h5>diskover socket server status</h5>
@@ -265,7 +220,7 @@ if ($result == "pong") {
 
 <h4>Run diskover socket command</h4>
 <fieldset>
-    <div class="form-group">
+    <!--<div class="form-group">
         <select class="form-control" id="commandset" name="commandset" style="width:200px; display: inline;">
             <?php $cmd = '{"action": "finddupes", "index": "'.$esIndex.'"}'; ?>
           <option value='<?php echo $cmd; ?>'>Find duplicate files</option>
@@ -273,17 +228,18 @@ if ($result == "pong") {
     </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary run-btn" onclick="runCommand(JSON.parse(document.getElementById('commandset').value))">Run</button>
-    </div>
+    </div>-->
     <div class="form-group">
         <input name="command" type="text" id="command" placeholder="Command" class="form-control" size="80" />
     </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary run-btn" onclick="runCommand(JSON.parse(document.getElementById('command').value))">Run</button>
     </div>
+    <p>See <a href="help.php">help page</a> for command examples.</p>
 </fieldset>
-
 </div>
-        <br />
+
+        <hr />
 		<h4>Edit diskover-web config</h4>
 		<?php
 
@@ -348,6 +304,7 @@ $configtext = file_get_contents($file_config);
         </div>
         </fieldset>
     </form>
+
     <hr />
     <h4>Delete diskover indices</h4>
     <span style="color:red"><strong><i class="glyphicon glyphicon-warning-sign"></i> Careful, index will be deleted permanently!</strong></span>
@@ -377,8 +334,47 @@ $configtext = file_get_contents($file_config);
     </fieldset>
     </form>
 </div>
-
 <div class="col-xs-6">
+    <div class="form-group">
+    <h4>Edit smart searches</h4>
+    <span class="text-info">!name|es query string</span>
+    <?php
+
+// configuration
+$file_smartsearches = 'smartsearches.txt';
+
+// check if form has been submitted
+if (isset($_POST['smartsearchtext'])) {
+// save the text contents
+$smartsearchtext = $_POST['smartsearchtext'];
+// check for newline at end
+if (substr($smartsearchtext, -1) != PHP_EOL) {
+    // add newline
+    $smartsearchtext .= PHP_EOL;
+}
+file_put_contents($file_smartsearches, $smartsearchtext);
+    $smartsearchsaved = TRUE;
+}
+
+// read the textfile
+$smartsearchtext = file_get_contents($file_smartsearches);
+
+?>
+        <form name="editsmartsearch" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
+            <fieldset>
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <textarea class="form-control" rows="15" name="smartsearchtext"><?php echo htmlspecialchars($smartsearchtext) ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="reset" class="btn btn-default">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <?php if ($smartsearchsaved) { ?><script>alert("smart searches saved"); window.location.reload();</script><?php } ?>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
         <div class="form-group">
         <hr />
         <h4>Edit custom tags</h4>

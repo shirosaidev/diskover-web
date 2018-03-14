@@ -101,8 +101,26 @@ if (!empty($indices)) {
     }
 }
 
-?>
+$indexselected = "";
+$index2selected = "";
+// set cookies for indices and redirect to index page
+if (isset($_POST['index'])) {
+    $indexselected = trim(str_replace(['<- newest','*crawl still running*'], '', $_POST['index']));
+    createCookie('index', $indexselected);
+    if (isset($_POST['index2']) && $_POST['index2'] != "none") {
+        $index2selected = $_POST['index2'];
+        createCookie('index2', $_POST['index2']);
+    } elseif (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "")) {
+        deleteCookie('index2');
+    }
+    // delete existing path cookie
+    deleteCookie('path');
+    // redirect to index dashboard page
+    header("location: index.php?index=".$indexselected."&index2=".$index2selected."");
+    exit();
+}
 
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -129,26 +147,6 @@ if (!empty($indices)) {
       z-index: 2;
    }
 </style>
-<?php
-$indexselected = "";
-$index2selected = "";
-// set cookies for indices and redirect to index page
-if (isset($_POST['index'])) {
-    $indexselected = trim(str_replace(['<- newest','*crawl still running*'], '', $_POST['index']));
-    createCookie('index', $indexselected);
-    if (isset($_POST['index2']) && $_POST['index2'] != "none") {
-        $index2selected = $_POST['index2'];
-        createCookie('index2', $_POST['index2']);
-    } elseif (isset($_POST['index2']) && ($_POST['index2'] == "none" || $_POST['index2'] == "")) {
-        deleteCookie('index2');
-    }
-    // delete existing path cookie
-    deleteCookie('path');
-    // redirect to index dashboard page
-    header("location: index.php?index=".$indexselected."&index2=".$index2selected."");
-    exit();
-}
-?>
 </head>
 
 <body>

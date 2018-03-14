@@ -11,7 +11,6 @@ use Elasticsearch\Common\Exceptions\Missing404Exception;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-require "vars_inc.php";
 
 $message = $_REQUEST['message'];
 

@@ -11,7 +11,6 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
-require "vars_inc.php";
 
 
 // Get search results from Elasticsearch if the user searched for something

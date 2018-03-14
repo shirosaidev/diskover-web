@@ -1,5 +1,20 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.4] - 2018-03-14
+### notice
+- requires index created with diskover >= 1.5.0
+- this is a beta pre-release for v 1.5.0
+### addded
+- ENABLE_SOCKET_CLIENT to Constants.php to enable/disable diskover-web socket client to talk to diskover (default is FALSE disabled)
+### changed
+- removed vars_inc.php and moved it into Diskover.php
+- better handling of global vars
+- file tree page's tree now updates items/sizes based on filters, not just show the size/items of directory doc (filters set on filetree page also affect treemap, heatmap, top50 etc)
+- search results page no longer checks if can connect to socket server unless ENABLE_SOCKET_CLIENT is set to TRUE in Constants.php
+### fixed
+- selectindices php warning for headers already sent when running in Apache
+- various bugs with filetree page
+
 # [1.5.0-beta.3] - 2018-03-09
 ### notice
 - requires index created with diskover >= 1.5.0

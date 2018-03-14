@@ -9,18 +9,12 @@ LICENSE for the full license text.
  */
 
  $(document).ready(function() {
-     var index = getCookie('index');
-     var index2 = getCookie('index2');
 
      $('#changepath').click(function () {
          console.log('changing paths');
-         var p = encodeURIComponent($('#pathinput').val());
-         setCookie('path', p);
-         var f = getCookie('filter');
-         var m = getCookie('mtime');
-         var u = getCookie('use_count');
-         var s = getCookie('show_files');
-         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + p + "&filter=" + f + "&mtime=" + m + "&use_count=" + u + "&show_files=" + s;
+         var newpath = encodeURIComponent($('#pathinput').val());
+         setCookie('path', newpath);
+         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + newpath + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
          return false;
      });
 
@@ -41,8 +35,8 @@ LICENSE for the full license text.
      });
 
      d3.select("#showfiles").on("change", function() {
-         var show_files = document.getElementById('showfiles').checked;
-         show_files === true ? show_files = 1 : show_files = 0;
+         var sf = document.getElementById('showfiles').checked;
+         (sf === true) ? show_files = 1 : show_files = 0;
          setCookie('show_files', show_files)
          console.log("removing json data on local storage because show files changed");
  		sessionStorage.removeItem("diskover-filetree");
@@ -50,6 +44,14 @@ LICENSE for the full license text.
      });
 
      getJSON();
+
+     // set cookies
+     setCookie('filter', filter);
+     setCookie('mtime', mtime);
+     setCookie('maxdepth', maxdepth);
+     setCookie('use_count', use_count);
+     setCookie('show_files', show_files);
+
  });
 
 
@@ -101,7 +103,7 @@ function getChildJSON(d) {
 		if ((data && data.error) || error) {
 			spinner.stop();
 			console.warn("Elasticsearch data fetch error: " + error);
-			document.getElementById('error').style.display = 'block';
+			//document.getElementById('error').style.display = 'block';
 			return false;
 		}
 
@@ -210,13 +212,6 @@ function getJSON() {
 
 		// load file tree
 		updateTree(root, root);
-
-        // store cookies
-        setCookie('path', encodeURIComponent(root.name));
-        (filter) ? setCookie('filter', filter) : setCookie('filter', FILTER);
-        (mtime) ? setCookie('mtime', mtime): setCookie('mtime', MTIME);
-        (use_count) ? setCookie('use_count', use_count): setCookie('use_count', USE_COUNT);
-        (show_files) ? setCookie('show_files', show_files): setCookie('show_files', SHOW_FILES);
 
 		// load file size/count pie chart
 		changePie(root);

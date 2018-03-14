@@ -9,7 +9,25 @@ var FILTER = 1;
 var MAXDEPTH = 2;
 var MTIME = 0;
 var USE_COUNT = 0;
-var SHOW_FILES = 0;
+var SHOW_FILES = 1;
+
+var index = ($_GET('index')) ? $_GET('index') : getCookie('index');
+var index2 = ($_GET('index2')) ? $_GET('index2') : getCookie('index2');
+var path = ($_GET('path')) ? decodeURIComponent($_GET('path')) : decodeURIComponent(getCookie('path'));
+// remove any trailing slash
+if (path !== '/') {
+	path = path.replace(/\/$/, "");
+}
+var filter = ($_GET('filter')) ? parseInt($_GET('filter')) : parseInt(getCookie('filter'));
+if (filter === '') filter = FILTER;
+var mtime = ($_GET('mtime')) ? $_GET('mtime') : getCookie('mtime');
+if (mtime === '') mtime = MTIME;
+var maxdepth = ($_GET('maxdepth')) ? parseInt($_GET('maxdepth')) : parseInt(getCookie('maxdepth'));
+if (maxdepth === '') maxdepth = MAXDEPTH;
+var use_count = ($_GET('use_count')) ? parseInt($_GET('use_count')) : parseInt(getCookie('use_count'));
+if (use_count === '') use_count = USE_COUNT;
+var show_files = ($_GET('show_files')) ? parseInt($_GET('show_files')) : parseInt(getCookie('show_files'));
+if (show_files === '') show_files = SHOW_FILES;
 
 var xhr = new XMLHttpRequest();
 var changeTagCount = 0;
@@ -98,8 +116,6 @@ $(document).ready(function () {
         return false;
 	});
 
-    // update visualization links
-    //updateVisLinks();
 });
 
 // cookie functions
@@ -173,37 +189,7 @@ function changePercent(a,b) {
     return ((a - b) / b) * 100;
 }
 
-// update url links in nav bar for visualizations
-/*function updateVisLinks() {
-	var path = ($_GET('path')) ? $_GET('path') : getCookie('path');
-	var filter = (getCookie('filter')) ? getCookie('filter') : FILTER;
-	var mtime = (getCookie('mtime')) ? getCookie('mtime') : MTIME;
-	var maxdepth = (getCookie('maxdepth')) ? getCookie('maxdepth') : MAXDEPTH;
-    var use_count = (getCookie('use_count')) ? getCookie('use_count') : USE_COUNT;
-    var show_files = (getCookie('show_files')) ? getCookie('show_files') : SHOW_FILES;
-    var index = ($_GET('index')) ? $_GET('index') : getCookie('index');
-    var index2 = ($_GET('index2')) ? $_GET('index2') : getCookie('index2');
-	var url = "filetree.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
-	document.getElementById("filetreelink").setAttribute("href", url);
-	var url = "treemap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
-	document.getElementById("treemaplink").setAttribute("href", url);
-    var url = "heatmap.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&maxdepth=" + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
-	document.getElementById("heatmaplink").setAttribute("href", url);
-    var url = "top50.php?index=" + index + "&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime;
-	document.getElementById("top50link").setAttribute("href", url);
-    var url = "tags.php?index=" + index + "&index2=" + index2;
-	document.getElementById("tagslink").setAttribute("href", url);
-    var url = "dupes.php?index=" + index + "&index2=" + index2;
-	document.getElementById("dupeslink").setAttribute("href", url);
-    var url = "smartsearches.php?index=" + index + "&index2=" + index2;
-	document.getElementById("smartsearcheslink").setAttribute("href", url);
-    var url = "crawlstats.php?index=" + index + "&index2=" + index2;
-	document.getElementById("crawlstatslink").setAttribute("href", url);
-	return false;
-}
-*/
-
-// listen for msgs from diskover socket server and display progress bar on screen
+// listen for msgs from diskover socket server and display progress info on screen
 // using XMLHttpRequest
 function listenSocketServer() {
     var socketlistening = document.getElementById('socketlistening');
@@ -228,8 +214,6 @@ function listenSocketServer() {
         if (this.readyState==2 && this.status==200) {
             // disable run buttons
             $('.run-btn').addClass("disabled");
-            // show progress bar
-            $("#progress-container").fadeIn();
         } else if (this.readyState==3 && this.status==200) {
             var lines = this.responseText.trim().split('\n');
             var lastline = lines[lines.length-1]
@@ -249,15 +233,18 @@ function listenSocketServer() {
                     // enable run buttons
                     $('.run-btn').removeClass("disabled");
                 }, 3000);
-        	} else if (data.msg == 'taskid') {
-                console.log("got taskid msg, storing in cookie " + data.id)
-                setCookie('running_task_id', data.id);
-        	} else {
-        		// update progressbar
-                document.getElementById('progressbar').innerHTML = data.percent + '%';
-        		document.getElementById('progressbar').innerHTML += ' ['+data.eta+', '+data.it_per_sec+' '+data.it_name+'/s]';
-        		document.getElementById('progressbar').setAttribute('aria-valuenow', data.percent);
-        		document.getElementById('progressbar').style.width = data.percent+'%';
+        	} else if (data.msg == 'taskstart') {
+                console.log("got taskstart msg, storing taskid in cookie " + data.taskid)
+                setCookie('running_task_id', data.taskid);
+                // show progress bar
+                $("#progressbar-container").fadeIn();
+                // update progressbar
+                document.getElementById('progressbar').innerHTML = 'Running taskid ' + data.taskid + '...';
+                setTimeout(function(){
+                    $("#progressbar-container").fadeOut();
+                    // enable run buttons
+                    $('.run-btn').removeClass("disabled");
+                }, 3000);
         	}
         } else if (this.readyState==4 && this.status==200) {
             var lines = this.responseText.trim().split('\n');
@@ -265,26 +252,18 @@ function listenSocketServer() {
             //console.log(lastline)
             var data = JSON.parse(lastline);
         	console.log(data);
-            if (data.msg == 'exit') {  // check if we received exit msg
-                console.log("got exit msg, hiding progress bar and reloading page")
-                document.getElementById('progressbar').innerHTML = '100%';
-                document.getElementById('progressbar').style.width = '100%';
-        		document.getElementById('progressbar').innerHTML = 'Finished (exit code:  '+data.exitcode+', elapsed time: '+data.elapsedtime+')';
+            if (data.msg == 'taskfinish') {  // check if we received taskfinish msg
+                console.log("got taskfinish msg, showing progress bar and reloading page")
+                // show progress bar
+                $("#progressbar-container").fadeIn();
+        		document.getElementById('progressbar').innerHTML = 'Finished (exitcode:  '+data.exitcode+', elapsedtime: '+data.elapsedtime+')';
                 setTimeout(function(){
-                    $(".progress-container").fadeOut();
+                    $("#progressbar-container").fadeOut();
                     // enable run buttons
                     $('.run-btn').removeClass("disabled");
-                    //document.getElementById('progressbar').innerHTML = '0%';
-                    //document.getElementById('progressbar').style.width = '0%';
                     location.reload(true);
                 }, 3000);
-            } else {
-        		// update progressbar
-                document.getElementById('progressbar').innerHTML = data.percent + '%';
-        		document.getElementById('progressbar').innerHTML += ' ['+data.eta+', '+data.it_per_sec+' '+data.it_name+'/s]';
-        		document.getElementById('progressbar').setAttribute('aria-valuenow', data.percent);
-        		document.getElementById('progressbar').style.width = data.percent+'%';
-        	}
+            }
         }
     }
 }

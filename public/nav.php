@@ -9,8 +9,6 @@ require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 
-$esIndex = $_GET['index'] ?: getCookie('index');
-$esIndex2 = $_GET['index2'] ?: getCookie('index2');
 ?>
 <nav class="navbar navbar-inverse navbar-fixed-top">
 	<div class="container-fluid">
@@ -135,14 +133,15 @@ $esIndex2 = $_GET['index2'] ?: getCookie('index2');
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Analytics <span class="caret"></span></a>
 					<ul class="dropdown-menu" role="menu">
-						<li><a href="filetree.php" id="filetreelink">File Tree</a></li>
-						<li><a href="treemap.php" id="treemaplink">Treemap</a></li>
-                        <li><a href="heatmap.php" id="heatmaplink">Heatmap</a></li>
-                        <li><a href="top50.php" id="top50link">Top 50</a></li>
-                        <li><a href="tags.php" id="tagslink">Tags</a></li>
-                        <li><a href="dupes.php" id="dupeslink">Dupes</a></li>
-                        <li><a href="smartsearches.php" id="smartsearcheslink">Smart Searches</a></li>
-                        <li><a href="crawlstats.php" id="crawlstatslink">Crawl Stats</a></li>
+                        <?php $urlvars = "index=".$esIndex."&index2=".$esIndex2."&filter=".$filter."&mtime=".$mtime."&use_count=".$use_count."&show_files=".$show_files."&path=".rawurlencode($path); ?>
+						<li><a href="filetree.php?<?php echo $urlvars; ?>">File Tree</a></li>
+						<li><a href="treemap.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Treemap</a></li>
+                        <li><a href="heatmap.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Heatmap</a></li>
+                        <li><a href="top50.php?<?php echo $urlvars; ?>">Top 50</a></li>
+                        <li><a href="tags.php?<?php echo $urlvars; ?>">Tags</a></li>
+                        <li><a href="dupes.php?<?php echo $urlvars; ?>">Dupes</a></li>
+                        <li><a href="smartsearches.php?<?php echo $urlvars; ?>">Smart Searches</a></li>
+                        <li><a href="crawlstats.php?<?php echo $urlvars; ?>">Crawl Stats</a></li>
 					</ul>
 				</li>
 			</ul>

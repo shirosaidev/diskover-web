@@ -21,18 +21,22 @@ for ($i=1; $i < 5; $i++) {
 // Grab all the custom tags from file
 $customtags = get_custom_tags();
 
-error_reporting(E_ERROR | E_PARSE);
-// open socket connection to diskover listener
-$socket_host = Constants::SOCKET_LISTENER_HOST;
-$socket_port = Constants::SOCKET_LISTENER_PORT;
-$fp = stream_socket_client("tcp://".$socket_host.":".$socket_port, $errno, $errstr, 10);
-// test if listening
-fwrite($fp, "ping");
-$result = fgets($fp, 1024);
-// close socket
-fclose($fp);
-if ($result == "pong") {
-    $socketlistening = 1;
+if (Constants::ENABLE_SOCKET_CLIENT) {
+    error_reporting(E_ERROR | E_PARSE);
+    // open socket connection to diskover listener
+    $socket_host = Constants::SOCKET_LISTENER_HOST;
+    $socket_port = Constants::SOCKET_LISTENER_PORT;
+    $fp = stream_socket_client("tcp://".$socket_host.":".$socket_port, $errno, $errstr, 10);
+    // test if listening
+    fwrite($fp, "ping");
+    $result = fgets($fp, 1024);
+    // close socket
+    fclose($fp);
+    if ($result == "pong") {
+        $socketlistening = 1;
+    } else {
+        $socketlistening = 0;
+    }
 } else {
     $socketlistening = 0;
 }
@@ -65,7 +69,7 @@ if (count($results[$p]) > 0) {
                 <?php if($socketlistening) { ?>
                     <i title="socket server listening" class="glyphicon glyphicon-off text-success"></i>
                 <?php } else { ?>
-                    <i title="socket server not listening" class="glyphicon glyphicon-off text-warning"></i>
+                    <i title="socket server not listening or client not enabled" class="glyphicon glyphicon-off text-warning"></i>
                 <?php } ?></span>
                     <div class="btn-group" style="display:inline-block;">
                       <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -400,17 +404,13 @@ if (count($results[$p]) > 0) {
 	</div>
   </div>
 </div>
-<div class="alert alert-dismissible alert-danger" id="errormsg-container" style="display:none; width:400px; position: fixed; left: 50px; bottom: 20px; z-index:2">
+<div class="alert alert-dismissible alert-danger" id="errormsg-container" style="display:none; width:500px; position: fixed; left: 50px; bottom: 20px; z-index:2">
             <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
-<div id="progress-container" class="alert alert-dismissible alert-info" style="display:none; width:400px; height:80px; position: fixed; left: 50px; bottom: 20px; z-index:2">
-  <strong>Task running, keep this window open until done.</strong><br />
-  <div id="progress" class="progress">
-    <div id="progressbar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 0%; color:white; font-weight:bold; height:20px;">
-      0%
+  <div id="progressbar-container" class="progress progress-striped active" style="display:none; width:500px; position: fixed; left: 50px; bottom: 20px; z-index:2">
+    <div id="progressbar" class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; color:white; font-weight:bold;">
     </div>
   </div>
-</div>
 <?php
 } // END if there are search results
 

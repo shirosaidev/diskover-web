@@ -10,7 +10,6 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
-require "vars_inc.php";
 
 
 // Get search results from Elasticsearch for thread usage

@@ -8,28 +8,18 @@ LICENSE for the full license text.
  * d3 filetree visuals for diskover-web
  */
 
-var filter = parseInt($_GET('filter'));
-var mtime = $_GET('mtime');
-var path = decodeURIComponent($_GET('path'));
-// remove any trailing slash
-if (path !== '/') {
-	path = path.replace(/\/$/, "");
-}
-
-var use_count = parseInt($_GET('use_count'));
-(!use_count || use_count === 0) ? use_count = 0 : use_count = 1;
+(use_count === '' || use_count === 0) ? use_count = 0 : use_count = 1;
 (use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
 
-var show_files = getCookie('show_files');
-(!show_files || show_files === '1') ? show_files = 1 : show_files = 0;
+(show_files === '' || show_files === 1) ? show_files = 1 : show_files = 0;
 (show_files === 1) ? $('#showfiles').prop('checked', true) : $('#showfiles').prop('checked', false);
 
-var hide_thresh = parseInt(getCookie('hide_thresh'));
-(!hide_thresh) ? hide_thresh = 0.9 : "";
+var hide_thresh = parseFloat(getCookie('hide_thresh'));
+(hide_thresh === '') ? hide_thresh = 0.9 : "";
 
 // add filtersto statustext
-var status_filter = ($_GET('filter')) ? 'file/dir minsize:' + format($_GET('filter')) + ', ' : 'file/dir minsize:1 Bytes, ';
-var status_mtime = ($_GET('mtime')) ? ' file mtime:' + $_GET('mtime') + ', ' : ' file mtime:0, ';
+var status_filter = (filter) ? 'minsize:' + format(filter) + ', ' : 'minsize:unknown, ';
+var status_mtime = (mtime) ? ' mtime:' + mtime + ', ' : ' mtime:unknown, ';
 document.getElementById('statusfilters').append(status_filter);
 document.getElementById('statusfilters').append(status_mtime);
 document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
@@ -57,7 +47,7 @@ function changeThreshold(a) {
 }
 
 function getMtime() {
-    if (mtime === '0') {
+    if (mtime === '0' || mtime === 'now') {
         var last_mod_time_high = 'now';
     } else if (mtime === '1d') {
         var last_mod_time_high = 'now-1d/d';

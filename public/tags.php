@@ -11,7 +11,6 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
-require "vars_inc.php";
 
 
 // Grab all the custom tags from file
