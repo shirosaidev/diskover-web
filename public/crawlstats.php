@@ -13,7 +13,7 @@ require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
 
-// check if crawl is finished
+// check if crawl has finished
 // Get search results from Elasticsearch for index stats and to see if crawl finished
 // return boolean if crawl finished (true)
 $results = [];
@@ -24,12 +24,24 @@ $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'crawlstat';
 
 $searchParams['body'] = [
-    '_source' => ['indexing_date'],
     'size' => 1,
     'query' => [
             'match' => [
-                'event' => 'start'
+                'worker_name' => 'main'
             ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+// determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
+$crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
+
+// get first crawl index time
+$searchParams['body'] = [
+    '_source' => ['indexing_date'],
+    'size' => 1,
+    'query' => [
+            'match_all' => (object) []
      ],
      'sort' => [
          'indexing_date' => [
@@ -39,15 +51,14 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-$firstcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+$firstcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
+// get last crawl index time
 $searchParams['body'] = [
     '_source' => ['indexing_date'],
     'size' => 1,
     'query' => [
-            'match' => [
-                'event' => 'start'
-            ]
+            'match_all' => (object) []
      ],
      'sort' => [
          'indexing_date' => [
@@ -57,32 +68,15 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-$lastcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+$lastcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
-$searchParams['body'] = [
-    '_source' => ['indexing_date'],
-    'size' => 1,
-    'query' => [
-            'match' => [
-                'event' => 'stop'
-            ]
-     ],
-     'sort' => [
-         'indexing_date' => [
-             'order' => 'desc'
-         ]
-     ]
-];
-$queryResponse = $client->search($searchParams);
-
-$lastcrawlstoptime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
-
+// get total crawl elapsed time (cumulative)
 $searchParams['body'] = [
    'size' => 0,
     'aggs' => [
       'total_elapsed' => [
         'sum' => [
-          'field' => 'elapsed_time'
+          'field' => 'crawl_time'
         ]
       ]
     ],
@@ -94,9 +88,6 @@ $queryResponse = $client->search($searchParams);
 
 // Get total elapsed time (in seconds) of crawl(s)
 $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
-
-// determine if crawl is finished by seeing if last crawlstarttime is newer than last crawlstoptime
-$crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
 
 ?>
 
@@ -509,7 +500,7 @@ $crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
                 .attr('class', 'd3-tip')
                 .html(function(d) {
                     return "<span style='font-size:12px;color:white;'>" + d.x + "</span><br>\
-                    <span style='font-size:12px; color:red;'>crawl time: " + Math.round(d.y * 100)/100 + " sec</span><br>\
+                    <span style='font-size:12px; color:red;'>crawl time: " + d3.round(d.y * 100 / 100, 3) + " sec</span><br>\
                     <span style='font-size:12px; color:red;'>items: " + d.items + " ("+format(d.filesize)+")</span>";
                 });
 
@@ -519,7 +510,7 @@ $crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
                 .attr('class', 'd3-tip')
                 .html(function(d) {
                     return "<span style='font-size:12px;color:white;'>" + paths[d] + "</span><br>\
-                    <span style='font-size:12px; color:red;'>crawl time: " + Math.round(crawltimes[d] * 100)/100 + " sec</span><br>\
+                    <span style='font-size:12px; color:red;'>crawl time: " + d3.round(crawltimes[d] * 100 / 100, 3) + " sec</span><br>\
                     <span style='font-size:12px; color:red;'>items: " + items[d] + " ("+format(sizes[d])+")</span>";
                 });
 

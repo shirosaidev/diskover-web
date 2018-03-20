@@ -8,18 +8,16 @@ LICENSE for the full license text.
  * d3 filetree visuals for diskover-web
  */
 
-(use_count === '' || use_count === 0) ? use_count = 0 : use_count = 1;
-(use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
 
-(show_files === '' || show_files === 1) ? show_files = 1 : show_files = 0;
+// set toggles
+(use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
 (show_files === 1) ? $('#showfiles').prop('checked', true) : $('#showfiles').prop('checked', false);
 
-var hide_thresh = parseFloat(getCookie('hide_thresh'));
-(hide_thresh === '') ? hide_thresh = 0.9 : "";
+var hide_thresh = (getCookie('hide_thresh')) ? parseFloat(getCookie('hide_thresh')) : HIDE_THRESH;
 
 // add filtersto statustext
-var status_filter = (filter) ? 'minsize:' + format(filter) + ', ' : 'minsize:unknown, ';
-var status_mtime = (mtime) ? ' mtime:' + mtime + ', ' : ' mtime:unknown, ';
+var status_filter = 'minsize:' + format(filter) + ', ';
+var status_mtime = ' mtime:' + mtime + ', ';
 document.getElementById('statusfilters').append(status_filter);
 document.getElementById('statusfilters').append(status_mtime);
 document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;

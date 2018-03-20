@@ -10,6 +10,7 @@ var MAXDEPTH = 2;
 var MTIME = 0;
 var USE_COUNT = 0;
 var SHOW_FILES = 1;
+var HIDE_THRESH = 0.9;
 
 var index = ($_GET('index')) ? $_GET('index') : getCookie('index');
 var index2 = ($_GET('index2')) ? $_GET('index2') : getCookie('index2');
@@ -19,15 +20,15 @@ if (path !== '/') {
 	path = path.replace(/\/$/, "");
 }
 var filter = ($_GET('filter')) ? parseInt($_GET('filter')) : parseInt(getCookie('filter'));
-if (filter === '') filter = FILTER;
+if (filter === '') var filter = FILTER;
 var mtime = ($_GET('mtime')) ? $_GET('mtime') : getCookie('mtime');
-if (mtime === '') mtime = MTIME;
+if (mtime === '') var mtime = MTIME;
 var maxdepth = ($_GET('maxdepth')) ? parseInt($_GET('maxdepth')) : parseInt(getCookie('maxdepth'));
-if (maxdepth === '') maxdepth = MAXDEPTH;
+if (maxdepth === '') var maxdepth = MAXDEPTH;
 var use_count = ($_GET('use_count')) ? parseInt($_GET('use_count')) : parseInt(getCookie('use_count'));
-if (use_count === '') use_count = USE_COUNT;
+if (use_count === '') var use_count = USE_COUNT;
 var show_files = ($_GET('show_files')) ? parseInt($_GET('show_files')) : parseInt(getCookie('show_files'));
-if (show_files === '') show_files = SHOW_FILES;
+if (show_files === '') var show_files = SHOW_FILES;
 
 var xhr = new XMLHttpRequest();
 var changeTagCount = 0;

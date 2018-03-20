@@ -37,6 +37,8 @@ class Constants {
     const USE_COUNT = 0;
     // default show files on analytics pages
     const SHOW_FILES = 1;
+    // default hide threshhold filter
+    const HIDE_THRESH = 0.9;
     // default results per search page
     const SEARCH_RESULTS = 50;
 }

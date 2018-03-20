@@ -48,49 +48,26 @@ if (!empty($indices)) {
 
     // check if it's finished being indexed
 
+    // Get search results from Elasticsearch for index stats and to see if crawl finished
     $results = [];
     $searchParams = [];
 
-    $searchParams['index'] = $newest_index;
+    // Setup search query
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'crawlstat';
 
     $searchParams['body'] = [
-        '_source' => ['indexing_date'],
         'size' => 1,
         'query' => [
                 'match' => [
-                    'event' => 'start'
+                    'worker_name' => 'main'
                 ]
-         ],
-         'sort' => [
-             'indexing_date' => [
-                 'order' => 'desc'
-             ]
          ]
     ];
     $queryResponse = $client->search($searchParams);
 
-    $lastcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
-
-    $searchParams['body'] = [
-        '_source' => ['indexing_date'],
-        'size' => 1,
-        'query' => [
-                'match' => [
-                    'event' => 'stop'
-                ]
-         ],
-         'sort' => [
-             'indexing_date' => [
-                 'order' => 'desc'
-             ]
-         ]
-    ];
-    $queryResponse = $client->search($searchParams);
-
-    $lastcrawlstoptime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
-
-    // determine if crawl is finished by seeing if last crawlstarttime is newer than last crawlstoptime
-    $crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
+    // determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
+    $crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
 
     // create cookies for default search sort if none already created
     if (empty(getCookie('sort')) && empty(getCookie('sort2'))) {

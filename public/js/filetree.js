@@ -36,19 +36,20 @@ LICENSE for the full license text.
 
      d3.select("#showfiles").on("change", function() {
          var sf = document.getElementById('showfiles').checked;
-         (sf === true) ? show_files = 1 : show_files = 0;
+         (sf) ? show_files = 1 : show_files = 0;
          setCookie('show_files', show_files)
          console.log("removing json data on local storage because show files changed");
- 		sessionStorage.removeItem("diskover-filetree");
+ 		 sessionStorage.removeItem("diskover-filetree");
          location.href="filetree.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
      });
 
      getJSON();
 
      // set cookies
+     setCookie('path', encodeURIComponent(path));
      setCookie('filter', filter);
      setCookie('mtime', mtime);
-     setCookie('maxdepth', maxdepth);
+     setCookie('hide_thresh', hide_thresh);
      setCookie('use_count', use_count);
      setCookie('show_files', show_files);
 

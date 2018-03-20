@@ -79,15 +79,15 @@ $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'file';
 
 
-// Setup search query for largest files
-$path = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
+// Setup search query for newest files
+$escapedpath = addcslashes($path, '+-&&||!(){}[]^"~*?:\/ ');
 $searchParams['body'] = [
     'size' => 50,
     '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
     'query' => [
         'bool' => [
             'must' => [
-                    'wildcard' => [ 'path_parent' => $path . '*' ]
+                    'wildcard' => [ 'path_parent' => $escapedpath . '*' ]
             ],
             'filter' => [
                 'bool' => [

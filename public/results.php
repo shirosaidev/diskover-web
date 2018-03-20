@@ -98,7 +98,7 @@ if (count($results[$p]) > 0) {
   <div class="row">
     <div class="counter pull-right"></div>
     <?php $numofcol = 10; ?>
-    <table class="table results table-striped table-hover table-condensed">
+    <table class="table results table-striped table-hover">
       <thead>
         <tr>
           <th class="text-nowrap">#</th>

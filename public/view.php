@@ -66,7 +66,7 @@ if ($filedoctype == 'directory') {
     $searchParams['index'] = $esIndex;
     $searchParams['type']  = 'crawlstat';
     $searchParams['body'] = [
-        '_source' => ['elapsed_time'],
+        '_source' => ['crawl_time'],
         'size' => 1,
         'query' => [
                 'match' => [
@@ -74,13 +74,13 @@ if ($filedoctype == 'directory') {
                 ]
          ],
          'sort' => [
-             'elapsed_time' => [
+             'crawl_time' => [
                  'order' => 'desc'
              ]
          ]
     ];
     $queryResponse = $client->search($searchParams);
-    $crawltime = $queryResponse['hits']['hits'][0]['_source']['elapsed_time'];
+    $crawltime = $queryResponse['hits']['hits'][0]['_source']['crawl_time'];
 }
 
 // Grab all the custom tags from file
@@ -326,10 +326,12 @@ exit();
             <span class="badge"><?php echo $file['indexing_date']; ?></span>
             Indexed at (utc)
           </li>
+          <?php if ($_REQUEST['doctype'] == 'directory') { ?>
           <li class="list-group-item">
             <span class="badge"><?php echo secondsToTime($crawltime); ?></span>
             Crawl time
           </li>
+          <?php } ?>
         </ul>
       </div>
     </div>

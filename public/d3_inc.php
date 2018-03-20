@@ -10,9 +10,6 @@ use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);
 
 
-// Connect to Elasticsearch
-$client = connectES();
-
 // Get total directory size, count, mtime from Elasticsearch (recursive) for path
 function get_dir_info($client, $index, $path, $filter, $mtime) {
     $totalsize = 0;
@@ -172,36 +169,6 @@ function get_files($client, $index, $path, $filter, $mtime) {
     return $items;
 }
 
-function get_es_path($client, $index) {
-    // try to get a top level path from ES
-
-    $searchParams['body'] = [];
-
-    // Setup search query
-    $searchParams['index'] = $index;
-    $searchParams['type']  = "diskspace";
-
-    // number of results to return
-    $searchParams['size'] = 1;
-
-    $searchParams['body'] = [
-        '_source' => ["path"],
-           'query' => [
-               'match_all' => (object) []
-        ]
-    ];
-
-    // Send search query to Elasticsearch and get results
-    $queryResponse = $client->search($searchParams);
-
-    // Get directories
-    $results = $queryResponse['hits']['hits'];
-
-    // set path to first path found
-    $path = $results[0]['_source']['path'];
-
-    return $path;
-}
 
 function get_sub_dirs($client, $index, $path, $filter, $use_count) {
     // gets the largest sub dirs by filesize or item count (use_count true)
@@ -223,7 +190,7 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
     } else {
         // escape special characters
         $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
-        $query = '(path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*) AND filesize: >=' . $filter;
+        $query = '(path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*)';
     }
 
     $searchParams['body'] = [
@@ -295,10 +262,9 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
     foreach ($subdirs as $d) {
         // get dir total size and file count
         $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
-        // if directory is empty, set it's item count to 1 for itself
+        // if directory is empty don't show it in the tree
         if ($dirinfo[0] === 0 || $dirinfo[1] === 0) {
-            $subdirs_size[$d] = 0;
-            $subdirs_count[$d] = 1;  // add 1 for itself
+            continue;
         } else {
             $subdirs_size[$d] = $dirinfo[0];
             $subdirs_count[$d] = $dirinfo[1];

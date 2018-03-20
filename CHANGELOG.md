@@ -1,5 +1,14 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.5] - 2018-03-21
+### notice
+- requires index created with diskover >= v1.5.0-beta.5
+- this is a beta pre-release for v1.5.0
+### changed
+- modified code for index changes in diskover 1.5.0-beta.5
+### fixed
+- various bugs
+
 # [1.5.0-beta.4] - 2018-03-14
 ### notice
 - requires index created with diskover >= 1.5.0

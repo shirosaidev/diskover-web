@@ -24,12 +24,24 @@ $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'crawlstat';
 
 $searchParams['body'] = [
-    '_source' => ['indexing_date'],
     'size' => 1,
     'query' => [
             'match' => [
-                'event' => 'start'
+                'worker_name' => 'main'
             ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+// determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
+$crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
+
+// get first crawl index time
+$searchParams['body'] = [
+    '_source' => ['indexing_date'],
+    'size' => 1,
+    'query' => [
+            'match_all' => (object) []
      ],
      'sort' => [
          'indexing_date' => [
@@ -39,15 +51,14 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-$firstcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+$firstcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
+// get last crawl index time
 $searchParams['body'] = [
     '_source' => ['indexing_date'],
     'size' => 1,
     'query' => [
-            'match' => [
-                'event' => 'start'
-            ]
+            'match_all' => (object) []
      ],
      'sort' => [
          'indexing_date' => [
@@ -57,32 +68,15 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-$lastcrawlstarttime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
+$lastcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
-$searchParams['body'] = [
-    '_source' => ['indexing_date'],
-    'size' => 1,
-    'query' => [
-            'match' => [
-                'event' => 'stop'
-            ]
-     ],
-     'sort' => [
-         'indexing_date' => [
-             'order' => 'desc'
-         ]
-     ]
-];
-$queryResponse = $client->search($searchParams);
-
-$lastcrawlstoptime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
-
+// get total crawl elapsed time (cumulative)
 $searchParams['body'] = [
    'size' => 0,
     'aggs' => [
       'total_elapsed' => [
         'sum' => [
-          'field' => 'elapsed_time'
+          'field' => 'crawl_time'
         ]
       ]
     ],
@@ -95,19 +89,33 @@ $queryResponse = $client->search($searchParams);
 // Get total elapsed time (in seconds) of crawl(s)
 $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
 
-// determine if crawl is finished by seeing if last crawlstarttime is newer than last crawlstoptime
-$crawlfinished = ($lastcrawlstarttime < $lastcrawlstoptime) ? true : false;
 
-
-// Get search results from Elasticsearch for thread usage
+// Get search results from Elasticsearch for worker usage
 $results = [];
 $searchParams = [];
 
 // Setup search query
-$thread_usage = [];
+$worker_usage = [];
+$workers = [];
 
-# show up to 40 threads in chart
-for ($i=0; $i < 40; $i++) {
+// get all the worker names
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'worker';
+$searchParams['body'] = [
+    '_source' => ['worker_name'],
+    'size' => 100,
+    'query' => [
+        'match_all' => (object) []
+    ]
+];
+// Send search query to Elasticsearch
+$queryResponse = $client->search($searchParams);
+foreach ($queryResponse['hits']['hits'] as $key => $value) {
+    $workers[] = $value['_source']['worker_name'];
+}
+$workers = array_unique($workers);
+
+foreach ($workers as $key => $value) {
     // Execute the search
     $searchParams['index'] = $esIndex;
     $searchParams['type']  = 'file';
@@ -115,7 +123,7 @@ for ($i=0; $i < 40; $i++) {
      'size' => 0,
      'query' => [
        'match' => [
-         'indexing_thread' => $i
+         'worker_name' => $value
        ]
      ]
     ];
@@ -130,18 +138,18 @@ for ($i=0; $i < 40; $i++) {
      'size' => 0,
      'query' => [
        'match' => [
-         'indexing_thread' => $i
+         'worker_name' => $value
        ]
      ]
     ];
 
     // Send search query to Elasticsearch
     $queryResponseDir = $client->search($searchParams);
+
     if ($queryResponseFile['hits']['total'] || $queryResponseDir['hits']['total'] > 0) {
-        $thread_usage[$i] = [ 'thread' => $i, 'file' => $queryResponseFile['hits']['total'], 'directory' => $queryResponseDir['hits']['total'] ];
+        $worker_usage[$value] = [ 'worker_name' => $value, 'file' => $queryResponseFile['hits']['total'], 'directory' => $queryResponseDir['hits']['total'] ];
     }
 }
-$js_threads = json_encode($thread_usage);
 
 
 // Get search results from Elasticsearch for tags
@@ -387,9 +395,9 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>diskover &mdash; Dashboard</title>
-	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+    <link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="css/diskover.css" media="screen" />
-	<style>
+    <style>
         .darken {
             color: gray !important;
         }
@@ -399,13 +407,13 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         .darken a:hover {
             color: gray !important;
         }
-		.arc text {
-			font: 10px sans-serif;
-			text-anchor: middle;
-		}
-		.arc path {
-			stroke: #0B0C0E;
-		}
+        .arc text {
+            font: 10px sans-serif;
+            text-anchor: middle;
+        }
+        .arc path {
+            stroke: #0B0C0E;
+        }
         #diskspacechart rect {
             fill: #BD1B00;
             stroke: black;
@@ -437,24 +445,24 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
             margin-bottom: 10px;
         }
         .axis {
-	        font: 10px sans-serif;
+            font: 10px sans-serif;
             fill: #ccc;
-	    }
-	    .axis path,
-	    .axis line {
-    	  fill: none;
-    	  stroke: #000;
-    	  shape-rendering: crispEdges;
         }
-        #threadchart {
+        .axis path,
+        .axis line {
+          fill: none;
+          stroke: #000;
+          shape-rendering: crispEdges;
+        }
+        #workerchart {
             width: 700px;
             height: 250px;
             position: relative;
         }
-        #threadchart rect {
+        #workerchart rect {
             stroke: black;
         }
-	</style>
+    </style>
 </head>
 <body>
 <?php include "nav.php"; ?>
@@ -474,15 +482,15 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       </div>
       <div class="panel panel-primary chartbox">
       <div class="panel-heading">
-          <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Thread Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
+          <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
       </div>
       <div class="panel-body">
-          <div id="threadchart" class="text-center"></div>
+          <div id="workerchart" class="text-center"></div>
       <div>
-          <?php foreach ($thread_usage as $key => $value) {
+          <?php foreach ($worker_usage as $key => $value) {
       ?>
-        <span class="label" style="background-color: #393D77;">file thread-<?php echo $key; ?> <?php echo $value['file']; ?></span>
-        <span class="label" style="background-color: #5256A1;">dir thread-<?php echo $key; ?> <?php echo $value['directory']; ?></span>
+        <span class="label" style="background-color: #393D77;">file count-<?php echo $key; ?> <?php echo $value['file']; ?></span>
+        <span class="label" style="background-color: #5256A1;">dir count-<?php echo $key; ?> <?php echo $value['directory']; ?></span>
       <?php
       } ?>
       </div>
@@ -586,14 +594,14 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         </div>
         <div class="well">
             <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
-                <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawlstarttime; ?></span> UTC.<br />
+                <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawltime; ?></span> UTC.<br />
                 <?php if ($crawlfinished) { ?>
-                    <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawlstoptime; ?></span> UTC.<br />
+                    <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawltime; ?></span> UTC.<br />
                     <i class="glyphicon glyphicon-time"></i> Total crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
                     <?php } else { ?>
                     <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
                 <?php } ?>
-                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> If running parallel crawls/reindexing, start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
+                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> Start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
         </div>
         <div class="panel panel-primary chartbox">
             <div class="panel-heading">
@@ -721,165 +729,165 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
 <script language="javascript" src="js/d3.v3.min.js"></script>
 <script language="javascript" src="js/spin.min.js"></script>
 <!-- d3 charts -->
-	<script>
-		var count_untagged = <?php echo $tagCounts['untagged'] ?>;
-		var count_delete = <?php echo $tagCounts['delete'] ?>;
-		var count_archive = <?php echo $tagCounts['archive'] ?>;
-		var count_keep = <?php echo $tagCounts['keep'] ?>;
-
-		var dataset = [{
-			label: 'untagged',
-			count: count_untagged
-		}, {
-			label: 'delete',
-			count: count_delete
-		}, {
-			label: 'archive',
-			count: count_archive
-		}, {
-			label: 'keep',
-			count: count_keep
-		}];
-
-		var width = 200;
-		var height = 200;
-		var radius = Math.min(width, height) / 2;
-
-		var color = d3.scale.ordinal()
-			.range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
-
-		var svg = d3.select("#tagcountchart")
-			.append('svg')
-			.attr('width', width)
-			.attr('height', height)
-			.append('g')
-			.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
-
-		var pie = d3.layout.pie()
-			.value(function(d) {
-				return d.count;
-			})
-			.sort(null);
-
-		var path = d3.svg.arc()
-			.outerRadius(radius - 10)
-			.innerRadius(0);
-
-		var label = d3.svg.arc()
-			.outerRadius(radius - 40)
-			.innerRadius(radius - 40);
-
-		var arc = svg.selectAll('.arc')
-			.data(pie(dataset))
-			.enter().append('g')
-			.attr('class', 'arc');
-
-		arc.append('path')
-			.attr('d', path)
-			.attr('fill', function(d) {
-				return color(d.data.label);
-			});
-
-		arc.append('text')
-			.attr("transform", function(d) {
-				return "translate(" + label.centroid(d) + ")";
-			})
-			.attr("dy", "0.35em")
-			.text(function(d) {
-				return d.data.label;
-			});
-	</script>
-
-	<script>
-		var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
-		var size_delete = <?php echo $totalFilesize['delete'] ?>;
-		var size_archive = <?php echo $totalFilesize['archive'] ?>;
-		var size_keep = <?php echo $totalFilesize['keep'] ?>;
-
-		var dataset = [{
-			label: 'untagged',
-			size: size_untagged
-		}, {
-			label: 'delete',
-			size: size_delete
-		}, {
-			label: 'archive',
-			size: size_archive
-		}, {
-			label: 'keep',
-			size: size_keep
-		}];
-
-		var width = 200;
-		var height = 200;
-		var radius = Math.min(width, height) / 2;
-
-		var color = d3.scale.ordinal()
-			//.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-		.range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
-
-		var svg = d3.select("#filesizechart")
-			.append('svg')
-			.attr('width', width)
-			.attr('height', height)
-			.append('g')
-			.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
-
-		var pie = d3.layout.pie()
-			.value(function(d) {
-				return d.size;
-			})
-			.sort(null);
-
-		var path = d3.svg.arc()
-			.outerRadius(radius - 10)
-			.innerRadius(0);
-
-		var label = d3.svg.arc()
-			.outerRadius(radius - 40)
-			.innerRadius(radius - 40);
-
-		var arc = svg.selectAll('.arc')
-			.data(pie(dataset))
-			.enter().append('g')
-			.attr('class', 'arc');
-
-		arc.append('path')
-			.attr('d', path)
-			.attr('fill', function(d) {
-				return color(d.data.label);
-			});
-
-		arc.append('text')
-			.attr("transform", function(d) {
-				return "translate(" + label.centroid(d) + ")";
-			})
-			.attr("dy", "0.35em")
-			.text(function(d) {
-				return d.data.label;
-			});
-	</script>
     <script>
-		var size_total = <?php echo $diskspace_total; ?>;
-		var size_used = <?php echo $diskspace_used; ?>;
-		var size_free = <?php echo $diskspace_free; ?>;
-		var size_available = <?php echo $diskspace_available; ?>;
+        var count_untagged = <?php echo $tagCounts['untagged'] ?>;
+        var count_delete = <?php echo $tagCounts['delete'] ?>;
+        var count_archive = <?php echo $tagCounts['archive'] ?>;
+        var count_keep = <?php echo $tagCounts['keep'] ?>;
 
-		var height = 20,
+        var dataset = [{
+            label: 'untagged',
+            count: count_untagged
+        }, {
+            label: 'delete',
+            count: count_delete
+        }, {
+            label: 'archive',
+            count: count_archive
+        }, {
+            label: 'keep',
+            count: count_keep
+        }];
+
+        var width = 200;
+        var height = 200;
+        var radius = Math.min(width, height) / 2;
+
+        var color = d3.scale.ordinal()
+            .range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
+
+        var svg = d3.select("#tagcountchart")
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('g')
+            .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+
+        var pie = d3.layout.pie()
+            .value(function(d) {
+                return d.count;
+            })
+            .sort(null);
+
+        var path = d3.svg.arc()
+            .outerRadius(radius - 10)
+            .innerRadius(0);
+
+        var label = d3.svg.arc()
+            .outerRadius(radius - 40)
+            .innerRadius(radius - 40);
+
+        var arc = svg.selectAll('.arc')
+            .data(pie(dataset))
+            .enter().append('g')
+            .attr('class', 'arc');
+
+        arc.append('path')
+            .attr('d', path)
+            .attr('fill', function(d) {
+                return color(d.data.label);
+            });
+
+        arc.append('text')
+            .attr("transform", function(d) {
+                return "translate(" + label.centroid(d) + ")";
+            })
+            .attr("dy", "0.35em")
+            .text(function(d) {
+                return d.data.label;
+            });
+    </script>
+
+    <script>
+        var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
+        var size_delete = <?php echo $totalFilesize['delete'] ?>;
+        var size_archive = <?php echo $totalFilesize['archive'] ?>;
+        var size_keep = <?php echo $totalFilesize['keep'] ?>;
+
+        var dataset = [{
+            label: 'untagged',
+            size: size_untagged
+        }, {
+            label: 'delete',
+            size: size_delete
+        }, {
+            label: 'archive',
+            size: size_archive
+        }, {
+            label: 'keep',
+            size: size_keep
+        }];
+
+        var width = 200;
+        var height = 200;
+        var radius = Math.min(width, height) / 2;
+
+        var color = d3.scale.ordinal()
+            //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+        .range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
+
+        var svg = d3.select("#filesizechart")
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('g')
+            .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+
+        var pie = d3.layout.pie()
+            .value(function(d) {
+                return d.size;
+            })
+            .sort(null);
+
+        var path = d3.svg.arc()
+            .outerRadius(radius - 10)
+            .innerRadius(0);
+
+        var label = d3.svg.arc()
+            .outerRadius(radius - 40)
+            .innerRadius(radius - 40);
+
+        var arc = svg.selectAll('.arc')
+            .data(pie(dataset))
+            .enter().append('g')
+            .attr('class', 'arc');
+
+        arc.append('path')
+            .attr('d', path)
+            .attr('fill', function(d) {
+                return color(d.data.label);
+            });
+
+        arc.append('text')
+            .attr("transform", function(d) {
+                return "translate(" + label.centroid(d) + ")";
+            })
+            .attr("dy", "0.35em")
+            .text(function(d) {
+                return d.data.label;
+            });
+    </script>
+    <script>
+        var size_total = <?php echo $diskspace_total; ?>;
+        var size_used = <?php echo $diskspace_used; ?>;
+        var size_free = <?php echo $diskspace_free; ?>;
+        var size_available = <?php echo $diskspace_available; ?>;
+
+        var height = 20,
             maxBarWidth = 400;
 
-		var svg = d3.select("#diskspacechart")
-			.append('svg')
-			.attr('width', maxBarWidth)
-			.attr('height', height)
-			.append('g');
+        var svg = d3.select("#diskspacechart")
+            .append('svg')
+            .attr('width', maxBarWidth)
+            .attr('height', height)
+            .append('g');
 
         var bar = svg.selectAll('.bar')
-			.data([size_used])
-			.enter().append('g')
-			.attr('class', 'bar');
+            .data([size_used])
+            .enter().append('g')
+            .attr('class', 'bar');
 
-		bar.append('rect')
+        bar.append('rect')
             .attr('height', height)
             .attr('class', 'bar')
             .attr('width', function(d) {
@@ -900,26 +908,26 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                 return percent + ' used';
             });
 
-	</script>
+    </script>
     <script>
-		var size_total = <?php echo $diskspace_total; ?>;
+        var size_total = <?php echo $diskspace_total; ?>;
         var size_indexed = <?php echo $totalFilesizeAll; ?>;
 
-		var height = 16,
+        var height = 16,
             maxBarWidth = 400;
 
-		var svg = d3.select("#diskspacechart-indexed")
-			.append('svg')
-			.attr('width', maxBarWidth)
-			.attr('height', height)
-			.append('g');
+        var svg = d3.select("#diskspacechart-indexed")
+            .append('svg')
+            .attr('width', maxBarWidth)
+            .attr('height', height)
+            .append('g');
 
         var bar = svg.selectAll('.bar')
-			.data([size_indexed])
-			.enter().append('g')
-			.attr('class', 'bar');
+            .data([size_indexed])
+            .enter().append('g')
+            .attr('class', 'bar');
 
-		bar.append('rect')
+        bar.append('rect')
             .attr('height', height)
             .attr('class', 'bar')
             .attr('width', function(d) {
@@ -940,18 +948,18 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                 return percent + ' indexed';
             });
 
-	</script>
+    </script>
 
     <script>
         var data;
         var indexname = '<?php echo $esIndex; ?>';
 
-        // init thread chart
+        // init worker chart
         var margin = {top: 20, right: 20, bottom: 30, left: 70},
         width = 700 - margin.left - margin.right,
         height = 250 - margin.top - margin.bottom;
 
-        var svg_threads = d3.select("#threadchart").append("svg")
+        var svg_workers = d3.select("#workerchart").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
           .append("g")
@@ -961,8 +969,8 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         function getjsondata(refreshcharts) {
             // config references
             var chartConfig = {
-                target: 'threadchart',
-                data_url: 'd3_data_threads.php?index=' + indexname
+                target: 'workerchart',
+                data_url: 'd3_data_workers.php?index=' + indexname
             };
 
             // loader settings
@@ -994,14 +1002,14 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                     // stop spin.js loader
                     spinner.stop();
                 } else {
-                    svg_threads.selectAll("*").remove();
+                    svg_workers.selectAll("*").remove();
                 }
                 // load chart
-                loadthreadchart()
+                loadworkerchart()
             });
         }
 
-        function loadthreadchart() {
+        function loadworkerchart() {
 
             var xData = ['file', 'directory'];
 
@@ -1024,7 +1032,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
 
             var dataIntermediate=xData.map(function (c){
                 return data.map(function(d) {
-                    return {x: d.thread, y: d[c]};
+                    return {x: d.worker_name, y: d[c]};
                 });
             });
 
@@ -1040,7 +1048,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                 ])
                 .nice();
 
-            var layer = svg_threads.selectAll(".stack")
+            var layer = svg_workers.selectAll(".stack")
                 .data(dataStackLayout)
                 .enter().append("g")
                 .attr("class", "stack")
@@ -1064,12 +1072,12 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                 })
                 .attr("width", x.rangeBand());
 
-            svg_threads.append("g")
+            svg_workers.append("g")
                 .attr("class", "axis")
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis);
 
-            svg_threads.append("g")
+            svg_workers.append("g")
                 .attr("class", "axis")
                 .attr("transform", "translate(0,0)")
                 .call(yAxis)
@@ -1083,20 +1091,20 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         }
 
         var crawlfinished = '<?php echo $crawlfinished ? "true" : "false"; ?>';
-        var thread_refreshtime = 2000;
-        // get json data for threads chart and load vis
+        var worker_refreshtime = 2000;
+        // get json data for workers chart and load vis
         getjsondata(false);
-        // auto refresh the threads chart
+        // auto refresh the workers chart
         var auto_refresh;
         if (crawlfinished === 'false') {
-            autorefresh(thread_refreshtime)
+            autorefresh(worker_refreshtime)
         } else {  // crewl is finished so disable interval
-            thread_refreshtime = 0;
-            autorefresh(thread_refreshtime)
+            worker_refreshtime = 0;
+            autorefresh(worker_refreshtime)
         }
         function autorefresh(n) {
-            thread_refreshtime = n
-            if (thread_refreshtime == 0) {
+            worker_refreshtime = n
+            if (worker_refreshtime == 0) {
                 clearInterval(auto_refresh);
                 $('#autorefresh_off').attr('style', 'color: #000 !important');
                 $('#autorefresh_2s').attr('style', 'color: #FFF !important');
@@ -1104,14 +1112,14 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
             } else {
                 auto_refresh = setInterval(
                     function () {
-                        // reload data for threads chart
+                        // reload data for workers chart
                         getjsondata(true);
-                    }, thread_refreshtime); // refresh every n ms
-                    if (thread_refreshtime == 1000) {
+                    }, worker_refreshtime); // refresh every n ms
+                    if (worker_refreshtime == 1000) {
                         $('#autorefresh_1s').attr('style', 'color: #000 !important');
                         $('#autorefresh_2s').attr('style', 'color: #FFF !important');
                         $('#autorefresh_off').attr('style', 'color: #FFF !important');
-                    } else if (thread_refreshtime == 2000) {
+                    } else if (worker_refreshtime == 2000) {
                         $('#autorefresh_2s').attr('style', 'color: #000 !important');
                         $('#autorefresh_1s').attr('style', 'color: #FFF !important');
                         $('#autorefresh_off').attr('style', 'color: #FFF !important');

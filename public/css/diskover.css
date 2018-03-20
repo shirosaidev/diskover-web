@@ -103,7 +103,7 @@ body::-webkit-scrollbar-thumb
 .results {
     word-wrap: break-word;
     word-break: break-all;
-    font-size: 12px;
+    font-size: 13px;
     color: gray;
 }
 

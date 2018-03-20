@@ -28,26 +28,26 @@ $crawltimes = [];
 $searchParams['index'] = $esIndex;
 $searchParams['type'] = 'crawlstat';
 $searchParams['body'] = [
-    '_source' => ['path', 'elapsed_time'],
+    '_source' => ['path', 'crawl_time'],
     'size' => $num,
     'query' => [
-        'match' => [
-            'event' => 'stop'
-        ]
+        'match_all' => (object) []
      ],
      'sort' => [
-         'elapsed_time' => [
+         'crawl_time' => [
              'order' => 'desc'
          ]
      ]
 ];
 $queryResponse = $client->search($searchParams);
 foreach ($queryResponse['hits']['hits'] as $key => $value) {
-    $elapsed = number_format($value['_source']['elapsed_time'], 2);
-    $slowestcrawlers[] = ['path' => $value['_source']['path'], 'crawltime' => (float)$elapsed];
-    $dirnames[] = basename($value['_source']['path']);
-    $paths[] = $value['_source']['path'];
-    $crawltimes[] = (float)$elapsed;
+    if ($value['_source']['path'] !== $path) {
+        $elapsed = number_format($value['_source']['crawl_time'], 3);
+        $slowestcrawlers[] = ['path' => $value['_source']['path'], 'crawltime' => (float)$elapsed];
+        $dirnames[] = basename($value['_source']['path']);
+        $paths[] = $value['_source']['path'];
+        $crawltimes[] = (float)$elapsed;
+    }
 }
 
 // grab the total items for each directory
