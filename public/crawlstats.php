@@ -151,7 +151,7 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
                 line-height: 1;
                 font-weight: bold;
                 padding: 12px;
-                background: rgba(50, 50, 50, 0.5);
+                background: rgba(25, 25, 25, 0.8);
                 color: #fff;
                 border-radius: 2px;
                 pointer-events: none;

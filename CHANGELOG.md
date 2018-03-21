@@ -1,5 +1,15 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.6] - 2018-03-21
+### notice
+- requires index created with diskover >= v1.5.0-beta.5
+- this is a beta pre-release for v1.5.0
+### added
+- elapsed time to dashboard, as well as cumulative crawl time
+### changed
+= improved worker bot chart on dashboard
+- improved crawl stats analytics page
+
 # [1.5.0-beta.5] - 2018-03-21
 ### notice
 - requires index created with diskover >= v1.5.0-beta.5

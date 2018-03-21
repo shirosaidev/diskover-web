@@ -9,7 +9,7 @@ namespace diskover;
 
 class Constants {
     // diskover-web version
-    const VERSION = '1.5.0-beta.5';
+    const VERSION = '1.5.0-beta.6';
     // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // set to your Elasticsearch port, default 9200

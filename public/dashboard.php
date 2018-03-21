@@ -33,8 +33,14 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-// determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
-$crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
+if (sizeof($queryResponse['hits']['hits']) > 0) {
+    // determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
+    $crawlfinished = true;
+    // Get total elapsed time (in seconds) of crawl
+    $crawlelapsedtime = $queryResponse['hits']['hits'][0]['_source']['crawl_time'];
+} else {
+    $crawlfinished = false;
+}
 
 // get first crawl index time
 $searchParams['body'] = [
@@ -70,7 +76,7 @@ $queryResponse = $client->search($searchParams);
 
 $lastcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
-// get total crawl elapsed time (cumulative)
+// Get total crawl cumulative time (in seconds) of crawls
 $searchParams['body'] = [
    'size' => 0,
     'aggs' => [
@@ -86,8 +92,7 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 
-// Get total elapsed time (in seconds) of crawl(s)
-$crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
+$crawlcumulativetime = $queryResponse['aggregations']['total_elapsed']['value'];
 
 
 // Get search results from Elasticsearch for worker usage
@@ -456,11 +461,23 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         }
         #workerchart {
             width: 700px;
-            height: 250px;
+            height: 350px;
             position: relative;
         }
         #workerchart rect {
             stroke: black;
+        }
+        .d3-tip {
+            font-size: 11px;
+            line-height: 1;
+            font-weight: bold;
+            padding: 12px;
+            background: rgba(25, 25, 25, 0.8);
+            color: #fff;
+            border-radius: 2px;
+            pointer-events: none;
+            word-break: break-all;
+            word-wrap: break-word;
         }
     </style>
 </head>
@@ -486,14 +503,6 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       </div>
       <div class="panel-body">
           <div id="workerchart" class="text-center"></div>
-      <div>
-          <?php foreach ($worker_usage as $key => $value) {
-      ?>
-        <span class="label" style="background-color: #393D77;">file count-<?php echo $key; ?> <?php echo $value['file']; ?></span>
-        <span class="label" style="background-color: #5256A1;">dir count-<?php echo $key; ?> <?php echo $value['directory']; ?></span>
-      <?php
-      } ?>
-      </div>
       </div>
     </div>
       <?php
@@ -597,11 +606,12 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                 <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawltime; ?></span> UTC.<br />
                 <?php if ($crawlfinished) { ?>
                     <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawltime; ?></span> UTC.<br />
-                    <i class="glyphicon glyphicon-time"></i> Total crawl time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span></p>
+                    <i class="glyphicon glyphicon-time"></i> Elapsed time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span><br />
+                    <i class="glyphicon glyphicon-time"></i> Total crawl time (cumulative): <span class="text-success"><?php echo secondsToTime($crawlcumulativetime); ?></span></p>
                     <?php } else { ?>
                     <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
                 <?php } ?>
-                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> Start time is first crawl and finish time is last crawl, the total crawl time is cumulative.</span></small></p>
+                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> Start time is first crawl and finish time is last crawl, the total crawl time is cumulative for all worker bots.</span></small></p>
         </div>
         <div class="panel panel-primary chartbox">
             <div class="panel-heading">
@@ -728,6 +738,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
 <script language="javascript" src="js/diskover.js"></script>
 <script language="javascript" src="js/d3.v3.min.js"></script>
 <script language="javascript" src="js/spin.min.js"></script>
+<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
 <!-- d3 charts -->
     <script>
         var count_untagged = <?php echo $tagCounts['untagged'] ?>;
@@ -955,9 +966,9 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         var indexname = '<?php echo $esIndex; ?>';
 
         // init worker chart
-        var margin = {top: 20, right: 20, bottom: 30, left: 70},
+        var margin = {top: 20, right: 20, bottom: 120, left: 70},
         width = 700 - margin.left - margin.right,
-        height = 250 - margin.top - margin.bottom;
+        height = 350 - margin.top - margin.bottom;
 
         var svg_workers = d3.select("#workerchart").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -1022,8 +1033,8 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
             var color = d3.scale.category20b();
 
             var xAxis = d3.svg.axis()
-                    .scale(x)
-                    .orient("bottom");
+                .scale(x)
+                .orient("bottom");
 
             var yAxis = d3.svg.axis()
                 .scale(y)
@@ -1070,12 +1081,30 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                 .attr("height", function (d) {
                     return y(d.y0) - y(d.y + d.y0);
                 })
-                .attr("width", x.rangeBand());
+                .attr("width", x.rangeBand())
+                .on("mouseover", function(d) {
+                    tip.show(d);
+                })
+                .on("mouseout", function(d) {
+                    tip.hide(d);
+                })
+                .on('mousemove', function() {
+                    return tip
+                      .style("top", (d3.event.pageY - 10) + "px")
+                      .style("left", (d3.event.pageX + 10) + "px");
+                });
 
             svg_workers.append("g")
                 .attr("class", "axis")
                 .attr("transform", "translate(0," + height + ")")
-                .call(xAxis);
+                .call(xAxis)
+                .selectAll("text")
+                  .attr("transform", "rotate(-90)")
+                    .attr("y", 0)
+                    .attr("x", 0)
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .style("text-anchor", "end");
 
             svg_workers.append("g")
                 .attr("class", "axis")
@@ -1088,6 +1117,21 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
                   .attr("dy", ".71em")
                   .style("text-anchor", "end")
                   .text("Queue items");
+
+            // tooltips
+            var tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .html(function(d) {
+                  var t = (d.y0===0) ? "files" : "dirs"
+                    return "<span style='font-size:12px;color:white;'>" + d.x + "</span><br>\
+                    <span style='font-size:12px; color:red;'>"+t+": " + d.y + "</span><br>";
+                });
+
+            svg.call(tip);
+
+            d3.select("#workerchart").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
         }
 
         var crawlfinished = '<?php echo $crawlfinished ? "true" : "false"; ?>';
