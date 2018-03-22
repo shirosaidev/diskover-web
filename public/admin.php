@@ -123,7 +123,7 @@ select::-webkit-scrollbar-thumb
 <div class="row">
     <div class="col-xs-6">
         <h1 class="text-nowrap"><i class="glyphicon glyphicon-cog"></i> Admin Panel</h1>
-        <span style="color:#D20915;"><?php echo "diskover-web v".Constants::VERSION; ?></span><br />
+        <span style="color:#D20915;"><?php echo "diskover-web v".$VERSION; ?></span><br />
         <small><i class="glyphicon glyphicon-download-alt"></i> <a target="_blank" href="https://github.com/shirosaidev/diskover-web/releases/latest">Check for updates</a></small><br />
         Elasticsearch health: <span id="eshealthheart" style="font-size:18px;color:gray"><strong><i class="glyphicon glyphicon-heart-empty"></i></strong></span>
 </div>
@@ -135,7 +135,7 @@ select::-webkit-scrollbar-thumb
   /\ \L\ \ \ \/\__, `\\ \ \\`\ /\ \L\ \ \ \_/ |/\  __/\ \ \/   ('>
   \ \___,_\ \_\/\____/ \ \_\ \_\ \____/\ \___/ \ \____\\ \_\   /rr
    \/__,_ /\/_/\/___/   \/_/\/_/\/___/  \/__/   \/____/ \/_/  *\))_
-                                                  v<?php echo CONSTANTS::VERSION; ?>
+                                                  v<?php echo $VERSION; ?>
 </pre>
 <div class="text-center">
     <strong><i class="glyphicon glyphicon-heart"></i> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.</strong>

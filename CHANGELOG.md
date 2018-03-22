@@ -1,5 +1,13 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.7] - 2018-03-22
+### notice
+- requires index created with diskover >= v1.5.0-beta.5
+- this is a beta pre-release for v1.5.0
+### changed
+= moved VERSION variable into Diskover.php out of Constants.php
+- Constants.php (config file) has been renamed to Constants.php.sample to help with updating (copy Constants.php.sample to Constants.php if you don't have)
+
 # [1.5.0-beta.6] - 2018-03-21
 ### notice
 - requires index created with diskover >= v1.5.0-beta.5

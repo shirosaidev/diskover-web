@@ -8,8 +8,6 @@ LICENSE for the full license text.
 namespace diskover;
 
 class Constants {
-    // diskover-web version
-    const VERSION = '1.5.0-beta.6';
     // set to your Elasticsearch host or ip
     const ES_HOST = 'localhost';
     // set to your Elasticsearch port, default 9200
@@ -21,9 +19,9 @@ class Constants {
     const LOGIN_REQUIRED = FALSE;
     const DISKOVER_USER = 'diskover';
     const DISKOVER_PASS = 'darkdata';
-    // set to true if using AWS
-    const AWS = false;
-    // diskover.py socket listener
+    // set to TRUE if using AWS ES
+    const AWS = FALSE;
+    // diskover.py socket listener server
     const ENABLE_SOCKET_CLIENT = FALSE;
     const SOCKET_LISTENER_HOST = '127.0.0.1';
     const SOCKET_LISTENER_PORT = 9999;

@@ -10,28 +10,25 @@ use Elasticsearch\ClientBuilder;
 
 error_reporting(E_ALL ^ E_NOTICE);
 
+// diskover-web version
+$VERSION = '1.5.0-beta.7';
+
 
 function connectES() {
   // Connect to Elasticsearch node
   $esPort = getenv('APP_ES_PORT') ?: Constants::ES_PORT;
   $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
   $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
-  if (Constants::AWS == false) {
-		$hosts = [
-      [
-    'host' => Constants::ES_HOST,
-    'port' => $esPort,
-    'user' => Constants::ES_USER,
-    'pass' => Constants::ES_PASS
-      ]
-  	];
-	} else { // using AWS
-		$hosts = [
-      [
-    'host' => Constants::ES_HOST,
-    'port' => $esPort
-      ]
-  ];
+  if (Constants::AWS) {
+    // using AWS
+    $hosts = [
+      [ 'host' => Constants::ES_HOST, 'port' => $esPort ]
+    ];
+  } else {
+  $hosts = [
+      [ 'host' => Constants::ES_HOST, 'port' => $esPort, 
+      'user' => Constants::ES_USER, 'pass' => Constants::ES_PASS ]
+    ];
 	}
 
   $client = ClientBuilder::create()->setHosts($hosts)->build();
