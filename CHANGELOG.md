@@ -1,5 +1,14 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.8] - 2018-03-29
+### notice
+- requires index created with diskover >= v1.5.0-beta.5
+- this is pre-release beta for v1.5.0
+### changed
+- file tree loads faster now by using directory doc size/items first (if already calculated)
+### fixed
+- bug with elapsed and cumulative times on dashboard page when crawl > 24 h
+
 # [1.5.0-beta.7] - 2018-03-22
 ### notice
 - requires index created with diskover >= v1.5.0-beta.5

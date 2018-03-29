@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-beta.7';
+$VERSION = '1.5.0-beta.8';
 
 
 function connectES() {
@@ -223,12 +223,12 @@ function getParentDir($p) {
 
 
 function secondsToTime($seconds) {
-    $seconds = number_format($seconds, 3);
-    $milliseconds = explode('.', $seconds)[1];
+    $sec = number_format($seconds, 3);
+    $milliseconds = explode('.', $sec)[1];
     $seconds = (int)$seconds;
     $dtF = new \DateTime('@0');
     $dtT = new \DateTime("@$seconds");
-    $time = $dtF->diff($dtT)->format('%dd:%hh:%im:%s');
+    $time = $dtF->diff($dtT)->format('%ad:%hh:%im:%s');
     $time = $time . '.' . $milliseconds . 's';
     return $time;
 }
