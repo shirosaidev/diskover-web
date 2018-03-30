@@ -6,6 +6,7 @@
 - this is pre-release beta for v1.5.0
 ### fixed
 - file tree min size filter not applying to directories
+- filter recursive dropdown on search results page
 
 # [1.5.0-beta.8] - 2018-03-29
 ### notice
