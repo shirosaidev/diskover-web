@@ -236,7 +236,7 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
     } else {
         // escape special characters
         $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
-        $query = '(path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*)';
+        $query = '(path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*) AND filesize: >=' . $filter;
     }
 
     $searchParams['body'] = [

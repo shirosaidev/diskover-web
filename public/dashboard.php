@@ -495,7 +495,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Please support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
+        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
       </div>
       <div class="panel panel-primary chartbox">
       <div class="panel-heading">
@@ -505,49 +505,6 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
           <div id="workerchart" class="text-center"></div>
       </div>
     </div>
-      <?php
-      if ($totalDupes === 0) {
-      ?>
-      <div class="alert alert-dismissible alert-info">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <h4><i class="glyphicon glyphicon-duplicate"></i> No dupe files found.</h4>
-        <p>Run diskover with the --finddupes flag after crawl finishes to check for duplicate files.</p>
-      </div>
-      <?php
-      }
-      ?>
-      <?php
-      if ($totalDupes > 0) {
-      ?>
-      <div class="alert alert-dismissible alert-warning">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
-        <p>It looks like you have <a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=dupe_md5:(NOT &quot;&quot;)&amp;doctype=file" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
-      </div>
-      <?php
-      }
-      ?>
-      <?php
-      if ($tagCounts['untagged'] > 0) {
-      ?>
-      <div class="alert alert-dismissible alert-info">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <h4><i class="glyphicon glyphicon-tags"></i> Untagged files!</h4>
-        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;" class="alert-link">untagged files</a>, time to start tagging and free up some space :)</p>
-      </div>
-      <?php
-      }
-      ?>
-      <?php
-      if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFilesize['archive'] > 0 AND $totalFilesize['keep'] > 0 ) {
-      ?>
-      <div class="alert alert-dismissible alert-info">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <i class="glyphicon glyphicon-thumbs-up"></i> <strong>Good job!</strong> It looks like all files have been tagged.
-      </div>
-      <?php
-      }
-      ?>
     <div class="row">
       <div class="col-xs-6">
         <div class="panel panel-primary chartbox">
@@ -582,6 +539,49 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
         </div>
     </div>
     </div>
+      <?php
+      if ($totalDupes === 0) {
+      ?>
+      <div class="alert alert-dismissible alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><i class="glyphicon glyphicon-duplicate"></i> No dupe files found.</h4>
+        <p>Run diskover with the --finddupes flag after crawl finishes to check for duplicate files.</p>
+      </div>
+      <?php
+      }
+      ?>
+      <?php
+      if ($totalDupes > 0) {
+      ?>
+      <div class="alert alert-dismissible alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
+        <p>It looks like you have <a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=dupe_md5:(NOT &quot;&quot;)&amp;doctype=file" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
+      </div>
+      <?php
+      }
+      ?>
+      <?php
+      if ($tagCounts['untagged'] > 0) {
+      ?>
+      <div class="alert alert-dismissible alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><i class="glyphicon glyphicon-tags"></i> Untagged files!</h4>
+        <p>It looks like you have <a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;" class="alert-link">untagged files</a>, time to start tagging and free up some space.</p>
+      </div>
+      <?php
+      }
+      ?>
+      <?php
+      if ($tagCounts['untagged'] == 0 AND $totalFilesize['delete'] > 0 AND $totalFilesize['archive'] > 0 AND $totalFilesize['keep'] > 0 ) {
+      ?>
+      <div class="alert alert-dismissible alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="glyphicon glyphicon-thumbs-up"></i> <strong>Good job!</strong> It looks like all files have been tagged.
+      </div>
+      <?php
+      }
+      ?>
     </div>
     <div class="col-xs-6">
         <div class="well">

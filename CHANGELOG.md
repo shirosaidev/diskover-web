@@ -1,5 +1,12 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.9] - 2018-03-30
+### notice
+- requires index created with diskover >= v1.5.0-beta.5
+- this is pre-release beta for v1.5.0
+### fixed
+- file tree min size filter not applying to directories
+
 # [1.5.0-beta.8] - 2018-03-29
 ### notice
 - requires index created with diskover >= v1.5.0-beta.5
