@@ -1,5 +1,12 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.10] - 2018-03-31
+### notice
+- requires index created with diskover >= v1.5.0-beta.5
+- this is pre-release beta for v1.5.0
+### fixed
+- reloading page issue when submitting forms on Admin page (Chrome)
+
 # [1.5.0-beta.9] - 2018-03-30
 ### notice
 - requires index created with diskover >= v1.5.0-beta.5

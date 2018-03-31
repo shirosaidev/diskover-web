@@ -266,7 +266,10 @@ $configtext = file_get_contents($file_config);
 						<div class="form-group">
 							<button type="reset" class="btn btn-default">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($configsaved) { ?><script>alert("config saved"); window.location.reload();</script><?php } ?>
+                            <?php if ($configsaved) { ?>
+                            <script>alert("config saved");</script>
+                            <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
+                            <?php } ?>
 						</div>
 					</div>
 				</fieldset>
@@ -284,13 +287,14 @@ $configtext = file_get_contents($file_config);
             <div class="col-xs-12">
     		<div class="form-group">
     			<?php
-    				// delete indices
+    				// optimize indices
     				if (isset($_POST['optimizeindices'])) {
     					foreach ($_POST['optimizeindices'] as $i) {
                             curl_es('/' . $i . '/_forcemerge?only_expunge_deletes=true', 'POST', false);
     					}
                     ?>
-                    <script>alert("selected indices optimized"); window.location.reload();</script>
+                    <script>alert("selected indices optimized");</script>
+                    <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
     				<?php } ?>
     			<select multiple="" name="optimizeindices[]" id="optimizeindices" class="form-control"><?php
     				foreach ($diskover_indices as $key => $val) {
@@ -319,7 +323,8 @@ $configtext = file_get_contents($file_config);
                         curl_es('/' . $i . '?pretty', 'DELETE', false);
                     }
                 ?>
-                <script>alert("selected indices deleted"); window.location.reload();</script>
+                <script>alert("selected indices deleted");</script>
+                <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
                 <?php } ?>
             <select multiple="" name="delindices[]" id="delindices" class="form-control"><?php
                 foreach ($diskover_indices as $key => $val) {
@@ -369,7 +374,10 @@ $smartsearchtext = file_get_contents($file_smartsearches);
                     <div class="form-group">
                         <button type="reset" class="btn btn-default">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save</button>
-                        <?php if ($smartsearchsaved) { ?><script>alert("smart searches saved"); window.location.reload();</script><?php } ?>
+                        <?php if ($smartsearchsaved) { ?>
+                        <script>alert("smart searches saved");</script>
+                        <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
+                        <?php } ?>
                     </div>
                 </div>
             </fieldset>
@@ -410,7 +418,10 @@ $tagtext = file_get_contents($file_customtags);
 						<div class="form-group">
 							<button type="reset" class="btn btn-default">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($tagssaved) { ?><script>alert("tags saved"); window.location.reload();</script><?php } ?>
+                            <?php if ($tagssaved) { ?>
+                            <script>alert("tags saved");</script>
+                            <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
+                            <?php } ?>
 						</div>
 					</div>
 				</fieldset>
