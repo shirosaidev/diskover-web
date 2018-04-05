@@ -1,5 +1,12 @@
 # Diskover Web Change Log
 
+# [1.5.0-beta.11] - 2018-04-05
+### notice
+- requires index created with diskover >= v1.5.0-beta.5
+- this is pre-release beta for v1.5.0
+### fixed
+- no results being returned when doing wildcard path search
+
 # [1.5.0-beta.10] - 2018-03-01
 ### notice
 - requires index created with diskover >= v1.5.0-beta.5

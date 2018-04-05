@@ -357,9 +357,9 @@ if ($esIndex2 != "") {
 }
 
 
-// Get recommended delete size/count
-$recommended_delete_size = 0;
-$recommended_delete_count = 0;
+// Get recommended file delete size/count
+$file_recommended_delete_size = 0;
+$file_recommended_delete_count = 0;
 
 $results = [];
 $searchParams = [];
@@ -368,7 +368,6 @@ $searchParams = [];
 $searchParams['index'] = $esIndex;
 $searchParams['type']  = "file";
 
-// Setup search query for dupes count
 $searchParams['body'] = [
    'size' => 0,
     'aggs' => [
@@ -387,10 +386,10 @@ $searchParams['body'] = [
 $queryResponse = $client->search($searchParams);
 
 // Get total count of recommended files to remove
-$recommended_delete_count = $queryResponse['hits']['total'];
+$file_recommended_delete_count = $queryResponse['hits']['total'];
 
 // Get total size of allrecommended files to remove
-$recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
+$file_recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
 
 ?>
 <!DOCTYPE html>
@@ -489,7 +488,7 @@ $recommended_delete_size = $queryResponse['aggregations']['total_size']['value']
       <div class="well">
         <h1><i class="glyphicon glyphicon-piggy-bank"></i> Space Savings</h1>
         <p>You could save <span style="font-size:24px;font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files.<br />
-            diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo $recommended_delete_count ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime & atime)</span></p>
+            diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo $file_recommended_delete_count ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime & atime)</span></p>
         <p><i class="glyphicon glyphicon-file" style="color:#738291;size:13px;font-weight:bold;"></i> Files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> &nbsp;&nbsp; <i class="glyphicon glyphicon-folder-close" style="color:skyblue;size:13px;font-weight:bold;"></i> Directories: <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> &nbsp;&nbsp;
             <i class="glyphicon glyphicon-duplicate" style="color:#738291;size:13px;font-weight:bold;"></i> Dupes: <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)</p>
       </div>

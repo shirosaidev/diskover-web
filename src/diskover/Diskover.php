@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-beta.10';
+$VERSION = '1.5.0-beta.11';
 
 
 function connectES() {
@@ -294,7 +294,7 @@ function sortURL($sort) {
 
 // escape special characters
 function escape_chars($text) {
-   $chr = '<>+-&|!(){}[]^"~*?:\/ ';
+   $chr = '<>+-&|!(){}[]^"~*?:\/= ';
    return addcslashes($text, $chr);
 }
 
@@ -469,7 +469,7 @@ function predict_search($q) {
             $filearr = explode('.', basename($request));
             $request = 'path_parent:' . dirname($request) . ' AND filename:' . $filearr[0] . '* AND extension:' . $filearr[1] . '*';
         } elseif (preg_match('/\*$/', $request)) {
-            $request = 'path_parent:' . $request;
+            $request = 'path_parent:' . rtrim($request, '\*') . ' OR path_parent:' . rtrim($request, '\*') . '\/*';
         } else {
             $request = rtrim($request, '\/*');
             $request = 'path_parent:' . $request . '* NOT path_parent:' . $request . '\/*';

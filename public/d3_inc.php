@@ -173,7 +173,7 @@ function get_files($client, $index, $path, $filter, $mtime) {
     // search size
     $searchParams['size'] = 100;
 
-    $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
+    $escapedpath = escape_chars($path);
     $searchParams['body'] = [
                 '_source' => ["path_parent","filename","filesize"],
                 'query' => [
@@ -235,7 +235,7 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
         $query = '(path_parent: \/ NOT path_parent: \/*\/* NOT filename: "") AND filesize: >=' . $filter;
     } else {
         // escape special characters
-        $escapedpath = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
+        $escapedpath = escape_chars($path);
         $query = '(path_parent: ' . $escapedpath . ' NOT path_parent: ' . $escapedpath . '\/*) AND filesize: >=' . $filter;
     }
 
