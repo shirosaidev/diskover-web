@@ -1,5 +1,11 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc1] - 2018-04-11
+### notice
+- requires index created with diskover >= v1.5.0-rc1
+- this is release candidate for v1.5.0
+- only version number change to rc1 in this release, no other changes
+
 # [1.5.0-beta.11] - 2018-04-05
 ### notice
 - requires index created with diskover >= v1.5.0-beta.5
