@@ -37,13 +37,14 @@ if (empty($_REQUEST['id'])) {
 }
 
 // set fullpath, parentpath and filename and check for root /
-if ($path === "/" && $file['path_parent'] === "/") {
-    $fullpath = '/' . $file['filename'];
+if ($file['path_parent'] === "/") {
     $parentpath = $file['path_parent'];
     if ($file['filename'] === "") { // root /
         $filename = '/';
+        $fullpath = '/';
     } else {
         $filename = $file['filename'];
+        $fullpath = '/' . $filename;
     }
 } else {
     $fullpath = $file['path_parent'] . '/' . $file['filename'];

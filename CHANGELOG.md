@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc2] - 2018-04-26
+### added
+- @, ' to escape_chars function in Diskover.php
+
 # [1.5.0-rc1] - 2018-04-11
 ### notice
 - requires index created with diskover >= v1.5.0-rc1
