@@ -25,6 +25,7 @@ require "d3_inc.php";
 		<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 		<link rel="stylesheet" href="css/diskover.css" media="screen" />
         <link rel="stylesheet" href="css/diskover-dupes.css" media="screen" />
+        <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
 	</head>
 
 	<body>

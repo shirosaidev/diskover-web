@@ -101,6 +101,7 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
 		<title>diskover &mdash; Crawl Stats</title>
 		<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 		<link rel="stylesheet" href="css/diskover.css" media="screen" />
+        <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
         <style>
             #crawlstatschart1 {
                 top: 10px;

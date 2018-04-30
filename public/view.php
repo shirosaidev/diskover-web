@@ -97,6 +97,7 @@ $customtags = get_custom_tags();
   <title>diskover &mdash; File View</title>
 	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="css/diskover.css" media="screen" />
+  <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
 </head>
 <body>
   <?php include "nav.php"; ?>
@@ -272,7 +273,6 @@ exit();
           <span class="badge"><?php echo $file['group']; ?></span>
           <a href="advanced.php?submitted=true&amp;p=1&amp;group=<?php echo $file['group']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Group</a>
         </li>
-        <?php if ($_REQUEST['doctype'] == 'file') { ?>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['inode']; ?></span>
           <a href="advanced.php?submitted=true&amp;p=1&amp;inode=<?php echo $file['inode']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Inode</a>
@@ -281,6 +281,7 @@ exit();
           <span class="badge"><?php echo $file['hardlinks']; ?></span>
           Hardlinks
         </li>
+        <?php if ($_REQUEST['doctype'] == 'file') { ?>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['filehash']; ?></span>
           <a href="advanced.php?submitted=true&amp;p=1&amp;filehash=<?php echo $file['filehash']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Filehash</a>
@@ -310,8 +311,13 @@ exit();
         Last modified (utc)
       </li>
       <li class="list-group-item">
+        <?php if (getCookie('qumulo') == '1') { ?>
+        <span class="badge"><?php echo $file['creation_time']; ?></span>
+        Creation time (utc)
+        <?php } else { ?>
         <span class="badge"><?php echo $file['last_access']; ?></span>
         Last access (utc)
+        <?php } ?>
       </li>
       <li class="list-group-item">
         <span class="badge"><?php echo $file['last_change']; ?></span>

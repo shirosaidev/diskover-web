@@ -100,6 +100,7 @@ foreach ($topusers as $key => $value) {
 	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="css/diskover.css" media="screen" />
   <link rel="stylesheet" href="css/diskover-top50.css" media="screen" />
+  <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
 </head>
 <body>
 <?php include "nav.php"; ?>

@@ -119,6 +119,7 @@ foreach ($SmartSearchesQueries as $key => $value) {
 		<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 		<link rel="stylesheet" href="css/diskover.css" media="screen" />
         <link rel="stylesheet" href="css/diskover-smartsearches.css" media="screen" />
+        <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
 	</head>
 
 	<body>

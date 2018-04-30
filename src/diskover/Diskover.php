@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc2';
+$VERSION = '1.5.0-rc3';
 
 
 function connectES() {
@@ -572,6 +572,12 @@ if (isset($_GET['index'])) {
         header("location:selectindices.php");
         exit();
     }
+}
+// check for Qumulo index
+if (strpos($esIndex, 'qumulo') !== false) {
+    createCookie('qumulo', 1);
+} else {
+    createCookie('qumulo', 0);
 }
 // check for index2 in url
 if (isset($_GET['index2'])) {

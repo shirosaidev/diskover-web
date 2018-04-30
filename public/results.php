@@ -112,7 +112,11 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
           <th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
+          <?php if (getCookie('qumulo') == '1') { ?>
+          <th class="text-nowrap">Created (utc) <?php echo sortURL('creation_time'); ?></th>
+          <?php } else { ?>
           <th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
+          <?php } ?>
           <?php
           if (count($extra_fields) > 0) {
             foreach ($extra_fields as $key => $value) { ?>
@@ -137,7 +141,11 @@ if (count($results[$p]) > 0) {
 					<th class="text-nowrap">Owner</th>
 					<th class="text-nowrap">Group</th>
 					<th class="text-nowrap">Modified (utc)</th>
+                    <?php if (getCookie('qumulo') == '1') { ?>
+                    <th class="text-nowrap">Created (utc)</th>
+                    <?php } else { ?>
 					<th class="text-nowrap">Accessed (utc)</th>
+                    <?php } ?>
                     <?php
                     if (count($extra_fields) > 0) {
                       foreach ($extra_fields as $key => $value) { ?>
@@ -305,7 +313,11 @@ if (count($results[$p]) > 0) {
         <td class="text-nowrap highlight"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap highlight"><?php echo $file['group']; ?></td>
         <td class="text-nowrap highlight"><?php echo $file['last_modified']; ?></td>
+        <?php if (getCookie('qumulo') == '1') { ?>
+        <td class="text-nowrap highlight"><?php echo $file['creation_time']; ?></td>
+        <?php } else { ?>
         <td class="text-nowrap highlight"><?php echo $file['last_access']; ?></td>
+        <?php } ?>
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>

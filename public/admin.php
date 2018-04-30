@@ -61,6 +61,7 @@ function curl_es($url, $request=null, $return_json=true) {
 <title>diskover &mdash; Admin Panel</title>
 <link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 <link rel="stylesheet" href="css/diskover.css" media="screen" />
+<link rel="icon" type="image/png" href="images/diskoverfavico.png" />
 <style>
 pre {
     background-color:#060606!important;
@@ -491,39 +492,17 @@ $tagtext = file_get_contents($file_customtags);
 // clear diskover cookies/cache
 function clearCache() {
 	console.log("purging cookies/cache");
-	deleteCookie('filter');
-	deleteCookie('mtime');
-    deleteCookie('maxdepth');
-	deleteCookie('hide_thresh');
-	deleteCookie('path');
-	deleteCookie('use_count');
-    deleteCookie('show_files');
-	deleteCookie('sort');
-	deleteCookie('sortorder');
-    deleteCookie('sort2');
-    deleteCookie('sortorder2');
-    deleteCookie('resultsize');
-    deleteCookie('index');
-    deleteCookie('index2');
-    deleteCookie('field1');
-    deleteCookie('field2');
-    deleteCookie('field3');
-    deleteCookie('field4');
-    deleteCookie('field1-desc');
-    deleteCookie('field2-desc');
-    deleteCookie('field3-desc');
-    deleteCookie('field4-desc');
-    deleteCookie('running_task_id')
-    deleteCookie('tagsshowuntagged');
-    deleteCookie('tagsshowfiles');
-    deleteCookie('tagsshowdirectories');
-    deleteCookie('tagsshowall');
-    deleteCookie('showotherfiles');
-    deleteCookie('PHPSESSID');
-	sessionStorage.removeItem("diskover-filetree");
-	sessionStorage.removeItem("diskover-treemap");
-    sessionStorage.removeItem("diskover-heatmap");
-    sessionStorage.removeItem("diskover-dupes");
+    cookies = ['filter', 'mtime', 'maxdepth', 'hide_thresh', 'path', 'use_count', 'show_files', 'sort', 'sortorder',
+                'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'field1', 'field2', 'field3', 'field4', 
+                'field1-desc', 'field2-desc', 'field3-desc', 'field4-desc', 'running_task_id', 'tagsshowuntagged', 
+                'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 'PHPSESSID'];
+    for (var i = 0; i < cookies.length; i++) {
+        deleteCookie(cookies[i]);
+    }
+    session_storage = ["diskover-filetree", "diskover-filetree", "diskover-heatmap", "diskover-dupes"];
+    for (var i = 0; i < session_storage.length; i++) {
+        sessionStorage.removeItem(session_storage[i]);
+    }
 	alert('cleared, please restart browser');
     return true;
 }
@@ -563,18 +542,11 @@ function setFields() {
 
 // clear all custom fields
 function clearFields() {
-    deleteCookie('field1');
-    deleteCookie('field2');
-    deleteCookie('field3');
-    deleteCookie('field4');
-    deleteCookie('field1-desc');
-    deleteCookie('field2-desc');
-    deleteCookie('field3-desc');
-    deleteCookie('field4-desc');
-    deleteCookie('sort');
-    deleteCookie('sort2');
-    deleteCookie('sortorder');
-    deleteCookie('sortorder2');
+    var custom_fields = ['field1', 'field2', 'field3', 'field4', 'field1-desc', 'field2-desc',
+                        'field3-desc', 'field4-desc', 'sort', 'sort2', 'sortorder', 'sortorder2'];
+    for (var i = 0; i < custom_fields.length; i++) {
+        deleteCookie(custom_fields[i]);
+    }
     alert("fields have been cleared")
 	return true;
 }

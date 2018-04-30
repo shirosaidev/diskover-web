@@ -24,6 +24,7 @@ require "../src/diskover/Diskover.php";
 	<title>diskover &mdash; Help</title>
 	<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 	<link rel="stylesheet" href="css/diskover.css" media="screen" />
+	<link rel="icon" type="image/png" href="images/diskoverfavico.png" />
     <style>
     code {
         background-color:#333!important;

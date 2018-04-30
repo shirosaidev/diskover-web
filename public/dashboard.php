@@ -325,9 +325,10 @@ $diskspace_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 // store disk space path into session var
 $_SESSION['rootpath'] = $diskspace_path;
 
-// update path cookie
+// update path cookie and path var
 if ($diskspace_path !== getCookie('path')) {
     createCookie('path', $diskspace_path);
+    $path = $diskspace_path;
 }
 
 if ($esIndex2 != "") {
@@ -399,86 +400,87 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>diskover &mdash; Dashboard</title>
-    <link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
+  <link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
   <link rel="stylesheet" href="css/diskover.css" media="screen" />
-    <style>
-        .darken {
-            color: gray !important;
-        }
-        .darken a {
-            color: gray !important;
-        }
-        .darken a:hover {
-            color: gray !important;
-        }
-        .arc text {
-            font: 10px sans-serif;
-            text-anchor: middle;
-        }
-        .arc path {
-            stroke: #0B0C0E;
-        }
-        #diskspacechart rect {
-            fill: #BD1B00;
-            stroke: black;
-        }
-        #diskspacechart text {
-            font-size: 10px;
-            fill: white;
-            font-weight: bold;
-        }
-        #diskspacechart {
-            height: 22px;
-            width: 400px;
-            border:1px solid #000;
-            background-color: #7EB26D;
-        }
-        #diskspacechart-indexed rect {
-            fill: #DA722C;
-            stroke: black;
-        }
-        #diskspacechart-indexed text {
-            font-size: 8px;
-            fill: white;
-        }
-        #diskspacechart-indexed {
-            height: 18px;
-            width: 400px;
-            border:1px solid #000;
-            background-color: #282C34;
-            margin-bottom: 10px;
-        }
-        .axis {
-            font: 10px sans-serif;
-            fill: #ccc;
-        }
-        .axis path,
-        .axis line {
-          fill: none;
-          stroke: #000;
-          shape-rendering: crispEdges;
-        }
-        #workerchart {
-            width: 700px;
-            height: 350px;
-            position: relative;
-        }
-        #workerchart rect {
-            stroke: black;
-        }
-        .d3-tip {
-            font-size: 11px;
-            line-height: 1;
-            font-weight: bold;
-            padding: 12px;
-            background: rgba(25, 25, 25, 0.8);
-            color: #fff;
-            border-radius: 2px;
-            pointer-events: none;
-            word-break: break-all;
-            word-wrap: break-word;
-        }
-    </style>
+  <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
+  <style>
+      .darken {
+          color: gray !important;
+      }
+      .darken a {
+          color: gray !important;
+      }
+      .darken a:hover {
+          color: gray !important;
+      }
+      .arc text {
+          font: 10px sans-serif;
+          text-anchor: middle;
+      }
+      .arc path {
+          stroke: #0B0C0E;
+      }
+      #diskspacechart rect {
+          fill: #BD1B00;
+          stroke: black;
+      }
+      #diskspacechart text {
+          font-size: 10px;
+          fill: white;
+          font-weight: bold;
+      }
+      #diskspacechart {
+          height: 22px;
+          width: 400px;
+          border:1px solid #000;
+          background-color: #7EB26D;
+      }
+      #diskspacechart-indexed rect {
+          fill: #DA722C;
+          stroke: black;
+      }
+      #diskspacechart-indexed text {
+          font-size: 8px;
+          fill: white;
+      }
+      #diskspacechart-indexed {
+          height: 18px;
+          width: 400px;
+          border:1px solid #000;
+          background-color: #282C34;
+          margin-bottom: 10px;
+      }
+      .axis {
+          font: 10px sans-serif;
+          fill: #ccc;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+      #workerchart {
+          width: 700px;
+          height: 350px;
+          position: relative;
+      }
+      #workerchart rect {
+          stroke: black;
+      }
+      .d3-tip {
+          font-size: 11px;
+          line-height: 1;
+          font-weight: bold;
+          padding: 12px;
+          background: rgba(25, 25, 25, 0.8);
+          color: #fff;
+          border-radius: 2px;
+          pointer-events: none;
+          word-break: break-all;
+          word-wrap: break-word;
+      }
+  </style>
 </head>
 <body>
 <?php include "nav.php"; ?>

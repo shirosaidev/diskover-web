@@ -171,6 +171,7 @@ foreach ($tagCountsCustom as $tag => $value) {
 		<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 		<link rel="stylesheet" href="css/diskover.css" media="screen" />
         <link rel="stylesheet" href="css/diskover-tags.css" media="screen" />
+        <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
 	</head>
 
 	<body>
