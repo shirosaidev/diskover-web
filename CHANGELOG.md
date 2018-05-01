@@ -1,11 +1,12 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc3] - 2018-05-01
+# [1.5.0-rc3] - 2018-05-02
 ### notice
 - Qumulo index support (beta) using diskover >= 1.5.0-rc4
 ### added
 - Support for diskover-qumulo-indexname indices (note: no file/dir access times in diskover-qumulo-indexname indices, not supported in Qumulo api)
 - fav icon for bookmarks/favorites
+- $ to escape_chars function
 ### changed
 - improved javascript functions in admin.php
 - when using qumulo index, search results page shows Created instead of Accessed column in results table
