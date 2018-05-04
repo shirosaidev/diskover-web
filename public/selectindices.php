@@ -13,6 +13,8 @@ require "../src/diskover/Diskover.php";
 
 $host = Constants::ES_HOST;
 $port = Constants::ES_PORT;
+$aws = Constants::AWS;
+$aws_https = Constants::AWS_HTTPS;
 $username = Constants::ES_USER;
 $password = Constants::ES_PASS;
 
@@ -25,7 +27,15 @@ $client = connectES();
 $curl = curl_init();
 // Set curl options
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.'/diskover-*?pretty');
+if ($aws) {
+    if ($aws_https) {
+        curl_setopt($curl, CURLOPT_URL, 'https://'.$host.':'.$port.'/diskover-*?pretty');
+    } else {
+        curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.'/diskover-*?pretty');
+    }
+} else {
+    curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.'/diskover-*?pretty');
+}
 // Add user/pass if using ES auth
 if ($username !== '' && $password !== '') {
     curl_setopt($curl, CURLOPT_USERPWD, "$username:$password");

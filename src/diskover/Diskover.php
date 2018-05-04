@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc3';
+$VERSION = '1.5.0-rc4';
 
 
 function connectES() {
@@ -21,15 +21,20 @@ function connectES() {
   $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
   if (Constants::AWS) {
     // using AWS
+    if (Constants::AWS_HTTPS) {
+        $scheme = 'https';
+    } else {
+        $scheme = 'http';
+    }
     $hosts = [
-      [ 'host' => Constants::ES_HOST, 'port' => $esPort ]
+      [ 'host' => Constants::ES_HOST, 'port' => $esPort, 'scheme' => $scheme ]
     ];
   } else {
   $hosts = [
       [ 'host' => Constants::ES_HOST, 'port' => $esPort, 
       'user' => Constants::ES_USER, 'pass' => Constants::ES_PASS ]
     ];
-	}
+  }
 
   $client = ClientBuilder::create()->setHosts($hosts)->build();
 
@@ -38,7 +43,7 @@ function connectES() {
   $bool_index = $client->indices()->exists($params);
   $params = ['index' => $esIndex2];
   $bool_index2 = $client->indices()->exists($params);
-  if (!$bool_index || !$bool_index2) {
+  if ((!$bool_index || !$bool_index2) && basename($_SERVER['PHP_SELF']) !== 'selectindices.php') {
       deleteCookie('index');
       deleteCookie('index2');
       header("Location: /selectindices.php");
@@ -315,6 +320,25 @@ function get_custom_tags() {
     return $t;
 }
 
+// get extra fields from extrafields.txt
+function get_extra_fields() {
+    $f = fopen("extrafields.txt", "r") or die("Unable to open file!");
+    $ef = [];
+    // grab each line (field)
+    while(!feof($f)) {
+        $l = trim(fgets($f));
+        if ($l === "") {
+            continue;
+        }
+        // field desc for field separated by pipe |
+        $fn = explode('|', $l)[0];
+        $fd = explode('|', $l)[1];
+        $ef[$fn] = $fd;
+    }
+    fclose($f);
+    return $ef;
+}
+
 // get smart searhches from smartsearches.txt
 function get_smartsearches() {
     $f = fopen("smartsearches.txt", "r") or die("Unable to open file!");
@@ -457,7 +481,7 @@ function predict_search($q) {
     if (strpos($q, '\\') === 0 || strpos($q, '!\\') === 0) {
         $request = preg_replace('/^\\\|!\\\/', '', $q);
     // check for path input
-    } elseif (strpos($q, '/') !== false && strpos($q, 'path_parent') === false) {
+    } elseif (strpos($q, '/') === 0 && strpos($q, 'path_parent') === false) {
         // check for escaped paths
         if (strpos($q, '\/') !== false) {
             $request = $q;
@@ -504,7 +528,7 @@ function predict_search($q) {
                 die();
             }
         }
-    } elseif (preg_match('/(\w+):/i', $q) == false && !empty($q)) {
+    } elseif (preg_match('/(\w+):/i', $q) == false && !empty($q)) {  # ES fields, ie last_modified:
         $request = "";
         $keyword_clean = preg_replace('/\bOR\b|\bAND\b|\bNOT\b|\bthe\b|\bof\b|\(|\)|\[|\]|\*|\/|\'s|&|(\w+):/i', '', $q);
         $keyword_arr = explode(' ', $keyword_clean);

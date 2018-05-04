@@ -1,5 +1,17 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc4] - 2018-05-04
+### added
+- AWS_HTTPS setting in Constants.php.sample for using AWS ES and https connection to endpoint
+### changed
+- better handling of any errors saving to files on admin.php when submitting forms (if you get an error, check file permissions for user running diskover-web can write to the file)
+- additional fields (es index fields) on admin page are now global and stored in extrafields.txt in document root (user running diskover-web will need r/w permissions), no longer storing cookies for extra fields
+- added .sample to files customtags.txt, extrafields.txt and smartsearches.txt so any custom changes won't be overwritten on updating with Git, remove the .sample to use these files with diskover-web
+### fixed
+- issue connecting to AWS ES endpoint with https
+- / char bug in predict_search
+- issue where selectindices.php page could go into page reload loop
+
 # [1.5.0-rc3] - 2018-05-02
 ### notice
 - Qumulo index support (beta) using diskover >= 1.5.0-rc4

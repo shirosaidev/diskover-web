@@ -53,13 +53,7 @@ if ($file['path_parent'] === "/") {
 }
 
 // see if there are any extra custom fields to add
-$extra_fields = [];
-for ($i=1; $i < 5; $i++) {
-    if (getCookie('field'.$i.'')) {
-        $value = (getCookie('field'.$i.'-desc')) ? getCookie('field'.$i.'-desc') : getCookie('field'.$i.'');
-        $extra_fields[getCookie('field'.$i.'')] = $value;
-    }
-}
+$extra_fields = get_extra_fields();
 
 // get crawl elased time for directory
 if ($filedoctype == 'directory') {

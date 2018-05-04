@@ -21,6 +21,8 @@ if(isset($_GET['command'])) {
 function curl_es($url, $request=null, $return_json=true) {
     $host = Constants::ES_HOST;
     $port = Constants::ES_PORT;
+    $aws = Constants::AWS;
+    $aws_https = Constants::AWS_HTTPS;
     $username = Constants::ES_USER;
     $password = Constants::ES_PASS;
     // Get cURL resource
@@ -32,7 +34,15 @@ function curl_es($url, $request=null, $return_json=true) {
     } elseif ($request === "POST") {
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
     }
-    curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.$url);
+    if ($aws) {
+        if ($aws_https) {
+            curl_setopt($curl, CURLOPT_URL, 'https://'.$host.':'.$port.$url);
+        } else {
+            curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.$url);
+        }
+    } else {
+        curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.$url);
+    }
     // Add user/pass if using ES auth
     if (!empty($username) && !empty($password)) {
         curl_setopt($curl, CURLOPT_USERPWD, "$username:$password");
@@ -126,7 +136,8 @@ select::-webkit-scrollbar-thumb
         <h1 class="text-nowrap"><i class="glyphicon glyphicon-cog"></i> Admin Panel</h1>
         <span style="color:#D20915;"><?php echo "diskover-web v".$VERSION; ?></span><br />
         <small><i class="glyphicon glyphicon-download-alt"></i> <a target="_blank" href="https://github.com/shirosaidev/diskover-web/releases/latest">Check for updates</a></small><br />
-        Elasticsearch health: <span id="eshealthheart" style="font-size:18px;color:gray"><strong><i class="glyphicon glyphicon-heart-empty"></i></strong></span>
+        Elasticsearch health: <span id="eshealthheart" style="font-size:18px;color:gray"><strong><i class="glyphicon glyphicon-heart-empty"></i></strong></span><br />
+        Connected to Elasticsearch at <?php echo Constants::ES_HOST; ?>:<?php echo Constants::ES_PORT; ?>
 </div>
 <div class="col-xs-6">
 <pre>    __               __
@@ -176,24 +187,59 @@ select::-webkit-scrollbar-thumb
             $fields = array_unique($fields);
         ?>
         <h4>Additional fields for search results</h4>
-        <fieldset>
-			<div class="form-group">
-                <?php for ($i=1; $i < 5; $i++) { ?>
-                    <label for="field<?php echo $i; ?>">field <?php echo $i; ?></label>
-            		<select class="form-control" id="field<?php echo $i; ?>" name="field<?php echo $i; ?>" style="width:200px; display: inline;">
-            		  <option value="<?php echo getCookie('field'.$i.''); ?>" selected><?php echo getCookie('field'.$i.''); ?></option>
-                      <?php foreach ($fields as $key => $value) { ?>
-                          <option value="<?php echo $value; ?>"><?php echo $value; ?></option>
-                      <?php } ?>
-            		</select>
-    				<input style="width:200px; display: inline;" name="field<?php echo $i; ?>-desc" type="text" id="field<?php echo $i; ?>-desc" placeholder="header name" class="form-control" value="<?php echo getCookie('field'.$i.'-desc'); ?>" /><br />
-                <?php } ?>
-			</div>
-			<div class="form-group">
-                <button type="submit" class="btn btn-primary" onclick="clearFields()">Clear all</button>
-				<button type="submit" class="btn btn-primary" onclick="setFields()">Set</button>
-			</div>
-		</fieldset>
+    <?php
+
+// extra fields text file
+$file_extrafields = 'extrafields.txt';
+
+// check if form has been submitted
+if (isset($_POST['extrafieldstext'])) {
+    // save the text contents
+    $extrafieldstext = $_POST['extrafieldstext'];
+    // check for newline at end
+    if (substr($extrafieldstext, -1) != PHP_EOL) {
+        // add newline
+        $extrafieldstext .= PHP_EOL;
+    }
+    $extrafields_ret = file_put_contents($file_extrafields, $extrafieldstext);
+}
+
+// read the textfile
+$extrafieldstext = file_get_contents($file_extrafields);
+
+
+?>
+        <form name="editextrafields" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
+            <fieldset>
+                <div class="col-xs-12">
+                    <div class="form-group">
+                    <select class="form-control" id="" name="" style="width:200px; display: inline;">
+                        <option value="" selected>Field names</option>
+                          <?php foreach ($fields as $key => $value) { ?>
+                              <option value=""><?php echo $value; ?></option>
+                          <?php } ?>
+                    </select>
+                    </div>
+                    <div class="form-group">
+                        <span class="text-info">field|field desc</span>
+                        <textarea class="form-control" rows="5" name="extrafieldstext"><?php echo htmlspecialchars($extrafieldstext) ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="reset" class="btn btn-default">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <?php if (isset($extrafields_ret)) {
+                            if ($extrafields_ret !== FALSE) { ?>
+                            <script>alert("extra fields saved to extrafields.txt");</script>
+                            <meta http-equiv='refresh' content='0'>
+                        <?php } else { ?>
+                            <script>alert("error saving extra fields to extrafields.txt");</script>
+                            <meta http-equiv='refresh' content='0'>
+                        <?php } } ?>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+
         <br />
         <div class="well">
 			<h5>diskover socket server status</h5>
@@ -244,14 +290,13 @@ if ($result == "pong") {
 		<h4>Edit diskover-web config</h4>
 		<?php
 
-// configuration
+// configuration file
 $file_config = '../src/diskover/Constants.php';
 
 // check if form has been submitted
 if (isset($_POST['configtext'])) {
     // save the text contents
-    file_put_contents($file_config, $_POST['configtext']);
-		$configsaved = TRUE;
+    $config_ret = file_put_contents($file_config, $_POST['configtext']);
 }
 
 // read the textfile
@@ -267,10 +312,14 @@ $configtext = file_get_contents($file_config);
 						<div class="form-group">
 							<button type="reset" class="btn btn-default">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($configsaved) { ?>
-                            <script>alert("config saved");</script>
-                            <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
-                            <?php } ?>
+                            <?php if (isset($config_ret)) {
+                                if ($config_ret !== FALSE) { ?>
+                                <script>alert("config saved to Constants.php");</script>
+                                <meta http-equiv='refresh' content='0'>
+                            <?php } else { ?>
+                                <script>alert("error saving config to Constants.php");</script>
+                                <meta http-equiv='refresh' content='0'>
+                            <?php } } ?>
 						</div>
 					</div>
 				</fieldset>
@@ -346,20 +395,19 @@ $configtext = file_get_contents($file_config);
     <span class="text-info">!name|es query string</span>
     <?php
 
-// configuration
+// smart searches text file
 $file_smartsearches = 'smartsearches.txt';
 
 // check if form has been submitted
 if (isset($_POST['smartsearchtext'])) {
-// save the text contents
-$smartsearchtext = $_POST['smartsearchtext'];
-// check for newline at end
-if (substr($smartsearchtext, -1) != PHP_EOL) {
-    // add newline
-    $smartsearchtext .= PHP_EOL;
-}
-file_put_contents($file_smartsearches, $smartsearchtext);
-    $smartsearchsaved = TRUE;
+    // save the text contents
+    $smartsearchtext = $_POST['smartsearchtext'];
+    // check for newline at end
+    if (substr($smartsearchtext, -1) != PHP_EOL) {
+        // add newline
+        $smartsearchtext .= PHP_EOL;
+    }
+    $smartsearches_ret = file_put_contents($file_smartsearches, $smartsearchtext);
 }
 
 // read the textfile
@@ -375,10 +423,14 @@ $smartsearchtext = file_get_contents($file_smartsearches);
                     <div class="form-group">
                         <button type="reset" class="btn btn-default">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save</button>
-                        <?php if ($smartsearchsaved) { ?>
-                        <script>alert("smart searches saved");</script>
-                        <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
-                        <?php } ?>
+                        <?php if (isset($smartsearches_ret)) {
+                            if ($smartsearches_ret !== FALSE) { ?>
+                            <script>alert("smart searches saved to smartsearches.txt");</script>
+                            <meta http-equiv='refresh' content='0'>
+                        <?php } else { ?>
+                            <script>alert("error saving smart searches to smartsearches.txt");</script>
+                            <meta http-equiv='refresh' content='0'>
+                        <?php } } ?>
                     </div>
                 </div>
             </fieldset>
@@ -390,7 +442,7 @@ $smartsearchtext = file_get_contents($file_smartsearches);
         <span class="text-info">tag name|#hexcolor</span>
 		<?php
 
-// configuration
+// custom tags text file
 $file_customtags = 'customtags.txt';
 
 // check if form has been submitted
@@ -402,8 +454,7 @@ if (isset($_POST['tagtext'])) {
         // add newline
         $tagtext .= PHP_EOL;
     }
-    file_put_contents($file_customtags, $tagtext);
-		$tagssaved = TRUE;
+    $customtags_ret = file_put_contents($file_customtags, $tagtext);
 }
 
 // read the textfile
@@ -419,10 +470,14 @@ $tagtext = file_get_contents($file_customtags);
 						<div class="form-group">
 							<button type="reset" class="btn btn-default">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save</button>
-                            <?php if ($tagssaved) { ?>
-                            <script>alert("tags saved");</script>
-                            <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
-                            <?php } ?>
+                            <?php if (isset($customtags_ret)) {
+                                if ($customtags_ret !== FALSE) { ?>
+                                    <script>alert("tags saved to customtags.txt");</script>
+                                    <meta http-equiv='refresh' content='0'>
+                                    <?php } else { ?>
+                                    <script>alert("error saving tags to customtags.txt");</script>
+                                    <meta http-equiv='refresh' content='0'>
+                            <?php } } ?>
 						</div>
 					</div>
 				</fieldset>
@@ -493,8 +548,7 @@ $tagtext = file_get_contents($file_customtags);
 function clearCache() {
 	console.log("purging cookies/cache");
     cookies = ['filter', 'mtime', 'maxdepth', 'hide_thresh', 'path', 'use_count', 'show_files', 'sort', 'sortorder',
-                'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'field1', 'field2', 'field3', 'field4', 
-                'field1-desc', 'field2-desc', 'field3-desc', 'field4-desc', 'running_task_id', 'tagsshowuntagged', 
+                'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
                 'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 'PHPSESSID'];
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
@@ -505,50 +559,6 @@ function clearCache() {
     }
 	alert('cleared, please restart browser');
     return true;
-}
-
-// set custom fields
-function setFields() {
-    var fields = [];
-    var fields_desc = [];
-	fields[0] = document.getElementById('field1').value;
-    fields[1] = document.getElementById('field2').value;
-    fields[2] = document.getElementById('field3').value;
-    fields[3] = document.getElementById('field4').value;
-    fields_desc[0] = document.getElementById('field1-desc').value;
-    fields_desc[1] = document.getElementById('field2-desc').value;
-    fields_desc[2] = document.getElementById('field3-desc').value;
-    fields_desc[3] = document.getElementById('field4-desc').value;
-	if (fields[0] == "") {
-        alert("no fields selected")
-		return false;
-	} else {
-        (fields[0] != "") ? setCookie('field1', fields[0]) : '';
-        (fields[1] != "") ? setCookie('field2', fields[1]) : '';
-        (fields[2] != "") ? setCookie('field3', fields[2]) : '';
-        (fields[3] != "") ? setCookie('field4', fields[3]) : '';
-        (fields_desc[0] != "") ? setCookie('field1-desc', fields_desc[0]) : '';
-        (fields_desc[1] != "") ? setCookie('field2-desc', fields_desc[1]) : '';
-        (fields_desc[2] != "") ? setCookie('field3-desc', fields_desc[2]) : '';
-        (fields_desc[3] != "") ? setCookie('field4-desc', fields_desc[3]) : '';
-        deleteCookie('sort');
-        deleteCookie('sort2');
-        deleteCookie('sortorder');
-        deleteCookie('sortorder2');
-        alert("fields have been set")
-		return true;
-    }
-}
-
-// clear all custom fields
-function clearFields() {
-    var custom_fields = ['field1', 'field2', 'field3', 'field4', 'field1-desc', 'field2-desc',
-                        'field3-desc', 'field4-desc', 'sort', 'sort2', 'sortorder', 'sortorder2'];
-    for (var i = 0; i < custom_fields.length; i++) {
-        deleteCookie(custom_fields[i]);
-    }
-    alert("fields have been cleared")
-	return true;
 }
 
 // del index check
