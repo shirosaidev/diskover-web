@@ -59,16 +59,6 @@ $ cd diskover-web
 $ composer install
 ```
 
-### Copy over .sample files and adjust for your environment
-
-```sh
-$ cd diskover-web
-$ cp src/Diskover/Constants.php.sample src/Diskover/Constants.php
-$ cp public/smartsearches.txt.sample public/smartsearches.txt
-$ cp public/customtags.txt.sample public/customtags.txt
-$ cp public/extrafields.txt.sample public/extrafields.txt
-```
-
 ## User Guide
 
 [Read the wiki](https://github.com/shirosaidev/diskover-web/wiki).
