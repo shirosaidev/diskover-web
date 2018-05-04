@@ -11,6 +11,7 @@
 - issue connecting to AWS ES endpoint with https
 - / char bug in predict_search
 - issue where selectindices.php page could go into page reload loop
+- issue with d3 charts on filetree page with similiar directory names and wildcard es searches
 
 # [1.5.0-rc3] - 2018-05-02
 ### notice

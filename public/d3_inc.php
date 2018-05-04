@@ -346,33 +346,34 @@ function get_file_mtime($client, $index, $path, $filter, $mtime) {
     $searchParams['index'] = $index;
     $searchParams['type'] = 'file';
 
-    $searchParams['body'] = [
-        'size' => 0,
-        'query' => [
-            'bool' => [
-                'must' => [
-                        'wildcard' => [ 'path_parent' => $path . '*' ]
-                ],
-                'filter' => [
-                    'bool' => [
-                        'must' => [
-                            'range' => [
-                                'filesize' => [
-                                    'gte' => $filter
-                                ]
-                            ]
-                        ],
-                        'should' => [
-                            'range' => [
-                                'last_modified' => [
-                                    'lte' => $mtime
-                                ]
-                            ]
-                        ]
+    $escapedpath = escape_chars($path);
+
+    if ($escapedpath === '\/') {  // root /
+            $searchParams['body'] = [
+                'size' => 0,
+                'query' => [
+                    'query_string' => [
+                        'query' => 'path_parent: ' . $escapedpath . '*
+                        AND last_modified: {* TO ' . $mtime . '}',
+                        'analyze_wildcard' => 'true'
                     ]
                 ]
+            ];
+    } else {
+        $searchParams['body'] = [
+            'size' => 0,
+            'query' => [
+                'query_string' => [
+                    'query' => '(path_parent: ' . $escapedpath . ' OR
+                    path_parent: ' . $escapedpath . '\/*) AND
+                    last_modified: {* TO ' . $mtime . '}',
+                    'analyze_wildcard' => 'true'
+                ]
             ]
-        ],
+        ];
+    }
+
+    $searchParams['body'] += [
         'aggs' => [
             'mtime_ranges' => [
                 'range' => [
@@ -431,33 +432,33 @@ function get_file_sizes($client, $index, $path, $filter, $mtime) {
     $searchParams['index'] = $index;
     $searchParams['type'] = 'file';
 
-    $searchParams['body'] = [
-        'size' => 0,
-        'query' => [
-            'bool' => [
-                'must' => [
-                        'wildcard' => [ 'path_parent' => $path . '*' ]
-                ],
-                'filter' => [
-                    'bool' => [
-                        'must' => [
-                            'range' => [
-                                'filesize' => [
-                                    'gte' => $filter
-                                ]
-                            ]
-                        ],
-                        'should' => [
-                            'range' => [
-                                'last_modified' => [
-                                    'lte' => $mtime
-                                ]
-                            ]
-                        ]
+    $escapedpath = escape_chars($path);
+    if ($escapedpath === '\/') {  // root /
+            $searchParams['body'] = [
+                'size' => 0,
+                'query' => [
+                    'query_string' => [
+                        'query' => 'path_parent: ' . $escapedpath . '*
+                        AND last_modified: {* TO ' . $mtime . '}',
+                        'analyze_wildcard' => 'true'
                     ]
                 ]
+            ];
+    } else {
+        $searchParams['body'] = [
+            'size' => 0,
+            'query' => [
+                'query_string' => [
+                    'query' => '(path_parent: ' . $escapedpath . ' OR
+                    path_parent: ' . $escapedpath . '\/*) AND
+                    last_modified: {* TO ' . $mtime . '}',
+                    'analyze_wildcard' => 'true'
+                ]
             ]
-        ],
+        ];
+    }
+
+    $searchParams['body'] += [
         'aggs' => [
             'filesize_ranges' => [
                 'range' => [
@@ -517,33 +518,33 @@ function get_file_ext($client, $index, $path, $filter, $mtime) {
     $searchParams['index'] = $index;
     $searchParams['type']  = 'file';
 
-    $searchParams['body'] = [
-            'size' => 0,
-            'query' => [
-                'bool' => [
-                    'must' => [
-                            'wildcard' => [ 'path_parent' => $path . '*' ]
-                    ],
-                    'filter' => [
-                        'bool' => [
-                            'must' => [
-                                'range' => [
-                                    'filesize' => [
-                                        'gte' => $filter
-                                    ]
-                                ]
-                            ],
-                            'should' => [
-                                'range' => [
-                                    'last_modified' => [
-                                        'lte' => $mtime
-                                    ]
-                                ]
-                            ]
-                        ]
+    $escapedpath = escape_chars($path);
+    if ($escapedpath === '\/') {  // root /
+            $searchParams['body'] = [
+                'size' => 0,
+                'query' => [
+                    'query_string' => [
+                        'query' => 'path_parent: ' . $escapedpath . '*
+                        AND last_modified: {* TO ' . $mtime . '}',
+                        'analyze_wildcard' => 'true'
                     ]
                 ]
-            ],
+            ];
+    } else {
+        $searchParams['body'] = [
+            'size' => 0,
+            'query' => [
+                'query_string' => [
+                    'query' => '(path_parent: ' . $escapedpath . ' OR
+                    path_parent: ' . $escapedpath . '\/*) AND
+                    last_modified: {* TO ' . $mtime . '}',
+                    'analyze_wildcard' => 'true'
+                ]
+            ]
+        ];
+    }
+
+    $searchParams['body'] += [
             'aggs' => [
                 'top_extensions' => [
                     'terms' => [

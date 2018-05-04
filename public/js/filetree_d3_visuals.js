@@ -446,13 +446,14 @@ function loadPieFileExt(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click', function(d) {
-            var path_parent = node.name + "*";
+            var path_parent = node.name;
             var extension = d.data.label;
             if (!d.data.label) {
                 extension = '""';
             }
             window.location.href = 'simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +
-            ' AND path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + ' AND filesize:>=' + filter +
+            ' AND (path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
+            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + ') AND filesize:>=' + filter +
             ' AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file';
         })
         .attr("class", "slice");
@@ -698,7 +699,7 @@ function loadBarMtime(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click', function(d) {
-            var path_parent = node3.name + "*";
+            var path_parent = node3.name;
             if (d.label === 'today') {
                 var last_mod_time_high = 'now';
                 var last_mod_time_low = 'now/d';
@@ -736,8 +737,10 @@ function loadBarMtime(data) {
                 var last_mod_time_high = 'now-10y/d';
                 var last_mod_time_low = '*';
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) +
-            ' AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter + ' AND _type:file&doctype=file';
+            window.location.href = 'simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
+            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + 
+            ') AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter + 
+            ' AND _type:file&doctype=file';
         });
 
     bar
@@ -933,7 +936,7 @@ function loadBarFileSizes(data) {
                 .style("left", (d3.event.pageX + 10) + "px");
         })
         .on('click', function(d) {
-            var path_parent = node4.name + "*";
+            var path_parent = node4.name;
             if (d.label === '0KB-1KB') {
                 var filesize_high = 1024;
                 var filesize_low = 0;
@@ -977,8 +980,9 @@ function loadBarFileSizes(data) {
                 var filesize_high = '*';
                 var filesize_low = 17179869184;
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=path_parent:' + encodeURIComponent(escapeHTML(path_parent)) +
-            ' AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file'
+            window.location.href = 'simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
+            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + 
+            ') AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file';
         });
 
     bar2
