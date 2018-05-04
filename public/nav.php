@@ -171,7 +171,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <span class="input-group-addon" style="width: 1%; margin: 1px; padding: 1px; height:20px;">
                             <button title="clear search" type="button" onclick="document.getElementById('searchnavinput').value=''; document.getElementById('essearchreply-nav').style.display='none';" class="btn btn-default btn-sm"><span style="color:#555;font-size:10px;"><i class="glyphicon glyphicon-remove"></i></span></button>
                         </span>
-    					<input id="searchnavinput" autocomplete="off" type="text" name="q" class="form-control input" style="background-color: #424242!important;" placeholder="Search or !smartsearch" value='<?php echo $request; ?>'>
+    					<input id="searchnavinput" autocomplete="off" type="text" name="q" class="form-control input" style="background-color: #424242!important;" placeholder="Search or !smartsearch" value="<?php echo str_replace('"', '&quot;', $request); ?>">
                         <span class="input-group-addon" style="width: 1%; margin: 1px; padding: 1px; height:20px;">
                             <select id="searchdoctype" name="doctype" class="form-control input-sm" style="background-color:#424242!important;">
                               <option value="" <?php echo $_REQUEST['doctype'] == "" ? "selected" : ""; ?>>all</option>

@@ -12,6 +12,7 @@
 - / char bug in predict_search
 - issue where selectindices.php page could go into page reload loop
 - issue with d3 charts on filetree page with similiar directory names and wildcard es searches
+- issue with search bar input display trimming filenames containing quotes
 
 # [1.5.0-rc3] - 2018-05-02
 ### notice
