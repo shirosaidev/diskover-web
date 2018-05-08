@@ -400,7 +400,7 @@ function get_index2_fileinfo($client, $index, $path_parent, $filename) {
     $filename = escape_chars($filename);
     $searchParams['body'] = [
        'size' => 1,
-       '_source' => ['filesize', 'items'],
+       '_source' => ['filesize', 'items', 'items_files', 'items_subdirs'],
        'query' => [
            'query_string' => [
                'query' => 'filename:' . $filename . ' AND path_parent:' . $path_parent
@@ -408,11 +408,14 @@ function get_index2_fileinfo($client, $index, $path_parent, $filename) {
         ]
     ];
     $queryResponse = $client->search($searchParams);
+    $filesize = $queryResponse['hits']['hits'][0]['_source']['filesize'];
     if ($queryResponse['hits']['hits'][0]['_type'] == 'directory') {
-        $arr = [ $queryResponse['hits']['hits'][0]['_source']['filesize'],
-            $queryResponse['hits']['hits'][0]['_source']['items'] ];
+        $items = $queryResponse['hits']['hits'][0]['_source']['items'];
+        $items_files = $queryResponse['hits']['hits'][0]['_source']['items_files'];
+        $items_subdirs = $queryResponse['hits']['hits'][0]['_source']['items_subdirs'];
+        $arr = [ $filesize, $items, $items_files, $items_subdirs ];
     } else {
-        $arr = [ $queryResponse['hits']['hits'][0]['_source']['filesize'] ];
+        $arr = [ $filesize ];
     }
     return $arr;
 }
