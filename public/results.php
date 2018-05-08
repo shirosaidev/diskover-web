@@ -102,6 +102,8 @@ if (count($results[$p]) > 0) {
 		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
+          <th class="text-nowrap">Items (files) <?php echo sortURL('items_files'); ?></th>
+          <th class="text-nowrap">Items (subdirs) <?php echo sortURL('items_subdirs'); ?></th>
           <?php } ?>
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
@@ -131,6 +133,8 @@ if (count($results[$p]) > 0) {
 					<th class="text-nowrap">File Size</th>
                     <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
                     <th class="text-nowrap">Items</th>
+                    <th class="text-nowrap">Items (files)</th>
+                    <th class="text-nowrap">Items (subdirs)</th>
                     <?php } ?>
 					<th class="text-nowrap">Owner</th>
 					<th class="text-nowrap">Group</th>
@@ -300,6 +304,30 @@ if (count($results[$p]) > 0) {
         <small><?php echo $fileinfo_index2[1]; ?>
             <span style="color:<?php echo $diritems_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
         <?php echo $diritems_change; ?>%)</span></small>
+    <?php } } ?>
+    <td class="text-nowrap highlight"><?php echo $file['items_files']; ?>
+        <!-- show comparison items (files) -->
+        <?php if ($esIndex2 != "") { ?>
+        <?php
+        if ($file['items'] > 0 && $fileinfo_index2[2] > 0) {
+            $diritems_files_change = number_format(changePercent($file['items_files'], $fileinfo_index2[2]), 2);
+        }
+        if ($diritems_files_change != 0) { ?>
+        <small><?php echo $fileinfo_index2[2]; ?>
+            <span style="color:<?php echo $diritems_files_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_files_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
+        <?php echo $diritems_files_change; ?>%)</span></small>
+    <?php } } ?>
+    <td class="text-nowrap highlight"><?php echo $file['items_subdirs']; ?>
+        <!-- show comparison items (subdirs) -->
+        <?php if ($esIndex2 != "") { ?>
+        <?php
+        if ($file['items_subdirs'] > 0 && $fileinfo_index2[3] > 0) {
+            $diritems_subdirs_change = number_format(changePercent($file['items_subdirs'], $fileinfo_index2[3]), 2);
+        }
+        if ($diritems_subdirs_change != 0) { ?>
+        <small><?php echo $fileinfo_index2[3]; ?>
+            <span style="color:<?php echo $diritems_subdirs_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_subdirs_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
+        <?php echo $diritems_subdirs_change; ?>%)</span></small>
     <?php } } ?>
     <!-- end show comparison items -->
     </td>

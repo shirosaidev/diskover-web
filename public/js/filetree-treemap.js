@@ -14,16 +14,19 @@ LICENSE for the full license text.
          console.log('changing paths');
          var newpath = encodeURIComponent($('#pathinput').val());
          setCookie('path', newpath);
-         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + newpath + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
+         location.href = "treemap.php?index=" + index +"&index2=" + index2 + "&path=" + newpath + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
          return false;
      });
+
+     /* ------- SIZE/COUNT BUTTONS -------*/
 
      d3.select("#size").on("click", function() {
          use_count = 0;
          setCookie('use_count', 0);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
+         sessionStorage.removeItem("diskover-treemap");
+         location.href = "treemap.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
      });
 
      d3.select("#count").on("click", function() {
@@ -31,8 +34,11 @@ LICENSE for the full license text.
          setCookie('use_count', 1);
          console.log("removing json data on local storage because size/count clicked");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href = "filetree.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
+         sessionStorage.removeItem("diskover-treemap");
+         location.href = "treemap.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
      });
+
+     /* ------- SHOW FILES CHECKBOX -------*/
 
      d3.select("#showfiles").on("change", function() {
          var sf = document.getElementById('showfiles').checked;
@@ -40,8 +46,54 @@ LICENSE for the full license text.
          setCookie('show_files', show_files)
          console.log("removing json data on local storage because show files changed");
  		 sessionStorage.removeItem("diskover-filetree");
-         location.href="filetree.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + "&use_count=" + use_count + "&show_files=" + show_files;
+         sessionStorage.removeItem("diskover-treemap");
+         location.href="treemap.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_files=" + show_files;
      });
+
+     /* ------- MAXDEPTH BUTTONS -------*/
+
+    d3.select("#depth1").on("click", function() {
+        maxdepth = 1;
+        setCookie('maxdepth', 1)
+        console.log("removing json data on local storage because maxdepth changed");
+        sessionStorage.removeItem("diskover-treemap");
+        location.href='treemap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+    });
+    d3.select("#depth2").on("click", function() {
+        maxdepth = 2;
+        setCookie('maxdepth', 2)
+        console.log("removing json data on local storage because maxdepth changed");
+        sessionStorage.removeItem("diskover-treemap");
+        location.href='treemap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+    });
+    d3.select("#depth3").on("click", function() {
+        maxdepth = 3;
+        setCookie('maxdepth', 3)
+        console.log("removing json data on local storage because maxdepth changed");
+        sessionStorage.removeItem("diskover-treemap");
+        location.href='treemap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+    });
+    d3.select("#depth4").on("click", function() {
+        maxdepth = 4;
+        setCookie('maxdepth', 4)
+        console.log("removing json data on local storage because maxdepth changed");
+        sessionStorage.removeItem("diskover-treemap");
+        location.href='treemap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+    });
+    d3.select("#depth5").on("click", function() {
+        maxdepth = 5;
+        setCookie('maxdepth', 5)
+        console.log("removing json data on local storage because maxdepth changed");
+        sessionStorage.removeItem("diskover-treemap");
+        location.href='treemap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count;
+    });
+
+    d3.select("#depth"+maxdepth).classed("active", true);
+    for (i = 1; i <= 5; i++) {
+        if (i != maxdepth) {
+            d3.select("#depth"+i).classed("active", false);
+        }
+    }
 
      getJSON();
 
@@ -64,10 +116,12 @@ function showHidden(root) {
 	document.getElementById('path-container').style.display = 'inline-block';
     // show chart buttons div
 	document.getElementById('chart-buttons').style.display = 'inline-block';
+    // show filetree header div
+    document.getElementById('tree-header').style.display = 'block';
     // show filetree div
 	document.getElementById('tree-wrapper').style.display = 'block';
 	// show chart div
-	document.getElementById('chart-container').style.display = 'block';
+	document.getElementById('treemap-wrapper').style.display = 'block';
 }
 
 function getChildJSON(d) {
@@ -136,6 +190,7 @@ function getJSON() {
 	if ($_GET('filter') !== getCookie('filter') || $_GET('mtime') !== getCookie('mtime') || $_GET('use_count') !== getCookie('use_count') || $_GET('show_files') !== getCookie('show_files')) {
 		console.log("removing json data on local storage because filters changed");
 		sessionStorage.removeItem("diskover-filetree");
+        sessionStorage.removeItem("diskover-treemap");
 		getESJsonData();
 		return true;
     }
@@ -143,6 +198,7 @@ function getJSON() {
 	if (root.name !== path) {
 		console.log("removing json data on local storage because path changed");
 		sessionStorage.removeItem("diskover-filetree");
+        sessionStorage.removeItem("diskover-treemap");
 		getESJsonData();
 		return true;
 	} else if (root.name === path) {
@@ -158,7 +214,7 @@ function getJSON() {
 
         // config references
         chartConfig = {
-            target: 'mainwindow',
+            target: 'tree-container',
             data_url: 'd3_data.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count + '&show_files=' + show_files
         };
 
@@ -214,17 +270,6 @@ function getJSON() {
 		// load file tree
 		updateTree(root, root);
 
-		// load file size/count pie chart
-		changePie(root);
-
-		// load file extension pie chart
-		changePieFileExt(root);
-
-        // load filesizes bar chart
-		changeBarFileSizes(root);
-
-		// load mtime bar chart
-		changeBarMtime(root);
 	}
 
 }
@@ -250,17 +295,11 @@ function click(d) {
     } else if (d._children) {
         toggleChildren(d);
         updateTree(root, d);
-        setTimeout(function() { changePie(d) },500);
-        setTimeout(function() { changePieFileExt(d) },500);
-        setTimeout(function() { changeBarFileSizes(d) },500);
-        setTimeout(function() { changeBarMtime(d) },500);
+        setTimeout(function() { changeTreeMap(d) },500);
     } else if (d.children) {
         toggleChildren(d);
         updateTree(root, d);
-        setTimeout(function() { changePie(d.parent) },500);
-        setTimeout(function() { changePieFileExt(d.parent) },500);
-        setTimeout(function() { changeBarFileSizes(d.parent) },500);
-        setTimeout(function() { changeBarMtime(d.parent) },500);
+        setTimeout(function() { changeTreeMap(d.parent) },500);
     } else if (!d.count) {
         // display file in search results
         location.href = 'advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name);
@@ -312,6 +351,59 @@ function updateTree(data, parent) {
         }
     });
 
+    //add text for filename
+    entered.append("span").attr("class", "filename")
+        .html(function (d) {
+            return d.depth === 0 ? d.name : d.name.split('/').pop();
+        })
+        .on("click", function (d) {
+            click(d);
+        })
+        .on("mouseover", function (d) {
+            d3.select(this).classed("selected", true);
+            if (d.count > 1 && !d.children && !d._children) {
+                // check if there are any children in Elasticsearch
+                getChildJSON(d);
+            }
+        })
+        .on("mouseout", function (d) {
+            d3.selectAll(".selected").classed("selected", false);
+        });
+
+    // add percent bar
+    entered.append("span").attr("class", "percent-bg")
+    entered.append("span").attr("class", function (d) {
+            var value = (use_count) ? d.count : d.size;
+            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
+            var percent = (value / parent_value * 100).toFixed(0);
+            if (percent >= 90) {
+                var barclass = "percent-bar-red";
+            } else if (percent >= 75) {
+                var barclass = "percent-bar-orange";
+            } else if (percent >= 50) {
+                var barclass = "percent-bar-yellow";
+            } else {
+                var barclass = "percent-bar-gray";
+            }
+            return barclass;
+        })
+        .style("width", function (d) {
+            var value = (use_count) ? (d.count > 0) ? d.count : 1 : d.size;
+            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
+            var percent = (value / parent_value * 100).toFixed(1);
+            var barwidth = 150 * (percent / 100);
+            return barwidth + "px";
+        });
+
+    // add percent text
+    entered.append("span").attr("class", "percent-text")
+        .html(function (d) {
+            var value = (use_count) ? (d.count > 0) ? d.count : 1 : d.size;
+            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
+            var percent = (value / parent_value * 100).toFixed(1);
+            return percent + "%";
+        });
+
     //add filesize
     entered.append("span").attr("class", function (d) {
             var value = (use_count) ? d.count : d.size;
@@ -332,51 +424,30 @@ function updateTree(data, parent) {
             return format(d.size);
         });
 
-    // add percent bar
-    entered.append("span").attr("class", "percent")
-        .style("width", function (d) {
-            var value = (use_count) ? (d.count > 0) ? d.count : 1 : d.size;
-            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
-            var percent = (value / parent_value * 100).toFixed(1);
-            return percent + "%";
-        });
-
-    // add percent text
-    entered.append("span").attr("class", "percent-text")
-        .html(function (d) {
-            var value = (use_count) ? (d.count > 0) ? d.count : 1 : d.size;
-            var parent_value = (use_count) ? (d.parent) ? d.parent.count : root.count : (d.parent) ? d.parent.size : root.size;
-            var percent = (value / parent_value * 100).toFixed(1);
-            return "(" + percent + "%)";
-        });
-
     // add file and directory counts
+    entered.append("span").attr("class", "totalcount")
+        .html(function (d) {
+            return (d.type === 'directory') ? d.count : "";
+        });
+
     entered.append("span").attr("class", "filecount")
         .html(function (d) {
-            return (d.type === 'directory') ? "(" + d.count_files + "/" + d.count_subdirs + ")" : "";
+            return (d.type === 'directory') ? d.count_files : "";
         });
 
-	//add text for filename
-	entered.append("span").attr("class", "filename")
+    entered.append("span").attr("class", "subdircount")
         .html(function (d) {
-            return d.depth === 0 ? d.name : d.name.split('/').pop();
-        })
-        .on("click", function (d) {
-            click(d);
-        })
-        .on("mouseover", function (d) {
-            d3.select(this).classed("selected", true);
-            if (d.count > 1 && !d.children && !d._children) {
-                // check if there are any children in Elasticsearch
-                getChildJSON(d);
-            }
-        })
-        .on("mouseout", function (d) {
-            d3.selectAll(".selected").classed("selected", false);
+            return (d.type === 'directory') ? d.count_subdirs : "";
+        });
+
+    // add last modified text
+    entered.append("span").attr("class", "modified-date")
+        .html(function (d) {
+            return d.modified;
         });
 
     //add icons for search button
-	entered.append("span").attr("class", "filetree-btns")
+	entered.append("span").attr("class", "filetree-btns-container")
         .html(function (d) {
             if (d.count > 0) {
                 return '<a href="simple.php?submitted=true&amp;p=1&amp;q=path_parent:' + escapeHTML(d.name) + ' OR path_parent:' + escapeHTML(d.name) + '\\/*"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';

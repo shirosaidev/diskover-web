@@ -1,5 +1,14 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc5] - 2018-05-08
+### notice
+- requires diskover index created with diskover >= v1.5.0-rc6
+### added
+- new treemap analytics page (see screenshot)
+- improved file tree analytics page
+- items is now broken down into files/subdirs for directories for search results, file/dir view and filetree/treemap analytics pages
+- more information in tooltips (mouse over tips) for file tree analytics page and treemap
+
 # [1.5.0-rc4] - 2018-05-04
 ### added
 - AWS_HTTPS setting in Constants.php.sample for using AWS ES and https connection to endpoint

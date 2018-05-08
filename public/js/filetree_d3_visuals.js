@@ -124,7 +124,13 @@ function pieData(data) {
         if (percent > hide_thresh) {
             labels.push({
                 'label': item.name,
-                'value': val
+                'value': val,
+                'size': item.size,
+                'count': item.count,
+                'count_files': item.count_files,
+                'count_subdirs': item.count_subdirs,
+                'modified': item.modified,
+                'type': item.type
             });
         }
     }
@@ -152,8 +158,14 @@ var tip = d3.tip()
         var rootval = (use_count) ? (node || root).count : (node || root).size;
         var percent = (d.value / rootval * 100).toFixed(1) + '%';
         var sum = (use_count) ? d.value : format(d.value);
-
-        return "<span style='font-size:12px;color:white;'>" + d.data.label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
+        var ret = "<span style='font-size:12px;color:white;'>" + d.data.label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
+        if (d.data.type === 'directory') {
+            ret += "<br><span style='font-size:11px; color:lightgray;'>Items: " + d.data.count + "</span>";
+            ret += "<br><span style='font-size:11px; color:lightgray;'>Items (files): " + d.data.count_files + "</span>";
+            ret += "<br><span style='font-size:11px; color:lightgray;'>Items (subdirs): " + d.data.count_subdirs + "</span>";
+        }
+        ret += "<br><span style='font-size:11px; color:lightgray;'>Modified: " + d.data.modified + "</span>";
+        return ret;
     });
 
 svg.call(tip);
@@ -252,7 +264,7 @@ function changePie(data) {
         });
 
     var percent = svg.append("text")
-        .attr("dy", "-.5em")
+        .attr("dy", "-1.5em")
         .attr("class", "label-percent")
         .text(function() {
             var value = (use_count) ? node.count : node.size;
@@ -261,11 +273,25 @@ function changePie(data) {
             return percent;
         });
 
-    var info = svg.append("text")
-        .attr("dy", "1.5em")
+    var items = svg.append("text")
+        .attr("dy", "1em")
         .attr("class", "label-info")
         .text(function() {
-            return node.count + ' items' + ', ' + format(node.size);
+            return node.count + ' items';
+        });
+
+    var items_breakdown = svg.append("text")
+        .attr("dy", "2em")
+        .attr("class", "label-info")
+        .text(function() {
+            return node.count_files + ' files/' + node.count_subdirs + ' subdirs';
+        });
+
+     var size = svg.append("text")
+        .attr("dy", "3em")
+        .attr("class", "label-info")
+        .text(function() {
+            return format(node.size);
         });
 
     /* ------- TEXT LABELS -------*/
@@ -387,7 +413,9 @@ var tip2 = d3.tip()
         var sum = (use_count) ? d.value : format(d.value);
         var label = (!d.data.label) ? 'NULLEXT (none)' : d.data.label;
 
-        return "<span style='font-size:12px;color:white;'>extension: " + label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
+        return "<span style='font-size:12px;color:white;'>extension: " + label + 
+        "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + 
+        ")</span><br><span style='font-size:11px; color:lightgray;'>Files: " + d.data.count + "</span>";
     });
 
 svg2.call(tip2);
@@ -412,7 +440,9 @@ function loadPieFileExt(data) {
             if (percent > hide_thresh) {
                 labels.push({
                     'label': item.name,
-                    'value': val
+                    'value': val,
+                    'size': item.size,
+                    'count': item.count
                 });
             }
         }
@@ -621,7 +651,9 @@ var tip3 = d3.tip()
         var sum = (use_count) ? d.value : format(d.value);
         var label = d.label;
 
-        return "<span style='font-size:12px;color:white;'>modified: " + label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
+        return "<span style='font-size:12px;color:white;'>modified: " + label + 
+        "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + 
+        ")</span><br><span style='font-size:11px; color:lightgray;'>Files: " + d.count + "</span>";
     });
 
 svg3.call(tip3);
@@ -642,7 +674,9 @@ function loadBarMtime(data) {
             var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
             labels.push({
                 'label': item.mtime,
-                'value': val
+                'value': val,
+                'size': item.size,
+                'count': item.count
             });
         }
 
@@ -858,7 +892,10 @@ var tip4 = d3.tip()
         var sum = (use_count) ? d.value : format(d.value);
         var label = d.label;
 
-        return "<span style='font-size:12px;color:white;'>filesize: " + label + "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + ")</span>";
+        return "<span style='font-size:12px;color:white;'>filesize: " + label + 
+        "</span><br><span style='font-size:12px; color:red;'>" + sum + " (" + percent + 
+        ")</span><br><span style='font-size:11px; color:lightgray;'>Files: " + d.count + "</span>";
+
     });
 
 svg4.call(tip4);
@@ -879,7 +916,9 @@ function loadBarFileSizes(data) {
             var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
             labels.push({
                 'label': item.filesize,
-                'value': val
+                'value': val,
+                'size': item.size,
+                'count': item.count
             });
         }
         labels.reverse()

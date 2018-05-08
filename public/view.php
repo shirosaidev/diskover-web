@@ -252,6 +252,42 @@ exit();
             <span class="badge"><?php echo $file['items']; ?></span>
             Items
         </li>
+        <li class="list-group-item">
+            <span class="pull-right">&nbsp;
+            <!-- show comparison items -->
+            <?php if ($esIndex2 != "") { ?>
+            <?php
+            if ($file['items_files'] > 0 && $fileinfo_index2[2] > 0) {
+                $diritems_files_change = number_format(changePercent($file['items_files'], $fileinfo_index2[2]), 2);
+            }
+            if ($diritems_files_change != 0) { ?>
+            <small><?php echo $fileinfo_index2[2]; ?>
+                <span style="color:<?php echo $diritems_files_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_files_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
+            <?php echo $diritems_files_change; ?>%)</span></small>
+        <?php } } ?>
+        <!-- end show comparison items -->
+        </span>
+            <span class="badge"><?php echo $file['items_files']; ?></span>
+            Items (files)
+        </li>
+        <li class="list-group-item">
+            <span class="pull-right">&nbsp;
+            <!-- show comparison items -->
+            <?php if ($esIndex2 != "") { ?>
+            <?php
+            if ($file['items_subdirs'] > 0 && $fileinfo_index2[3] > 0) {
+                $diritems_subdirs_change = number_format(changePercent($file['items_subdirs'], $fileinfo_index2[3]), 2);
+            }
+            if ($diritems_subdirs_change != 0) { ?>
+            <small><?php echo $fileinfo_index2[3]; ?>
+                <span style="color:<?php echo $diritems_subdirs_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_subdirs_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
+            <?php echo $diritems_subdirs_change; ?>%)</span></small>
+        <?php } } ?>
+        <!-- end show comparison items -->
+        </span>
+            <span class="badge"><?php echo $file['items_subdirs']; ?></span>
+            Items (subdirs)
+        </li>
         <?php } ?>
         <?php if ($_REQUEST['doctype'] == 'file') { ?>
         <li class="list-group-item">

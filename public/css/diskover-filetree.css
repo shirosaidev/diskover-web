@@ -9,8 +9,8 @@ LICENSE for the full license text.
 .switch {
   position: relative;
   display: inline-block;
-  width: 30px;
-  height: 17px;
+  width: 25px;
+  height: 14px;
 }
 
 .switch input {display:none;}
@@ -30,8 +30,8 @@ LICENSE for the full license text.
 .slider:before {
   position: absolute;
   content: "";
-  height: 13px;
-  width: 13px;
+  height: 10px;
+  width: 10px;
   left: 2px;
   bottom: 2px;
   background-color: white;
@@ -48,13 +48,13 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(13px);
-  -ms-transform: translateX(13px);
-  transform: translateX(13px);
+  -webkit-transform: translateX(10px);
+  -ms-transform: translateX(10px);
+  transform: translateX(10px);
 }
 
 .slider.round {
-  border-radius: 17px;
+  border-radius: 14px;
 }
 
 .slider.round:before {

@@ -93,6 +93,7 @@ require "d3_inc.php";
                         <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Hide Thresh
 <span class="caret"></span></button>
                         <ul class="dropdown-menu">
+                            <li><a href="#_self" onclick="changeThreshold(0.01);">0.01</a></li>
                             <li><a href="#_self" onclick="changeThreshold(0.1);">0.1</a></li>
                             <li><a href="#_self" onclick="changeThreshold(0.3);">0.3</a></li>
                             <li><a href="#_self" onclick="changeThreshold(0.5);">0.5</a></li>
