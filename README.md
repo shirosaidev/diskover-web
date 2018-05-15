@@ -1,4 +1,4 @@
-# diskover-web - diskover's web file manager and storage analytics
+# diskover-web - diskover's web file manager, storage analytics and storage search engine
 
 [![License](https://img.shields.io/github/license/shirosaidev/diskover-web.svg?label=License&maxAge=86400)](./LICENSE.txt)
 [![Release](https://img.shields.io/github/release/shirosaidev/diskover-web.svg?label=Release&maxAge=60)](https://github.com/shirosaidev/diskover-web/releases/latest)
