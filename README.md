@@ -1,4 +1,4 @@
-# diskover-web
+# diskover-web - diskover's web file manager and storage analytics
 
 [![License](https://img.shields.io/github/license/shirosaidev/diskover-web.svg?label=License&maxAge=86400)](./LICENSE.txt)
 [![Release](https://img.shields.io/github/release/shirosaidev/diskover-web.svg?label=Release&maxAge=60)](https://github.com/shirosaidev/diskover-web/releases/latest)
@@ -7,7 +7,7 @@
 
 <img align="left" width="249" height="189" src="https://github.com/shirosaidev/diskover/blob/master/docs/diskover.png?raw=true" hspace="5" vspace="5" alt="diskover">
 
-diskover-web is an open-source file manager and storage analytics software for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search across your storage servers using your diskover Elasticsearch indices. With diskover-web you can visualize using the analytics pages to see the file meta data from your diskover crawls and get better insights into your data.
+diskover-web is an open source web file manager and storage analytics for [diskover](https://github.com/shirosaidev/diskover). It is designed to help you quickly search across your storage servers using your diskover Elasticsearch indices. With diskover-web you can visualize using the analytics pages to see the file meta data from your diskover crawls and get better insights into your data.
 
 With diskover-web you can also do file tagging and provide detailed disk usage analytics for your file systems. Files and directories can be tagged for archival or delete, or whatever you want with custom tags, and from there you can use the API to provide any data moving you wish to do. 
 
