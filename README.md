@@ -37,9 +37,10 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 ### Requirements
 
 * `Linux or OS X/MacOS` (tested on Ubuntu 16.04, OS X 10.11.6)
-* `PHP 7.0` (tested on PHP 7.1.10)
-* `Composer Dependency Manager for PHP`
-* `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.3.2)
+* `PHP 7` (tested on PHP 7.1.10, 7.2.5)
+* `Composer Dependency Manager for PHP` (install composer with apt or yum)
+* `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.3.2, installed when running composer install)
+* `php-curl` (install with apt or yum, if you are running php7.1 or php7.2 install php7.x-curl)
 * `Elasticsearch` (tested on Elasticsearch 5.4.2, 5.6.4)
 * `Apache or Nginx` (if you don't want to use PHP built-in web server)
 * `diskover` (Elasticsearch index created by diskover)
