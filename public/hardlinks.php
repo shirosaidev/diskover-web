@@ -30,6 +30,14 @@ require "d3_inc.php";
 
 	<body>
 		<?php include "nav.php"; ?>
+		<div class="container" id="error" style="display:none; margin-top:70px;">
+			<div class="row">
+				<div class="alert alert-dismissible alert-info col-xs-8">
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>No hardlinks found.</strong>
+				</div>
+			</div>
+		</div>
 		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
             <div id="hardlinkscharts-wrapper" style="display:none;">
                 <div class="row">
