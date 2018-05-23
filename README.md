@@ -22,7 +22,7 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 <img src="docs/diskover-web-dashboard-screenshot.png?raw=true" alt="diskover-web dashboard" width="400" align="left">
 <img src="docs/diskover-web-filetree-screenshot.png?raw=true" alt="diskover-web file tree" width="400" align="left">
 <img src="docs/diskover-web-treemap-screenshot.png?raw=true" alt="diskover-web treemap" width="400" align="left">
-<img src="docs/diskover-web-heatmap-screenshot.png?raw=true" alt="diskover-web heatmap" width="400" align="left">
+<img src="docs/diskover-web-hotdirs-screenshot.png?raw=true" alt="diskover-web heatmap" width="400" align="left">
 <img src="docs/diskover-web-tags-screenshot.png?raw=true" alt="diskover-web tags" width="400" align="left">
 <img src="docs/diskover-web-dupes-screenshot.png?raw=true" alt="diskover-web dupes" width="400" align="left">
 <img src="docs/diskover-web-smartsearches-screenshot.png?raw=true" alt="diskover-web smart searches" width="400" align="left">
@@ -59,10 +59,6 @@ $ cd diskover-web
 $ cd diskover-web
 $ composer install
 ```
-
-### OVA image file (for vmware, etc)
-
-If you don't want to set up everything yourself, I have an OVA file running the latest version of diskover/diskover-web. Fastest and best way to get up and running with diskover. <a href="mailto:cpark16@gmail.com">Contact me</a> for pricing and download link.
 
 ## User Guide
 
