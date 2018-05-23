@@ -17,13 +17,14 @@ require "d3_inc.php";
 // Grab all the custom tags from file
 $customtags = get_custom_tags();
 
+$pi = cpi($client, $esIndex);
+
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
 $total_size = 0;
 $ids_onpage = [];
 
 if (!empty($_REQUEST['submitted'])) {
-
     // set sort cookies
     if (!empty($_REQUEST['sort'])) {
         createCookie('sort', $_REQUEST['sort']);
@@ -360,12 +361,19 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="filename" <?php echo (getCookie('sort') === 'filename') ? 'selected' : ''; ?>>filename</option>
 		  <option value="path_parent" <?php echo (getCookie('sort') === 'path_parent') ? 'selected' : ''; ?>>path_parent</option>
 		  <option value="filesize" <?php echo (getCookie('sort') === 'filesize') ? 'selected' : ''; ?>>filesize</option>
+          <option value="items" <?php echo (getCookie('sort') === 'items') ? 'selected' : ''; ?>>items</option>
+          <option value="items_files" <?php echo (getCookie('sort') === 'items_files') ? 'selected' : ''; ?>>items (files)</option>
+          <option value="items_subdirs" <?php echo (getCookie('sort') === 'items_subdirs') ? 'selected' : ''; ?>>items (subdirs)</option>
 		  <option value="owner" <?php echo (getCookie('sort') === 'owner') ? 'selected' : ''; ?>>owner</option>
 		  <option value="group" <?php echo (getCookie('sort') === 'group') ? 'selected' : ''; ?>>group</option>
 		  <option value="last_modified" <?php echo (getCookie('sort') === 'last_modified') ? 'selected' : ''; ?>>last_modified</option>
 		  <option value="last_access" <?php echo (getCookie('sort') === 'last_access') ? 'selected' : ''; ?>>last_access</option>
 		  <option value="tag" <?php echo (getCookie('sort') === 'tag') ? 'selected' : ''; ?>>tag</option>
 		  <option value="tag_custom" <?php echo (getCookie('sort') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
+          <?php if ($pi) { ?>
+          <option value="change_percent_filesize" <?php echo (getCookie('sort') === 'change_percent_filesize') ? 'selected' : ''; ?>>change_percent_filesize</option>
+          <option value="change_percent_items" <?php echo (getCookie('sort') === 'change_percent_items') ? 'selected' : ''; ?>>change_percent_items</option>
+          <?php } ?>
 		</select>
 	  </div>
 	  <div class="col-xs-2">
@@ -383,12 +391,19 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="filename" <?php echo (getCookie('sort2') === 'filename') ? 'selected' : ''; ?>>filename</option>
 		  <option value="path_parent" <?php echo (getCookie('sort2') === 'path_parent') ? 'selected' : ''; ?>>path_parent</option>
 		  <option value="filesize" <?php echo (getCookie('sort2') === 'filesize') ? 'selected' : ''; ?>>filesize</option>
+          <option value="items" <?php echo (getCookie('sort2') === 'items') ? 'selected' : ''; ?>>items</option>
+          <option value="items_files" <?php echo (getCookie('sort2') === 'items_files') ? 'selected' : ''; ?>>items (files)</option>
+          <option value="items_subdirs" <?php echo (getCookie('sort2') === 'items_subdirs') ? 'selected' : ''; ?>>items (subdirs)</option>
 		  <option value="owner" <?php echo (getCookie('sort2') === 'owner') ? 'selected' : ''; ?>>owner</option>
 		  <option value="group" <?php echo (getCookie('sort2') === 'group') ? 'selected' : ''; ?>>group</option>
 		  <option value="last_modified" <?php echo (getCookie('sort2') === 'last_modified') ? 'selected' : ''; ?>>last_modified</option>
 		  <option value="last_access" <?php echo (getCookie('sort2') === 'last_access') ? 'selected' : ''; ?>>last_access</option>
 		  <option value="tag" <?php echo (getCookie('sort2') === 'tag') ? 'selected' : ''; ?>>tag</option>
 		  <option value="tag_custom" <?php echo (getCookie('sort2') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
+          <?php if ($pi) { ?>
+          <option value="change_percent_filesize" <?php echo (getCookie('sort2') === 'change_percent_filesize') ? 'selected' : ''; ?>>change_percent_filesize</option>
+          <option value="change_percent_items" <?php echo (getCookie('sort2') === 'change_percent_items') ? 'selected' : ''; ?>>change_percent_items</option>
+          <?php } ?>
 		</select>
 	  </div>
 	  <div class="col-xs-2">
@@ -419,7 +434,7 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
   </div>
   </div>
   <button type="reset" class="btn btn-default">Clear</button>
-  <button type="submit" class="btn btn-primary">Search</button>
+  <button type="submit" class="btn btn-primary" onclick="setCookies();">Search</button>
   <span>&nbsp;<a href="simple.php">Switch to simple search</a></span>
 		</fieldset>
 </form>
@@ -453,6 +468,14 @@ $(document).ready(function () {
     // listen for msgs from diskover socket server
     listenSocketServer();
 });
+
+function setCookies() {
+    // set cookies on form submit
+    setCookie('sort', document.getElementById('sort').value);
+    setCookie('sort2', document.getElementById('sort2').value);
+    setCookie('sortorder', document.getElementById('sortorder').value);
+    setCookie('sortorder2', document.getElementById('sortorder2').value);
+}
 </script>
 <div id="loading">
   <img id="loading-image" width="32" height="32" src="images/ajax-loader.gif" alt="Updating..." />

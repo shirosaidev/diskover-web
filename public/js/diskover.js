@@ -54,6 +54,7 @@ $(document).ready(function () {
 		sessionStorage.removeItem("diskover-treemap");
         sessionStorage.removeItem("diskover-heatmap");
         sessionStorage.removeItem("diskover-dupes");
+        sessionStorage.removeItem("diskover-hardlinks");
 		location.reload(true);
 	});
 

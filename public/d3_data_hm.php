@@ -11,6 +11,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
+
 // get mtime in ES format
 $mtime = getmtime($mtime);
 
@@ -32,10 +33,14 @@ foreach ($indices as $key => $value) {
 
     // append each index info to data list
     $data[] = [
-        "name" => $path, //basename($path),
+        "name" => $path,
         "size" => $dirinfo[0],
         "count" => $dirinfo[1],
-        "children" => walk_tree($client, $value, $path, $filter, $mtime, $depth=0, $maxdepth, $use_count, $show_files)
+        "count_files" => $dirinfo[2],
+        "count_subdirs" => $dirinfo[3],
+        "modified" => $dirinfo[4],
+        "type" => 'directory',
+        "children" => walk_tree($client, $value, $path, $filter, $mtime, $depth=0, $maxdepth, $use_count, $show_files=0)
     ];
 }
 

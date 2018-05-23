@@ -78,14 +78,6 @@ if (!empty($indices)) {
 
     // determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
     $crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
-
-    // create cookies for default search sort if none already created
-    if (empty(getCookie('sort')) && empty(getCookie('sort2'))) {
-        createCookie('sort', 'path_parent');
-        createCookie('sortorder', 'asc');
-        createCookie('sort2', 'filename');
-        createCookie('sortorder2', 'asc');
-    }
 }
 
 $indexselected = "";
@@ -102,6 +94,16 @@ if (isset($_POST['index'])) {
     }
     // delete existing path cookie
     deleteCookie('path');
+
+    $pi = cpi($client, $indexselected);
+    
+    // create cookies for default search sort if none already created
+    if ((empty(getCookie('sort')) && empty(getCookie('sort2'))) || ! $proindex) {
+        createCookie('sort', 'path_parent');
+        createCookie('sortorder', 'asc');
+        createCookie('sort2', 'filename');
+        createCookie('sortorder2', 'asc');
+    }
     // redirect to index dashboard page
     header("location: index.php?index=".$indexselected."&index2=".$index2selected."");
     exit();
@@ -159,7 +161,7 @@ if (isset($_POST['index'])) {
         ?>
             <div class="alert alert-dismissible alert-info">
               <button type="button" class="close" data-dismiss="alert">&times;</button>
-              <i class="glyphicon glyphicon-info-sign"></i> Please select at least one diskover index (sorted by creation date). Index 2 is optional and is a previous index used for data comparison.
+              <i class="glyphicon glyphicon-info-sign"></i> Please select at least one diskover index (sorted by creation date). Index 2 is optional and is a previous index used for data comparison (PRO VERSION).
             </div>
         <?php
     } ?>
@@ -184,7 +186,7 @@ if (isset($_POST['index'])) {
                     }
                 }
                 ?></select>
-            <label for="index2">Index 2:</label>
+            <label for="index2">Index 2 (pro version):</label>
             <select name="index2" id="index2" class="form-control">
                 <option selected><?php echo getCookie('index2') ? getCookie('index2') : ""; ?></option>
                 <?php

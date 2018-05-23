@@ -14,14 +14,8 @@ $(document).ready(function() {
 
 });
 
-
- // set toggles
-(use_count === 1) ? $('#count').addClass('active') : $('#size').addClass('active');
-(show_files === 1) ? $('#showfiles').prop('checked', true) : $('#showfiles').prop('checked', false);
-
-var hide_thresh = (getCookie('hide_thresh')) ? parseFloat(getCookie('hide_thresh')) : HIDE_THRESH;
-
 // add filtersto statustext
+var hide_thresh = (getCookie('hide_thresh')) ? parseFloat(getCookie('hide_thresh')) : HIDE_THRESH;
 var status_filter = 'minsize:' + format(filter) + ', ';
 var status_mtime = ' mtime:' + mtime + ', ';
 document.getElementById('statusfilters').append(status_filter);

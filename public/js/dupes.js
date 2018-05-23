@@ -100,11 +100,12 @@ function renderDupesCharts(dataset) {
          .value(function(d) {
              return d.count;
          })
-         .sort(null);
+         //.sort(null);
+         .sort(function(a, b) { return d3.descending(a.count, b.count); });
 
      var path = d3.svg.arc()
-         .outerRadius(radius - 10)
-         .innerRadius(radius - 70);
+         .outerRadius(radius - 40)
+         .innerRadius(0);
 
      var label = d3.svg.arc()
          .outerRadius(radius - 40)
@@ -122,7 +123,7 @@ function renderDupesCharts(dataset) {
              return color(d.data.label);
          })
          .on("click", function(d) {
-             document.location.href='advanced.php?>&submitted=true&p=1&dupe_md5=' + d.data.label;
+             document.location.href='advanced.php?>&submitted=true&p=1&dupe_md5=' + d.data.label + '&doctype=file';
          })
          .on("mouseover", function(d) {
              tip.show(d);
@@ -135,6 +136,7 @@ function renderDupesCharts(dataset) {
          })
          .on("mouseout", function(d) {
              tip.hide(d);
+             document.getElementById('dupefiles').innerHTML="";
          })
          .on('mousemove', function() {
              return tip
@@ -221,7 +223,7 @@ function renderDupesCharts(dataset) {
                  return x(barValue(d));
              })
              .on("click", function(d) {
-                 document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.label;
+                 document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file';
              })
              .on("mouseover", function(d) {
                  tip2.show(d);
@@ -233,7 +235,8 @@ function renderDupesCharts(dataset) {
                  document.getElementById('dupefiles').innerHTML=files;
              })
              .on('mouseout', function(d) {
-                 tip2.hide(d)
+                 tip2.hide(d);
+                 document.getElementById('dupefiles').innerHTML="";
              })
              .on('mousemove', function() {
                  return tip2
@@ -241,7 +244,7 @@ function renderDupesCharts(dataset) {
                      .style("left", (d3.event.pageX + 10) + "px");
              })
              .on("click", function(d) {
-                 document.location.href='advanced.php?>&submitted=true&p=1&dupe_md5=' + d.label;
+                 document.location.href='advanced.php?>&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file';
              });
 
 

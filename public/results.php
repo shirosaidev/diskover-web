@@ -40,6 +40,8 @@ error_reporting(E_ALL ^ E_NOTICE);
 // display results
 if (count($results[$p]) > 0) {
 	//print_r($_SERVER);
+  $pi = cpi($client, $esIndex);
+  $scp = scp($client, $esIndex, $esIndex2, $pi);
 ?>
 <div class="container-fluid searchresults" style="margin-top: 70px;">
   <div class="row">
@@ -91,7 +93,7 @@ if (count($results[$p]) > 0) {
   </div>
   <div class="row">
     <div class="counter pull-right"></div>
-    <?php $numofcol = 10; ?>
+    <?php $numofcol = 9; ?>
     <table class="table results table-striped table-hover">
       <thead>
         <tr>
@@ -99,11 +101,20 @@ if (count($results[$p]) > 0) {
           <th class="text-nowrap">Name <?php echo sortURL('filename'); ?></th>
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
-		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
+		      <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
+          <?php if ($scp) { ?>
+          <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
+          <?php $numofcol+=1; ?>
+          <?php } ?>
           <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
+          <?php if ($scp) { ?>
+          <th class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
+          <?php $numofcol+=1; ?>
+          <?php } ?>
           <th class="text-nowrap">Items (files) <?php echo sortURL('items_files'); ?></th>
           <th class="text-nowrap">Items (subdirs) <?php echo sortURL('items_subdirs'); ?></th>
+          <?php $numofcol+=3; ?>
           <?php } ?>
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
@@ -131,11 +142,17 @@ if (count($results[$p]) > 0) {
                     <th class="text-nowrap">Tags</th>
 					<th class="text-nowrap">Path</th>
 					<th class="text-nowrap">File Size</th>
-                    <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
-                    <th class="text-nowrap">Items</th>
-                    <th class="text-nowrap">Items (files)</th>
-                    <th class="text-nowrap">Items (subdirs)</th>
-                    <?php } ?>
+          <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
+          <?php if ($scp) { ?>
+          <th class="text-nowrap">Change %</th>
+          <?php } ?>
+          <th class="text-nowrap">Items</th>
+          <?php if ($scp) { ?>
+          <th class="text-nowrap">Change %</th>
+          <?php } ?>
+          <th class="text-nowrap">Items (files)</th>
+          <th class="text-nowrap">Items (subdirs)</th>
+          <?php } ?>
 					<th class="text-nowrap">Owner</th>
 					<th class="text-nowrap">Group</th>
 					<th class="text-nowrap">Modified (utc)</th>
@@ -263,7 +280,7 @@ if (count($results[$p]) > 0) {
                       <ul class="dropdown-menu">
                           <li class="small"><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-tree-conifer"></i> filetree</a></li>
                           <li class="small"><a href="treemap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-large"></i> treemap</a></li>
-                          <li class="small"><a href="heatmap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> heatmap</a></li>
+                          <li class="small"><a href="hotdirs.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> hotdirs (pro)</a></li>
                           <li class="small"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-list"></i> top 50</a></li>
                           </ul>
                   </div>
@@ -278,57 +295,42 @@ if (count($results[$p]) > 0) {
               <!-- end path buttons -->
               <span class="highlight"><?php echo $file['path_parent']; ?></span>
           </td>
-        <td class="text-nowrap highlight"><?php echo formatBytes($file['filesize']); ?>
-            <!-- show comparison file size -->
-            <?php if ($esIndex2 != "") { ?>
-            <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
-            if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
-                $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
-            }
-            if ($filesize_change != 0) { ?>
-            <small><?php echo formatBytes($fileinfo_index2[0]); ?>
-                <span style="color:<?php echo $filesize_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $filesize_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
-            <?php echo $filesize_change; ?>%)</span></small>
+        <td class="text-nowrap highlight"><?php echo formatBytes($file['filesize']); ?></td>
+        <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
+        <!-- show comparison file size -->
+        <?php if ($scp) { ?>
+          <td class="text-nowrap highlight">
+          <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
+          if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
+              $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
+          } else if ($file['filesize'] > 0 && $fileinfo_index2[0] === 0) {
+              $filesize_change = number_format(100.0, 2);
+          }
+          if ($filesize_change != 0) { ?>
+          <small><?php echo formatBytes($fileinfo_index2[0]); ?>
+              <span style="color:<?php echo $filesize_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $filesize_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
+          <?php echo $filesize_change; ?>%)</span></small>
+          </td>
         <?php } } ?>
         <!-- end show comparison file size -->
-        </td>
-        <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <td class="text-nowrap highlight"><?php echo $file['items']; ?>
         <!-- show comparison items -->
-        <?php if ($esIndex2 != "") { ?>
+        <?php if ($scp) { ?>
+        <td class="text-nowrap highlight">
         <?php
         if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
             $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
+        } else if ($file['items'] > 0 && $fileinfo_index2[1] === 0) {
+              $diritems_change = number_format(100.0, 2);
         }
         if ($diritems_change != 0) { ?>
         <small><?php echo $fileinfo_index2[1]; ?>
             <span style="color:<?php echo $diritems_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
         <?php echo $diritems_change; ?>%)</span></small>
+      </td>
     <?php } } ?>
     <td class="text-nowrap highlight"><?php echo $file['items_files']; ?>
-        <!-- show comparison items (files) -->
-        <?php if ($esIndex2 != "") { ?>
-        <?php
-        if ($file['items'] > 0 && $fileinfo_index2[2] > 0) {
-            $diritems_files_change = number_format(changePercent($file['items_files'], $fileinfo_index2[2]), 2);
-        }
-        if ($diritems_files_change != 0) { ?>
-        <small><?php echo $fileinfo_index2[2]; ?>
-            <span style="color:<?php echo $diritems_files_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_files_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
-        <?php echo $diritems_files_change; ?>%)</span></small>
-    <?php } } ?>
     <td class="text-nowrap highlight"><?php echo $file['items_subdirs']; ?>
-        <!-- show comparison items (subdirs) -->
-        <?php if ($esIndex2 != "") { ?>
-        <?php
-        if ($file['items_subdirs'] > 0 && $fileinfo_index2[3] > 0) {
-            $diritems_subdirs_change = number_format(changePercent($file['items_subdirs'], $fileinfo_index2[3]), 2);
-        }
-        if ($diritems_subdirs_change != 0) { ?>
-        <small><?php echo $fileinfo_index2[3]; ?>
-            <span style="color:<?php echo $diritems_subdirs_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diritems_subdirs_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?>
-        <?php echo $diritems_subdirs_change; ?>%)</span></small>
-    <?php } } ?>
     <!-- end show comparison items -->
     </td>
         <?php } ?>
@@ -447,12 +449,11 @@ if (count($results[$p]) > 0) {
   </div>
 <?php
 } // END if there are search results
-
 else {
 ?>
 <div class="container" style="margin-top: 70px;">
   <div class="row">
-    <div class="alert alert-dismissible alert-info col-xs-8">
+    <div class="alert alert-dismissible alert-warning col-xs-8">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
       <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no items found.</strong> Change a few things up and try searching again. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
     </div>

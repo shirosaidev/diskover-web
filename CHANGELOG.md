@@ -1,5 +1,20 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc6] - 2018-05-23
+### notice
+- requires diskover index created with diskover >= v1.5.0-rc8
+- diskover PRO requires a paid license, please see diskover github page for more information
+### added
+- support for diskover PRO
+- new analytics page "Hot Dirs" for indices created with diskover PRO (see wiki for how to)
+- searchable/sortable directory change percent fields for indices created with diskover PRO
+- items to advanced search sort drop downs
+### changed
+- comparing data in index2 (previous index) to index (current index) requires diskover PRO
+- Dupes analytics requires index created with diskover PRO
+### fixed
+- bug with sort arrow highlighting on search results page when submitting advanced search and changing sort
+
 # [1.5.0-rc5] - 2018-05-08
 ### notice
 - requires diskover index created with diskover >= v1.5.0-rc6

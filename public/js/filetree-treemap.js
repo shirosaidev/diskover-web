@@ -8,7 +8,7 @@ LICENSE for the full license text.
  * d3 filetree for diskover-web
  */
 
- $(document).ready(function() {
+$(document).ready(function() {
 
      $('#changepath').click(function () {
          console.log('changing paths');
@@ -105,7 +105,7 @@ LICENSE for the full license text.
      setCookie('use_count', use_count);
      setCookie('show_files', show_files);
 
- });
+});
 
 
 function showHidden(root) {

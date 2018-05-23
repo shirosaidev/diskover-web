@@ -21,43 +21,28 @@ require "d3_inc.php";
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>diskover &mdash; Dupes</title>
+		<title>diskover &mdash; Hardlinks</title>
 		<link rel="stylesheet" href="css/bootswatch.min.css" media="screen" />
 		<link rel="stylesheet" href="css/diskover.css" media="screen" />
-        <link rel="stylesheet" href="css/diskover-dupes.css" media="screen" />
+        <link rel="stylesheet" href="css/diskover-hardlinks.css" media="screen" />
         <link rel="icon" type="image/png" href="images/diskoverfavico.png" />
 	</head>
 
 	<body>
 		<?php include "nav.php"; ?>
-        <div class="container" id="error" style="display:none; margin-top:70px;">
-			<div class="row">
-				<div class="alert alert-dismissible alert-info col-xs-8">
-					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found. Run diskover using --finddupes to search for duplicate files. (PRO VERSION)
-				</div>
-			</div>
-		</div>
 		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
-            <div id="dupescharts-wrapper" style="display:none;">
+            <div id="hardlinkscharts-wrapper" style="display:none;">
                 <div class="row">
                     <div class="col-xs-12 text-center">
-                        <h1>Dupes</h1><span style="font-size:10px; color:gray;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
+                        <h1>Hardlinks</h1><span style="font-size:10px; color:gray;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-xs-6">
-                          <div id="dupescountchart" class="text-center"></div>
-                      </div>
-                    <div class="col-xs-6">
-                        <div id="filesizechart" class="text-center"></div>
-                </div>
-    				</div>
+                <br />
                 <div class="row">
                     <div class="col-xs-12">
-                        <div id="dupefiles"></div>
+                        <div id="hardlinkscountchart" class="hardlinkscountchart text-center"></div>
                     </div>
-                </div>
+    			</div>
             </div>
 			</div>
 		<script language="javascript" src="js/jquery.min.js"></script>
@@ -66,7 +51,7 @@ require "d3_inc.php";
 		<script language="javascript" src="js/d3.v3.min.js"></script>
         <script language="javascript" src="js/spin.min.js"></script>
 		<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
-        <script language="javascript" src="js/dupes.js"></script>
+        <script language="javascript" src="js/hardlinks.js"></script>
 	</body>
 
 	</html>

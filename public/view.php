@@ -81,6 +81,9 @@ if ($filedoctype == 'directory') {
 // Grab all the custom tags from file
 $customtags = get_custom_tags();
 
+$pi = cpi($client, $esIndex);
+$scp = scp($client, $esIndex, $esIndex2, $pi);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -218,7 +221,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison file size -->
-            <?php if ($esIndex2 != "") { ?>
+            <?php if ($scp) { ?>
             <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
             if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
                 $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
@@ -237,7 +240,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison items -->
-            <?php if ($esIndex2 != "") { ?>
+            <?php if ($scp) { ?>
             <?php
             if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
                 $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
@@ -255,7 +258,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison items -->
-            <?php if ($esIndex2 != "") { ?>
+            <?php if ($scp) { ?>
             <?php
             if ($file['items_files'] > 0 && $fileinfo_index2[2] > 0) {
                 $diritems_files_change = number_format(changePercent($file['items_files'], $fileinfo_index2[2]), 2);
@@ -273,7 +276,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison items -->
-            <?php if ($esIndex2 != "") { ?>
+            <?php if ($scp) { ?>
             <?php
             if ($file['items_subdirs'] > 0 && $fileinfo_index2[3] > 0) {
                 $diritems_subdirs_change = number_format(changePercent($file['items_subdirs'], $fileinfo_index2[3]), 2);

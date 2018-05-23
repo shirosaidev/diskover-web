@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc5';
+$VERSION = '1.5.0-rc6';
 
 
 function connectES() {
@@ -408,6 +408,9 @@ function get_index2_fileinfo($client, $index, $path_parent, $filename) {
         ]
     ];
     $queryResponse = $client->search($searchParams);
+    if (sizeof($queryResponse['hits']['hits'][0]['_source']) === 0) {
+        return [ 0, 0, 0, 0 ];
+    }
     $filesize = $queryResponse['hits']['hits'][0]['_source']['filesize'];
     if ($queryResponse['hits']['hits'][0]['_type'] == 'directory') {
         $items = $queryResponse['hits']['hits'][0]['_source']['items'];
@@ -579,6 +582,48 @@ function predict_search($q) {
     }
 
     return $request;
+}
+
+
+function cpi($client, $index) {
+    $searchParams['index'] = $index;
+    $searchParams['type']  = 'directory';
+    $searchParams['body'] = [
+                'size' => 1,
+                'query' => [
+                    'match_all' => (object) []
+                ]
+            ];
+    $queryResponse = $client->search($searchParams);
+    $result_source = $queryResponse['hits']['hits'][0]['_source'];
+    if (array_key_exists('change_percent_filesize', $result_source)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+function scp($client, $index, $index2, $pi) {
+    if ($index2 == "" || ! $pi) {
+        return false;
+    }
+    $searchParams['index'] = $index;
+    $searchParams['type']  = 'directory';
+    $searchParams['body'] = [
+                'size' => 1,
+                'query' => [
+                    'match_all' => (object) []
+                ]
+            ];
+    $queryResponse = $client->search($searchParams);
+    $result_source = $queryResponse['hits']['hits'][0]['_source'];
+    //print_r($result_source); die();
+    if ($result_source['change_percent_filesize'] >= 0 && $result_source['change_percent_filesize'] !== "") {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
