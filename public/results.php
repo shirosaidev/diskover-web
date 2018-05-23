@@ -304,7 +304,7 @@ if (count($results[$p]) > 0) {
           if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
               $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
           } else if ($file['filesize'] > 0 && $fileinfo_index2[0] === 0) {
-              $filesize_change = number_format(100.0, 2);
+              $filesize_change = 100.0;
           }
           if ($filesize_change != 0) { ?>
           <small><?php echo formatBytes($fileinfo_index2[0]); ?>
@@ -321,7 +321,7 @@ if (count($results[$p]) > 0) {
         if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
             $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
         } else if ($file['items'] > 0 && $fileinfo_index2[1] === 0) {
-              $diritems_change = number_format(100.0, 2);
+              $diritems_change = 100.0;
         }
         if ($diritems_change != 0) { ?>
         <small><?php echo $fileinfo_index2[1]; ?>
