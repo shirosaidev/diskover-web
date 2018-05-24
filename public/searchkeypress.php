@@ -68,7 +68,7 @@ if (isset($_GET)) {
 
     $files = [];
     // format for output
-    if (count($results)>0) {
+    if (!empty($results) && count($results)>0) {
         foreach($results as $arr) {
             $files[] = [ $arr['_type'], $arr['_source']['filename'], $arr['_source']['path_parent'] ];
         }
@@ -81,7 +81,7 @@ if (isset($_GET)) {
 echo '<span style="color:#666;font-size:10px;line-height:1.2em;display:block;">' . $request . '</span>';
 echo '<span class="pull-right" style="font-size:11px;color:#ccc;"><strong>' . $total . ' items found</strong></span><br />';
 
-if (count($results) === 0) {
+if (!empty($results) && count($results) === 0) {
     echo "<i class=\"glyphicon glyphicon-eye-close\"></i> No results found";
 } else {
     // replace any words and characters that we don't want to highlight in red with a space
