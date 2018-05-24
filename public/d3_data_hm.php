@@ -40,7 +40,7 @@ foreach ($indices as $key => $value) {
         "count_subdirs" => $dirinfo[3],
         "modified" => $dirinfo[4],
         "type" => 'directory',
-        "children" => walk_tree($client, $value, $path, $filter, $mtime, $depth=0, $maxdepth, $use_count, $show_files=0)
+        "children" => walk_tree($client, $value, $path, $filter, $mtime, $depth=0, $maxdepth, $use_count, $show_files)
     ];
 }
 

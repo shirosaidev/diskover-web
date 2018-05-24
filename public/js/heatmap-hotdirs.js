@@ -35,7 +35,7 @@ function getESJsonDataHeatMap() {
     // config references
     var chartConfig = {
         target: 'heatmap-container',
-        data_url: 'd3_data_hm.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files + '&min_change_percent=' + min_change_percent
+        data_url: 'd3_data_hm.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=0&min_change_percent=' + min_change_percent
     };
 
     // loader settings
@@ -71,7 +71,7 @@ function getESJsonDataHeatMap() {
 
         console.log("storing json data in session storage");
         // store in session Storage
-        sessionStorage.setItem('diskover-heatmap', JSON.stringify(data));
+        sessionStorage.setItem('diskover-hotdirs-heatmap', JSON.stringify(data));
 
         // stop spin.js loader
         spinner.stop();
@@ -89,7 +89,7 @@ function changeTreeMap(node) {
     // config references
     var chartConfig = {
         target: 'heatmap-container',
-        data_url: 'd3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files + '&min_change_percent=' + min_change_percent
+        data_url: 'd3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=0&min_change_percent=' + min_change_percent
     };
 
     // loader settings
@@ -363,7 +363,7 @@ function getJSONHeatmap() {
     console.time('loadtime-treemap')
 
     // check if json data stored in session storage
-    root = JSON.parse(sessionStorage.getItem("diskover-heatmap"));
+    root = JSON.parse(sessionStorage.getItem("diskover-hotdirs-heatmap"));
 
     // get data from Elasticsearh if no json in session storage
     if (!root) {
@@ -373,14 +373,14 @@ function getJSONHeatmap() {
     // get new json data from ES if filters changed
     if ($_GET('filter') !== getCookie('filter') || $_GET('mtime') !== getCookie('mtime') || $_GET('use_count') !== getCookie('use_count')) {
         console.log("removing json data on local storage because filters changed");
-        sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         getESJsonDataHeatMap();
         return true;
     }
     // get new json data from ES if path changed
     if (root[0].name !== path) {
         console.log("removing json data on local storage because path changed");
-        sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         getESJsonDataHeatMap();
         return true;
     } else if (root[0].name === path) {
