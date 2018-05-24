@@ -403,6 +403,6 @@ if ($pi && $scp) {
 <script language="javascript" src="js/spin.min.js"></script>
 <script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
 <script language="javascript" src="js/simpleheat.js"></script>
-<script language="javascript" src="js/heatmap.js"></script>
+<script language="javascript" src="js/heatmap-hotdirs.js"></script>
 </body>
 </html>
