@@ -34,7 +34,7 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>No hardlinks found.</strong>
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found.</strong>
 				</div>
 			</div>
 		</div>

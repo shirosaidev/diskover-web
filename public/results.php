@@ -455,7 +455,7 @@ else {
   <div class="row">
     <div class="alert alert-dismissible alert-warning col-xs-8">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no items found.</strong> Change a few things up and try searching again. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
+      <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no items found.</strong> Change a few things up and try searching again. See help for search examples. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
     </div>
   </div>
 </div>
