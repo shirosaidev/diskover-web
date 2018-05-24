@@ -53,6 +53,7 @@ $(document).ready(function () {
 		sessionStorage.removeItem("diskover-filetree");
 		sessionStorage.removeItem("diskover-treemap");
         sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         sessionStorage.removeItem("diskover-dupes");
         sessionStorage.removeItem("diskover-hardlinks");
 		location.reload(true);

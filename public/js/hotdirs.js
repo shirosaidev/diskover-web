@@ -26,7 +26,7 @@ $(document).ready(function() {
          (snd) ? show_new_dirs = 1 : show_new_dirs = 0;
          setCookie('show_new_dirs', show_new_dirs);
          console.log("removing json data on local storage because show new dirs changed");
-         sessionStorage.removeItem("diskover-heatmap");
+         sessionStorage.removeItem("diskover-hotdirs-heatmap");
          location.href="hotdirs.php?index=" + index +"&index2=" + index2 + "&path=" + encodeURIComponent(path) + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + "&sort=" + sort + "&sortorder=" + sortorder;
      });
 
@@ -36,35 +36,35 @@ $(document).ready(function() {
         maxdepth = 1;
         setCookie('maxdepth', 1)
         console.log("removing json data on local storage because maxdepth changed");
-        sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         location.href='hotdirs.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + "&sort=" + sort + "&sortorder=" + sortorder;
     });
     d3.select("#depth2").on("click", function() {
         maxdepth = 2;
         setCookie('maxdepth', 2)
         console.log("removing json data on local storage because maxdepth changed");
-        sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         location.href='hotdirs.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + "&sort=" + sort + "&sortorder=" + sortorder;
     });
     d3.select("#depth3").on("click", function() {
         maxdepth = 3;
         setCookie('maxdepth', 3)
         console.log("removing json data on local storage because maxdepth changed");
-        sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         location.href='hotdirs.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + "&sort=" + sort + "&sortorder=" + sortorder;
     });
     d3.select("#depth4").on("click", function() {
         maxdepth = 4;
         setCookie('maxdepth', 4)
         console.log("removing json data on local storage because maxdepth changed");
-        sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         location.href='hotdirs.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + "&sort=" + sort + "&sortorder=" + sortorder;
     });
     d3.select("#depth5").on("click", function() {
         maxdepth = 5;
         setCookie('maxdepth', 5)
         console.log("removing json data on local storage because maxdepth changed");
-        sessionStorage.removeItem("diskover-heatmap");
+        sessionStorage.removeItem("diskover-hotdirs-heatmap");
         location.href='hotdirs.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + "&sort=" + sort + "&sortorder=" + sortorder;
     });
 

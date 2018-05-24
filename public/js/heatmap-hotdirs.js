@@ -35,7 +35,7 @@ function getESJsonDataHeatMap() {
     // config references
     var chartConfig = {
         target: 'heatmap-container',
-        data_url: 'd3_data_hm.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=0&min_change_percent=' + min_change_percent
+        data_url: 'd3_data_hm.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=0'
     };
 
     // loader settings
@@ -89,7 +89,7 @@ function changeTreeMap(node) {
     // config references
     var chartConfig = {
         target: 'heatmap-container',
-        data_url: 'd3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=0&min_change_percent=' + min_change_percent
+        data_url: 'd3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=0'
     };
 
     // loader settings
