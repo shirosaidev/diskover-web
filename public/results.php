@@ -38,7 +38,7 @@ if (Constants::ENABLE_SOCKET_CLIENT) {
 error_reporting(E_ALL ^ E_NOTICE);
 
 // display results
-if (count($results[$p]) > 0) {
+if (!empty($results[$p]) && count($results[$p]) > 0) {
 	//print_r($_SERVER);
   $pi = cpi($client, $esIndex);
   $scp = scp($client, $esIndex, $esIndex2, $pi);
