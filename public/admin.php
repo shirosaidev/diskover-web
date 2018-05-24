@@ -555,7 +555,7 @@ function clearCache() {
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
     }
-    session_storage = ["diskover-filetree", "diskover-filetree", "diskover-heatmap", "diskover-dupes"];
+    session_storage = ["diskover-filetree", "diskover-treemap", "diskover-heatmap", "diskover-dupes"];
     for (var i = 0; i < session_storage.length; i++) {
         sessionStorage.removeItem(session_storage[i]);
     }

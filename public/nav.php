@@ -136,6 +136,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <?php $urlvars = "index=".$esIndex."&index2=".$esIndex2."&filter=".$filter."&mtime=".$mtime."&use_count=".$use_count."&show_files=".$show_files."&path=".rawurlencode($path); ?>
 						<li><a href="filetree.php?<?php echo $urlvars; ?>">File Tree</a></li>
 						<li><a href="treemap.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Treemap</a></li>
+                        <li><a href="heatmap.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Heatmap</a></li>
                         <li><a href="hotdirs.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Hot Dirs (PRO)</a></li>
                         <li><a href="top50.php?<?php echo $urlvars; ?>">Top 50</a></li>
                         <li><a href="tags.php?<?php echo $urlvars; ?>">Tags</a></li>

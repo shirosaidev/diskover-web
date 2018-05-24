@@ -1,6 +1,6 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc6] - 2018-05-23
+# [1.5.0-rc6] - 2018-05-24
 ### notice
 - requires diskover index created with diskover >= v1.5.0-rc8
 - diskover PRO requires a paid license, please see diskover github page for more information
@@ -8,6 +8,7 @@
 - support for diskover PRO
 - new analytics page "Hot Dirs" for indices created with diskover PRO (see wiki for how to)
 - searchable/sortable directory change percent fields for indices created with diskover PRO
+- new analytics page "Hardlinks"
 - items to advanced search sort drop downs
 ### changed
 - comparing data in index2 (previous index) to index (current index) requires diskover PRO
