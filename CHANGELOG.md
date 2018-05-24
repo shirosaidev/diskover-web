@@ -14,6 +14,7 @@
 - comparing data in index2 (previous index) to index (current index) requires diskover PRO
 - Dupes analytics requires index created with diskover PRO
 ### fixed
+- bug with heatmap not loading (black screen)
 - bug with sort arrow highlighting on search results page when submitting advanced search and changing sort
 
 # [1.5.0-rc5] - 2018-05-08
