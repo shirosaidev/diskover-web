@@ -38,7 +38,7 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 
 ### Requirements
 
-* `Linux or OS X/MacOS` (tested on Ubuntu 16.04, OS X 10.11.6)
+* `Linux or OS X/MacOS` (tested on Ubuntu 16.04/18.04, OS X 10.11.6)
 * `PHP 7` (tested on PHP 7.1.10, 7.2.5)
 * `Composer Dependency Manager for PHP` (install composer with apt or yum)
 * `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.3.2, installed when running composer install)
