@@ -494,9 +494,9 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
         <p><i class="glyphicon glyphicon-file" style="color:#738291;size:13px;font-weight:bold;"></i> Files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> &nbsp;&nbsp; <i class="glyphicon glyphicon-folder-close" style="color:skyblue;size:13px;font-weight:bold;"></i> Directories: <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> &nbsp;&nbsp;
             <i class="glyphicon glyphicon-duplicate" style="color:#738291;size:13px;font-weight:bold;"></i> Dupes: <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)</p>
       </div>
-      <div class="alert alert-dismissible alert-success">
+      <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
+        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web! Please support diskover project on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.</strong>
       </div>
       <div class="panel panel-primary chartbox">
       <div class="panel-heading">
