@@ -94,11 +94,9 @@ if (isset($_POST['index'])) {
     }
     // delete existing path cookie
     deleteCookie('path');
-
-    $pi = cpi($client, $indexselected);
     
     // create cookies for default search sort if none already created
-    if ((empty(getCookie('sort')) && empty(getCookie('sort2')))) {
+    if (empty(getCookie('sort')) && empty(getCookie('sort2'))) {
         createCookie('sort', 'path_parent');
         createCookie('sortorder', 'asc');
         createCookie('sort2', 'filename');
