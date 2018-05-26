@@ -408,7 +408,7 @@ function get_index2_fileinfo($client, $index, $path_parent, $filename) {
         ]
     ];
     $queryResponse = $client->search($searchParams);
-    if (sizeof($queryResponse['hits']['hits'][0]['_source']) === 0) {
+    if (empty($queryResponse['hits']['hits'][0]['_source'])) {
         return [ 0, 0, 0, 0 ];
     }
     $filesize = $queryResponse['hits']['hits'][0]['_source']['filesize'];
@@ -585,27 +585,9 @@ function predict_search($q) {
 }
 
 
-function cpi($client, $index) {
-    $searchParams['index'] = $index;
-    $searchParams['type']  = 'directory';
-    $searchParams['body'] = [
-                'size' => 1,
-                'query' => [
-                    'match_all' => (object) []
-                ]
-            ];
-    $queryResponse = $client->search($searchParams);
-    $result_source = $queryResponse['hits']['hits'][0]['_source'];
-    if (array_key_exists('change_percent_filesize', $result_source)) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
-
-function scp($client, $index, $index2, $pi) {
-    if ($index2 == "" || ! $pi) {
+function showChangePercent($client, $index, $index2) {
+    if ($index2 == "") {
         return false;
     }
     $searchParams['index'] = $index;

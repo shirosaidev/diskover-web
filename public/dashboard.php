@@ -331,10 +331,7 @@ if ($diskspace_path !== getCookie('path')) {
     $path = $diskspace_path;
 }
 
-$pi = cpi($client, $esIndex);
-$scp = ($pi && $esIndex2 != "") ? true : false;
-
-if ($scp) {
+if ($esIndex2 != "") {
     // Get search results from Elasticsearch for disk space info from index2
     $results = [];
     $searchParams = [];
@@ -501,16 +498,6 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.
       </div>
-      <?php
-      if (! $pi) {
-      ?>
-      <div class="alert alert-dismissible alert-info">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-info-sign"></i> Upgrade to diskover PRO!</strong> Unlock additional features and get more insights. <a target="_blank" href="https://shirosaidev.github.io/diskover">Learn more</a>.
-      </div>
-      <?php
-      }
-      ?>
       <div class="panel panel-primary chartbox">
       <div class="panel-heading">
           <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
@@ -559,7 +546,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-duplicate"></i> No dupe files found.</h4>
-        <p>Run diskover with the --finddupes flag after crawl finishes to check for duplicate files. (PRO VERSION)</p>
+        <p>Run diskover with the --finddupes flag after crawl finishes to check for duplicate files.</p>
       </div>
       <?php
       }
@@ -604,19 +591,19 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
           <div id="diskspacechart"></div>
           <div id="diskspacechart-indexed"></div>
           <?php
-          if ($scp) {
+          if ($esIndex2 != "") {
               $diskspace_used_change = number_format(changePercent($diskspace_used, $diskspace2_used), 2);
               $diskspace_free_change = number_format(changePercent($diskspace_free, $diskspace2_free), 2);
               $diskspace_available_change = number_format(changePercent($diskspace_available, $diskspace2_available), 2);
           }
           ?>
           <p>Total: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_total); ?></span>&nbsp;&nbsp;&nbsp;&nbsp;
-              Used: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_used); ?></span> <?php if ($scp) { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small><?php } ?><br />
-              Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($scp) { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
-              Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($scp) { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
+              Used: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_used); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small><?php } ?><br />
+              Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
+              Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
         </div>
         <div class="well">
-            <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?><?php echo ($pi) ? " (PRO)" : ""; ?></strong></span></small>
+            <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
                 <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawltime; ?></span> UTC.<br />
                 <?php if ($crawlfinished) { ?>
                     <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawltime; ?></span> UTC.<br />

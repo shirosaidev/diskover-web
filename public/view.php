@@ -81,9 +81,6 @@ if ($filedoctype == 'directory') {
 // Grab all the custom tags from file
 $customtags = get_custom_tags();
 
-$pi = cpi($client, $esIndex);
-$scp = scp($client, $esIndex, $esIndex2, $pi);
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -179,7 +176,7 @@ exit();
                   <ul class="dropdown-menu">
                       <li class="small"><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-tree-conifer"></i> filetree</a></li>
                       <li class="small"><a href="treemap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-large"></i> treemap</a></li>
-                      <li class="small"><a href="heatmap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> heatmap</a></li>
+                      <li class="small"><a href="hotdirs.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> hotdirs</a></li>
                       <li class="small"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($fullpath); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-list"></i> top 50</a></li>
                       </ul>
               </div>
@@ -200,7 +197,7 @@ exit();
               <ul class="dropdown-menu">
                   <li class="small"><a href="filetree.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-tree-conifer"></i> filetree</a></li>
                   <li class="small"><a href="treemap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-large"></i> treemap</a></li>
-                  <li class="small"><a href="heatmap.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> heatmap</a></li>
+                  <li class="small"><a href="hotdirs.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-fire"></i> hotdirs</a></li>
                   <li class="small"><a href="top50.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>"><i class="glyphicon glyphicon-th-list"></i> top 50</a></li>
                   </ul>
           </div>
@@ -221,7 +218,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison file size -->
-            <?php if ($scp) { ?>
+            <?php if ($esIndex2 != "") { ?>
             <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
             if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
                 $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
@@ -240,7 +237,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison items -->
-            <?php if ($scp) { ?>
+            <?php if ($esIndex2 != "") { ?>
             <?php
             if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
                 $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
@@ -258,7 +255,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison items -->
-            <?php if ($scp) { ?>
+            <?php if ($esIndex2 != "") { ?>
             <?php
             if ($file['items_files'] > 0 && $fileinfo_index2[2] > 0) {
                 $diritems_files_change = number_format(changePercent($file['items_files'], $fileinfo_index2[2]), 2);
@@ -276,7 +273,7 @@ exit();
         <li class="list-group-item">
             <span class="pull-right">&nbsp;
             <!-- show comparison items -->
-            <?php if ($scp) { ?>
+            <?php if ($esIndex2 != "") { ?>
             <?php
             if ($file['items_subdirs'] > 0 && $fileinfo_index2[3] > 0) {
                 $diritems_subdirs_change = number_format(changePercent($file['items_subdirs'], $fileinfo_index2[3]), 2);

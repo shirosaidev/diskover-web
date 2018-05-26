@@ -59,7 +59,6 @@ function curl_es($url, $request=null, $return_json=true) {
     }
 }
 
-$pi = cpi($client, $esIndex);
 
 ?>
 
@@ -166,7 +165,7 @@ select::-webkit-scrollbar-thumb
             $indexsize = $indexstats['_all']['total']['store']['size_in_bytes'];
             $indexdoccount = $indexstats['_all']['total']['docs'];
             ?>
-            <strong>Index: <span class="text-success"><?php echo $esIndex; ?><?php echo ($pi) ? " (PRO)" : ""; ?></span></strong><br />
+            <strong>Index: <span class="text-success"><?php echo $esIndex; ?></span></strong><br />
             <span style="color:gray"><small><i class="glyphicon glyphicon-stats"></i> docs (count/deleted): <?php echo $indexdoccount['count'].'/'.$indexdoccount['deleted']; ?> size: <?php echo formatBytes($indexsize); ?></small></span><br />
             <span class="text-info"><small><i class="glyphicon glyphicon-info-sign"></i> If deleted count is high you may want to optimize the index (below) to reduce size.</small></span><br />
             <br /><strong>Index 2:</strong> <?php echo $esIndex2; ?><br /><br />

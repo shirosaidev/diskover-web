@@ -17,8 +17,6 @@ require "d3_inc.php";
 // Grab all the custom tags from file
 $customtags = get_custom_tags();
 
-$pi = cpi($client, $esIndex);
-
 // Get search results from Elasticsearch if the user searched for something
 $results = [];
 $total_size = 0;
@@ -370,10 +368,8 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="last_access" <?php echo (getCookie('sort') === 'last_access') ? 'selected' : ''; ?>>last_access</option>
 		  <option value="tag" <?php echo (getCookie('sort') === 'tag') ? 'selected' : ''; ?>>tag</option>
 		  <option value="tag_custom" <?php echo (getCookie('sort') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
-          <?php if ($pi) { ?>
           <option value="change_percent_filesize" <?php echo (getCookie('sort') === 'change_percent_filesize') ? 'selected' : ''; ?>>change_percent_filesize</option>
           <option value="change_percent_items" <?php echo (getCookie('sort') === 'change_percent_items') ? 'selected' : ''; ?>>change_percent_items</option>
-          <?php } ?>
 		</select>
 	  </div>
 	  <div class="col-xs-2">
@@ -400,10 +396,8 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="last_access" <?php echo (getCookie('sort2') === 'last_access') ? 'selected' : ''; ?>>last_access</option>
 		  <option value="tag" <?php echo (getCookie('sort2') === 'tag') ? 'selected' : ''; ?>>tag</option>
 		  <option value="tag_custom" <?php echo (getCookie('sort2') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
-          <?php if ($pi) { ?>
           <option value="change_percent_filesize" <?php echo (getCookie('sort2') === 'change_percent_filesize') ? 'selected' : ''; ?>>change_percent_filesize</option>
           <option value="change_percent_items" <?php echo (getCookie('sort2') === 'change_percent_items') ? 'selected' : ''; ?>>change_percent_items</option>
-          <?php } ?>
 		</select>
 	  </div>
 	  <div class="col-xs-2">

@@ -40,8 +40,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 // display results
 if (!empty($results[$p]) && count($results[$p]) > 0) {
 	//print_r($_SERVER);
-  $pi = cpi($client, $esIndex);
-  $scp = scp($client, $esIndex, $esIndex2, $pi);
+  $show_change_percent = showChangePercent($client, $esIndex, $esIndex2);
 ?>
 <div class="container-fluid searchresults" style="margin-top: 70px;">
   <div class="row">
@@ -103,12 +102,12 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
 		      <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
-          <?php if ($scp) { ?>
+          <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
           <?php $numofcol+=1; ?>
           <?php } ?>
           <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
-          <?php if ($scp) { ?>
+          <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
           <?php $numofcol+=1; ?>
           <?php } ?>
@@ -143,11 +142,11 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
 					<th class="text-nowrap">Path</th>
 					<th class="text-nowrap">File Size</th>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
-          <?php if ($scp) { ?>
+          <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change %</th>
           <?php } ?>
           <th class="text-nowrap">Items</th>
-          <?php if ($scp) { ?>
+          <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change %</th>
           <?php } ?>
           <th class="text-nowrap">Items (files)</th>
@@ -298,7 +297,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <td class="text-nowrap highlight"><?php echo formatBytes($file['filesize']); ?></td>
         <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <!-- show comparison file size -->
-        <?php if ($scp) { ?>
+        <?php if ($show_change_percent) { ?>
           <td class="text-nowrap highlight">
           <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
           if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
@@ -315,7 +314,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <!-- end show comparison file size -->
         <td class="text-nowrap highlight"><?php echo $file['items']; ?>
         <!-- show comparison items -->
-        <?php if ($scp) { ?>
+        <?php if ($show_change_percent) { ?>
         <td class="text-nowrap highlight">
         <?php
         if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {

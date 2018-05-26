@@ -13,10 +13,9 @@ require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
 
-$pi = cpi($client, $esIndex);
-$scp = scp($client, $esIndex, $esIndex2, $pi);
+$show_change_percent = showChangePercent($client, $esIndex, $esIndex2);
 
-if ($pi && $scp) {
+if ($show_change_percent) {
     // get sort
     $sort = isset($_GET['sort']) ? $_GET['sort'] : "change_percent_filesize";
     $sortorder = isset($_GET['sortorder']) ? $_GET['sortorder'] : "desc";
@@ -171,21 +170,12 @@ if ($pi && $scp) {
 </head>
 <body>
 <?php include "nav.php"; ?>
-<?php if (! $pi) { ?>
-<div class="container" id="index2req" style="margin-top:70px;">
-            <div class="row">
-                <div class="alert alert-dismissible alert-info col-xs-8">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>This index was not created with diskover PRO.</strong> Go to the <a href="selectindices.php">select index</a> page and pick an index that was made with diskover PRO.
-                </div>
-            </div>
-        </div>
-<?php } else if (! $scp) { ?>
+<?php if (! $show_change_percent) { ?>
       <div class="container" id="nohotdirs" style="display:block; margin-top:70px;">
             <div class="row">
                 <div class="alert alert-dismissible alert-info col-xs-8">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hot directories found.</strong> Run diskover using --hotdirs to find hot directories. (PRO VERSION)
+                    <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hot directories found.</strong> Run diskover using --hotdirs to find hot directories.
                 </div>
             </div>
         </div>
@@ -202,7 +192,7 @@ if ($pi && $scp) {
             <div class="row">
                 <div class="alert alert-dismissible alert-info col-xs-8">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>No index2 selected.</strong> Go to the <a href="selectindices.php">select index</a> page to add a previous index for data comparison. (PRO VERSION)
+                    <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>No index2 selected.</strong> Go to the <a href="selectindices.php">select index</a> page to add a previous index for data comparison.
                 </div>
             </div>
         </div>

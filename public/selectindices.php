@@ -98,7 +98,7 @@ if (isset($_POST['index'])) {
     $pi = cpi($client, $indexselected);
     
     // create cookies for default search sort if none already created
-    if ((empty(getCookie('sort')) && empty(getCookie('sort2'))) || ! $proindex) {
+    if ((empty(getCookie('sort')) && empty(getCookie('sort2')))) {
         createCookie('sort', 'path_parent');
         createCookie('sortorder', 'asc');
         createCookie('sort2', 'filename');
@@ -161,7 +161,7 @@ if (isset($_POST['index'])) {
         ?>
             <div class="alert alert-dismissible alert-info">
               <button type="button" class="close" data-dismiss="alert">&times;</button>
-              <i class="glyphicon glyphicon-info-sign"></i> Please select at least one diskover index (sorted by creation date). Index 2 is optional and is a previous index used for data comparison (PRO VERSION).
+              <i class="glyphicon glyphicon-info-sign"></i> Please select at least one diskover index (sorted by creation date). Index 2 is optional and is a previous index used for data comparison.
             </div>
         <?php
     } ?>
@@ -186,7 +186,7 @@ if (isset($_POST['index'])) {
                     }
                 }
                 ?></select>
-            <label for="index2">Index 2 (pro version):</label>
+            <label for="index2">Index 2:</label>
             <select name="index2" id="index2" class="form-control">
                 <option selected><?php echo getCookie('index2') ? getCookie('index2') : ""; ?></option>
                 <?php
