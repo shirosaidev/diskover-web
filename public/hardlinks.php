@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -11,6 +11,8 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
+
+$minhardlinks = isset($_GET['minhardlinks']) ? $_GET['minhardlinks'] : 3;
 
 ?>
 
@@ -34,7 +36,7 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found.</strong>
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found.</strong> Try changing paths or filters.
 				</div>
 			</div>
 		</div>
@@ -42,15 +44,26 @@ require "d3_inc.php";
             <div id="hardlinkscharts-wrapper" style="display:none;">
                 <div class="row">
                     <div class="col-xs-12 text-center">
-                        <h1>Hardlinks</h1><span style="font-size:10px; color:gray;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
+                    	<h1>Hardlinks</h1>
+                    	<div class="row">
+                    		<div class="col-xs-12 text-center">
+                    			<form onsubmit="sessionStorage.removeItem('diskover-hardlinks'); document.getElementById('changeminhardlinks').submit(); return false;" class="form-horizontal" id="changeminhardlinks">
+                    			<div class="form-group form-inline"><label class="small">Min Hard Links</label>&nbsp;<input class="form-control input-sm" name="minhardlinks" id="minhardlinks" value="<?php echo $minhardlinks; ?>" size="5">&nbsp;<button type="submit" id="changeminhardlinksbutton" class="btn btn-default btn-xs" title="submit">Go </button>
+                    			<span style="font-size:10px; color:gray; margin-left:20px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
+                    			</div>
+                    			</form>
+                    		</div>
+                    	</div>
                     </div>
                 </div>
-                <br />
-                <div class="row">
-                    <div class="col-xs-12">
-                        <div id="hardlinkscountchart" class="hardlinkscountchart text-center"></div>
+                <div class="row" style="margin-top:30px;">
+                    <div class="col-xs-4">
+                        <div id="hardlinkscountbarchart" class="hardlinkscountbarchart text-center"></div>
                     </div>
-    			</div>
+                    <div class="col-xs-8">
+                        <div id="hardlinkscountgraph" class="hardlinkscountgraph text-center"></div>
+                    </div>
+                </div>
             </div>
 			</div>
 		<script language="javascript" src="js/jquery.min.js"></script>

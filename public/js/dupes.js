@@ -13,7 +13,7 @@ function getESJsonData() {
      // config references
      var chartConfig = {
          target: 'mainwindow',
-         data_url: 'd3_data_dupes.php'
+         data_url: 'd3_data_dupes.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime
      };
 
      // loader settings

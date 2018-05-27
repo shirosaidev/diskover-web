@@ -13,7 +13,7 @@ function getESJsonData() {
      // config references
      var chartConfig = {
          target: 'mainwindow',
-         data_url: 'd3_data_hardlinks.php'
+         data_url: 'd3_data_hardlinks.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&minhardlinks=' + minhardlinks
      };
 
      // loader settings
@@ -59,25 +59,31 @@ function getESJsonData() {
      });
 }
 
-function renderHardLinksCharts(dataset) {
+function renderHardLinksCharts(data) {
 
      // display charts container
      document.getElementById('hardlinkscharts-wrapper').style.display = 'block';
+
+     // split data into bar chart and force-directed graph
+     var dataset = data[0];
+     var links = data[1];
 
      // Bar chart (hardlinks counts)
 
      var valueLabelWidth = 20; // space reserved for value labels (right)
      var barHeight = 10; // height of one bar
-     var barLabelWidth = 100; // space reserved for bar labels
+     var barLabelWidth = 80; // space reserved for bar labels
      var barLabelPadding = 10; // padding between bar and bar labels (left)
      var gridChartOffset = 0; // space between start of grid and first bar
-     var maxBarWidth = '86vw'; // width of the bar with the max value
+     var maxBarWidth = 500; // width of the bar with the max value
 
      var totalcount = d3.sum(dataset, function(d) {
          return d.count;
      });
 
-     var min = d3.min(dataset, function(d) {
+     var color = d3.scale.category20b();
+
+     /*var min = d3.min(dataset, function(d) {
          return d.count;
      });
 
@@ -85,14 +91,15 @@ function renderHardLinksCharts(dataset) {
          return d.count;
      });
 
-     // svg container element
-     var svg = d3.select('#hardlinkscountchart').append("svg")
-         .attr('width', '98vw')
-         .attr('height', '199vh');
-
      var color = d3.scale.linear()
                 .domain([min, max])
-                .range(['black', 'green']);
+                .range(['black', 'steelblue']);
+    */
+
+     // svg container element
+     var svg = d3.select('#hardlinkscountbarchart').append("svg")
+         .attr('width', 600)
+         .attr('height', 600);
 
      svg.append("g")
          .attr("class", "bars");
@@ -111,12 +118,12 @@ function renderHardLinksCharts(dataset) {
              d.files.forEach(function(f) {
                  files += f + '<br>\n';
              });
-             return "<span style='font-size:10px;color:gray;'>" + files + "</span><br><span style='font-size:12px; color:white;'>inode: " + d.label + "</span><br><span style='font-size:12px; color:red;'>count: " + d.count + " (" + percent + ")</span>";
+             return "<span style='font-size:10px;color:lightgray;'>" + files + "</span><br><span style='font-size:12px; color:white;'>inode: " + d.label + "</span><br><span style='font-size:12px; color:white;'>size: " + format(d.size) + "</span><br><span style='font-size:12px; color:red;'>count: " + d.count + " (" + percent + ")</span>";
          });
 
      svg.call(tip);
 
-     d3.select("hardlinkscountchart").append("div")
+     d3.select("#hardlinkscountbarchart").append("div")
          .attr("class", "tooltip")
          .style("opacity", 0);
 
@@ -150,7 +157,7 @@ function renderHardLinksCharts(dataset) {
          .attr('y', y)
          .attr('class', 'bars')
          .style('fill', function(d) {
-             return color(d.count);
+             return color(d.label);
          })
          .attr('width', function(d) {
              return x(barValue(d));
@@ -168,9 +175,6 @@ function renderHardLinksCharts(dataset) {
              return tip
                  .style("top", (d3.event.pageY - 10) + "px")
                  .style("left", (d3.event.pageX + 10) + "px");
-         })
-         .on("click", function(d) {
-             document.location.href='advanced.php?>&submitted=true&p=1&inode=' + d.label + '&doctype=file';
          });
 
 
@@ -214,11 +218,106 @@ function renderHardLinksCharts(dataset) {
 
      barvaluelabel.exit().remove();
 
+
+    // force-directed graph
+
+    var width = 960,
+    height = 600;
+
+    var svg = d3.select("#hardlinkscountgraph").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    var nodes = {};
+
+    links.forEach(function(link) {
+        link.source = nodes[link.source] ||
+            (nodes[link.source] = {name: link.source, target: link.target, inode: link.inode});
+        link.target = nodes[link.target] ||
+            (nodes[link.target] = {name: link.target, count: link.count});
+    });
+
+    console.log(links)
+
+    var force = d3.layout.force()
+        //.size([document.getElementById("hardlinkscountgraph").offsetWidth, document.getElementById("hardlinkscountgraph").offsetHeight])
+        .size([width, height])
+        .nodes(d3.values(nodes))
+        .links(links)
+        //.charge(-30)
+        //.linkDistance(15)
+        .start();
+
+    var link = svg.selectAll(".link")
+      .data(links)
+      .enter().append("line")
+      .attr("class", "link")
+      .style("stroke-width", function(d) { return Math.sqrt(d.value); })
+      .style("stroke", function(d) { return color(d.inode); });
+
+    var node = svg.selectAll(".node")
+      .data(force.nodes())
+      .enter().append("circle")
+      .attr("class", "node")
+      .attr("r", 5)
+      .style("fill", function(d) { if(d.inode) { return color(d.inode); } else { return "#555"; } })
+      .call(force.drag);
+
+    //node.append("title")
+    //  .text(function(d) { return d.name; });
+
+    var tip2 = d3.tip()
+         .attr('class', 'd3-tip')
+         .html(function(d) {
+             if (d.inode) {
+                return "<span style='font-size:11px;color:lightgray;'>" + d.name + "</span><br><span style='font-size:11px;color:white;'>inode: " + d.inode + "</span>";
+             } else {
+                return "<span style='font-size:11px;color:lightgray;'>" + d.name + "</span>";
+             }
+         });
+
+     svg.call(tip2);
+
+     d3.select("#hardlinkscountgraph").append("div")
+         .attr("class", "tooltip")
+         .style("opacity", 0);
+
+    node
+        .on("click", function(d) {
+            if (d.inode) {
+                document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.inode + '&doctype=file';
+            }
+        })
+        .on("mouseover", function(d) {
+            tip2.show(d);
+        })
+        .on('mouseout', function(d) {
+            tip2.hide(d)
+        })
+        .on('mousemove', function() {
+            return tip2
+            .style("top", (d3.event.pageY - 10) + "px")
+            .style("left", (d3.event.pageX + 10) + "px");
+        });
+
+    force.on("tick", function() {
+        link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+        node.attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
+    });
+
 }
 
 console.time('loadtime')
 // check if json data stored in session storage
 root = JSON.parse(sessionStorage.getItem("diskover-hardlinks"));
+
+// minimum hard links
+var minhardlinks = $_GET('minhardlinks') || 3;
 
 // get data from Elasticsearh if no json in session storage
 if (!root) {

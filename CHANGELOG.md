@@ -1,6 +1,6 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc6] - 2018-05-26
+# [1.5.0-rc6] - 2018-05-27
 ### notice
 - requires index created with diskover >= v1.5.0-rc8
 ### added

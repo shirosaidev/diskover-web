@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -11,11 +11,12 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
+$minhardlinks = isset($_GET['minhardlinks']) ? $_GET['minhardlinks'] : 3;
 
 // Get search results from Elasticsearch for harlinks
 
 // find all the files with hardlinks values that are greater than 1 ""
-$indodes = [];
+$inodes = [];
 $results = [];
 $searchParams = [];
 $totalHardLinkCount = 0;
@@ -32,7 +33,7 @@ $searchParams['body'] = [
                   'must' => [
                       'range' => [
                             'hardlinks' => [
-                                'gt' => 1
+                                'gte' => $minhardlinks
                             ]
                       ]
                   ],
@@ -97,6 +98,7 @@ $inodes_unique = array_unique($inodes);
 
 // find files that match each inode
 $inodes_files = [];
+$inodes_sizes = [];
 $results = [];
 $searchParams = [];
 $searchParams['index'] = $esIndex;
@@ -105,7 +107,7 @@ $searchParams['type']  = 'file';
 foreach ($inodes_unique as $key => $value) {
     $searchParams['body'] = [
         'size' => 100,
-        '_source' => ['filename', 'path_parent'],
+        '_source' => ['filename', 'path_parent', 'filesize'],
             'query' => [
                 'match' => [
                 'inode' => $value
@@ -119,15 +121,28 @@ foreach ($inodes_unique as $key => $value) {
     foreach($results as $k => $v) {
         $inodes_files[$value][] = $v['_source']['path_parent'] . '/' . $v['_source']['filename'];
     }
+    $inodes_sizes[$value] = $v['_source']['filesize'];
 }
 
 // build data array for d3
 foreach($inodes_unique as $key => $value) {
-    $data[] = [
+    $data[0][] = [
         "label" => $value,
         "count" => sizeof($inodes_files[$value]),
-        "files" => $inodes_files[$value]
+        "files" => $inodes_files[$value],
+        "size" => $inodes_sizes[$value]
     ];
+}
+
+foreach($inodes_files as $key => $value) {
+    foreach($value as $k => $v) {
+      $data[1][] = [
+          "source" => $v,
+          "target" => dirname($v),
+          "inode" => $key,
+          "count" => sizeof($value)
+      ];
+    }
 }
 
 echo json_encode($data);
