@@ -46,12 +46,13 @@ LICENSE for the full license text.
     line-height: 1;
     font-weight: bold;
     padding: 12px;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(50, 50, 50, 0.4);
     color: #fff;
     border-radius: 2px;
     pointer-events: none;
     word-break: break-all;
     word-wrap: break-word;
+    max-width: 700px;
 }
 
 .node {

@@ -61,162 +61,169 @@ function getESJsonData() {
 
 function renderHardLinksCharts(data) {
 
-     // display charts container
-     document.getElementById('hardlinkscharts-wrapper').style.display = 'block';
+    // display charts container
+    document.getElementById('hardlinkscharts-wrapper').style.display = 'block';
 
-     // split data into bar chart and force-directed graph
-     var dataset = data[0];
-     var links = data[1];
+    // split data into bar chart and force-directed graph
+    var dataset = data[0];
+    var links = data[1];
 
-     // Bar chart (hardlinks counts)
+    // Bar chart (hardlinks counts)
 
-     var valueLabelWidth = 20; // space reserved for value labels (right)
-     var barHeight = 10; // height of one bar
-     var barLabelWidth = 80; // space reserved for bar labels
-     var barLabelPadding = 10; // padding between bar and bar labels (left)
-     var gridChartOffset = 0; // space between start of grid and first bar
-     var maxBarWidth = 500; // width of the bar with the max value
+    var valueLabelWidth = 20; // space reserved for value labels (right)
+    var barHeight = 10; // height of one bar
+    var barLabelWidth = 80; // space reserved for bar labels
+    var barLabelPadding = 10; // padding between bar and bar labels (left)
+    var gridChartOffset = 0; // space between start of grid and first bar
+    var maxBarWidth = 500; // width of the bar with the max value
 
-     var totalcount = d3.sum(dataset, function(d) {
-         return d.count;
-     });
+    var totalcount = d3.sum(dataset, function(d) {
+        return d.count;
+    });
 
-     var color = d3.scale.category20b();
+    var color2 = d3.scale.category20b();
 
-     /*var min = d3.min(dataset, function(d) {
-         return d.count;
-     });
+    var min = d3.min(dataset, function(d) {
+        return d.count;
+    });
 
-     var max = d3.max(dataset, function(d) {
-         return d.count;
-     });
+    var max = d3.max(dataset, function(d) {
+        return d.count;
+    });
 
-     var color = d3.scale.linear()
-                .domain([min, max])
-                .range(['black', 'steelblue']);
-    */
+    var color = d3.scale.linear()
+            .domain([min, max])
+            .range(['black', 'steelblue']);
+    
 
-     // svg container element
-     var svg = d3.select('#hardlinkscountbarchart').append("svg")
-         .attr('width', 600)
-         .attr('height', 600);
+    // svg container element
+    var svg = d3.select('#hardlinkscountbarchart').append("svg")
+        .attr('width', 600)
+        .attr('height', 600);
 
-     svg.append("g")
-         .attr("class", "bars");
-     svg.append("g")
-         .attr("class", "barvaluelabel");
-     svg.append("g")
-         .attr("class", "barlabel");
+    svg.append("g")
+        .attr("class", "bars");
+    svg.append("g")
+        .attr("class", "barvaluelabel");
+    svg.append("g")
+        .attr("class", "barlabel");
 
-     /* ------- TOOLTIP -------*/
+    /* ------- TOOLTIP -------*/
 
-     var tip = d3.tip()
-         .attr('class', 'd3-tip')
-         .html(function(d) {
-             var percent = (d.count / totalcount * 100).toFixed(1) + '%';
-             var files = '';
-             d.files.forEach(function(f) {
-                 files += f + '<br>\n';
-             });
-             return "<span style='font-size:10px;color:lightgray;'>" + files + "</span><br><span style='font-size:12px; color:white;'>inode: " + d.label + "</span><br><span style='font-size:12px; color:white;'>size: " + format(d.size) + "</span><br><span style='font-size:12px; color:red;'>count: " + d.count + " (" + percent + ")</span>";
-         });
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .html(function(d) {
+            var percent = (d.count / totalcount * 100).toFixed(1) + '%';
+            var files = '';
+            d.files.forEach(function(f) {
+                files += f + '<br>\n';
+            });
+            return "<span style='font-size:10px;color:lightgray;'>" + files + "</span><br><span style='font-size:12px; color:white;'>inode: " + d.label + "</span><br><span style='font-size:12px; color:white;'>size: " + format(d.size) + "</span><br><span style='font-size:12px; color:red;'>count: " + d.count + " (" + percent + ")</span>";
+        });
 
-     svg.call(tip);
+    svg.call(tip);
 
-     d3.select("#hardlinkscountbarchart").append("div")
-         .attr("class", "tooltip")
-         .style("opacity", 0);
+    d3.select("#hardlinkscountbarchart").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
-     /* ------- BARS -------*/
+    /* ------- BARS -------*/
 
-     // accessor functions
-     var barLabel = function(d) {
-         return d['label'];
-     };
-     var barValue = function(d) {
-         return d['count'];
-     };
+    // accessor functions
+    var barLabel = function(d) {
+        return d['label'];
+    };
+    var barValue = function(d) {
+        return d['count'];
+    };
 
-     // scales
-     var yScale = d3.scale.ordinal().domain(d3.range(0, dataset.length)).rangeBands([0, dataset.length * barHeight]);
-     var y = function(d, i) {
-         return yScale(i);
-     };
-     var yText = function(d, i) {
-         return y(d, i) + yScale.rangeBand() / 2;
-     };
-     var x = d3.scale.linear().domain([0, d3.max(dataset, barValue)]).range([0, maxBarWidth]);
+    // scales
+    var yScale = d3.scale.ordinal().domain(d3.range(0, dataset.length)).rangeBands([0, dataset.length * barHeight]);
+    var y = function(d, i) {
+     return yScale(i);
+    };
+    var yText = function(d, i) {
+     return y(d, i) + yScale.rangeBand() / 2;
+    };
+    var x = d3.scale.linear().domain([0, d3.max(dataset, barValue)]).range([0, maxBarWidth]);
 
-     // bars
-     var bar = svg.select(".bars").selectAll("rect")
-            .data(dataset.sort(function(a, b) { return d3.descending(a.count, b.count); }));
+    // bars
+    var bar = svg.select(".bars").selectAll("rect")
+        .data(dataset.sort(function(a, b) { return d3.descending(a.count, b.count); }));
 
-     bar.enter().append("rect")
-         .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
-         .attr('height', yScale.rangeBand())
-         .attr('y', y)
-         .attr('class', 'bars')
-         .style('fill', function(d) {
-             return color(d.label);
-         })
-         .attr('width', function(d) {
-             return x(barValue(d));
-         })
-         .on("click", function(d) {
-             document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.label + '&doctype=file';
-         })
-         .on("mouseover", function(d) {
-             tip.show(d);
-         })
-         .on('mouseout', function(d) {
-             tip.hide(d)
-         })
-         .on('mousemove', function() {
-             return tip
-                 .style("top", (d3.event.pageY - 10) + "px")
-                 .style("left", (d3.event.pageX + 10) + "px");
-         });
+    bar.enter().append("rect")
+        .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
+        .attr('height', yScale.rangeBand())
+        .attr('y', y)
+        .attr('class', 'bars')
+        .style('fill', function(d) {
+            return color(d.count);
+        })
+        .attr('width', function(d) {
+            return x(barValue(d));
+        })
+        .on("click", function(d) {
+            document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.label + '&doctype=file';
+        })
+        .on("mouseover", function(d) {
+            tip.show(d)
+            d3.selectAll("circle").filter('.inode' + d.label).transition()
+              .duration(250)
+              .attr("r", 8)
+              .style("stroke", "red");
+        })
+        .on('mouseout', function(d) {
+            tip.hide(d)
+            d3.selectAll("circle").filter('.inode' + d.label).transition()
+              .duration(250)
+              .attr("r", 5)
+              .style("stroke", "black");
+        })
+        .on('mousemove', function() {
+            return tip
+            .style("top", (d3.event.pageY - 10) + "px")
+            .style("left", (d3.event.pageX + 10) + "px");
+        });
 
+    bar
+        .transition().duration(750)
+        .attr("width", function(d) {
+            return x(barValue(d));
+        });
 
-     bar
-         .transition().duration(750)
-         .attr("width", function(d) {
-             return x(barValue(d));
-         });
+    bar.exit().remove();
 
-     bar.exit().remove();
+    // bar labels
+    var barlabel = svg.select(".barlabel").selectAll('text').data(dataset);
 
-     // bar labels
-     var barlabel = svg.select(".barlabel").selectAll('text').data(dataset);
+    barlabel.enter().append('text')
+        .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + gridChartOffset + ')')
+        .attr('y', yText)
+        .attr("dy", ".35em") // vertical-align: middle
+        .attr("class", "barlabel")
+        .text(barLabel);
 
-     barlabel.enter().append('text')
-         .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + gridChartOffset + ')')
-         .attr('y', yText)
-         .attr("dy", ".35em") // vertical-align: middle
-         .attr("class", "barlabel")
-         .text(barLabel);
+    barlabel.exit().remove();
 
-     barlabel.exit().remove();
+    // bar value labels
+    var barvaluelabel = svg.select(".barvaluelabel").selectAll('text').data(dataset);
 
-     // bar value labels
-     var barvaluelabel = svg.select(".barvaluelabel").selectAll('text').data(dataset);
+    barvaluelabel.enter().append("text")
+        .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
+        .attr("dx", 3) // padding-left
+        .attr("dy", ".35em") // vertical-align: middle
+        .attr("class", "barvaluelabel");
 
-     barvaluelabel.enter().append("text")
-         .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
-         .attr("dx", 3) // padding-left
-         .attr("dy", ".35em") // vertical-align: middle
-         .attr("class", "barvaluelabel");
+    barvaluelabel
+        .attr("x", function(d) {
+            return x(barValue(d));
+        })
+        .attr("y", yText)
+        .text(function(d) {
+            return barValue(d);
+        });
 
-     barvaluelabel
-         .attr("x", function(d) {
-             return x(barValue(d));
-         })
-         .attr("y", yText)
-         .text(function(d) {
-             return barValue(d);
-         });
-
-     barvaluelabel.exit().remove();
+    barvaluelabel.exit().remove();
 
 
     // force-directed graph
@@ -232,39 +239,82 @@ function renderHardLinksCharts(data) {
 
     links.forEach(function(link) {
         link.source = nodes[link.source] ||
-            (nodes[link.source] = {name: link.source, target: link.target, inode: link.inode});
+            (nodes[link.source] = {name: link.source, target: link.target, inode: link.inode, count: link.count});
         link.target = nodes[link.target] ||
-            (nodes[link.target] = {name: link.target, count: link.count});
+            (nodes[link.target] = {name: link.target});
     });
-
-    console.log(links)
 
     var force = d3.layout.force()
         //.size([document.getElementById("hardlinkscountgraph").offsetWidth, document.getElementById("hardlinkscountgraph").offsetHeight])
         .size([width, height])
         .nodes(d3.values(nodes))
         .links(links)
-        //.charge(-30)
-        //.linkDistance(15)
+        //.gravity(0.1)
+        //.charge(-120)
+        //.linkDistance(30)
         .start();
 
     var link = svg.selectAll(".link")
-      .data(links)
-      .enter().append("line")
-      .attr("class", "link")
-      .style("stroke-width", function(d) { return Math.sqrt(d.value); })
-      .style("stroke", function(d) { return color(d.inode); });
+        .data(links)
+        .enter().append("line")
+        .attr("class", "link")
+        .style("stroke-width", function(d) { return Math.sqrt(d.value); })
+        .style("stroke", function(d) { return color(d.count); });
 
     var node = svg.selectAll(".node")
-      .data(force.nodes())
-      .enter().append("circle")
-      .attr("class", "node")
-      .attr("r", 5)
-      .style("fill", function(d) { if(d.inode) { return color(d.inode); } else { return "#555"; } })
-      .call(force.drag);
+        .data(force.nodes())
+        .enter().append("circle")
+        //.attr("class", "node")
+        .attr("class", function(d) { return 'node inode' + d.inode; })
+        .attr("r", 5)
+        .style("fill", function(d) { if(d.count) { return color(d.count); } else { return color2(d.name); } })
+        .call(force.drag);
 
     //node.append("title")
     //  .text(function(d) { return d.name; });
+
+    var label = node.append("text")
+        .attr("dy", ".35em")
+        .style("fill", "white")
+        .style("size", "8px")
+        .text(function(d) { return d.inode; });
+
+    node
+        .on("click", function(d) {
+            if (d.inode) {
+                document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.inode + '&doctype=file';
+            }
+        })
+        .on("mouseover", function(d) {
+            tip2.show(d)
+            d3.select(this).transition()
+              .duration(250)
+              .attr("r", 8);
+        })
+        .on('mouseout', function(d) {
+            tip2.hide(d)
+            d3.select(this).transition()
+              .duration(250)
+              .attr("r", 5);
+        })
+        .on('mousemove', function() {
+            return tip2
+            .style("top", (d3.event.pageY - 10) + "px")
+            .style("left", (d3.event.pageX + 10) + "px");
+        });
+
+    force.on("tick", function() {
+        link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+        node.attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
+
+        label.attr("x", function(d) { return d.x + 8; })
+            .attr("y", function(d) { return d.y; });
+    });
 
     var tip2 = d3.tip()
          .attr('class', 'd3-tip')
@@ -281,34 +331,6 @@ function renderHardLinksCharts(data) {
      d3.select("#hardlinkscountgraph").append("div")
          .attr("class", "tooltip")
          .style("opacity", 0);
-
-    node
-        .on("click", function(d) {
-            if (d.inode) {
-                document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.inode + '&doctype=file';
-            }
-        })
-        .on("mouseover", function(d) {
-            tip2.show(d);
-        })
-        .on('mouseout', function(d) {
-            tip2.hide(d)
-        })
-        .on('mousemove', function() {
-            return tip2
-            .style("top", (d3.event.pageY - 10) + "px")
-            .style("left", (d3.event.pageX + 10) + "px");
-        });
-
-    force.on("tick", function() {
-        link.attr("x1", function(d) { return d.source.x; })
-            .attr("y1", function(d) { return d.source.y; })
-            .attr("x2", function(d) { return d.target.x; })
-            .attr("y2", function(d) { return d.target.y; });
-
-        node.attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; });
-    });
 
 }
 
