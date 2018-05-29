@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -11,6 +11,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
+$mindupes = $_GET['mindupes'];
 
 // Get search results from Elasticsearch for duplicate files
 
@@ -27,11 +28,30 @@ $searchParams['scroll'] = "1m";
 
 $searchParams['body'] = [
     '_source' => ['dupe_md5'],
-        'query' => [
-            'query_string' => [
-            'query' => 'dupe_md5:(NOT "")'
+    'query' => [
+              'bool' => [
+                'must' => [
+                      'wildcard' => [ 'path_parent' => $path . '*' ]
+                ],
+                'must_not' => [
+                      'match' => [ 'dupe_md5' => '' ]
+                  ],
+                  'filter' => [
+                      'range' => [
+                          'filesize' => [
+                                'gte' => $filter
+                          ]
+                      ]
+                  ],
+                  'should' => [
+                      'range' => [
+                          'last_modified' => [
+                              'lte' => $mtime
+                          ]
+                      ]
+                  ]
+              ]
         ]
-    ]
 ];
 $queryResponse = $client->search($searchParams);
 
@@ -72,6 +92,7 @@ $md5s_unique = array_unique($md5s);
 
 // find files that match each md5
 $md5s_files = [];
+$dupes_paths = [];
 $results = [];
 $searchParams = [];
 $searchParams['index'] = $esIndex;
@@ -82,19 +103,49 @@ foreach ($md5s_unique as $key => $value) {
         'size' => 100,
         '_source' => ['filename', 'path_parent'],
             'query' => [
-                'match' => [
-                'dupe_md5' => $value
-            ]
-        ]
+              'bool' => [
+                'must' => [
+                      'match' => [ 'dupe_md5' => $value ]
+                  ],
+                  'filter' => [
+                      'range' => [
+                          'filesize' => [
+                                'gte' => $filter
+                          ]
+                      ]
+                  ],
+                  'should' => [
+                      'range' => [
+                          'last_modified' => [
+                              'lte' => $mtime
+                          ]
+                      ]
+                  ]
+              ]
+          ]
     ];
     $queryResponse = $client->search($searchParams);
     $results = $queryResponse['hits']['hits'];
 
+    // remove key and continue if count of results < min dupes
+    if (sizeof($results) < $mindupes) {
+        unset($md5s_unique[$key]);
+        continue;
+    }
+
     $md5s_files[$value] = [];
     foreach($results as $k => $v) {
         $md5s_files[$value][] = $v['_source']['path_parent'] . '/' . $v['_source']['filename'];
+        $arr = array_filter(explode('/', $v['_source']['path_parent']));
+        $dupes_paths[] = '/'.implode('/',$arr);
+        while((array_pop($arr) and !empty($arr))){
+            $dupes_paths[] = '/'.implode('/',$arr);
+        };
     }
 }
+
+// just get unique paths
+$dupes_paths_unique = array_unique($dupes_paths);
 
 
 // get total file sizes for each md5
@@ -136,15 +187,30 @@ foreach ($md5s_unique as $key => $value) {
 
 // build data array for d3
 foreach($md5s_unique as $key => $value) {
-    // only include md5's > 0.1 of total size or total dupe count
-    if (($md5_sizes[$value] / $totalFilesize * 100) > 0.1) {
-        $data[] = [
-            "label" => $value,
-            "size" => $md5_sizes[$value],
-            "count" => $md5_counts[$value],
-            "files" => $md5s_files[$value]
-        ];
+    $data[0][] = [
+        "label" => $value,
+        "size" => $md5_sizes[$value],
+        "count" => $md5_counts[$value],
+        "files" => $md5s_files[$value]
+    ];
+}
+
+foreach($md5s_files as $key => $value) {
+    foreach($value as $k => $v) {
+      $data[1][] = [
+          "source" => $v,
+          "target" => dirname($v),
+          "md5" => $key,
+          "count" => $md5_counts[$key]
+      ];
     }
+}
+
+foreach($dupes_paths_unique as $key => $value) {
+      $data[1][] = [
+          "source" => $value,
+          "target" => dirname($value)
+      ];
 }
 
 echo json_encode($data);

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -11,6 +11,8 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
+
+$mindupes = isset($_GET['mindupes']) ? $_GET['mindupes'] : 2;
 
 ?>
 
@@ -34,7 +36,7 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found.</strong> Run diskover using --finddupes to search for duplicate files.
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found.</strong> Run diskover using --finddupes to search for duplicate files or trying changing path or filters.
 				</div>
 			</div>
 		</div>
@@ -42,22 +44,27 @@ require "d3_inc.php";
             <div id="dupescharts-wrapper" style="display:none;">
                 <div class="row">
                     <div class="col-xs-12 text-center">
-                        <h1>Dupes</h1><span style="font-size:10px; color:gray;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
+                    	<h1>Dupes</h1>
+                    	<div class="row">
+                    		<div class="col-xs-12 text-center">
+                    			<form class="form-horizontal" id="changemindupes">
+                    			<div class="form-group form-inline"><label class="small">Min Dupes</label>&nbsp;<input class="form-control input-sm" name="mindupes" id="mindupes" value="<?php echo $mindupes; ?>" size="5">&nbsp;<button type="submit" id="changemindupesbutton" class="btn btn-default btn-xs" title="submit">Go </button>
+                    			<span style="font-size:10px; color:gray; margin-left:20px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
+                    			</div>
+                    			</form>
+                    		</div>
+                    	</div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-xs-6">
-                          <div id="dupescountchart" class="text-center"></div>
+                <div class="row" style="margin-top:15px;">
+                    <div class="col-xs-4">
+                          <div id="dupescountchart" class="text-center"></div><br />
+                          <div id="filesizechart" class="text-center"></div>
                       </div>
-                    <div class="col-xs-6">
-                        <div id="filesizechart" class="text-center"></div>
-                </div>
-    				</div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <div id="dupefiles"></div>
-                    </div>
-                </div>
+                    <div class="col-xs-8">
+                        <div id="dupescloudgraph" class="text-center"></div>
+                	</div>
+    			</div>
             </div>
 			</div>
 		<script language="javascript" src="js/jquery.min.js"></script>

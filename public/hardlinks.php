@@ -47,7 +47,7 @@ $minhardlinks = isset($_GET['minhardlinks']) ? $_GET['minhardlinks'] : 3;
                     	<h1>Hardlinks</h1>
                     	<div class="row">
                     		<div class="col-xs-12 text-center">
-                    			<form onsubmit="sessionStorage.removeItem('diskover-hardlinks'); document.getElementById('changeminhardlinks').submit(); return false;" class="form-horizontal" id="changeminhardlinks">
+                    			<form class="form-horizontal" id="changeminhardlinks">
                     			<div class="form-group form-inline"><label class="small">Min Hard Links</label>&nbsp;<input class="form-control input-sm" name="minhardlinks" id="minhardlinks" value="<?php echo $minhardlinks; ?>" size="5">&nbsp;<button type="submit" id="changeminhardlinksbutton" class="btn btn-default btn-xs" title="submit">Go </button>
                     			<span style="font-size:10px; color:gray; margin-left:20px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
                     			</div>
@@ -56,7 +56,7 @@ $minhardlinks = isset($_GET['minhardlinks']) ? $_GET['minhardlinks'] : 3;
                     	</div>
                     </div>
                 </div>
-                <div class="row" style="margin-top:30px;">
+                <div class="row" style="margin-top:15px;">
                     <div class="col-xs-4">
                         <div id="hardlinkscountbarchart" class="hardlinkscountbarchart text-center"></div>
                     </div>

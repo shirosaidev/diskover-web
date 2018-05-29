@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -18,7 +18,7 @@ LICENSE for the full license text.
 
 .bars rect {
     fill: none;
-    stroke: #272B30;
+    stroke: black;
     stroke-width: 1px;
     cursor: pointer;
     opacity: .9;

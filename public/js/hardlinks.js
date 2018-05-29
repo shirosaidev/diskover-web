@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -7,6 +7,23 @@ LICENSE for the full license text.
 /*
  * d3 hardlinks analytics for diskover-web
  */
+
+$(document).ready(function() {
+
+     $('#changeminhardlinksbutton').click(function () {
+         sessionStorage.removeItem('diskover-hardlinks');
+         console.log('changing min hard links');
+         var minhardlinks = $('#minhardlinks').val();
+         setCookie('minhardlinks', minhardlinks);
+         location.href = "hardlinks.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + "&minhardlinks=" + minhardlinks;
+         return false;
+     });
+
+    // set cookies
+    setCookie('path', path);
+    setCookie('minhardlinks', minhardlinks);
+
+});
 
 function getESJsonData() {
 
@@ -59,6 +76,14 @@ function getESJsonData() {
      });
 }
 
+function nodeDepthColor(p) {
+    d = (p.match(/\//g) || []).length;
+    var color = d3.scale.linear()
+        .domain([1, 10])
+        .range(['#000', '#333']);
+    return color(d);
+}
+
 function renderHardLinksCharts(data) {
 
     // display charts container
@@ -93,8 +118,7 @@ function renderHardLinksCharts(data) {
 
     var color = d3.scale.linear()
             .domain([min, max])
-            .range(['black', 'steelblue']);
-    
+            .range(['#33376B', '#8C8FC6']);
 
     // svg container element
     var svg = d3.select('#hardlinkscountbarchart').append("svg")
@@ -176,7 +200,7 @@ function renderHardLinksCharts(data) {
             tip.hide(d)
             d3.selectAll("circle").filter('.inode' + d.label).transition()
               .duration(250)
-              .attr("r", 5)
+              .attr("r", function(d) { if (d.inode) { return 5; } else { return 6; } })
               .style("stroke", "black");
         })
         .on('mousemove', function() {
@@ -266,36 +290,46 @@ function renderHardLinksCharts(data) {
         .enter().append("circle")
         //.attr("class", "node")
         .attr("class", function(d) { return 'node inode' + d.inode; })
-        .attr("r", 5)
-        .style("fill", function(d) { if(d.count) { return color(d.count); } else { return color2(d.name); } })
+        .attr("r", function(d) { if (d.inode) { return 5; } else { return 6; } })
+        //.style("fill", function(d) { if(d.count) { return color(d.count); } else { return color2(d.name); } })
+        .style("fill", function(d) { if(d.count) { return color(d.count); } else { return nodeDepthColor(d.name); } })
+        .style("stroke", function(d) { if(!d.count) { return "#222"; } })
         .call(force.drag);
 
     //node.append("title")
     //  .text(function(d) { return d.name; });
 
-    var label = node.append("text")
-        .attr("dy", ".35em")
-        .style("fill", "white")
-        .style("size", "8px")
-        .text(function(d) { return d.inode; });
-
     node
         .on("click", function(d) {
             if (d.inode) {
                 document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.inode + '&doctype=file';
+            } else {
+                document.location.href = "hardlinks.php?index=" + index + "&index2=" + index2 + "&path=" + d.name + "&filter=" + filter + "&mtime=" + mtime + "&minhardlinks=" + minhardlinks;
             }
         })
         .on("mouseover", function(d) {
             tip2.show(d)
             d3.select(this).transition()
               .duration(250)
-              .attr("r", 8);
+              .attr("r", 8)
+            if (d.inode) {
+                d3.selectAll("circle").filter('.inode' + d.inode).transition()
+                .duration(250)
+                .attr("r", 8)
+                .style("stroke", "red");
+            }
         })
         .on('mouseout', function(d) {
             tip2.hide(d)
             d3.select(this).transition()
               .duration(250)
-              .attr("r", 5);
+              .attr("r", function(d) { if (d.inode) { return 5; } else { return 6; } })
+            if (d.inode) {
+                d3.selectAll("circle").filter('.inode' + d.inode).transition()
+                .duration(250)
+                .attr("r", 5)
+                .style("stroke", "black");
+            }
         })
         .on('mousemove', function() {
             return tip2
@@ -311,9 +345,6 @@ function renderHardLinksCharts(data) {
 
         node.attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; });
-
-        label.attr("x", function(d) { return d.x + 8; })
-            .attr("y", function(d) { return d.y; });
     });
 
     var tip2 = d3.tip()
@@ -339,10 +370,12 @@ console.time('loadtime')
 root = JSON.parse(sessionStorage.getItem("diskover-hardlinks"));
 
 // minimum hard links
-var minhardlinks = $_GET('minhardlinks') || 3;
+var minhardlinks = $_GET('minhardlinks') || getCookie('minhardlinks') || 3;
 
 // get data from Elasticsearh if no json in session storage
 if (!root) {
+    getESJsonData();
+} else if (minhardlinks != getCookie('minhardlinks') || $_GET('path') != getCookie('path')) {
     getESJsonData();
 } else {
     console.log("using cached json data in session storage");

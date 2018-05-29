@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -7,26 +7,16 @@ LICENSE for the full license text.
 /* d3 dupes */
 
 #filesizechart {
-    height: 600px;
+    height: 300px;
     position: absolute;
-    top: 40px;
 }
 #dupescountchart svg {
-    height: 600px;
-    width: 720px;
+    height: 300px;
+    width: 400px;
 }
-#dupefiles {
-   width: 90%;
-   height: 90%;
-   top: 70px;
-   left: 15px;
-   position: fixed;
-   display: block;
-   z-index: -99;
-   text-align: left;
-   font-size: 12px;
-   color: #ccc;
-   opacity: 0.7;
+#dupescloudgraph svg {
+    height: 600px;
+    width: 960px;
 }
 .bars rect {
     fill: none;
@@ -41,14 +31,14 @@ LICENSE for the full license text.
 }
 
 .barlabel text {
-    fill: #555;
-    font-size: 8px;
+    fill: gray;
+    font-size: 9px;
     text-anchor: end;
     pointer-events: none;
 }
 
 .barvaluelabel text {
-    fill: gray;
+    fill: lightgray;
     font-size: 9px;
     text-anchor: start;
     pointer-events: none;
@@ -59,11 +49,11 @@ path {
     stroke: #272B30;
     fill-rule: evenodd;
     cursor: pointer;
-    opacity: .8;
+    opacity: .9;
 }
 path:hover {
     stroke: black;
-    opacity: .6;
+    opacity: .7;
     cursor: pointer;
 }
 text {
@@ -76,10 +66,21 @@ text {
     line-height: 1;
     font-weight: bold;
     padding: 12px;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(50, 50, 50, 0.5);
     color: #fff;
     border-radius: 2px;
     pointer-events: none;
     word-break: break-all;
     word-wrap: break-word;
+}
+
+.node {
+  stroke: black;
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
 }

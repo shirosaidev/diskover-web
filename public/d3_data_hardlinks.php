@@ -11,11 +11,11 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
-$minhardlinks = isset($_GET['minhardlinks']) ? $_GET['minhardlinks'] : 3;
+$minhardlinks = $_GET['minhardlinks'];
 
 // Get search results from Elasticsearch for harlinks
 
-// find all the files with hardlinks values that are greater than 1 ""
+// find all the files with hardlinks >= minhardlinks
 $inodes = [];
 $results = [];
 $searchParams = [];
@@ -30,18 +30,19 @@ $searchParams['body'] = [
     '_source' => ['hardlinks','inode'],
         'query' => [
               'bool' => [
-                  'must' => [
-                      'range' => [
-                            'hardlinks' => [
-                                'gte' => $minhardlinks
-                            ]
-                      ]
+                'must' => [
+                      'wildcard' => [ 'path_parent' => $path . '*' ]
                   ],
                   'filter' => [
                       'range' => [
                           'filesize' => [
                                 'gte' => $filter
                           ]
+                      ],
+                      'range' => [
+                            'hardlinks' => [
+                                'gte' => $minhardlinks
+                            ]
                       ]
                   ],
                   'should' => [
@@ -99,6 +100,7 @@ $inodes_unique = array_unique($inodes);
 // find files that match each inode
 $inodes_files = [];
 $inodes_sizes = [];
+$inodes_paths = [];
 $results = [];
 $searchParams = [];
 $searchParams['index'] = $esIndex;
@@ -120,9 +122,17 @@ foreach ($inodes_unique as $key => $value) {
     $inodes_files[$value] = [];
     foreach($results as $k => $v) {
         $inodes_files[$value][] = $v['_source']['path_parent'] . '/' . $v['_source']['filename'];
+        $arr = array_filter(explode('/', $v['_source']['path_parent']));
+        $inodes_paths[] = '/'.implode('/',$arr);
+        while((array_pop($arr) and !empty($arr))){
+            $inodes_paths[] = '/'.implode('/',$arr);
+        };
     }
     $inodes_sizes[$value] = $v['_source']['filesize'];
 }
+
+// just get unique paths
+$inodes_paths_unique = array_unique($inodes_paths);
 
 // build data array for d3
 foreach($inodes_unique as $key => $value) {
@@ -144,5 +154,13 @@ foreach($inodes_files as $key => $value) {
       ];
     }
 }
+
+foreach($inodes_paths_unique as $key => $value) {
+      $data[1][] = [
+          "source" => $value,
+          "target" => dirname($value)
+      ];
+}
+
 
 echo json_encode($data);

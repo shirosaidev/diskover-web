@@ -1,5 +1,10 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc7] - 2018-05-29
+### changed
+- improved hardlinks analytics
+- improved dupes analytics
+
 # [1.5.0-rc6] - 2018-05-27
 ### notice
 - requires index created with diskover >= v1.5.0-rc8

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc6';
+$VERSION = '1.5.0-rc7';
 
 
 function connectES() {
