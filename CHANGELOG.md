@@ -1,9 +1,12 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc7] - 2018-05-29
+# [1.5.0-rc7] - 2018-05-30
+### added
+- heatmap, dupes, hardlinks to analytics button dropdown list on search results and file/dir view pages
 ### changed
 - improved hardlinks analytics
 - improved dupes analytics
+- dupes and hardlinks default min value is determined by getting average
 
 # [1.5.0-rc6] - 2018-05-27
 ### notice

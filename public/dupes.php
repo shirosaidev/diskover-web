@@ -12,7 +12,125 @@ require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
-$mindupes = isset($_GET['mindupes']) ? $_GET['mindupes'] : 2;
+
+function getAvgDupes($client, $esIndex, $path, $filter, $mtime) {
+    // find avg dupes
+    $searchParams = [];
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'file';
+    $searchParams['size'] = 1;
+
+    $searchParams['body'] = [
+        '_source' => ['md5_sum'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'must_not' => [
+                          'match' => [ 'dupe_md5' => '' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'aggs' => [
+                  'top-dupe_md5' => [
+                      'terms' => [
+                        "field" => 'dupe_md5',
+                        'size' => 1
+                      ],
+                      'aggs' => [
+                          'top-md5s' => [
+                              'top_hits' => [
+                                "size" => 1
+                              ]
+                          ]
+                      ]
+
+                ]
+            ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    $maxdupes = $queryResponse['aggregations']['top-dupe_md5']['buckets'][0]['doc_count'];
+
+    $searchParams['body'] = [
+        '_source' => ['md5_sum'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'must_not' => [
+                          'match' => [ 'dupe_md5' => '' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'aggs' => [
+                  'top-dupe_md5' => [
+                      'terms' => [
+                        "field" => 'dupe_md5',
+                        'size' => 1,
+                        'order' => [
+                            'top_hit' => 'asc'
+                        ]
+                      ],
+                      'aggs' => [
+                          'top-md5s' => [
+                              'top_hits' => [
+                                "size" => 1
+                              ]
+                          ],
+                          'top_hit' => [
+                              'max' => [
+                                'script' => [
+                                    'source' => '_score'
+                                ]
+
+                              ]
+                          ]
+                      ]
+
+                ]
+            ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    $mindupes = $queryResponse['aggregations']['top-dupe_md5']['buckets'][0]['doc_count'];
+
+    $avg = round(($maxdupes+$mindupes)/2, 0);
+
+    return $avg;
+}
+
+$mindupes = (!empty($_GET['mindupes'])) ? $_GET['mindupes'] : (!empty(getCookie('mindupes'))) ? getCookie('mindupes') : getAvgDupes($client, $esIndex, $path, $filter, $mtime);
 
 ?>
 
@@ -36,7 +154,7 @@ $mindupes = isset($_GET['mindupes']) ? $_GET['mindupes'] : 2;
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found.</strong> Run diskover using --finddupes to search for duplicate files or trying changing path or filters.
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found.</strong> Run diskover using --finddupes to search for duplicate files or trying changing path, filters or min dupes.
 				</div>
 			</div>
 		</div>

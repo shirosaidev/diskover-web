@@ -19,6 +19,9 @@ $(document).ready(function() {
          return false;
      });
 
+    // set min hardlinks input value
+    $('#minhardlinks').val(minhardlinks);
+
     // set cookies
     setCookie('path', path);
     setCookie('minhardlinks', minhardlinks);
@@ -139,9 +142,13 @@ function renderHardLinksCharts(data) {
         .html(function(d) {
             var percent = (d.count / totalcount * 100).toFixed(1) + '%';
             var files = '';
-            d.files.forEach(function(f) {
-                files += f + '<br>\n';
-            });
+            for (var i = 0; i < d.files.length; i++) {
+            files += d.files[i] + '<br>\n';
+                if (i === 20){
+                  files += "... " + '<br>\n';
+                  break;
+                }
+            }
             return "<span style='font-size:10px;color:lightgray;'>" + files + "</span><br><span style='font-size:12px; color:white;'>inode: " + d.label + "</span><br><span style='font-size:12px; color:white;'>size: " + format(d.size) + "</span><br><span style='font-size:12px; color:red;'>count: " + d.count + " (" + percent + ")</span>";
         });
 
@@ -312,6 +319,7 @@ function renderHardLinksCharts(data) {
             d3.select(this).transition()
               .duration(250)
               .attr("r", 8)
+              .style('fill', 'white')
             if (d.inode) {
                 d3.selectAll("circle").filter('.inode' + d.inode).transition()
                 .duration(250)
@@ -324,6 +332,7 @@ function renderHardLinksCharts(data) {
             d3.select(this).transition()
               .duration(250)
               .attr("r", function(d) { if (d.inode) { return 5; } else { return 6; } })
+              .style("fill", function(d) { if(d.count) { return color(d.count); } else { return nodeDepthColor(d.name); } })
             if (d.inode) {
                 d3.selectAll("circle").filter('.inode' + d.inode).transition()
                 .duration(250)
@@ -370,12 +379,14 @@ console.time('loadtime')
 root = JSON.parse(sessionStorage.getItem("diskover-hardlinks"));
 
 // minimum hard links
-var minhardlinks = $_GET('minhardlinks') || getCookie('minhardlinks') || 3;
+var minhardlinks = $('#minhardlinks').val();
+
+console.log('MINHARDLINKS:'+minhardlinks)
 
 // get data from Elasticsearh if no json in session storage
 if (!root) {
     getESJsonData();
-} else if (minhardlinks != getCookie('minhardlinks') || $_GET('path') != getCookie('path')) {
+} else if ($_GET('minhardlinks') != getCookie('minhardlinks') || $_GET('path') != getCookie('path')) {
     getESJsonData();
 } else {
     console.log("using cached json data in session storage");

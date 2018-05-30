@@ -12,7 +12,94 @@ require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
-$minhardlinks = isset($_GET['minhardlinks']) ? $_GET['minhardlinks'] : 3;
+function getAvgHardlinks($client, $esIndex, $path, $filter, $mtime) {
+    // find avg hardlinks
+    $searchParams = [];
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'file';
+    $searchParams['size'] = 1;
+
+    $searchParams['body'] = [
+        '_source' => ['hardlinks'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ],
+                          'range' => [
+                            'hardlinks' => [
+                                'gt' => 1
+                            ]
+                      ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'sort' => [
+                  'hardlinks' => [
+                      'order' => 'desc'
+                  ]
+              ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    $maxhardlinks = $queryResponse['hits']['hits'][0]['_source']['hardlinks'];
+
+    $searchParams['body'] = [
+        '_source' => ['hardlinks'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ],
+                          'range' => [
+                            'hardlinks' => [
+                                'gt' => 1
+                            ]
+                      ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'sort' => [
+                  'hardlinks' => [
+                      'order' => 'asc'
+                  ]
+              ]
+    ];
+    $queryResponse = $client->search($searchParams);
+    $minhardlinks = $queryResponse['hits']['hits'][0]['_source']['hardlinks'];
+
+    $avg = round(($maxhardlinks+$minhardlinks)/2, 0);
+
+    return $avg;
+}
+
+$minhardlinks = (!empty($_GET['minhardlinks'])) ? $_GET['minhardlinks'] : (!empty(getCookie('minhardlinks'))) ? getCookie('minhardlinks') : getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
 
 ?>
 
@@ -36,7 +123,7 @@ $minhardlinks = isset($_GET['minhardlinks']) ? $_GET['minhardlinks'] : 3;
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found.</strong> Try changing paths or filters.
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found.</strong> Try changing path, filters or min hard links.
 				</div>
 			</div>
 		</div>

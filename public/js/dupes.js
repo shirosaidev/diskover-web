@@ -410,6 +410,7 @@ function renderDupesCharts(data) {
             d3.select(this).transition()
               .duration(250)
               .attr("r", 8)
+              .style('fill', 'white')
             if (d.md5) {
                 d3.selectAll("circle").filter('.md5' + d.md5).transition()
                 .duration(250)
@@ -422,6 +423,7 @@ function renderDupesCharts(data) {
             d3.select(this).transition()
               .duration(250)
               .attr("r", function(d) { if (d.md5) { return 5; } else { return 6; } })
+              .style("fill", function(d) { if(d.md5) { return color(d.md5); } else { return nodeDepthColor(d.name); } })
             if (d.md5) {
                 d3.selectAll("circle").filter('.md5' + d.md5).transition()
                 .duration(250)
@@ -467,13 +469,15 @@ console.time('loadtime')
 // check if json data stored in session storage
 root = JSON.parse(sessionStorage.getItem("diskover-dupes"));
 
-// minimum hard links
-var mindupes = $_GET('mindupes') || getCookie('mindupes') || 2;
+// minimum dupes
+var mindupes = $('#mindupes').val();
+
+console.log('MINDUPES:'+mindupes)
 
 // get data from Elasticsearh if no json in session storage
 if (!root) {
     getESJsonData();
-} else if (mindupes != getCookie('mindupes') || $_GET('path') != getCookie('path')) {
+} else if ($_GET('mindupes') != getCookie('mindupes') || $_GET('path') != getCookie('path')) {
     getESJsonData();
 } else {
     console.log("using cached json data in session storage");

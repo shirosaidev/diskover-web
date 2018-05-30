@@ -11,6 +11,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
+
 $minhardlinks = $_GET['minhardlinks'];
 
 // Get search results from Elasticsearch for harlinks
