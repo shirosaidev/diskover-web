@@ -1,8 +1,9 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc7] - 2018-05-30
+# [1.5.0-rc7] - 2018-06-05
 ### added
 - heatmap, dupes, hardlinks to analytics button dropdown list on search results and file/dir view pages
+- docker-compose file that provides an test environment out of the box.
 ### changed
 - improved hardlinks analytics
 - improved dupes analytics

@@ -33,7 +33,7 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 <img src="docs/diskover-web-adminpanel-screenshot.png?raw=true" alt="diskover-web admin panel" width="400">
 
 
-## Installation Guide
+## Installation Guide - Local
 
 ### Requirements
 
@@ -60,6 +60,30 @@ $ cd diskover-web
 $ cd diskover-web
 $ composer install
 ```
+
+## Installation Guide - Using docker compose
+
+You can use docker-compose to test and run Diskover-web. In the docker-compose it is also included Elasticsearch and Redis so that it is possible to create a full test environment for Diskover.
+
+The following schema uses Apache2 as webserver. This allows Diskover Web to receive more requests in parallel than using the development PHP server.
+
+### Requirements
+
+* Docker 1.13+
+* Docker-compose 1.16.1+
+
+### Running
+
+```
+$ docker-compose build && docker-compose up
+```
+
+The services will be exposed in the following port on localhost:
+| Service      | Port |
+|--------------|------|
+|Elasticsearch | 9200 |
+|Redis         | 6379 |
+|Diskover Web  | 8080 |
 
 ## User Guide
 
