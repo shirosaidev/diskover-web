@@ -27,7 +27,7 @@ $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'directory';
 
 
-// Setup search query for largest files
+// Setup search query for largest directories
 $searchParams['body'] = [
     'size' => 50,
     '_source' => ['filename', 'path_parent', 'filesize', 'items', 'last_modified'],

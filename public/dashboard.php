@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -496,8 +496,14 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web! Please support diskover project on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.</strong>
+        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover"><strong>Patreon</strong></a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank"><strong>PayPal</strong></a>.
       </div>
+      <?php if (!$crawlfinished) { ?>
+      <div class="alert alert-dismissible alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong><i class="glyphicon glyphicon-exclamation-sign"></i> Worker bots still running!</strong> Some analytics pages will not load until worker bots have finished crawling and calculating directory sizes. Check worker bots in rq or rq-dashboard. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
+      </div>
+      <?php } ?>
       <div class="panel panel-primary chartbox">
       <div class="panel-heading">
           <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
@@ -696,14 +702,13 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
                   $searchParams['index'] = $esIndex;
                   $searchParams['type']  = 'directory';
 
-
                   // Setup search query for largest files
                   $searchParams['body'] = [
                       'size' => 10,
                       '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
                       'query' => [
                         'query_string' => [
-                          'query' => 'path_parent: "' . $path . '"\/*',
+                          'query' => 'path_parent: ' . escape_chars($path) . '\/*',
                           'analyze_wildcard' => 'true'
                         ]
                       ],

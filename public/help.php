@@ -199,11 +199,13 @@ require "../src/diskover/Diskover.php";
                 <div class="well">
                     <h3>diskover.py socket command examples</h3>
 					<p>nc (netcat) example:<br />
-					<code>echo -n '{"action": "finddupes"}' | nc 127.0.0.1 9999</code></p>
-					<p>tag duplicate files in index:<br>
+					<code>echo -n '{"action": "crawl", "path": "/Users/shirosai/Library", "index": "diskover-test", "adaptivebatch": "True"}' | nc 127.0.0.1 9999</code></p>
+					<p>curl example:<br />
+					<code>curl -X POST -d '{"action": "crawl", "path": "/Users/shirosai/Library", "index": "diskover-test", "adaptivebatch": "True"}' 127.0.0.1:9999</code></p>
+					<p>find and tag duplicate files in index:<br>
 						<code>{"action": "finddupes", "index": "diskover-2017.04.22"}</code></p>
-					<p>crawl directory and save to diskover-2017.10.06 index:<br><code>{"action": "crawl", "path": "/Users/cp", "index": "diskover-2017.10.06"}</code></p>
-					<p>crawl directory (recursive) using 8 threads and save to default index:<br><code>{"action": "crawl", "path": "/Users/cp/Downloads", "threads": 8}</code></p>
+					<p>crawl directory using adaptive batch and save to diskover-2017.10.06 index:<br><code>{"action": "crawl", "path": "/Users/cp", "index": "diskover-2017.10.06", "adaptivebatch": "True"}</code></p>
+					<p>crawl directory (recursive) using batchsize of 25 and save to default index:<br><code>{"action": "crawl", "path": "/Users/cp/Downloads", "batchsize": "25"}</code></p>
 					<p>reindex (freshen) directory (non-recursive) and update default index:<br><code>{"action": "reindex", "path": "/Users/cp/Downloads"}</code></p>
 					<p>reindex (freshen) directory and all subdirs (recursive) and update default index:<br><code>{"action": "reindex", "path": "/Users/cp/Documents", "recursive": "true"}</code></p>
                 </div>
