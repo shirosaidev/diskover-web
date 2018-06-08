@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -65,11 +65,24 @@ if (!empty($_REQUEST['submitted'])) {
 
 
     if (!empty($_REQUEST['filename'])) {
-        $q[] = "filename:" . escape_chars($_REQUEST['filename']);
+        if (strpos($_REQUEST['filename'], '*')) {
+            $filename = str_replace('\*', '*', escape_chars($_REQUEST['filename']));
+            $q[] = "filename:" . $filename;
+        } else {
+            $filename = escape_chars($_REQUEST['filename']);
+            $q[] = "filename:" . $filename;
+        }
     }
 
     if (!empty($_REQUEST['path_parent'])) {
-        $q[] = "path_parent:" . escape_chars($_REQUEST['path_parent']);
+        if (strpos($_REQUEST['path_parent'], '*')) {
+            $path_parent_wildcard = str_replace('\*', '\/*', escape_chars($_REQUEST['path_parent']));
+            $path_parent = escape_chars(str_replace('*', '', $_REQUEST['path_parent']));
+            $q[] = "path_parent:" . $path_parent . " OR path_parent:" . $path_parent_wildcard;
+        } else {
+            $path_parent = escape_chars($_REQUEST['path_parent']);
+            $q[] = "path_parent:" . $path_parent;
+        }
     }
 
     if (!empty($_REQUEST['tag'])) {

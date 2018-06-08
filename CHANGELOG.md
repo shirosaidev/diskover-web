@@ -5,6 +5,7 @@
 - better warning messages that workers are still calculating directory sizes to analytics pages and dashboard
 ### fixed
 - top 10 directories on dashboard to match same top 10 in top 50 analytics page
+- bug with advanced search and using wildcards for filename or parent path fields
 
 # [1.5.0-rc7] - 2018-05-30
 ### added
