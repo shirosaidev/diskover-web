@@ -609,6 +609,212 @@ function showChangePercent($client, $index, $index2) {
 }
 
 
+function getAvgHardlinks($client, $esIndex, $path, $filter, $mtime) {
+    // find avg hardlinks
+    $searchParams = [];
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'file';
+    $searchParams['size'] = 1;
+
+    $searchParams['body'] = [
+        '_source' => ['hardlinks'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ],
+                          'range' => [
+                            'hardlinks' => [
+                                'gt' => 1
+                            ]
+                      ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'sort' => [
+                  'hardlinks' => [
+                      'order' => 'desc'
+                  ]
+              ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    $maxhardlinks = $queryResponse['hits']['hits'][0]['_source']['hardlinks'];
+
+    $searchParams['body'] = [
+        '_source' => ['hardlinks'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ],
+                          'range' => [
+                            'hardlinks' => [
+                                'gt' => 1
+                            ]
+                      ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'sort' => [
+                  'hardlinks' => [
+                      'order' => 'asc'
+                  ]
+              ]
+    ];
+    $queryResponse = $client->search($searchParams);
+    $minhardlinks = $queryResponse['hits']['hits'][0]['_source']['hardlinks'];
+
+    $avg = round(($maxhardlinks+$minhardlinks)/2, 0);
+
+    return $avg;
+}
+
+
+function getAvgDupes($client, $esIndex, $path, $filter, $mtime) {
+    // find avg dupes
+    $searchParams = [];
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'file';
+    $searchParams['size'] = 1;
+
+    $searchParams['body'] = [
+        '_source' => ['md5_sum'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'must_not' => [
+                          'match' => [ 'dupe_md5' => '' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'aggs' => [
+                  'top-dupe_md5' => [
+                      'terms' => [
+                        "field" => 'dupe_md5',
+                        'size' => 1
+                      ],
+                      'aggs' => [
+                          'top-md5s' => [
+                              'top_hits' => [
+                                "size" => 1
+                              ]
+                          ]
+                      ]
+
+                ]
+            ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    $maxdupes = $queryResponse['aggregations']['top-dupe_md5']['buckets'][0]['doc_count'];
+
+    $searchParams['body'] = [
+        '_source' => ['md5_sum'],
+            'query' => [
+                  'bool' => [
+                    'must' => [
+                          'wildcard' => [ 'path_parent' => $path . '*' ]
+                      ],
+                      'must_not' => [
+                          'match' => [ 'dupe_md5' => '' ]
+                      ],
+                      'filter' => [
+                          'range' => [
+                              'filesize' => [
+                                    'gte' => $filter
+                              ]
+                          ]
+                      ],
+                      'should' => [
+                          'range' => [
+                              'last_modified' => [
+                                  'lte' => $mtime
+                              ]
+                          ]
+                      ]
+                  ]
+              ],
+              'aggs' => [
+                  'top-dupe_md5' => [
+                      'terms' => [
+                        "field" => 'dupe_md5',
+                        'size' => 1,
+                        'order' => [
+                            'top_hit' => 'asc'
+                        ]
+                      ],
+                      'aggs' => [
+                          'top-md5s' => [
+                              'top_hits' => [
+                                "size" => 1
+                              ]
+                          ],
+                          'top_hit' => [
+                              'max' => [
+                                'script' => [
+                                    'source' => '_score'
+                                ]
+
+                              ]
+                          ]
+                      ]
+
+                ]
+            ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    $mindupes = $queryResponse['aggregations']['top-dupe_md5']['buckets'][0]['doc_count'];
+
+    $avg = round(($maxdupes+$mindupes)/2, 0);
+
+    return $avg;
+}
+
+
 // Connect to Elasticsearch
 $client = connectES();
 
@@ -683,4 +889,14 @@ $maxdepth = (isset($_GET['maxdepth'])) ? (int)$_GET['maxdepth'] : getCookie('max
 if ($maxdepth === "") {
     $maxdepth = Constants::MAXDEPTH;
     createCookie('maxdepth', $maxdepth);
+}
+$minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : getCookie('minhardlinks'); // minhardlinks
+if ($minhardlinks === "") {
+    $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
+    createCookie('minhardlinks', $minhardlinks);
+}
+$mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : getCookie('mindupes'); // mindupes
+if ($mindupes === "") {
+    $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
+    createCookie('mindupes', $mindupes);
 }

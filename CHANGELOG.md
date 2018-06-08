@@ -6,6 +6,7 @@
 ### fixed
 - top 10 directories on dashboard to match same top 10 in top 50 analytics page
 - bug with advanced search and using wildcards for filename or parent path fields
+- bug with hardlinks and dupes pages not using browser cached es data
 
 # [1.5.0-rc7] - 2018-05-30
 ### added

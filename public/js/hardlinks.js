@@ -23,7 +23,7 @@ $(document).ready(function() {
     $('#minhardlinks').val(minhardlinks);
 
     // set cookies
-    setCookie('path', path);
+    setCookie('path', encodeURIComponent(path));
     setCookie('minhardlinks', minhardlinks);
 
 });
@@ -386,7 +386,7 @@ console.log('MINHARDLINKS:'+minhardlinks)
 // get data from Elasticsearh if no json in session storage
 if (!root) {
     getESJsonData();
-} else if ($_GET('minhardlinks') != getCookie('minhardlinks') || $_GET('path') != getCookie('path')) {
+} else if ($_GET('minhardlinks') != getCookie('minhardlinks') || decodeURIComponent($_GET('path')) != getCookie('path')) {
     getESJsonData();
 } else {
     console.log("using cached json data in session storage");

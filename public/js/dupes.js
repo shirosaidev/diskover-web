@@ -19,8 +19,11 @@ $(document).ready(function() {
          return false;
      });
 
+    // set min dupes input value
+    $('#mindupes').val(mindupes);
+
     // set cookies
-    setCookie('path', path);
+    setCookie('path', encodeURIComponent(path));
     setCookie('mindupes', mindupes);
 
 });
@@ -477,7 +480,7 @@ console.log('MINDUPES:'+mindupes)
 // get data from Elasticsearh if no json in session storage
 if (!root) {
     getESJsonData();
-} else if ($_GET('mindupes') != getCookie('mindupes') || $_GET('path') != getCookie('path')) {
+} else if ($_GET('mindupes') != getCookie('mindupes') || decodeURIComponent($_GET('path')) != getCookie('path')) {
     getESJsonData();
 } else {
     console.log("using cached json data in session storage");
