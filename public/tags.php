@@ -452,7 +452,7 @@ foreach ($tagCountsCustom as $tag => $value) {
                 .attr('class', 'd3-tip')
                 .html(function(d) {
                     var percent = (d.size / totalsize * 100).toFixed(1) + '%';
-                    return "<span style='font-size:12px;color:white;'>dupe_md5: " + d.label + "</span><br><span style='font-size:12px; color:red;'>size: " + format(d.size) + " (" + percent + ")</span>";
+                    return "<span style='font-size:12px;color:white;'>" + d.label + "</span><br><span style='font-size:12px; color:red;'>size: " + format(d.size) + " (" + percent + ")</span>";
                 });
 
             svg.call(tip2);

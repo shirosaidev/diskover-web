@@ -1,9 +1,17 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc7] - 2018-06-05
+# [1.5.0-rc8] - 2018-06-09
+### added
+- better warning messages that workers are still calculating directory sizes to analytics pages and dashboard
+- docker-compose file that provides an test environment out of the box.
+### fixed
+- top 10 directories on dashboard to match same top 10 in top 50 analytics page
+- bug with advanced search and using wildcards for filename or parent path fields
+- bug with hardlinks and dupes pages not using browser cached es data
+
+# [1.5.0-rc7] - 2018-05-30
 ### added
 - heatmap, dupes, hardlinks to analytics button dropdown list on search results and file/dir view pages
-- docker-compose file that provides an test environment out of the box.
 ### changed
 - improved hardlinks analytics
 - improved dupes analytics

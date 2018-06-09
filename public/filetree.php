@@ -34,7 +34,7 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-warning col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or something else bad happened :(</strong> Choose a different path and try again. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
+					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or worker bots are still calculating directory sizes.</strong> Choose a different path and try again or check if worker bots are still running in rq. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
 				</div>
 			</div>
 		</div>
