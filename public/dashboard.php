@@ -708,7 +708,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
                       '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
                       'query' => [
                         'query_string' => [
-                          'query' => 'path_parent: ' . escape_chars($path) . '\/*',
+                          'query' => 'path_parent: ' . escape_chars($path) . ' OR path_parent: ' . escape_chars($path) . '\/*',
                           'analyze_wildcard' => 'true'
                         ]
                       ],
