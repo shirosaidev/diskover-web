@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -263,7 +263,7 @@ function click(d) {
         setTimeout(function() { changeBarMtime(d.parent) },500);
     } else if (!d.count) {
         // display file in search results
-        location.href = 'advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name);
+        window.open('advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name),'_blank');
     }
 }
 
@@ -298,7 +298,15 @@ function updateTree(data, parent) {
 
 	//add icons for folder for file
 	entered.append("span").attr("class", function (d) {
-		var icon = (d.count > 0 || d.type === 'directory') ? "glyphicon-folder-close" : "glyphicon-file";
+        if (s3_index && d.name === '/s3') {
+            var foldericon = "glyphicon-cloud";
+        }
+        else if (s3_index && d.parent.name === '/s3') {
+            var foldericon = "glyphicon-cloud-upload";
+        } else {
+            var foldericon = "glyphicon-folder-close";
+        }
+		var icon = (d.count > 0 || d.type === 'directory') ? foldericon : "glyphicon-file";
 		return "glyphicon " + icon;
 	})
     .style('cursor', 'pointer')
@@ -379,7 +387,7 @@ function updateTree(data, parent) {
 	entered.append("span").attr("class", "filetree-btns")
         .html(function (d) {
             if (d.count > 0) {
-                return '<a href="simple.php?submitted=true&amp;p=1&amp;q=path_parent:' + escapeHTML(d.name) + ' OR path_parent:' + escapeHTML(d.name) + '\\/*"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
+                return '<a target="_blank" href="simple.php?submitted=true&amp;p=1&amp;q=path_parent:' + escapeHTML(d.name) + ' OR path_parent:' + escapeHTML(d.name) + '\\/*"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
             }
         });
 

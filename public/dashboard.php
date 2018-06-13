@@ -12,7 +12,6 @@ require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
-
 // check if crawl has finished
 // Get search results from Elasticsearch for index stats and to see if crawl finished
 // return boolean if crawl finished (true)
@@ -357,40 +356,68 @@ if ($esIndex2 != "") {
     $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 }
 
+if (!$s3_index && !$qumulo_index) {
+    // Get recommended file delete size/count
+    $file_recommended_delete_size = 0;
+    $file_recommended_delete_count = 0;
 
-// Get recommended file delete size/count
-$file_recommended_delete_size = 0;
-$file_recommended_delete_count = 0;
+    $results = [];
+    $searchParams = [];
 
-$results = [];
-$searchParams = [];
+    // Setup search query
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = "file";
 
-// Setup search query
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = "file";
-
-$searchParams['body'] = [
-   'size' => 0,
-    'aggs' => [
-      'total_size' => [
-        'sum' => [
-          'field' => 'filesize'
+    $searchParams['body'] = [
+       'size' => 0,
+        'aggs' => [
+          'total_size' => [
+            'sum' => [
+              'field' => 'filesize'
+            ]
+          ]
+        ],
+        'query' => [
+          'query_string' => [
+            'query' => 'last_modified:{* TO now-6M} AND last_access:{* TO now-6M}'
+          ]
         ]
-      ]
-    ],
-    'query' => [
-      'query_string' => [
-        'query' => 'last_modified:{* TO now-6M} AND last_access:{* TO now-6M}'
-      ]
-    ]
-];
-$queryResponse = $client->search($searchParams);
+    ];
+    $queryResponse = $client->search($searchParams);
 
-// Get total count of recommended files to remove
-$file_recommended_delete_count = $queryResponse['hits']['total'];
+    // Get total count of recommended files to remove
+    $file_recommended_delete_count = $queryResponse['hits']['total'];
 
-// Get total size of allrecommended files to remove
-$file_recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
+    // Get total size of allrecommended files to remove
+    $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
+}
+
+if ($s3_index) {
+    // Get s3 bucket names
+    $buckets = [];
+
+    $results = [];
+    $searchParams = [];
+
+    // Setup search query
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = "directory";
+
+    $searchParams['body'] = [
+       'size' => 100,
+        'query' => [
+          'query_string' => [
+            'query' => 'path_parent:\/s3'
+          ]
+        ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    // Get total count of buckets
+    $bucketcount = $queryResponse['hits']['total'];
+
+    $buckets = $queryResponse['hits']['hits'];
+}
 
 ?>
 <!DOCTYPE html>
@@ -490,9 +517,9 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
       <div class="well">
         <h1><i class="glyphicon glyphicon-piggy-bank"></i> Space Savings</h1>
         <p>You could save <span style="font-size:24px;font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files.<br />
-            diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo $file_recommended_delete_count ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime & atime)</span></p>
+            <?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo $file_recommended_delete_count ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime &amp; atime)</span><?php } ?></p>
         <p><i class="glyphicon glyphicon-file" style="color:#738291;size:13px;font-weight:bold;"></i> Files: <span style="font-weight:bold;color:#D20915;"><?php echo $totalfiles; ?></span> &nbsp;&nbsp; <i class="glyphicon glyphicon-folder-close" style="color:skyblue;size:13px;font-weight:bold;"></i> Directories: <span style="font-weight:bold;color:#D20915;"><?php echo $totaldirs; ?></span> &nbsp;&nbsp;
-            <i class="glyphicon glyphicon-duplicate" style="color:#738291;size:13px;font-weight:bold;"></i> Dupes: <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)</p>
+            <?php if (!$s3_index) { ?><i class="glyphicon glyphicon-duplicate" style="color:#738291;size:13px;font-weight:bold;"></i> Dupes: <span style="font-weight:bold;color:#D20915;"><?php echo $totalDupes; ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)<?php } ?></p>
       </div>
       <div class="alert alert-dismissible alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -547,7 +574,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
     </div>
     </div>
       <?php
-      if ($totalDupes === 0) {
+      if ($totalDupes === 0 && $s3_index != '1') {
       ?>
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -558,7 +585,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
       }
       ?>
       <?php
-      if ($totalDupes > 0) {
+      if ($totalDupes > 0 && $s3_index != '1') {
       ?>
       <div class="alert alert-dismissible alert-warning">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -592,6 +619,13 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
     </div>
     <div class="col-xs-6">
         <div class="well">
+          <?php if ($s3_index) { ?>
+          <h4><i class="glyphicon glyphicon-cloud" style="color:#FD9827;"></i> S3 Overview</h4>
+          <p>Buckets: <span class="text-success"><strong><?php $i = 0; while ( $i < sizeof($buckets) ) { { echo '<i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;"></i> ' . $buckets[$i]['_source']['filename']; if ($i<sizeof($buckets)-1) { echo '&nbsp; '; }; $i++; } } ?></strong></span><br />
+          Bucket Count: <span class="text-success"><strong><?php echo $bucketcount; ?></strong></span><br />
+          diskover S3 root path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span><br />
+          Total Buckets Size: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span></p>
+          <?php } else { ?>
           <h4><i class="glyphicon glyphicon-hdd"></i> Disk Space Overview</h4>
           <p>Path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span></p>
           <div id="diskspacechart"></div>
@@ -607,7 +641,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
               Used: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_used); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small><?php } ?><br />
               Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
               Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change > 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
-        </div>
+        <?php } ?></div>
         <div class="well">
             <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
                 <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawltime; ?></span> UTC.<br />
@@ -788,7 +822,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
 
         var path = d3.svg.arc()
             .outerRadius(radius - 10)
-            .innerRadius(0);
+            .innerRadius(40);
 
         var label = d3.svg.arc()
             .outerRadius(radius - 40)
@@ -858,7 +892,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
 
         var path = d3.svg.arc()
             .outerRadius(radius - 10)
-            .innerRadius(0);
+            .innerRadius(40);
 
         var label = d3.svg.arc()
             .outerRadius(radius - 40)
@@ -976,7 +1010,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
         width = 700 - margin.left - margin.right,
         height = 350 - margin.top - margin.bottom;
 
-        var svg_workers = d3.select("#workerchart").append("svg")
+        var svg = d3.select("#workerchart").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
           .append("g")
@@ -1019,7 +1053,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
                     // stop spin.js loader
                     spinner.stop();
                 } else {
-                    svg_workers.selectAll("*").remove();
+                    svg.selectAll("*").remove();
                 }
                 // load chart
                 loadworkerchart()
@@ -1065,7 +1099,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
                 ])
                 .nice();
 
-            var layer = svg_workers.selectAll(".stack")
+            var layer = svg.selectAll(".stack")
                 .data(dataStackLayout)
                 .enter().append("g")
                 .attr("class", "stack")
@@ -1100,7 +1134,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
                       .style("left", (d3.event.pageX + 10) + "px");
                 });
 
-            svg_workers.append("g")
+            svg.append("g")
                 .attr("class", "axis")
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis)
@@ -1112,7 +1146,7 @@ $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['va
                     .attr("dy", ".15em")
                     .style("text-anchor", "end");
 
-            svg_workers.append("g")
+            svg.append("g")
                 .attr("class", "axis")
                 .attr("transform", "translate(0,0)")
                 .call(yAxis)

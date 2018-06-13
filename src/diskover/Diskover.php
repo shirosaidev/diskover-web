@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc8';
+$VERSION = '1.5.0-rc9';
 
 
 function connectES() {
@@ -836,8 +836,18 @@ if (isset($_GET['index'])) {
 // check for Qumulo index
 if (strpos($esIndex, 'qumulo') !== false) {
     createCookie('qumulo', 1);
+    $qumulo_index = 1;
 } else {
     createCookie('qumulo', 0);
+    $qumulo_index = 0;
+}
+// check for AWS S3 index
+if (strpos($esIndex, 's3') !== false) {
+    createCookie('s3', 1);
+    $s3_index = 1;
+} else {
+    createCookie('s3', 0);
+    $s3_index = 0;
 }
 // check for index2 in url
 if (isset($_GET['index2'])) {

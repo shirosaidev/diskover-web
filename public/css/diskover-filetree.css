@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -129,6 +129,20 @@ input:checked + .slider:before {
     font-size: 13px;
     padding-right: 4px;
     color: skyblue;
+    font-weight: bold;
+}
+
+.node .glyphicon-cloud {
+    font-size: 13px;
+    padding-right: 4px;
+    color: #FD9827;
+    font-weight: bold;
+}
+
+.node .glyphicon-cloud-upload {
+    font-size: 13px;
+    padding-right: 4px;
+    color: #FD9827;
     font-weight: bold;
 }
 

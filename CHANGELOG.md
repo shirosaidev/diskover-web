@@ -1,5 +1,13 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc9] - 2018-06-13
+### notice
+- beta for S3 inventory support - requires index created with diskover >= v1.5.0-rc10 for s3 inventory imports
+### added
+- support for Amazon AWS S3 inventory imports from indices created with diskover --s3 cli arg
+### changed
+- filetree and treemap now open new browser tabs when clicking on icons/charts to search results
+
 # [1.5.0-rc8] - 2018-06-09
 ### added
 - better warning messages that workers are still calculating directory sizes to analytics pages and dashboard

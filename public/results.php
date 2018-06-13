@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -115,12 +115,18 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">Items (subdirs) <?php echo sortURL('items_subdirs'); ?></th>
           <?php $numofcol+=3; ?>
           <?php } ?>
+          <?php if ($s3_index) { ?>
+          <th class="text-nowrap">Bucket <?php echo sortURL('s3_bucket'); ?></th>
+          <th class="text-nowrap">Key <?php echo sortURL('s3_key'); ?></th>
+          <th class="text-nowrap">Storage class <?php echo sortURL('s3_storage_class'); ?></th>
+          <?php } else { ?>
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
+          <?php } ?>
           <th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
-          <?php if (getCookie('qumulo') == '1') { ?>
+          <?php if ($qumulo_index == '1') { ?>
           <th class="text-nowrap">Created (utc) <?php echo sortURL('creation_time'); ?></th>
-          <?php } else { ?>
+          <?php } elseif ($s3_index != '1') { ?>
           <th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
           <?php } ?>
           <?php
@@ -152,12 +158,18 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">Items (files)</th>
           <th class="text-nowrap">Items (subdirs)</th>
           <?php } ?>
+          <?php if ($s3_index) { ?>
+          <th class="text-nowrap">Bucket <?php echo sortURL('s3_bucket'); ?></th>
+          <th class="text-nowrap">Key <?php echo sortURL('s3_key'); ?></th>
+          <th class="text-nowrap">Storage class <?php echo sortURL('s3_storage_class'); ?></th>
+          <?php } else { ?>
 					<th class="text-nowrap">Owner</th>
 					<th class="text-nowrap">Group</th>
+          <?php } ?>
 					<th class="text-nowrap">Modified (utc)</th>
-                    <?php if (getCookie('qumulo') == '1') { ?>
+                    <?php if ($qumulo_index) { ?>
                     <th class="text-nowrap">Created (utc)</th>
-                    <?php } else { ?>
+                    <?php } elseif (!$s3_index) { ?>
 					<th class="text-nowrap">Accessed (utc)</th>
                     <?php } ?>
                     <?php
@@ -196,7 +208,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                 $filename = $file['filename'];
             }
             ?>
-            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><span style="color:#666;font-size:13px;top:1px;position:relative;padding-left:2px;padding-right:2px"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></span></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php } ?>
+            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><?php if ($s3_index && $file['path_parent'] == '/') { ?><i class="glyphicon glyphicon-cloud" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else if ($s3_index && $file['path_parent'] == '/s3') { ?><i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else { ?><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i><?php } ?> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><span style="color:#666;font-size:13px;top:1px;position:relative;padding-left:2px;padding-right:2px"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></span></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php } ?>
             <!-- socket commands dropdown -->
             <?php if ($socketlistening) {
             if ($result['_type'] == 'directory') { ?>
@@ -336,12 +348,18 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
     <!-- end show comparison items -->
     </td>
         <?php } ?>
+        <?php if ($s3_index) { ?>
+        <td class="text-nowrap highlight"><?php echo $file['s3_bucket']; ?></td>
+        <td class="path highlight"><?php echo $file['s3_key']; ?></td>
+        <td class="text-nowrap highlight"><?php echo $file['s3_storage_class']; ?></td>
+        <?php } else { ?>
         <td class="text-nowrap highlight"><?php echo $file['owner']; ?></td>
         <td class="text-nowrap highlight"><?php echo $file['group']; ?></td>
+        <?php } ?>
         <td class="text-nowrap highlight"><?php echo $file['last_modified']; ?></td>
-        <?php if (getCookie('qumulo') == '1') { ?>
+        <?php if ($qumulo_index) { ?>
         <td class="text-nowrap highlight"><?php echo $file['creation_time']; ?></td>
-        <?php } else { ?>
+        <?php } elseif (!$s3_index) { ?>
         <td class="text-nowrap highlight"><?php echo $file['last_access']; ?></td>
         <?php } ?>
         <?php

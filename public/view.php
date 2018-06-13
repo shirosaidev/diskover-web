@@ -114,7 +114,8 @@ exit();
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; ?> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $filename; ?></a></h2>
+      <?php if ($s3_index && $file['path_parent'] == '/') { $foldericon = '<i class="glyphicon glyphicon-cloud" style="color:#FD9827;"></i>'; } else if ($s3_index && $file['path_parent'] == '/s3') { $foldericon = '<i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;"></i>'; } else { $foldericon = '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; } ?>
+      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : $foldericon; ?> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $filename; ?></a></h2>
       <!-- tag dropdown -->
       <form id="changetag" name="changetag" class="form-inline">
       <input type="hidden" name="id" value="<?php echo $fileid; ?>">
@@ -301,6 +302,16 @@ exit();
           <a href="advanced.php?submitted=true&amp;p=1&amp;extension=<?php echo $file['extension']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Extension</a>
         </li>
         <?php } ?>
+        <?php if ($s3_index) { ?>
+        <li class="list-group-item">
+          <span class="badge"><?php echo $file['s3_bucket']; ?></span>
+          <a href="advanced.php?submitted=true&amp;p=1&amp;s3_bucket=<?php echo $file['s3_bucket']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Bucket</a>
+        </li>
+        <li class="list-group-item">
+          <span class="badge"><?php echo $file['s3_key']; ?></span>
+          Key
+        </li>
+        <?php } else { ?>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['owner']; ?></span>
           <a href="advanced.php?submitted=true&amp;p=1&amp;owner=<?php echo $file['owner']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Owner</a>
@@ -317,6 +328,7 @@ exit();
           <span class="badge"><?php echo $file['hardlinks']; ?></span>
           Hardlinks
         </li>
+        <?php } ?>
         <?php if ($_REQUEST['doctype'] == 'file') { ?>
         <li class="list-group-item">
           <span class="badge"><?php echo $file['filehash']; ?></span>
@@ -346,8 +358,30 @@ exit();
         <span class="badge"><?php echo $file['last_modified']; ?></span>
         Last modified (utc)
       </li>
+      <?php if ($s3_index) { ?>
       <li class="list-group-item">
-        <?php if (getCookie('qumulo') == '1') { ?>
+        <span class="badge"><?php echo $file['s3_storage_class']; ?></span>
+        <a href="advanced.php?submitted=true&amp;p=1&amp;s3_storage_class=<?php echo $file['s3_storage_class']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Storage class</a>
+      </li>
+      <li class="list-group-item">
+        <span class="badge"><?php echo $file['s3_etag']; ?></span>
+        <a href="advanced.php?submitted=true&amp;p=1&amp;s3_etag=<?php echo $file['s3_etag']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Etag</a>
+      </li>
+      <li class="list-group-item">
+        <span class="badge"><?php echo $file['s3_multipart_upload']; ?></span>
+        <a href="advanced.php?submitted=true&amp;p=1&amp;s3_multipart_upload=<?php echo $file['s3_multipart_upload']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Multipart upload</a>
+      </li>
+      <li class="list-group-item">
+        <span class="badge"><?php echo $file['s3_replication_status']; ?></span>
+        <a href="advanced.php?submitted=true&amp;p=1&amp;s3_replication_status=<?php echo $file['s3_replication_status']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Replication status</a>
+      </li>
+      <li class="list-group-item">
+        <span class="badge"><?php echo $file['s3_encryption_status']; ?></span>
+        <a href="advanced.php?submitted=true&amp;p=1&amp;s3_encryption_status=<?php echo $file['s3_encryption_status']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Encryption status</a>
+      </li>
+      <?php } else { ?>
+      <li class="list-group-item">
+        <?php if ($qumulo == '1') { ?>
         <span class="badge"><?php echo $file['creation_time']; ?></span>
         Creation time (utc)
         <?php } else { ?>
@@ -359,6 +393,7 @@ exit();
         <span class="badge"><?php echo $file['last_change']; ?></span>
         Last change (utc)
       </li>
+      <?php } ?>
       </ul>
         <ul class="list-group">
           <li class="list-group-item">

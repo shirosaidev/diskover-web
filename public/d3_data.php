@@ -19,7 +19,7 @@ $dirinfo = get_dir_info($client, $esIndex, $path, $filter, $mtime);
 
 // check for error
 if ($dirinfo[0] === 0) {
-    echo "Error: diskover index " . $esIndex . " has no data";
+    echo "Error: diskover index " . $esIndex . " has no data or other error";
     exit;
 }
 

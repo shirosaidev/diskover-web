@@ -150,7 +150,7 @@ foreach ($largestfiles as $key => $value) {
                         <button class="btn btn-default button-largest active"> Largest</button>
                         <button class="btn btn-default button-oldest"> Oldest</button>
                         <button class="btn btn-default button-newest"> Newest</button>
-                        <button class="btn btn-default button-user"> Users</button>
+                        <?php if (!$s3_index) { ?><button class="btn btn-default button-user"> Users</button><?php } ?>
                     </div>
                     <span style="font-size:10px; color:gray;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page</span>
                     <br />

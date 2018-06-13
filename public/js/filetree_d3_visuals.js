@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -481,10 +481,10 @@ function loadPieFileExt(data) {
             if (!d.data.label) {
                 extension = '""';
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +
+            window.open('simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +
             ' AND (path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
             ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + ') AND filesize:>=' + filter +
-            ' AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file';
+            ' AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file','_blank');
         })
         .attr("class", "slice");
 
@@ -771,10 +771,10 @@ function loadBarMtime(data) {
                 var last_mod_time_high = 'now-10y/d';
                 var last_mod_time_low = '*';
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
+            window.open('simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
             ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + 
             ') AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter + 
-            ' AND _type:file&doctype=file';
+            ' AND _type:file&doctype=file','_blank');
         });
 
     bar
@@ -1019,9 +1019,9 @@ function loadBarFileSizes(data) {
                 var filesize_high = '*';
                 var filesize_low = 17179869184;
             }
-            window.location.href = 'simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
+            window.open('simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
             ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + 
-            ') AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file';
+            ') AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file','_blank');
         });
 
     bar2
