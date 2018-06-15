@@ -79,11 +79,11 @@ $ docker-compose build && docker-compose up
 ```
 
 The services will be exposed in the following port on localhost:
-| Service      | Port |
-|--------------|------|
-|Elasticsearch | 9200 |
-|Redis         | 6379 |
-|Diskover Web  | 8080 |
+| Service       | Port |
+|---------------|------|
+| Elasticsearch | 9200 |
+| Redis         | 6379 |
+| Diskover Web  | 8080 |
 
 ## User Guide
 
