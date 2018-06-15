@@ -10,7 +10,7 @@ services:
     depends_on:
       - elasticsearch
   elasticsearch:
-    image: elasticsearch:5.6.5
+    image: elasticsearch:5.6.9
     ports:
       - 9200:9200
   redis:
