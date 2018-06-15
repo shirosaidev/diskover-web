@@ -63,9 +63,9 @@ $ composer install
 
 ## Installation Guide - Using docker compose
 
-You can use docker-compose to test and run Diskover-web. In the docker-compose it is also included Elasticsearch and Redis so that it is possible to create a full test environment for Diskover.
+You can use docker-compose to test and run diskover-web. In the docker-compose it is also included Elasticsearch and Redis so that it is possible to create a full test environment for diskover.
 
-The following schema uses Apache2 as webserver. This allows Diskover Web to receive more requests in parallel than using the development PHP server.
+The following schema uses Apache2 as webserver. This allows diskover-web to receive more requests in parallel than using the development PHP server.
 
 ### Requirements
 
