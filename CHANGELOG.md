@@ -1,5 +1,11 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc10] - 2018-06-19
+### added
+- additional characters to escape_chars and escapeHTML functions
+### fixed
+- top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
+
 # [1.5.0-rc9] - 2018-06-13
 ### notice
 - beta for S3 inventory support - requires index created with diskover >= v1.5.0-rc10 for s3 inventory imports

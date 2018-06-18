@@ -250,7 +250,7 @@ foreach ($newestfiles as $key => $value) {
       <?php } else { ?>
           <div class="col-xs-7">
           <div class="alert alert-dismissible alert-info">
-              <button type="button" class="close" data-dismiss="alert">&times;</button><i class="glyphicon glyphicon-info-sign"></i> No directories found or directory size has not been calculated.
+              <button type="button" class="close" data-dismiss="alert">&times;</button><i class="glyphicon glyphicon-info-sign"></i> No directories found. Try switching to files.
           </div>
         </div>
       <?php } ?>

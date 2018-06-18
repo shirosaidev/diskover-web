@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc9';
+$VERSION = '1.5.0-rc10';
 
 
 function connectES() {
@@ -299,7 +299,7 @@ function sortURL($sort) {
 
 // escape special characters
 function escape_chars($text) {
-   $chr = '<>+-&|!(){}[]^"~*?:/= @\'$';
+   $chr = '<>+-&|!(){}[]^"~*?:/= @\'$.#\\';
    return addcslashes($text, $chr);
 }
 

@@ -741,9 +741,14 @@ if ($s3_index) {
                       'size' => 10,
                       '_source' => ['filename', 'path_parent', 'filesize', 'last_modified'],
                       'query' => [
-                        'query_string' => [
-                          'query' => 'path_parent: ' . escape_chars($path) . ' OR path_parent: ' . escape_chars($path) . '\/*',
-                          'analyze_wildcard' => 'true'
+                        'bool' => [
+                            'must' => [
+                                    'wildcard' => [ 'path_parent' => $path . '*' ]
+                            ],
+                            'must_not' => [
+                                    'match' => [ 'path_parent' => "/" ],
+                                    'match' => [ 'filename' => ""]
+                            ]
                         ]
                       ],
                       'sort' => [
