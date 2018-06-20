@@ -305,7 +305,7 @@ function escape_chars($text) {
 
 // get custom tags from customtags.txt
 function get_custom_tags() {
-    $f = fopen("customtags.txt", "r") or die("Unable to open file!");
+    $f = fopen("customtags.txt", "r") or die("Unable to open customtags.txt! Check if exists and permissions.");
     $t = [];
     // grab each line (tag)
     while(!feof($f)) {
@@ -322,7 +322,7 @@ function get_custom_tags() {
 
 // get extra fields from extrafields.txt
 function get_extra_fields() {
-    $f = fopen("extrafields.txt", "r") or die("Unable to open file!");
+    $f = fopen("extrafields.txt", "r") or die("Unable to open extrafields.txt! Check if exists and permissions.");
     $ef = [];
     // grab each line (field)
     while(!feof($f)) {
@@ -341,7 +341,7 @@ function get_extra_fields() {
 
 // get smart searhches from smartsearches.txt
 function get_smartsearches() {
-    $f = fopen("smartsearches.txt", "r") or die("Unable to open file!");
+    $f = fopen("smartsearches.txt", "r") or die("Unable to open smartsearches.txt! Check if exists and permissions.");
     $ss = [];
     // grab each line (smart search string)
     while(!feof($f)) {
@@ -364,7 +364,7 @@ function add_custom_tag($t) {
         // default hex color for tags
         $color = "#CCC";
     }
-    $f = fopen("customtags.txt", "a") or die("Unable to open file!");
+    $f = fopen("customtags.txt", "a") or die("Unable to open customtags.txt! Check if exists and permissions.");
     fwrite($f, $tag . '|' . $color . PHP_EOL);
     fclose($f);
 }
@@ -372,7 +372,7 @@ function add_custom_tag($t) {
 // get custom tag color from customtags.txt
 function get_custom_tag_color($t) {
     $c = "#ccc";
-    $f = fopen("customtags.txt", "r") or die("Unable to open file!");
+    $f = fopen("customtags.txt", "r") or die("Unable to open customtags.txt! Check if exists and permissions.");
     // grab each line (tag)
     while(!feof($f)) {
         $l = trim(fgets($f));
