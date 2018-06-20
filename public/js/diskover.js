@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -180,15 +180,17 @@ function format(a, b) {
 
 // escape special characters
 function escapeHTML(text) {
-   var chr = { '/': '\\/', '(': '\\(', ')': '\\)', '[': '\\[', ']': '\\]',
+   var chr = {'/': '\\/', '(': '\\(', ')': '\\)', '[': '\\[', ']': '\\]',
        ' ': '\\ ', '&': '\\&', '<': '\\<', '>': '\\>', '+': '\\+', '-': '\\-',
        '|': '\\|', '!': '\\!', '{': '\\{', '}': '\\}', '^': '\\^', '~': '\\~',
        '?': '\\?', ':': '\\:', '=': '\\=', '\'': '\\\'', '"': '\\"', '@': '\\@',
-       '.': '\\.', '#': '\\#', '\\': '\\\\', '*': '\\*'};
+       '.': '\\.', '#': '\\#', '*': '\\*'};
    function abc(a) {
       return chr[a];
    }
-   return text.replace(/[()\[\] &<>+-|!{}^~?:='"@.#\\*]/g, abc);
+   escaped_text = text.replace('\\', '\\\\');
+   escaped_text = escaped_text.replace(/[\/\(\)\[\] &\<\>\+\-\|\!\{\}\^~\?\:\='"@\.#\*]/g, abc);
+   return escaped_text;
 }
 
 // calculate change percentage between two numbers

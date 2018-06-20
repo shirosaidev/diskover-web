@@ -481,9 +481,9 @@ function loadPieFileExt(data) {
             if (!d.data.label) {
                 extension = '""';
             }
-            window.open('simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(escapeHTML(extension)) +
+            window.open('simple.php?submitted=true&p=1&q=extension:' + encodeURIComponent(extension) +
             ' AND (path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
-            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + ') AND filesize:>=' + filter +
+            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent) + '\\/*') + ') AND filesize:>=' + filter +
             ' AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file','_blank');
         })
         .attr("class", "slice");
@@ -772,7 +772,7 @@ function loadBarMtime(data) {
                 var last_mod_time_low = '*';
             }
             window.open('simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
-            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + 
+            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent) + '\\/*') + 
             ') AND last_modified:[' + last_mod_time_low + ' TO ' + last_mod_time_high + '} AND filesize:>=' + filter + 
             ' AND _type:file&doctype=file','_blank');
         });
@@ -1020,7 +1020,7 @@ function loadBarFileSizes(data) {
                 var filesize_low = 17179869184;
             }
             window.open('simple.php?submitted=true&p=1&q=(path_parent:' + encodeURIComponent(escapeHTML(path_parent)) + 
-            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent + '/*')) + 
+            ' OR path_parent:' + encodeURIComponent(escapeHTML(path_parent) + '\\/*') + 
             ') AND filesize:[' + filesize_low + ' TO ' + filesize_high + '} AND last_modified:[' + getMtime() + '] AND _type:file&doctype=file','_blank');
         });
 
