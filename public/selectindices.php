@@ -94,14 +94,19 @@ if (isset($_POST['index'])) {
     }
     // delete existing path cookie
     deleteCookie('path');
-    
-    // create cookies for default search sort if none already created
-    if (empty(getCookie('sort')) && empty(getCookie('sort2'))) {
-        createCookie('sort', 'path_parent');
-        createCookie('sortorder', 'asc');
-        createCookie('sort2', 'filename');
-        createCookie('sortorder2', 'asc');
-    }
+
+    // delete existing sort cookies
+    deleteCookie('sort');
+    deleteCookie('sortorder');
+    deleteCookie('sort2');
+    deleteCookie('sortorder2');
+
+    // create cookies for default search sort
+    createCookie('sort', 'path_parent');
+    createCookie('sortorder', 'asc');
+    createCookie('sort2', 'filename');
+    createCookie('sortorder2', 'asc');
+
     // redirect to index dashboard page
     header("location: index.php?index=".$indexselected."&index2=".$index2selected."");
     exit();
