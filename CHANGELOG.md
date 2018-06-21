@@ -4,10 +4,11 @@
 ### added
 - additional characters to escape_chars and escapeHTML functions
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
-- cookies for sort are reset to defaults when switching indices (sort1 path_parent asc, sort2 filename asc)
+### changed
+- cookies for search result sorting are reset to defaults when switching indices (sort1 path_parent asc, sort2 filename asc)
 ### fixed
 - top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
-- ES sort error if switching between s3 and non s3 indices and having a sort cookie set that is not in the other index type
+- ES sort error bug for s3 indices
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice

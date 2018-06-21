@@ -900,13 +900,15 @@ if ($maxdepth === "") {
     $maxdepth = Constants::MAXDEPTH;
     createCookie('maxdepth', $maxdepth);
 }
-$minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : getCookie('minhardlinks'); // minhardlinks
-if ($minhardlinks === "") {
-    $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
-    createCookie('minhardlinks', $minhardlinks);
-}
-$mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : getCookie('mindupes'); // mindupes
-if ($mindupes === "") {
-    $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
-    createCookie('mindupes', $mindupes);
+if (!$s3_index) {
+    $minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : getCookie('minhardlinks'); // minhardlinks
+    if ($minhardlinks === "") {
+        $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
+        createCookie('minhardlinks', $minhardlinks);
+    }
+    $mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : getCookie('mindupes'); // mindupes
+    if ($mindupes === "") {
+        $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
+        createCookie('mindupes', $mindupes);
+    }
 }
