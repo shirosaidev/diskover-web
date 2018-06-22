@@ -194,7 +194,7 @@ foreach ($oldestfiles as $key => $value) {
                         <button class="btn btn-default button-largest"> Largest</button>
                         <button class="btn btn-default button-oldest active"> Oldest</button>
                         <button class="btn btn-default button-newest"> Newest</button>
-                        <button class="btn btn-default button-user"> Users</button>
+                        <?php if (!$s3_index) { ?><button class="btn btn-default button-user"> Users</button><?php } ?>
                     </div>
                     <br />
                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>

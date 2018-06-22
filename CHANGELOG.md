@@ -1,6 +1,6 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc10] - 2018-06-21
+# [1.5.0-rc10] - 2018-06-22
 ### added
 - additional characters to escape_chars and escapeHTML functions
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
@@ -9,6 +9,7 @@
 ### fixed
 - top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
 - ES sort error bug for s3 indices
+- bugs with filetree and treemap pages for s3 indices
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice

@@ -215,7 +215,7 @@ function getJSON() {
         // config references
         chartConfig = {
             target: 'tree-container',
-            data_url: 'd3_data.php?path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count + '&show_files=' + show_files
+            data_url: 'd3_data.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&use_count=' + use_count + '&show_files=' + show_files
         };
 
         // loader settings
@@ -337,11 +337,14 @@ function updateTree(data, parent) {
 
 	//add icons for folder for file
 	entered.append("span").attr("class", function (d) {
-        if (s3_index && d.name === '/s3') {
-            var foldericon = "glyphicon-cloud";
-        }
-        else if (s3_index && d.parent.name === '/s3') {
-            var foldericon = "glyphicon-cloud-upload";
+        if (s3_index) {
+            if (d.name === '/s3') {
+                var foldericon = "glyphicon-cloud";
+            } else if ((d.parent && d.parent.name === '/s3') || (d.name.split('/').length == 3)) {
+                var foldericon = "glyphicon-cloud-upload";
+            } else {
+                var foldericon = "glyphicon-folder-close";
+            }
         } else {
             var foldericon = "glyphicon-folder-close";
         }
