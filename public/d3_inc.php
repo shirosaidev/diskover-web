@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -77,6 +77,7 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
 
 function get_files($client, $index, $path, $filter, $mtime) {
     // gets the 100 largest files in the current directory (path)
+    // sorted by size/filename
     $items = [];
     $searchParams['body'] = [];
 
@@ -99,6 +100,9 @@ function get_files($client, $index, $path, $filter, $mtime) {
                 'sort' => [
                     'filesize' => [
                     'order' => 'desc'
+                    ],
+                    'filename' => [
+                    'order' => 'asc'
                     ]
                 ]
         ];
@@ -135,6 +139,7 @@ function get_files($client, $index, $path, $filter, $mtime) {
 function get_sub_dirs($client, $index, $path, $filter, $use_count) {
     // gets the largest sub dirs by filesize or item count (use_count true)
     // non-recursive
+    // sorted by size/filename
     $dirs = [];
 
     $searchParams['body'] = [];
@@ -169,12 +174,18 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
         $searchParams['body']['sort'] = [
             'items' => [
                 'order' => 'desc'
+            ],
+            'filename' => [
+                'order' => 'asc'
             ]
         ];
     } else {
         $searchParams['body']['sort'] = [
             'filesize' => [
                 'order' => 'desc'
+            ],
+            'filename' => [
+                'order' => 'asc'
             ]
         ];
     }

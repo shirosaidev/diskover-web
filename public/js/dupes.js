@@ -177,7 +177,7 @@ function renderDupesCharts(data) {
              return color(d.data.label);
          })
          .on("click", function(d) {
-             document.location.href='advanced.php?>&submitted=true&p=1&dupe_md5=' + d.data.label + '&doctype=file';
+             document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.data.label + '&doctype=file';
          })
          .on("mouseover", function(d) {
              tip.show(d);
@@ -308,7 +308,7 @@ function renderDupesCharts(data) {
                  .style("left", (d3.event.pageX + 10) + "px");
          })
          .on("click", function(d) {
-             document.location.href='advanced.php?>&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file';
+             document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file';
          });
 
 
