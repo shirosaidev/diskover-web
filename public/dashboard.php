@@ -966,7 +966,7 @@ if ($s3_index) {
 
     </script>
     <script>
-        var size_total = <?php echo $diskspace_total; ?>;
+        var size_used = <?php echo $diskspace_used; ?>;
         var size_indexed = <?php echo $totalFilesizeAll; ?>;
 
         var height = 16,
@@ -1000,8 +1000,11 @@ if ($s3_index) {
             .attr('class', 'label')
             .attr('text-anchor', 'middle')
             .text(function(d) {
-                percent = d3.round(d / size_total * 100, 2) + "%";
-                return percent + ' indexed';
+                percent = d3.round(d / size_used * 100, 2);
+                if (percent > 100) {
+                    percent = 100;
+                }
+                return percent + '% indexed';
             });
 
     </script>

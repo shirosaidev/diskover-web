@@ -1,6 +1,6 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc10] - 2018-06-23
+# [1.5.0-rc10] - 2018-06-24
 ### added
 - additional characters to escape_chars and escapeHTML functions
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
@@ -12,6 +12,7 @@
 - bugs with filetree and treemap pages for s3 indices
 - bug with heatmap incorrectly showing 100% change (for new files)
 - bug with avg hardlinks and avg dupes getting set to 0 for hardlinks and dupes pages
+- bug with indexed % bar chart on dashboard
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice
