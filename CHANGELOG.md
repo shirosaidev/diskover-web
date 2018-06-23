@@ -11,6 +11,7 @@
 - ES sort error bug for s3 indices
 - bugs with filetree and treemap pages for s3 indices
 - bug with heatmap incorrectly showing 100% change (for new files)
+- bug with avg hardlinks and avg dupes getting set to 0 for hardlinks and dupes pages
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice

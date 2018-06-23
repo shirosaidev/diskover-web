@@ -693,6 +693,10 @@ function getAvgHardlinks($client, $esIndex, $path, $filter, $mtime) {
 
     $avg = round(($maxhardlinks+$minhardlinks)/2, 0);
 
+    if ($avg == 0) {
+        $avg = 2;
+    }
+
     return $avg;
 }
 
@@ -811,6 +815,10 @@ function getAvgDupes($client, $esIndex, $path, $filter, $mtime) {
 
     $avg = round(($maxdupes+$mindupes)/2, 0);
 
+    if ($avg == 0) {
+        $avg = 2;
+    }
+
     return $avg;
 }
 
@@ -901,13 +909,13 @@ if ($maxdepth === "") {
     createCookie('maxdepth', $maxdepth);
 }
 if (!$s3_index) {
-    $minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : getCookie('minhardlinks'); // minhardlinks
-    if ($minhardlinks === "") {
+    $minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : (int)getCookie('minhardlinks'); // minhardlinks
+    if ($minhardlinks === "" || $minhardlinks === 0) {
         $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
         createCookie('minhardlinks', $minhardlinks);
     }
-    $mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : getCookie('mindupes'); // mindupes
-    if ($mindupes === "") {
+    $mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : (int)getCookie('mindupes'); // mindupes
+    if ($mindupes === "" || $mindupes === 0) {
         $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
         createCookie('mindupes', $mindupes);
     }
