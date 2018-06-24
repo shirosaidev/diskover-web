@@ -536,7 +536,7 @@ if ($s3_index) {
           <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
       </div>
       <div class="panel-body">
-          <div id="workerchart" class="text-center"></div>
+        <div id="workerchart" class="text-center"></div>
       </div>
     </div>
     <div class="row">
@@ -987,8 +987,11 @@ if ($s3_index) {
             .attr('height', height)
             .attr('class', 'bar')
             .attr('width', function(d) {
-                percent = parseInt(d / size_total * 100) + "%";
-                return percent;
+                percent = parseInt(d / size_used * 100);
+                if (percent > 100) {
+                    percent = 100;
+                }
+                return percent + "%";
             });
 
         var label = svg.selectAll(".label")
