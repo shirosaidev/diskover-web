@@ -105,7 +105,7 @@ rect:hover {
   height: 38vh;
   width: 99vw;
   overflow: scroll;
-    border: 0;
+  border: 0;
 }
 
 #tree-wrapper::-webkit-scrollbar-track
@@ -136,7 +136,7 @@ rect:hover {
   float: left;
   height: 43vh;
   width: 99vw;
-  overflow: scroll;
+  overflow: hidden;
   border: 0;
 }
 
