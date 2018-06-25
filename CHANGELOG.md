@@ -6,6 +6,7 @@
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
 ### changed
 - cookies for search result sorting are reset to defaults when switching indices (sort1 path_parent asc, sort2 filename asc)
+- dashboard space savings files/dirs/dupes now has formated number counts with commas
 ### fixed
 - top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
 - ES sort error bug for s3 indices
