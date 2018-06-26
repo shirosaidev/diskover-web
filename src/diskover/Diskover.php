@@ -842,7 +842,7 @@ if (isset($_GET['index'])) {
     }
 }
 // check for Qumulo index
-if (strpos($esIndex, 'qumulo') !== false) {
+if (strpos($esIndex, 'diskover_qumulo-') !== false) {
     createCookie('qumulo', 1);
     $qumulo_index = 1;
 } else {
@@ -850,7 +850,7 @@ if (strpos($esIndex, 'qumulo') !== false) {
     $qumulo_index = 0;
 }
 // check for AWS S3 index
-if (strpos($esIndex, 's3') !== false) {
+if (strpos($esIndex, 'diskover_s3-') !== false) {
     createCookie('s3', 1);
     $s3_index = 1;
 } else {
