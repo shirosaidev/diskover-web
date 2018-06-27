@@ -216,8 +216,8 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                 <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs run-btn file-cmd-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-tasks"></i>
                     <span class="caret"></span></button>
                     <ul class="dropdown-menu">
-                        <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (non-recursive)</a></li>
-                        <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"recursive\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (recursive)</a></li>
+                        <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"adaptivebatch\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (non-recursive)</a></li>
+                        <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"recursive\": \"true\", \"adaptivebatch\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (recursive)</a></li>
                 </ul>
             </div>
             <!-- end socket command dropdown -->

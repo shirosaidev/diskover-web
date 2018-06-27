@@ -1,12 +1,13 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc10] - 2018-06-25
+# [1.5.0-rc10] - 2018-06-27
 ### added
 - additional characters to escape_chars and escapeHTML functions
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
 ### changed
 - cookies for search result sorting are reset to defaults when switching indices (sort1 path_parent asc, sort2 filename asc)
 - dashboard space savings files/dirs/dupes now has formated number counts with commas
+- set adaptivebatch to true for reindex and reindexrecurs directory run command buttons (when diskover socket server is listening and enabled in Constants.php)
 ### fixed
 - top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
 - ES sort error bug for s3 indices
