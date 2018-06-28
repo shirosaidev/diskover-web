@@ -174,7 +174,7 @@ select::-webkit-scrollbar-thumb
 
         <hr />
         <?php
-            $diskover_indices = curl_es('/diskover-*?pretty');
+            $diskover_indices = curl_es('/diskover*?pretty');
             $fields_file = $diskover_indices[$esIndex]['mappings']['file']['properties'];
             $fields_dir = $diskover_indices[$esIndex]['mappings']['directory']['properties'];
             // combine file and directory fields and find unique
@@ -487,8 +487,8 @@ $tagtext = file_get_contents($file_customtags);
 
 		<div class="form-group">
             <?php
-            $curlresp_esindices = curl_es('/diskover-*?pretty', 'null', false);
-            $curlresp_esinfo = curl_es('/diskover-*/_stats?pretty', 'null', false);
+            $curlresp_esindices = curl_es('/diskover*?pretty', 'null', false);
+            $curlresp_esinfo = curl_es('/diskover*/_stats?pretty', 'null', false);
             ?>
             <hr />
             <h4>Indices info</h4>

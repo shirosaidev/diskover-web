@@ -29,12 +29,12 @@ $curl = curl_init();
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 if ($aws) {
     if ($aws_https) {
-        curl_setopt($curl, CURLOPT_URL, 'https://'.$host.':'.$port.'/diskover-*?pretty');
+        curl_setopt($curl, CURLOPT_URL, 'https://'.$host.':'.$port.'/diskover*?pretty');
     } else {
-        curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.'/diskover-*?pretty');
+        curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.'/diskover*?pretty');
     }
 } else {
-    curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.'/diskover-*?pretty');
+    curl_setopt($curl, CURLOPT_URL, 'http://'.$host.':'.$port.'/diskover*?pretty');
 }
 // Add user/pass if using ES auth
 if ($username !== '' && $password !== '') {
