@@ -517,6 +517,12 @@ if ($s3_index) {
       <div class="well well-sm">
         <strong><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web!</strong> Become a patron for diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span>
       </div>
+      <?php if (!$crawlfinished) { ?>
+      <div class="alert alert-dismissible alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong><i class="glyphicon glyphicon-exclamation-sign"></i> Worker bots still running!</strong> Some analytics pages will not load until worker bots have finished crawling and calculating directory sizes. Check worker bots in rq or rq-dashboard. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
+      </div>
+      <?php } ?>
       <div class="jumbotron">
         <h1><i class="glyphicon glyphicon-hdd"></i> Space Savings</h1>
         <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files. 
@@ -556,12 +562,6 @@ if ($s3_index) {
                 <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> Started at time is first crawl and finished at time is last crawl. Elapsed time is how long it took to crawl the tree and scrape meta. Total crawl time is the cumulative time for all worker bots.</span></small></p>
           </div>
         </div>
-      <?php if (!$crawlfinished) { ?>
-      <div class="alert alert-dismissible alert-warning">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-exclamation-sign"></i> Worker bots still running!</strong> Some analytics pages will not load until worker bots have finished crawling and calculating directory sizes. Check worker bots in rq or rq-dashboard. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
-      </div>
-      <?php } ?>
       <div class="panel panel-success chartbox">
       <div class="panel-heading">
           <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
