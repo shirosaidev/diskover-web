@@ -461,7 +461,7 @@ function updateTree(data, parent) {
 	entered.append("span").attr("class", "filetree-btns-container")
         .html(function (d) {
             if (d.count > 0) {
-                return '<a target="_blank" href="simple.php?submitted=true&amp;p=1&amp;q=path_parent:' + encodeURIComponent(escapeHTML(d.name)) + ' OR path_parent:' + encodeURIComponent(escapeHTML(d.name) + '\\/*') + '"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
+                return '<a target="_blank" href="simple.php?submitted=true&amp;p=1&amp;q=(path_parent:' + encodeURIComponent(escapeHTML(d.name)) + ' filename:' + encodeURIComponent(escapeHTML(d.name.split('/').pop())) + ') (path_parent:' + encodeURIComponent(escapeHTML(d.name)) + ' OR path_parent:' + encodeURIComponent(escapeHTML(d.name) + '\\/*)') + '"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
             }
         });
 
