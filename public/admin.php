@@ -141,18 +141,16 @@ select::-webkit-scrollbar-thumb
         Connected to Elasticsearch at <?php echo Constants::ES_HOST; ?>:<?php echo Constants::ES_PORT; ?>
 </div>
 <div class="col-xs-6">
-<pre>    __               __
+<pre>
+
+    __               __
    /\ \  __         /\ \
    \_\ \/\_\    ____\ \ \/'\     ___   __  __     __   _ __
    /'_` \/\ \  /',__\\ \ , <    / __`\/\ \/\ \  /'__`\/\`'__\   //
   /\ \L\ \ \ \/\__, `\\ \ \\`\ /\ \L\ \ \ \_/ |/\  __/\ \ \/   ('>
   \ \___,_\ \_\/\____/ \ \_\ \_\ \____/\ \___/ \ \____\\ \_\   /rr
    \/__,_ /\/_/\/___/   \/_/\/_/\/___/  \/__/   \/____/ \/_/  *\))_
-                                                  v<?php echo $VERSION; ?>
 </pre>
-<div class="text-center">
-    <strong><i class="glyphicon glyphicon-heart"></i> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>.</strong>
-</div>
 </div>
 </div>
 <br />
