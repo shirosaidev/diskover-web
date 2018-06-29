@@ -4,6 +4,7 @@
 ### added
 - additional characters to escape_chars and escapeHTML functions
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
+- copy text buttons to view file info page for copying paths to clipboard
 ### changed
 - cookies for search result sorting are reset to defaults when switching indices (sort1 path_parent asc, sort2 filename asc)
 - dashboard space savings files/dirs/dupes now has formated number counts with commas

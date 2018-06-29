@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -169,7 +169,7 @@ exit();
               </ul>
           </div>
          <!-- end tag dropdown -->
-      <h4 class="path">Full path: <?php echo $fullpath; ?></h4>
+      <h4 class="path">Full path: <span id="fullpath"><?php echo $fullpath; ?></span></h4> <a href="#" class="btn btn-default btn-xs file-btns" onclick="copyToClipboard('#fullpath')">Copy text</a>
       <?php if ($_REQUEST['doctype'] == 'directory') { ?>
           <div class="dropdown" style="display:inline-block;">
               <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-stats"></i>
@@ -194,7 +194,7 @@ exit();
                   </div>
       <br />
       <?php } ?>
-      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> <span style="color:gray">Parent path: <?php echo $parentpath; ?> </span></h5>
+      <h5 class="path"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i> <span style="color:gray">Parent path: <span id="parentpath"><?php echo $parentpath; ?></span> </span></h5> <a href="#" class="btn btn-default btn-xs file-btns" onclick="copyToClipboard('#parentpath')">Copy text</a>
       <div class="dropdown" style="display:inline-block;">
           <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-stats"></i>
               <span class="caret"></span></button>
