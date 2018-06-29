@@ -10,6 +10,9 @@
 - dashboard space savings files/dirs/dupes now has formated number counts with commas
 - set adaptivebatch to true for reindex and reindexrecurs directory run command buttons (when diskover socket server is listening and enabled in Constants.php)
 - dashboard design
+- filetree and treemap page search buttons (button for searching paths) now includes the directory in the search results
+- sorting for bar charts on tags and smartsearches pages are now set to null (unsorted, same order as labels)
+- sorting for extension pie chart on filetree page is now sorted by value (size/count)
 ### fixed
 - top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
 - ES sort error bug for s3 indices

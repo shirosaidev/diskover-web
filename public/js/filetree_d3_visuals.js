@@ -90,7 +90,8 @@ var width = 960,
     radius = Math.min(width, height) / 2;
 
 var pie = d3.layout.pie()
-    .sort(null)
+    //.sort(null)
+    .sort(function(a, b) { return d3.descending(a.value, b.value); })
     .value(function(d) {
         return d.value;
     });
@@ -387,7 +388,8 @@ var width2 = 320,
 var color2 = d3.scale.category20b();
 
 var pie2 = d3.layout.pie()
-    .sort(null)
+    //.sort(null)
+    .sort(function(a, b) { return d3.descending(a.value, b.value); })
     .value(function(d) {
         return d.value;
     });

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -483,7 +483,8 @@ foreach ($tagCountsCustom as $tag => $value) {
 
             // bars
             var bar = svg.select(".bars").selectAll("rect")
-                   .data(dataset.sort(function(x, y) { return d3.descending(x.size, y.size); }));
+                   .data(dataset);
+                   //.data(dataset.sort(function(x, y) { return d3.descending(x.size, y.size); }));
 
             bar.enter().append("rect")
                 .attr('transform', 'translate(' + barLabelWidth + ',' + gridChartOffset + ')')
