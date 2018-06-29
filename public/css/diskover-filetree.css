@@ -238,7 +238,7 @@ input:checked + .slider:before {
 
 #piechart-ext {
     top: 20px;
-    width: 340px;
+    width: 360px;
     height: 300px;
     position: relative;
     display: block;

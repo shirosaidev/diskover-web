@@ -381,7 +381,7 @@ svg2.append("g")
 svg2.append("g")
     .attr("class", "lines");
 
-var width2 = 320,
+var width2 = 360,
     height2 = 300,
     radius2 = Math.min(width2, height2) / 2.5;
 

@@ -21,6 +21,7 @@
 - bug with avg hardlinks and avg dupes getting set to 0 for hardlinks and dupes pages
 - bug with indexed % bar chart on dashboard
 - scrollbars occasionaly appearing around treemap on treemap page
+- extension pie chart labels getting cut off when extension name long
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice
