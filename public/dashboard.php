@@ -484,7 +484,7 @@ if ($s3_index) {
       .axis path,
       .axis line {
         fill: none;
-        stroke: #000;
+        stroke: #555;
         shape-rendering: crispEdges;
       }
       #workerchart {
@@ -514,64 +514,61 @@ if ($s3_index) {
 <div class="container-fluid" style="margin-top:70px;">
   <div class="row">
     <div class="col-xs-6">
-      <div class="well">
-        <h1><i class="glyphicon glyphicon-piggy-bank"></i> Space Savings</h1>
-        <p>You could save <span style="font-size:24px;font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files.<br />
-            <?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-size:16px;font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove. <span style="font-size:10px;color:#555;">(>6M mtime &amp; atime)</span><?php } ?></p>
-        <p><i class="glyphicon glyphicon-file" style="color:#738291;size:13px;font-weight:bold;"></i> Files: <span style="font-weight:bold;color:#D20915;"><?php echo number_format($totalfiles); ?></span> &nbsp;&nbsp; <i class="glyphicon glyphicon-folder-close" style="color:skyblue;size:13px;font-weight:bold;"></i> Directories: <span style="font-weight:bold;color:#D20915;"><?php echo number_format($totaldirs); ?></span> &nbsp;&nbsp;
-            <?php if (!$s3_index) { ?><i class="glyphicon glyphicon-duplicate" style="color:#738291;size:13px;font-weight:bold;"></i> Dupes: <span style="font-weight:bold;color:#D20915;"><?php echo number_format($totalDupes); ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeDupes); ?></span>)<?php } ?></p>
+      <div class="well well-sm">
+        <strong><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web!</strong> Become a patron for diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span>
       </div>
-      <div class="alert alert-dismissible alert-success">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-home"></i> Welcome to diskover-web!</strong> Support diskover on <a target="_blank" href="https://www.patreon.com/diskover"><strong>Patreon</strong></a> or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank"><strong>PayPal</strong></a>.
+      <div class="jumbotron">
+        <h1><i class="glyphicon glyphicon-hdd"></i> Space Savings</h1>
+        <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files. 
+            <?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.<br /><span style="font-size:11px;color:#555;"><i class="glyphicon glyphicon-info-sign"></i> Recommended files is based on >6M mtime &amp; atime.</span><?php } ?></p>
+        <p><span class="label label-default"><i class="glyphicon glyphicon-file" style="color:#738291;font-weight:bold;"></i> Files <?php echo number_format($totalfiles); ?></span> &nbsp;&nbsp; <span class="label label-default"><i class="glyphicon glyphicon-folder-close" style="color:skyblue;font-weight:bold;"></i> Directories <?php echo number_format($totaldirs); ?></span> &nbsp;&nbsp;
+            <?php if (!$s3_index) { ?><span class="label label-default"><i class="glyphicon glyphicon-duplicate" style="color:#738291;font-weight:bold;"></i> Dupes <?php echo number_format($totalDupes); ?> (<?php echo formatBytes($totalFilesizeDupes); ?>)</span><?php } ?></p>
       </div>
+      <div class="panel panel-default chartbox">
+        <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-dashboard"></i> Crawl Stats</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="crawlstats.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View more</a></small></div>
+        <div class="panel-body">
+            <ul class="list-group">
+              <li class="list-group-item">
+                <span class="badge"><?php echo $esIndex; ?></span>
+                <i class="glyphicon glyphicon-list-alt"></i> Index
+              </li>
+              <li class="list-group-item">
+                <span class="badge"><?php echo $firstcrawltime; ?> UTC</span>
+                <i class="glyphicon glyphicon-calendar"></i> Started at
+              </li>
+              <?php if ($crawlfinished) { ?>
+              <li class="list-group-item">
+                <span class="badge"><?php echo $lastcrawltime; ?> UTC</span>
+                <i class="glyphicon glyphicon-flag"></i> Finished at
+              </li>
+              <li class="list-group-item">
+                <span class="badge"><?php echo secondsToTime($crawlelapsedtime); ?></span>
+                <i class="glyphicon glyphicon-time"></i> Elapsed time
+              </li>
+              <li class="list-group-item">
+                <span class="badge"><?php echo secondsToTime($crawlcumulativetime); ?></span>
+                <i class="glyphicon glyphicon-time"></i> Total crawl time (cumulative)
+              </li>
+              <?php } else { ?>
+                    <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
+                <?php } ?>
+            </ul>
+                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> Started at time is first crawl and finished at time is last crawl. Elapsed time is how long it took to crawl the tree and scrape meta. Total crawl time is the cumulative time for all worker bots.</span></small></p>
+          </div>
+        </div>
       <?php if (!$crawlfinished) { ?>
       <div class="alert alert-dismissible alert-warning">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><i class="glyphicon glyphicon-exclamation-sign"></i> Worker bots still running!</strong> Some analytics pages will not load until worker bots have finished crawling and calculating directory sizes. Check worker bots in rq or rq-dashboard. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
       </div>
       <?php } ?>
-      <div class="panel panel-primary chartbox">
+      <div class="panel panel-success chartbox">
       <div class="panel-heading">
           <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
       </div>
       <div class="panel-body">
-        <div id="workerchart" class="text-center"></div>
+        <div id="workerchart" class="text-center" style="display: block; margin: auto;"></div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-xs-6">
-        <div class="panel panel-primary chartbox">
-        <div class="panel-heading">
-            <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
-        </div>
-        <div class="panel-body">
-            <div id="tagcountchart" class="text-center"></div>
-            <div class="chartbox">
-              <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
-              <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
-              <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
-              <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
-          </div>
-        </div>
-        </div>
-      </div>
-        <div class="col-xs-6">
-            <div class="panel panel-primary chartbox">
-            <div class="panel-heading">
-                <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
-            </div>
-        <div class="panel-body">
-            <div id="filesizechart" class="text-center"></div>
-            <div class="chartbox">
-              <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
-              <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
-              <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
-              <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
-          </div>
-        </div>
-        </div>
-    </div>
     </div>
       <?php
       if ($totalDupes === 0 && $s3_index != '1') {
@@ -618,16 +615,18 @@ if ($s3_index) {
       ?>
     </div>
     <div class="col-xs-6">
-        <div class="well">
+        <div class="panel panel-default">
           <?php if ($s3_index) { ?>
-          <h4><i class="glyphicon glyphicon-cloud" style="color:#FD9827;"></i> S3 Overview</h4>
-          <p>Buckets: <span class="text-success"><strong><?php $i = 0; while ( $i < sizeof($buckets) ) { { echo '<i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;"></i> ' . $buckets[$i]['_source']['filename']; if ($i<sizeof($buckets)-1) { echo '&nbsp; '; }; $i++; } } ?></strong></span><br />
-          Bucket Count: <span class="text-success"><strong><?php echo $bucketcount; ?></strong></span><br />
-          diskover S3 root path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span><br />
-          Total Buckets Size: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span></p>
+          <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-cloud" style="color:#FD9827;"></i> S3 Overview</h3></div>
+          <div class="panel-body">
+            <p>Buckets: <span class="text-success"><strong><?php $i = 0; while ( $i < sizeof($buckets) ) { { echo '<i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;"></i> ' . $buckets[$i]['_source']['filename']; if ($i<sizeof($buckets)-1) { echo '&nbsp; '; }; $i++; } } ?></strong></span><br />
+            Bucket Count: <span class="text-success"><strong><?php echo $bucketcount; ?></strong></span><br />
+            diskover S3 root path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span><br />
+            Total Buckets Size: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span></p>
           <?php } else { ?>
-          <h4><i class="glyphicon glyphicon-hdd"></i> Disk Space Overview</h4>
-          <p>Path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span></p>
+          <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-eye-open"></i> Disk Space Overview</h3></div>
+          <div class="panel-body">
+          <p>Path: <span style class="text-success"><strong><?php echo $diskspace_path; ?></strong></span></p>
           <div id="diskspacechart"></div>
           <div id="diskspacechart-indexed"></div>
           <?php
@@ -637,24 +636,53 @@ if ($s3_index) {
               $diskspace_available_change = number_format(changePercent($diskspace_available, $diskspace2_available), 2);
           }
           ?>
-          <p>Total: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_total); ?></span>&nbsp;&nbsp;&nbsp;&nbsp;
-              Used: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_used); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small><?php } ?><br />
-              Free: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_free); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;
-              Available: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($diskspace_available); ?></span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></p>
-        <?php } ?></div>
-        <div class="well">
-            <h4 style="display: inline;"><i class="glyphicon glyphicon-dashboard"></i> Index Crawl Stats</h4>&nbsp;&nbsp;&nbsp;&nbsp;<small>Index: <span class="text-success"><strong><?php echo $esIndex; ?></strong></span></small>
-                <p><i class="glyphicon glyphicon-calendar"></i> Started at: <span class="text-success"><?php echo $firstcrawltime; ?></span> UTC.<br />
-                <?php if ($crawlfinished) { ?>
-                    <i class="glyphicon glyphicon-flag"></i> Finished at: <span class="text-success"><?php echo $lastcrawltime; ?></span> UTC.<br />
-                    <i class="glyphicon glyphicon-time"></i> Elapsed time: <span class="text-success"><?php echo secondsToTime($crawlelapsedtime); ?></span><br />
-                    <i class="glyphicon glyphicon-time"></i> Total crawl time (cumulative): <span class="text-success"><?php echo secondsToTime($crawlcumulativetime); ?></span></p>
-                    <?php } else { ?>
-                    <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
-                <?php } ?>
-                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> Start time is first crawl and finish time is last crawl, the total crawl time is cumulative for all worker bots.</span></small></p>
+            <span class="label label-default">Total <?php echo formatBytes($diskspace_total); ?></span>&nbsp;&nbsp;
+            <span class="label label-default">Used <?php echo formatBytes($diskspace_used); ?> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small></span><?php } ?></span>&nbsp;&nbsp;
+            <span class="label label-default">Free <?php echo formatBytes($diskspace_free); ?><span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?></span></span>&nbsp;&nbsp;
+            <span class="label label-default">Available <?php echo formatBytes($diskspace_available); ?><span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></span></span>
+            <?php if ((($diskspace_used / $diskspace_total) * 100) >= 80 && (($diskspace_used / $diskspace_total) * 100) < 90) { ?>
+            <br /><span class="label label-warning"><i class="glyphicon glyphicon-warning-sign"></i> Used disk space is above 80%</span>
+            <?php } else if ((($diskspace_used / $diskspace_total) * 100) >= 90) { ?>
+            <br /><span class="label label-danger"><i class="glyphicon glyphicon-warning-sign"></i> Used disk space is above 90%</span>
+            <?php } ?>
+        <?php } ?>
         </div>
-        <div class="panel panel-primary chartbox">
+        </div>
+        <div class="row">
+      <div class="col-xs-6">
+        <div class="panel panel-default chartbox">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-tag"></i> Tag Counts</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
+        </div>
+        <div class="panel-body">
+            <div id="tagcountchart" class="text-center"></div>
+            <div class="chartbox">
+              <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
+              <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
+              <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
+              <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
+          </div>
+        </div>
+        </div>
+      </div>
+        <div class="col-xs-6">
+            <div class="panel panel-default chartbox">
+            <div class="panel-heading">
+                <h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-hdd"></i> Total File Sizes</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="tags.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View all</a></small>
+            </div>
+        <div class="panel-body">
+            <div id="filesizechart" class="text-center"></div>
+            <div class="chartbox">
+              <span class="label" style="background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
+              <span class="label" style="background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
+              <span class="label" style="background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
+              <span class="label" style="background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>
+          </div>
+        </div>
+        </div>
+    </div>
+    </div>
+        <div class="panel panel-info chartbox">
             <div class="panel-heading">
                 <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a></small>
             </div>
@@ -711,7 +739,7 @@ if ($s3_index) {
           </table>
         </div>
         </div>
-        <div class="panel panel-primary chartbox">
+        <div class="panel panel-info chartbox">
             <div class="panel-heading">
                 <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Directories</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a></small>
             </div>
