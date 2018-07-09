@@ -305,7 +305,7 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	<div class="row">
 	  <div class="col-xs-12">
 		<label for="path_parent">Parent path is...  </label>
-		<input name="path_parent" value="" placeholder="/Users/shirosai/Music or /Users/shirosai/Downloads*" class="form-control" />
+		<input name="path_parent" value="" placeholder="/Users/shirosai/Music or /Users/shirosai/Downloads* or dirname* or *dir name*" class="form-control" />
 	  </div>
 	</div>
   </div>
