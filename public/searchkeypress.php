@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -45,7 +45,8 @@ if (isset($_GET)) {
                     'query' => $request,
                     'fields' => ['filename^5','path_parent','extension'],
                     'default_operator' => 'OR',
-                    'analyze_wildcard' => 'true'
+                    'analyze_wildcard' => 'true',
+                    'use_dis_max' => 'true'
                 ]
             ]
         ];
@@ -81,7 +82,7 @@ if (isset($_GET)) {
 echo '<span style="color:#666;font-size:10px;line-height:1.2em;display:block;">' . $request . '</span>';
 echo '<span class="pull-right" style="font-size:11px;color:#ccc;"><strong>' . $total . ' items found</strong></span><br />';
 
-if (!empty($results) && count($results) === 0) {
+if (isset($results) && count($results) === 0) {
     echo "<i class=\"glyphicon glyphicon-eye-close\"></i> No results found";
 } else {
     // replace any words and characters that we don't want to highlight in red with a space

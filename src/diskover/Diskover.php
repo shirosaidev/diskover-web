@@ -541,28 +541,37 @@ function predict_search($q) {
         $keyword_arr_ext = [];
         $keyword_arr_path = [];
         foreach ($keyword_arr as $key => $value) {
-                // check if .ext extension and make extension lowercase/uppercase version
-                if (strpos($value, '.') === 0) {
-                    $keyword_arr_ext[] = strtoupper($value);
-                    $keyword_arr_ext[] = strtolower($value);
-                // Add first letter upercase/lowercase and all lowercase/uppercase versions of keyword
-                } else {
-                    $keyword_arr_path[] = strtoupper($value);
-                    $keyword_arr_path[] = strtolower($value);
-                    $keyword_arr_path[] = ucfirst($value);
-                    $keyword_arr_path[] = lcfirst($value);
-                }
+            if ($value == "") continue;
+            // check if .ext extension and make extension lowercase/uppercase version
+            if (strpos($value, '.') === 0) {
+                $keyword_arr_ext[] = strtoupper($value);
+                $keyword_arr_ext[] = strtolower($value);
+            // Add first letter upercase/lowercase and all lowercase/uppercase versions of keyword
+            } else {
+                $keyword_arr_path[] = strtoupper($value);
+                $keyword_arr_path[] = strtolower($value);
+                $keyword_arr_path[] = ucfirst($value);
+                $keyword_arr_path[] = lcfirst($value);
+                $keyword_arr_path[] = (count($keyword_arr) > 1 && $value !== "") ? 'AND' : '';
+            }
         }
         // create es request
         if (count($keyword_arr_path) > 0) {
             $request .= '(';
             foreach (['filename', 'path_parent'] as $field) {
-                $request .= $field.':(';
+                $request .= '(' . $field .':(';
+                $i = 1;
+                $n = count($keyword_arr_path);
                 foreach ($keyword_arr_path as $key => $value) {
-                    if ($value == "") continue;
-                    $request .= '*' . escape_chars($value) . '* ';
+                    if ($i == $n) continue;
+                    if ($value == "AND") {
+                        $request .= ') AND '. $field .':(';
+                    } else {
+                        $request .= '*' . escape_chars($value) . '* ';
+                    }
+                    $i++;
                 }
-                $request .= ') ';
+                $request .= ')) ';
             }
             $request .= ') ';
         }
