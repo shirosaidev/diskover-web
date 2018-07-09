@@ -283,7 +283,7 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	<div class="row">
 	  <div class="col-xs-6">
 		<label for="filename">Filename is...</label>
-		<input name="filename" value="" placeholder="somefile.m4a or someimg*.png or directory_name" class="form-control" />
+		<input name="filename" value="" placeholder="somefile.m4a or someimg*.png or *file name* or directory_name" class="form-control" />
 	  </div>
 	  <div class="col-xs-2">
 		<label for="filehash">Filehash is...</label>
