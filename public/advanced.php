@@ -62,9 +62,8 @@ if (!empty($_REQUEST['submitted'])) {
         $searchParams['size'] = Constants::SEARCH_RESULTS;
     }
 
-
     if (!empty($_REQUEST['filename'])) {
-        if (strpos($_REQUEST['filename'], '*')) {
+        if (strpos($_REQUEST['filename'], '*') !== false) {
             $filename = str_replace('\*', '*', escape_chars($_REQUEST['filename']));
             $q[] = "filename:" . $filename;
         } else {
@@ -74,7 +73,7 @@ if (!empty($_REQUEST['submitted'])) {
     }
 
     if (!empty($_REQUEST['path_parent'])) {
-        if (strpos($_REQUEST['path_parent'], '*')) {
+        if (strpos($_REQUEST['path_parent'], '*') !== false) {
             $path_parent_wildcard = str_replace('\*', '\/*', escape_chars($_REQUEST['path_parent']));
             $path_parent = escape_chars(str_replace('*', '', $_REQUEST['path_parent']));
             $q[] = "path_parent:" . $path_parent . " OR path_parent:" . $path_parent_wildcard;

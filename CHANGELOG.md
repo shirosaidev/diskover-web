@@ -23,6 +23,7 @@
 - bug with indexed % bar chart on dashboard
 - scrollbars occasionaly appearing around treemap on treemap page
 - extension pie chart labels getting cut off when extension name long
+- bug with wildcards in filename and parent path fields using advanced search
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice
