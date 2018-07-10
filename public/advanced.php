@@ -64,23 +64,60 @@ if (!empty($_REQUEST['submitted'])) {
 
     if (!empty($_REQUEST['filename'])) {
         if (strpos($_REQUEST['filename'], '*') !== false) {
-            $filename = str_replace('\*', '*', escape_chars($_REQUEST['filename']));
-            $q[] = "filename:" . $filename;
+            $filename_wildcard = str_replace('\*', '*', escape_chars($_REQUEST['filename']));
+            $filename_arr = preg_split('/\b/', $filename_wildcard);
+            $filestring = "filename:(" . $filename_wildcard;
+            // Add first letter upercase/lowercase and all lowercase/uppercase versions of keyword
+            $filestring .= " " . strtoupper($filename_wildcard);
+            $filestring .= " " . strtolower($filename_wildcard);
+            $filestring .= " ";
+            for ($i=0; $i <= count($filename_arr); $i++) {
+                if ($filename_arr[$i] !== "*") {
+                    $filestring .= ($filename_arr[$i] !== "of" && $filename_arr[$i] !== "the") ? ucfirst($filename_arr[$i]) : $filename_arr[$i];
+                } else {
+                    $filestring .= "*";
+                }
+            }
+            $filestring .= ")";
         } else {
             $filename = escape_chars($_REQUEST['filename']);
-            $q[] = "filename:" . $filename;
+            $filestring = "filename:(" . $filename;
+            // Add first letter upercase/lowercase and all lowercase/uppercase versions of keyword
+            $filestring .= " " . strtoupper($filename);
+            $filestring .= " " . strtolower($filename);
+            $filestring .= " " . ucfirst($filename);
+            $filestring .= ")";
         }
+        $q[] = $filestring;
     }
 
     if (!empty($_REQUEST['path_parent'])) {
         if (strpos($_REQUEST['path_parent'], '*') !== false) {
-            $path_parent_wildcard = str_replace('\*', '\/*', escape_chars($_REQUEST['path_parent']));
-            $path_parent = escape_chars(str_replace('*', '', $_REQUEST['path_parent']));
-            $q[] = "path_parent:" . $path_parent . " OR path_parent:" . $path_parent_wildcard;
+            $pathparent_wildcard = str_replace('\*', '*', escape_chars($_REQUEST['path_parent']));
+            $pathparent_arr = preg_split('/\b/', $pathparent_wildcard);
+            $pathstring = "path_parent:(" . $pathparent_wildcard;
+            // Add first letter upercase/lowercase and all lowercase/uppercase versions of keyword
+            $pathstring .= " " . strtoupper($pathparent_wildcard);
+            $pathstring .= " " . strtolower($pathparent_wildcard);
+            $pathstring .= " ";
+            for ($i=0; $i <= count($pathparent_arr); $i++) {
+                if ($pathparent_arr[$i] !== "*") {
+                    $pathstring .= ($pathparent_arr[$i] !== "of" && $pathparent_arr[$i] !== "the") ? ucfirst($pathparent_arr[$i]) : $pathparent_arr[$i];
+                } else {
+                    $pathstring .= "*";
+                }
+            }
+            $pathstring .= ")";
         } else {
-            $path_parent = escape_chars($_REQUEST['path_parent']);
-            $q[] = "path_parent:" . $path_parent;
+            $parentpath = escape_chars($_REQUEST['path_parent']);
+            $pathstring = "path_parent:(" . $parentpath;
+            // Add first letter upercase/lowercase and all lowercase/uppercase versions of keyword
+            $pathstring .= " " . strtoupper($parentpath);
+            $pathstring .= " " . strtolower($parentpath);
+            $pathstring .= " " . ucfirst($parentpath);
+            $pathstring .= ")";
         }
+        $q[] = $pathstring;
     }
 
     if (!empty($_REQUEST['tag'])) {
@@ -179,6 +216,7 @@ if (!empty($_REQUEST['submitted'])) {
     // Build complete search request body
     if (count($q) == 1) {
         $querystring = $q[0];
+        $keyword = 
         $searchParams['body']['query']['query_string']['query'] = $querystring;
     } elseif (count($q) > 1) {
         $querystring = "";
@@ -194,6 +232,7 @@ if (!empty($_REQUEST['submitted'])) {
     } else {
         $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
     }
+    $searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
     $request = $querystring;
     // Save search query
     saveSearchQuery($querystring);

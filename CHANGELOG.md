@@ -1,6 +1,6 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc10] - 2018-07-09
+# [1.5.0-rc10] - 2018-07-10
 ### added
 - additional characters to escape_chars and escapeHTML functions
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
@@ -14,6 +14,7 @@
 - sorting for bar charts on tags and smartsearches pages are now set to null (unsorted, same order as labels)
 - sorting for extension pie chart on filetree page is now sorted by value (size/count)
 - improved simple search / predictive search
+- improved advanced search
 ### fixed
 - top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
 - ES sort error bug for s3 indices

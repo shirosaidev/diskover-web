@@ -551,7 +551,6 @@ function predict_search($q) {
                 $keyword_arr_path[] = strtoupper($value);
                 $keyword_arr_path[] = strtolower($value);
                 $keyword_arr_path[] = ucfirst($value);
-                $keyword_arr_path[] = lcfirst($value);
                 $keyword_arr_path[] = (count($keyword_arr) > 1 && $value !== "") ? 'AND' : '';
             }
         }
