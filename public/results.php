@@ -227,7 +227,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                         <?php } else { ?>
                         <li class="small"><?php $cmd = "{\"action\": \"crawl\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"adaptivebatch\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> re-crawl rootpath (OVERWRITE INDEX)</a></li>
                         <li class="small"><?php $cmd = "{\"action\": \"finddupes\", \"index\": \"".$esIndex."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-duplicate"></i> find dupes</a></li>
-                        <?php if (isset($esIndex2)) { ?>
+                        <?php if (!empty($esIndex2)) { ?>
                         <li class="small"><?php $cmd = "{\"action\": \"hotdirs\", \"index\": \"".$esIndex."\", \"index2\": \"".$esIndex2."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-fire"></i> find hotdirs</a></li>
                         <?php } ?>
                         <?php } ?>
