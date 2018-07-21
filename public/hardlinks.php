@@ -34,7 +34,7 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found or timeout (too many results).</strong> Try searching for a directory lower down the tree and clicking it's hardlinks analytics button, or changing filters or min hard links.
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found or timeout (too many results).</strong> Try searching for a directory lower down the tree and clicking it's hardlinks analytics button, or changing filters (on filetree page) or increasing minhardlinks value.
 				</div>
 			</div>
 		</div>
