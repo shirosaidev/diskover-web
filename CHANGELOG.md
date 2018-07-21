@@ -16,6 +16,8 @@
 - improved simple search / predictive search
 - improved advanced search
 - changed treemap font color to light gray to make easier to read
+- hardlinks and dupes analytics pages - clicking chart items loads search results in new window
+- added delay for searching ES for user keyboard input when using nav/simple search (predictive search)
 ### fixed
 - top 50 dirs and dashboard top 10 dirs showing / (root) dir as top directory when rootdir path crawled is /
 - ES sort error bug for s3 indices

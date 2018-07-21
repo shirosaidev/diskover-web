@@ -96,29 +96,33 @@ $(document).ready(function () {
         if ($('#searchnavinput').val() === "") {
             $('#essearchreply-text-nav').html("");
             $('#essearchreply-nav').hide();
+            timeit = 0;
             return false;
         }
         var results;
-        $.ajax({
-            type:'GET',
-            url:'searchkeypress.php',
-            data: $('#searchnav').serialize(),
-            success: function(data) {
-            		if (data != "") {
-                        // set width and position of search results div to match search input
-                        var w = $('#searchnavbox').width();
-                        var p = $('#searchnavbox').position();
-                        console.log(p)
-                        $("#essearchreply-nav").css({left: p.left, position:'absolute'});
-                        $('#essearchreply-nav').width(w);
-            			$('#essearchreply-nav').show();
-                        $('#essearchreply-text-nav').html(data);
-            		} else {
-                        $('#essearchreply-text-nav').html("");
-                        $('#essearchreply-nav').hide();
-            		}
-                }
-        });
+        // delay for 500 ms before searching ES for user input
+        setTimeout(function() {
+            $.ajax({
+                type:'GET',
+                url:'searchkeypress.php',
+                data: $('#searchnav').serialize(),
+                success: function(data) {
+                        if (data != "") {
+                            // set width and position of search results div to match search input
+                            var w = $('#searchnavbox').width();
+                            var p = $('#searchnavbox').position();
+                            console.log(p)
+                            $("#essearchreply-nav").css({left: p.left, position:'absolute'});
+                            $('#essearchreply-nav').width(w);
+                            $('#essearchreply-nav').show();
+                            $('#essearchreply-text-nav').html(data);
+                        } else {
+                            $('#essearchreply-text-nav').html("");
+                            $('#essearchreply-nav').hide();
+                        }
+                    }
+            });
+        }, 500);
         return false;
 	});
 
