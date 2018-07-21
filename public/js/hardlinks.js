@@ -194,7 +194,7 @@ function renderHardLinksCharts(data) {
             return x(barValue(d));
         })
         .on("click", function(d) {
-            document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.label + '&doctype=file';
+            window.open('advanced.php?&submitted=true&p=1&inode=' + d.label + '&doctype=file','_blank');
         })
         .on("mouseover", function(d) {
             tip.show(d)
@@ -309,7 +309,7 @@ function renderHardLinksCharts(data) {
     node
         .on("click", function(d) {
             if (d.inode) {
-                document.location.href='advanced.php?&submitted=true&p=1&inode=' + d.inode + '&doctype=file';
+                window.open('advanced.php?&submitted=true&p=1&inode=' + d.inode + '&doctype=file','_blank');
             } else {
                 document.location.href = "hardlinks.php?index=" + index + "&index2=" + index2 + "&path=" + d.name + "&filter=" + filter + "&mtime=" + mtime + "&minhardlinks=" + minhardlinks;
             }

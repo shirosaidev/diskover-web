@@ -68,7 +68,7 @@ input:checked + .slider:before {
 
 text {
     font-size: 10px;
-    fill: black;
+    fill: #ccc;
     pointer-events: none;
 }
 

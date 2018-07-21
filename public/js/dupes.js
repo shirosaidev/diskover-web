@@ -177,7 +177,7 @@ function renderDupesCharts(data) {
              return color(d.data.label);
          })
          .on("click", function(d) {
-             document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.data.label + '&doctype=file';
+             window.open('advanced.php?&submitted=true&p=1&dupe_md5=' + d.data.label + '&doctype=file','_blank');
          })
          .on("mouseover", function(d) {
              tip.show(d);
@@ -286,7 +286,7 @@ function renderDupesCharts(data) {
              return x(barValue(d));
          })
          .on("click", function(d) {
-             document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file';
+             window.open('advanced.php?&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file','_blank');
          })
          .on("mouseover", function(d) {
              tip2.show(d);
@@ -308,7 +308,7 @@ function renderDupesCharts(data) {
                  .style("left", (d3.event.pageX + 10) + "px");
          })
          .on("click", function(d) {
-             document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file';
+             window.open('advanced.php?&submitted=true&p=1&dupe_md5=' + d.label + '&doctype=file','_blank');
          });
 
 
@@ -403,7 +403,7 @@ function renderDupesCharts(data) {
     node
         .on("click", function(d) {
             if (d.md5) {
-                document.location.href='advanced.php?&submitted=true&p=1&dupe_md5=' + d.md5 + '&doctype=file';
+                window.open('advanced.php?&submitted=true&p=1&dupe_md5=' + d.md5 + '&doctype=file','_blank');
             } else {
                 document.location.href = "dupes.php?index=" + index + "&index2=" + index2 + "&path=" + d.name + "&filter=" + filter + "&mtime=" + mtime;
             }
