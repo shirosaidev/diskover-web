@@ -22,81 +22,55 @@ $results = [];
 $searchParams = [];
 $totalHardLinkCount = 0;
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = 'file';
-$searchParams['size'] = 1000;
-// Scroll parameter alive time
-$searchParams['scroll'] = "1m";
+$searchParams['type'] = 'file';
 
 $searchParams['body'] = [
+    'size' => 0,
     '_source' => ['hardlinks','inode'],
-        'query' => [
-              'bool' => [
-                'must' => [
-                      'wildcard' => [ 'path_parent' => $path . '*' ]
-                  ],
-                  'filter' => [
-                      'range' => [
-                          'filesize' => [
-                                'gte' => $filter
-                          ]
-                      ],
-                      'range' => [
-                            'hardlinks' => [
-                                'gte' => $minhardlinks
-                            ]
+    'query' => [
+          'bool' => [
+            'must' => [
+                  'wildcard' => [ 'path_parent' => $path . '*' ]
+              ],
+              'filter' => [
+                  'range' => [
+                      'filesize' => [
+                            'gte' => $filter
                       ]
                   ],
-                  'should' => [
-                      'range' => [
-                          'last_modified' => [
-                              'lte' => $mtime
-                          ]
+                  'range' => [
+                        'hardlinks' => [
+                            'gte' => $minhardlinks
+                        ]
+                  ]
+              ],
+              'should' => [
+                  'range' => [
+                      'last_modified' => [
+                          'lte' => $mtime
                       ]
                   ]
               ]
-          ],
-          'sort' => [
-              'hardlinks' => [
-                  'order' => 'desc'
+          ]
+      ],
+      'aggs' => [
+          'top_hardlinks' => [
+              'terms' => [
+                  'field' => 'inode',
+                  'size' => 100
               ]
           ]
-];
+      ]
+  ];
+
 $queryResponse = $client->search($searchParams);
 
-// set total hits
-$total = $queryResponse['hits']['total'];
+// Get top hardlinks
+$results = $queryResponse['aggregations']['top_hardlinks']['buckets'];
 
-// Get the first scroll_id
-$scroll_id = $queryResponse['_scroll_id'];
-
-$i = 1;
-// Loop through all the pages of results
-while ($i <= ceil($total/$searchParams['size'])) {
-    // Get results
-    foreach ($queryResponse['hits']['hits'] as $hit) {
-        $results[] = $hit;
-    }
-
-    // Execute a Scroll request and repeat
-    $queryResponse = $client->scroll(
-    [
-        "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-        "scroll" => "1m"           // and the same timeout window
-    ]
-);
-
-    // Get the scroll_id for next page of results
-    $scroll_id = $queryResponse['_scroll_id'];
-    $i += 1;
+foreach ($results as $result) {
+    $inodes_unique[] = $result['key'];
 }
-
-// grab the inodes and put into inodes list
-foreach ($results as $arr) {
-    $inodes[] = $arr['_source']['inode'];
-}
-
-// just get unique inodes
-$inodes_unique = array_unique($inodes);
 
 // find files that match each inode
 $inodes_files = [];

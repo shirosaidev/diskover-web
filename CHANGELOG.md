@@ -6,6 +6,7 @@
 - better error output if missing .txt files for config (customtags.txt, extrafields.txt, smartsearches.txt) (copy from .sample files)
 - copy text buttons to view file info page for copying paths to clipboard
 - better error alerts for hardlinks and dupes analytics pages when timeout (too many results)
+- improved hardlinks and dupes analytics pages
 ### changed
 - cookies for search result sorting are reset to defaults when switching indices (sort1 path_parent asc, sort2 filename asc)
 - dashboard space savings files/dirs/dupes now has formated number counts with commas
@@ -29,6 +30,7 @@
 - scrollbars occasionaly appearing around treemap on treemap page
 - extension pie chart labels getting cut off when extension name long
 - bug with wildcards in filename and parent path fields using advanced search
+- missing hardlinks, dupes from clear cookies/cache button action on admin page
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice

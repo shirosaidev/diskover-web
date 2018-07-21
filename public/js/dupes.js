@@ -64,6 +64,7 @@ function getESJsonData() {
              spinner.stop();
              console.warn("No Elasticsearch results or timeout: " + error);
              document.getElementById('error').style.display = 'block';
+             deleteCookie("mindupes");
              return false;
          }
 

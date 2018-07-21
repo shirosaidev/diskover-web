@@ -34,7 +34,7 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found or timeout (too many results).</strong> Try searching for a directory lower down the tree and clicking it's hardlinks analytics button, or changing filters (on filetree page) or increasing minhardlinks value.
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found.</strong> Try searching for a different directory and clicking it's hardlinks analytics button, or changing filters (on filetree page) or minhardlinks value.
 				</div>
 			</div>
 		</div>
@@ -46,15 +46,18 @@ require "d3_inc.php";
                     	<div class="row">
                     		<div class="col-xs-12 text-center">
                     			<form class="form-horizontal" id="changeminhardlinks">
-                    			<div class="form-group form-inline"><label class="small">Min Hard Links</label>&nbsp;<input class="form-control input-sm" name="minhardlinks" id="minhardlinks" value="<?php echo $minhardlinks; ?>" size="5">&nbsp;<button type="submit" id="changeminhardlinksbutton" class="btn btn-default btn-xs" title="submit">Go </button>
-                    			<span style="font-size:10px; color:gray; margin-left:20px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
+                    			<div class="form-group form-inline">
+                    				<label class="small">Min Hard Links</label>&nbsp;<input class="form-control input-sm" name="minhardlinks" id="minhardlinks" value="<?php echo $minhardlinks; ?>" size="5">&nbsp;<button type="submit" id="changeminhardlinksbutton" class="btn btn-default btn-xs" title="submit">Go </button>
+                    				<span style="font-size:10px; color:gray; margin-left:20px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page, reload to see changes &nbsp;&nbsp;</span><button type="submit" id="reload" class="btn btn-default btn-xs" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button><br />
+                    				<h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
+                    				<span><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
                     			</div>
                     			</form>
                     		</div>
                     	</div>
                     </div>
                 </div>
-                <div class="row" style="margin-top:15px;">
+                <div class="row" style="margin-top:10px;">
                     <div class="col-xs-4">
                         <div id="hardlinkscountbarchart" class="hardlinkscountbarchart text-center"></div>
                     </div>
@@ -68,9 +71,9 @@ require "d3_inc.php";
 		<script language="javascript" src="js/bootstrap.min.js"></script>
 		<script language="javascript" src="js/diskover.js"></script>
 		<script language="javascript" src="js/d3.v3.min.js"></script>
-    <script language="javascript" src="js/spin.min.js"></script>
+    	<script language="javascript" src="js/spin.min.js"></script>
 		<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
-    <script language="javascript" src="js/hardlinks.js"></script>
+    	<script language="javascript" src="js/hardlinks.js"></script>
 	</body>
 
 	</html>

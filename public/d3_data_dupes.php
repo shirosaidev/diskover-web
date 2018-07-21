@@ -21,13 +21,10 @@ $results = [];
 $searchParams = [];
 $totalMd5Count = 0;
 $searchParams['index'] = $esIndex;
-$searchParams['type']  = 'file';
-$searchParams['size'] = 1000;
-// Scroll parameter alive time
-$searchParams['scroll'] = "1m";
+$searchParams['type'] = 'file';
 
 $searchParams['body'] = [
-    '_source' => ['dupe_md5'],
+    'size' => 0,
     'query' => [
               'bool' => [
                 'must' => [
@@ -51,44 +48,24 @@ $searchParams['body'] = [
                       ]
                   ]
               ]
-        ]
+        ],
+        'aggs' => [
+          'top_dupes' => [
+              'terms' => [
+                  'field' => 'dupe_md5',
+                  'size' => 100
+              ]
+          ]
+      ]
 ];
 $queryResponse = $client->search($searchParams);
 
-// set total hits
-$total = $queryResponse['hits']['total'];
+// Get top dupes
+$results = $queryResponse['aggregations']['top_dupes']['buckets'];
 
-// Get the first scroll_id
-$scroll_id = $queryResponse['_scroll_id'];
-
-$i = 1;
-// Loop through all the pages of results
-while ($i <= ceil($total/$searchParams['size'])) {
-    // Get results
-    foreach ($queryResponse['hits']['hits'] as $hit) {
-        $results[] = $hit;
-    }
-
-    // Execute a Scroll request and repeat
-    $queryResponse = $client->scroll(
-    [
-        "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-        "scroll" => "1m"           // and the same timeout window
-    ]
-);
-
-    // Get the scroll_id for next page of results
-    $scroll_id = $queryResponse['_scroll_id'];
-    $i += 1;
+foreach ($results as $result) {
+    $md5s_unique[] = $result['key'];
 }
-
-// grab the md5's and put into md5s list
-foreach ($results as $arr) {
-    $md5s[] = $arr['_source']['dupe_md5'];
-}
-
-// just get unique md5s
-$md5s_unique = array_unique($md5s);
 
 // find files that match each md5
 $md5s_files = [];

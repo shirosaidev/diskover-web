@@ -548,11 +548,13 @@ function clearCache() {
 	console.log("purging cookies/cache");
     cookies = ['filter', 'mtime', 'maxdepth', 'hide_thresh', 'path', 'use_count', 'show_files', 'sort', 'sortorder',
                 'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
-                'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 'PHPSESSID'];
+                'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 'minhardlinks', 
+                'mindupes', 'PHPSESSID'];
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
     }
-    session_storage = ["diskover-filetree", "diskover-treemap", "diskover-heatmap", "diskover-hotdirs-heatmap", "diskover-dupes"];
+    session_storage = ["diskover-filetree", "diskover-treemap", "diskover-heatmap", "diskover-hotdirs-heatmap", 
+                        "diskover-dupes", "diskover-hardlinks"];
     for (var i = 0; i < session_storage.length; i++) {
         sessionStorage.removeItem(session_storage[i]);
     }
