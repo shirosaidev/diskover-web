@@ -139,9 +139,10 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <li><a href="heatmap.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Heatmap</a></li>
                         <li><a href="hotdirs.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Hot Dirs</a></li>
                         <li><a href="top50.php?<?php echo $urlvars; ?>">Top 50</a></li>
-                        <li><a href="tags.php?<?php echo $urlvars; ?>">Tags</a></li>
                         <?php if (!$s3_index) { ?><li><a href="dupes.php?<?php echo $urlvars; ?>&amp;mindupes=<?php echo $mindupes; ?>">Dupes</a></li><?php } ?>
                         <?php if (!$s3_index) { ?><li><a href="hardlinks.php?<?php echo $urlvars; ?>&amp;minhardlinks=<?php echo $minhardlinks; ?>">Hardlinks</a></li><?php } ?>
+                        <li class="divider"></li>
+                        <li><a href="tags.php?<?php echo $urlvars; ?>">Tags</a></li>
                         <li><a href="smartsearches.php?<?php echo $urlvars; ?>">Smart Searches</a></li>
                         <?php if (!$s3_index) { ?><li><a href="crawlstats.php?<?php echo $urlvars; ?>">Crawl Stats</a></li><?php } ?>
 					</ul>

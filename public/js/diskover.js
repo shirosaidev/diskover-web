@@ -111,7 +111,6 @@ $(document).ready(function () {
                             // set width and position of search results div to match search input
                             var w = $('#searchnavbox').width();
                             var p = $('#searchnavbox').position();
-                            console.log(p)
                             $("#essearchreply-nav").css({left: p.left, position:'absolute'});
                             $('#essearchreply-nav').width(w);
                             $('#essearchreply-nav').show();
