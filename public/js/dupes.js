@@ -406,7 +406,7 @@ function renderDupesCharts(data) {
             if (d.md5) {
                 window.open('advanced.php?&submitted=true&p=1&dupe_md5=' + d.md5 + '&doctype=file','_blank');
             } else {
-                document.location.href = "dupes.php?index=" + index + "&index2=" + index2 + "&path=" + d.name + "&filter=" + filter + "&mtime=" + mtime;
+                document.location.href = "dupes.php?index=" + index + "&index2=" + index2 + "&path=" + d.name + "&filter=" + filter + "&mtime=" + mtime + "&mindupes=" + mindupes;
             }
         })
         .on("mouseover", function(d) {
