@@ -11,6 +11,8 @@
 - copy text buttons to view file info page for copying paths to clipboard
 - better error alerts for hardlinks and dupes analytics pages when timeout (too many results)
 - improved hardlinks and dupes analytics pages
+- improved task progress for directory task buttons (when diskover socket server listening and client enabled in config)
+- tasks for rootdir path (when diskover socket server listening and client enabled in config)
 ### changed
 - cookies for search result sorting are reset to defaults when switching indices (sort1 path_parent asc, sort2 filename asc)
 - dashboard space savings files/dirs/dupes now has formated number counts with commas
@@ -35,6 +37,7 @@
 - extension pie chart labels getting cut off when extension name long
 - bug with wildcards in filename and parent path fields using advanced search
 - missing hardlinks, dupes from clear cookies/cache button action on admin page
+- bug with filechange percent when size 0 on search results page
 
 # [1.5.0-rc9] - 2018-06-13
 ### notice

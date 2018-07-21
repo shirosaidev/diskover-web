@@ -82,6 +82,9 @@ function get_es_path($client, $index) {
     // set path to first path found
     $path = $results[0]['_source']['path'];
 
+    // set session var
+    $_SESSION['rootpath'] = $path;
+
     return $path;
 }
 

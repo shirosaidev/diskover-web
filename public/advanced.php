@@ -626,6 +626,7 @@ function setCookies() {
 </script>
 <div id="loading">
   <img id="loading-image" width="32" height="32" src="images/ajax-loader.gif" alt="Updating..." />
+  <div id="loading-text"></div>
 </div>
 <iframe name="hiddeniframe" width=0 height=0 style="display:none;"></iframe>
 </body>

@@ -213,11 +213,24 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             <?php if ($socketlistening) {
             if ($result['_type'] == 'directory') { ?>
             <div class="dropdown pathdropdown" style="display:inline-block;">
-                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs run-btn file-cmd-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-tasks"></i>
+                <?php if ($file['path_parent'] . '/' . $file['filename'] !== $_SESSION['rootpath']) { ?>
+                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs run-btn file-cmd-btns" type="button" data-toggle="dropdown">
+                <?php } else { ?>
+                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs run-btn file-cmd-btn-root" type="button" data-toggle="dropdown">
+                <?php } ?>
+                <i class="glyphicon glyphicon-tasks"></i>
                     <span class="caret"></span></button>
                     <ul class="dropdown-menu">
+                        <?php if ($file['path_parent'] . '/' . $file['filename'] !== $_SESSION['rootpath']) { ?>
                         <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"adaptivebatch\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (non-recursive)</a></li>
                         <li class="small"><?php $cmd = "{\"action\": \"reindex\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"recursive\": \"true\", \"adaptivebatch\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> reindex directory (recursive)</a></li>
+                        <?php } else { ?>
+                        <li class="small"><?php $cmd = "{\"action\": \"crawl\", \"path\": \"".$fullpath."\", \"index\": \"".$esIndex."\", \"adaptivebatch\": \"true\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-repeat"></i> re-crawl rootpath (OVERWRITE INDEX)</a></li>
+                        <li class="small"><?php $cmd = "{\"action\": \"finddupes\", \"index\": \"".$esIndex."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-duplicate"></i> find dupes</a></li>
+                        <?php if (isset($esIndex2)) { ?>
+                        <li class="small"><?php $cmd = "{\"action\": \"hotdirs\", \"index\": \"".$esIndex."\", \"index2\": \"".$esIndex2."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-fire"></i> find hotdirs</a></li>
+                        <?php } ?>
+                        <?php } ?>
                 </ul>
             </div>
             <!-- end socket command dropdown -->
@@ -312,7 +325,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <td class="text-nowrap highlight"><?php echo formatBytes($file['filesize']); ?></td>
         <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <!-- show comparison file size -->
-        <?php if ($show_change_percent) { ?>
+        <?php if ($show_change_percent) { $filesize_change = 0; ?>
           <td class="text-nowrap highlight">
           <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
           if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
@@ -461,10 +474,10 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
   </div>
 </div>
 <div class="alert alert-dismissible alert-danger" id="errormsg-container" style="display:none; width:500px; position: fixed; left: 50px; bottom: 20px; z-index:2">
-            <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
+    <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
-  <div id="progressbar-container" class="progress progress-striped active" style="display:none; width:500px; position: fixed; left: 50px; bottom: 20px; z-index:2">
-    <div id="progressbar" class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; color:white; font-weight:bold;">
+  <div id="progressbar-container" class="progress progress-striped active" style="display:none; width:99vw; height:99vh; position:absolute; z-index:2">
+    <div id="progressbar" class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; height: 20px; color:white; font-weight:bold;">
     </div>
   </div>
 <?php

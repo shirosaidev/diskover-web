@@ -321,15 +321,6 @@ $diskspace_available = $queryResponse['hits']['hits'][0]['_source']['available']
 $diskspace_used = $queryResponse['hits']['hits'][0]['_source']['used'];
 $diskspace_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
-// store disk space path into session var
-$_SESSION['rootpath'] = $diskspace_path;
-
-// update path cookie and path var
-if ($diskspace_path !== getCookie('path')) {
-    createCookie('path', $diskspace_path);
-    $path = $diskspace_path;
-}
-
 if ($esIndex2 != "") {
     // Get search results from Elasticsearch for disk space info from index2
     $results = [];
@@ -684,7 +675,7 @@ if ($s3_index) {
     </div>
         <div class="panel panel-info chartbox">
             <div class="panel-heading">
-                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a></small>
+                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Files</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $diskspace_path; ?>">Top 50</a></small>
             </div>
             <div class="panel-body">
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -741,7 +732,7 @@ if ($s3_index) {
         </div>
         <div class="panel panel-info chartbox">
             <div class="panel-heading">
-                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Directories</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $path; ?>">Top 50</a></small>
+                <h3 style="display: inline;" class="panel-title"><i class="glyphicon glyphicon-scale"></i> Top 10 Largest Directories</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="top50.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;path=<?php echo $diskspace_path; ?>">Top 50</a></small>
             </div>
             <div class="panel-body">
             <table class="table table-striped table-hover table-condensed" style="font-size:12px;">
@@ -771,7 +762,7 @@ if ($s3_index) {
                       'query' => [
                         'bool' => [
                             'must' => [
-                                    'wildcard' => [ 'path_parent' => $path . '*' ]
+                                    'wildcard' => [ 'path_parent' => $diskspace_path . '*' ]
                             ],
                             'must_not' => [
                                     'match' => [ 'path_parent' => "/" ],

@@ -234,13 +234,11 @@ function listenSocketServer() {
             if (data.msg == 'error') {  // check if we received err msg
                 console.log("got error msg, closing event source and displaying error")
         		// hide progress
-        		document.getElementById('progress-container').style.display = 'none';
+        		//document.getElementById('progressbar-container').style.display = 'none';
         		// display error
                 $("#errormsg-container").fadeIn();
-                $("#errormsg").fadeIn();
         		document.getElementById('errormsg').innerHTML = '<i class="glyphicon glyphicon-exclamation-sign"></i> Error, check command';
                 setTimeout(function(){
-                    $("#errormsg").fadeOut();
                     $("#errormsg-container").fadeOut();
                     // enable run buttons
                     $('.run-btn').removeClass("disabled");
@@ -249,30 +247,30 @@ function listenSocketServer() {
                 console.log("got taskstart msg, storing taskid in cookie " + data.taskid)
                 setCookie('running_task_id', data.taskid);
                 // show progress bar
-                $("#progressbar-container").fadeIn();
+                //$("#progressbar-container").fadeIn();
                 // update progressbar
-                document.getElementById('progressbar').innerHTML = 'Running taskid ' + data.taskid + '...';
-                setTimeout(function(){
+                document.getElementById('loading').style.display='block';
+                document.getElementById('loading-text').innerHTML = 'Running taskid ' + data.taskid + '...';
+                /*setTimeout(function(){
                     $("#progressbar-container").fadeOut();
                     // enable run buttons
                     $('.run-btn').removeClass("disabled");
-                }, 3000);
+                }, 3000);*/
         	}
         } else if (this.readyState==4 && this.status==200) {
             var lines = this.responseText.trim().split('\n');
             var lastline = lines[lines.length-1]
             //console.log(lastline)
             var data = JSON.parse(lastline);
-        	console.log(data);
             if (data.msg == 'taskfinish') {  // check if we received taskfinish msg
                 console.log("got taskfinish msg, showing progress bar and reloading page")
                 // show progress bar
-                $("#progressbar-container").fadeIn();
-        		document.getElementById('progressbar').innerHTML = 'Finished (exitcode:  '+data.exitcode+', elapsedtime: '+data.elapsedtime+')';
+                //$("#progressbar-container").fadeIn();
+        		document.getElementById('loading-text').innerHTML = 'Finished (exitcode:  '+data.exitcode+', elapsedtime: '+data.elapsedtime+')';
                 setTimeout(function(){
-                    $("#progressbar-container").fadeOut();
+                    //$("#progressbar-container").fadeOut();
                     // enable run buttons
-                    $('.run-btn').removeClass("disabled");
+                    //$('.run-btn').removeClass("disabled");
                     location.reload(true);
                 }, 3000);
             }
@@ -295,6 +293,7 @@ function runCommand(command) {
     console.log("sending command to socket server")
     console.log(command)
     xhr.open("GET", "sockethandler.php?command="+command, true);
+    xhr.timeout = 0;
     xhr.send();
 }
 
