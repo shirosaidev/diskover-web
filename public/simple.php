@@ -221,25 +221,28 @@ if (isset($_REQUEST['submitted'])) {
                 return false;
             }
             var results;
-            $.ajax({
-                type:'GET',
-                url:'searchkeypress.php',
-                data: $('#simplesearch').serialize(),
-                success: function(data) {
-                		if (data != "") {
-                            // set width and position of search results div to match search input
-                            var w = $('#search').width();
-                            var p = $('#search').position();
-                            $("#essearchreply").css({left: p.left, position:'absolute'});
-                            $('#essearchreply').width(w+30);
-                			$('#essearchreply').show();
-                            $('#essearchreply-text').html(data);
-                		} else {
-                            $('#essearchreply-text').html("");
-                            $('#essearchreply').hide();
-                		}
-                    }
-            });
+            // delay for 500 ms before searching ES for user input
+            setTimeout(function() {
+                $.ajax({
+                    type:'GET',
+                    url:'searchkeypress.php',
+                    data: $('#simplesearch').serialize(),
+                    success: function(data) {
+                    		if (data != "") {
+                                // set width and position of search results div to match search input
+                                var w = $('#search').width();
+                                var p = $('#search').position();
+                                $("#essearchreply").css({left: p.left, position:'absolute'});
+                                $('#essearchreply').width(w+30);
+                    			$('#essearchreply').show();
+                                $('#essearchreply-text').html(data);
+                    		} else {
+                                $('#essearchreply-text').html("");
+                                $('#essearchreply').hide();
+                    		}
+                        }
+                });
+            }, 500);
             return false;
     	});
 
