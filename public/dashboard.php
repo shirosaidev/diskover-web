@@ -584,7 +584,7 @@ if ($s3_index) {
       <?php
       if ($totalDupes > 0 && $s3_index != '1') {
       ?>
-      <div class="alert alert-dismissible alert-warning">
+      <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><i class="glyphicon glyphicon-duplicate"></i> Duplicate files!</h4>
         <p>It looks like you have <a href="simple.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;q=dupe_md5:(NOT &quot;&quot;)&amp;doctype=file" class="alert-link">duplicate files</a>, tag the copies for deletion to save space.</p>
