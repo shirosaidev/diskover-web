@@ -62,7 +62,7 @@ function getESJsonData() {
          // display error if data has error message
          if ((data && data.error) || error || data === null) {
              spinner.stop();
-             console.warn("nothing found in Elasticsearch: " + error);
+             console.warn("No Elasticsearch results or timeout: " + error);
              document.getElementById('error').style.display = 'block';
              return false;
          }

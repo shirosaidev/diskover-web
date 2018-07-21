@@ -34,7 +34,7 @@ require "d3_inc.php";
 			<div class="row">
 				<div class="alert alert-dismissible alert-info col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found.</strong> Run diskover using --finddupes to search for duplicate files or trying changing path, filters or min dupes.
+					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found or timeout (too many results).</strong> Run diskover using --finddupes to search for duplicate files, or try searching for a directory lower down the tree and clicking it's dupes analytics button, or changing filters or min dupes.
 				</div>
 			</div>
 		</div>
