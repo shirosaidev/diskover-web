@@ -42,7 +42,7 @@ require "d3_inc.php";
             <div id="dupescharts-wrapper" style="display:none;">
                 <div class="row">
                     <div class="col-xs-12 text-center">
-                    	<h1>Dupes</h1>
+                    	<h2>Dupes</h2>
                     	<div class="row">
                     		<div class="col-xs-12 text-center">
                     			<form class="form-horizontal" id="changemindupes">

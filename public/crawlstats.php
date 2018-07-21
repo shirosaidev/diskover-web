@@ -186,7 +186,7 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
 		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
             <div class="row">
                 <div class="col-xs-12 text-center">
-                    <h1>Crawl Stats</h1>
+                    <h2>Crawl Stats</h2>
                 </div>
             </div>
             <div class="row">

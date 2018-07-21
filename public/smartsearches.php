@@ -127,7 +127,7 @@ foreach ($SmartSearchesQueries as $key => $value) {
 		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
             <div class="row">
                 <div class="col-xs-12 text-center">
-                    <h1>Smart Searches</h1>
+                    <h2>Smart Searches</h2>
                 </div>
             </div>
 			<div class="row">
