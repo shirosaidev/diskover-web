@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc11] - 2018-07-21
+### notice
+- version change only, no additional updates
+
 # [1.5.0-rc10] - 2018-07-21
 ### added
 - additional characters to escape_chars and escapeHTML functions
