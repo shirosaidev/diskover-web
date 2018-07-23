@@ -279,17 +279,26 @@ function listenSocketServer() {
 }
 
 // send command to diskover socket server
-function runCommand(command) {
+function runCommand() {
+    var command = document.getElementById('command').value;
+    if (!command) {
+        alert("no command entered")
+        return false;
+    }
+    try {
+        command = JSON.parse(command);
+    }
+    catch(err) {
+        console.log(err.message);
+        alert("json error, check command string");
+        return false;
+    }
     var socketlistening = document.getElementById('socketlistening').value;
     if (socketlistening == 0) {
         alert("diskover socket server not listening")
         return false;
     }
-    if (!command) {
-		alert("no command")
-		return false;
-	}
-    var command = JSON.stringify(command);
+    command = JSON.stringify(command);
     console.log("sending command to socket server")
     console.log(command)
     xhr.open("GET", "sockethandler.php?command="+command, true);

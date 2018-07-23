@@ -1,5 +1,15 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc12] - 2018-07-23
+### added
+- hardlinks count/size to dashboard page
+- new analytics page "Time Change" showing file/directory count and size changes over past year based on last_modified time
+### changed
+- removed chart auto refresh options of 2s, 1s and changed to on (3 sec) or off (dashboard/crawl stats pages)
+### fixed
+- progress indication when sending command to socket server on admin page
+- better handling of errors when running commands on admin page
+
 # [1.5.0-rc11] - 2018-07-21
 ### notice
 - version change only, no additional updates

@@ -296,6 +296,41 @@ $queryResponse = $client->search($searchParams);
 // Get total count of directories
 $totaldirs = $queryResponse['hits']['total'];
 
+// Get search results from Elasticsearch for hardlink files
+$results = [];
+$searchParams = [];
+$totalHardlinkFiles = 0;
+$totalFilesizeHardlinkFiles = 0;
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'file';
+
+
+// Setup search query for hardlink count
+$searchParams['body'] = [
+   'size' => 0,
+    'aggs' => [
+      'total_size' => [
+        'sum' => [
+          'field' => 'filesize'
+        ]
+      ]
+    ],
+    'query' => [
+      'query_string' => [
+        'query' => 'hardlinks:>1'
+      ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of hardlink files
+$totalHardlinkFiles = $queryResponse['hits']['total'];
+
+// Get total size of all hardlink files
+$totalFilesizeHardlinkFiles = $queryResponse['aggregations']['total_size']['value'];
+
 
 // Get search results from Elasticsearch for disk space info
 $results = [];
@@ -498,6 +533,14 @@ if ($s3_index) {
           word-break: break-all;
           word-wrap: break-word;
       }
+      .line {
+          fill: none;
+          stroke-width: 1px;
+      }
+      .tick line {
+          stroke: #ccc;
+          stroke-width: 1px;
+      }
   </style>
 </head>
 <body>
@@ -517,9 +560,9 @@ if ($s3_index) {
       <div class="jumbotron">
         <h1><i class="glyphicon glyphicon-hdd"></i> Space Savings</h1>
         <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files. 
-            <?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.<br /><span style="font-size:11px;color:#555;"><i class="glyphicon glyphicon-info-sign"></i> Does not account for hardlinks. Recommended files is based on >6M mtime &amp; atime.</span><?php } ?></p>
-        <p><span class="label label-default"><i class="glyphicon glyphicon-file" style="color:#738291;font-weight:bold;"></i> Files <?php echo number_format($totalfiles); ?></span> &nbsp;&nbsp; <span class="label label-default"><i class="glyphicon glyphicon-folder-close" style="color:skyblue;font-weight:bold;"></i> Directories <?php echo number_format($totaldirs); ?></span> &nbsp;&nbsp;
-            <?php if (!$s3_index) { ?><span class="label label-default"><i class="glyphicon glyphicon-duplicate" style="color:#738291;font-weight:bold;"></i> Dupes <?php echo number_format($totalDupes); ?> (<?php echo formatBytes($totalFilesizeDupes); ?>)</span><?php } ?></p>
+            <?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.<br /><span style="font-size:12px;color:#666;"><i class="glyphicon glyphicon-info-sign"></i> Does not account for hardlinks. Recommended files is based on >6M mtime &amp; atime.</span><?php } ?></p>
+        <p><span class="label label-default"><i class="glyphicon glyphicon-file" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Files</span> <?php echo number_format($totalfiles); ?></span> &nbsp;&nbsp; <span class="label label-default"><i class="glyphicon glyphicon-folder-close" style="color:skyblue;font-weight:bold;"></i> <span style="color:lightgray">Directories</span> <?php echo number_format($totaldirs); ?></span> &nbsp;&nbsp;
+            <?php if (!$s3_index) { ?><span class="label label-default"><i class="glyphicon glyphicon-duplicate" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Dupes</span> <?php echo number_format($totalDupes); ?> (<?php echo formatBytes($totalFilesizeDupes); ?>)</span> &nbsp;&nbsp; <span class="label label-default"><i class="glyphicon glyphicon-link" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Hardlink files</span> <?php echo number_format($totalHardlinkFiles); ?> (<?php echo formatBytes($totalFilesizeHardlinkFiles); ?>)</span><?php } ?></p>
       </div>
       <div class="panel panel-default chartbox">
         <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-dashboard"></i> Crawl Stats</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="crawlstats.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View more</a></small></div>
@@ -550,12 +593,12 @@ if ($s3_index) {
                     <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
                 <?php } ?>
             </ul>
-                <p><small><span style="color:#555"><i class="glyphicon glyphicon-info-sign"></i> Started at time is first crawl and finished at time is last crawl. Elapsed time is how long it took to crawl the tree and scrape meta. Total crawl time is the cumulative time for all worker bots.</span></small></p>
+                <p><small><span style="color:#666"><i class="glyphicon glyphicon-info-sign"></i> Started at time is first crawl and finished at time is last crawl. Elapsed time is how long it took to crawl the tree and scrape meta. Total crawl time is the cumulative time for all worker bots.</span></small></p>
           </div>
         </div>
       <div class="panel panel-success chartbox">
       <div class="panel-heading">
-          <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
+          <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_on" onclick="autorefresh(3000);">on</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
       </div>
       <div class="panel-body">
         <div id="workerchart" class="text-center" style="display: block; margin: auto;"></div>
@@ -804,442 +847,431 @@ if ($s3_index) {
 <script language="javascript" src="js/spin.min.js"></script>
 <script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
 <!-- d3 charts -->
-    <script>
-        var count_untagged = <?php echo $tagCounts['untagged'] ?>;
-        var count_delete = <?php echo $tagCounts['delete'] ?>;
-        var count_archive = <?php echo $tagCounts['archive'] ?>;
-        var count_keep = <?php echo $tagCounts['keep'] ?>;
+<script>
+    var count_untagged = <?php echo $tagCounts['untagged'] ?>;
+    var count_delete = <?php echo $tagCounts['delete'] ?>;
+    var count_archive = <?php echo $tagCounts['archive'] ?>;
+    var count_keep = <?php echo $tagCounts['keep'] ?>;
 
-        var dataset = [{
-            label: 'untagged',
-            count: count_untagged
-        }, {
-            label: 'delete',
-            count: count_delete
-        }, {
-            label: 'archive',
-            count: count_archive
-        }, {
-            label: 'keep',
-            count: count_keep
-        }];
+    var dataset = [{
+        label: 'untagged',
+        count: count_untagged
+    }, {
+        label: 'delete',
+        count: count_delete
+    }, {
+        label: 'archive',
+        count: count_archive
+    }, {
+        label: 'keep',
+        count: count_keep
+    }];
 
-        var width = 200;
-        var height = 200;
-        var radius = Math.min(width, height) / 2;
+    var width = 200;
+    var height = 200;
+    var radius = Math.min(width, height) / 2;
 
-        var color = d3.scale.ordinal()
-            .range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
-
-        var svg = d3.select("#tagcountchart")
-            .append('svg')
-            .attr('width', width)
-            .attr('height', height)
-            .append('g')
-            .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
-
-        var pie = d3.layout.pie()
-            .value(function(d) {
-                return d.count;
-            })
-            .sort(null);
-
-        var path = d3.svg.arc()
-            .outerRadius(radius - 10)
-            .innerRadius(40);
-
-        var label = d3.svg.arc()
-            .outerRadius(radius - 40)
-            .innerRadius(radius - 40);
-
-        var arc = svg.selectAll('.arc')
-            .data(pie(dataset))
-            .enter().append('g')
-            .attr('class', 'arc');
-
-        arc.append('path')
-            .attr('d', path)
-            .attr('fill', function(d) {
-                return color(d.data.label);
-            });
-
-        arc.append('text')
-            .attr("transform", function(d) {
-                return "translate(" + label.centroid(d) + ")";
-            })
-            .attr("dy", "0.35em")
-            .text(function(d) {
-                return d.data.label;
-            });
-    </script>
-
-    <script>
-        var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
-        var size_delete = <?php echo $totalFilesize['delete'] ?>;
-        var size_archive = <?php echo $totalFilesize['archive'] ?>;
-        var size_keep = <?php echo $totalFilesize['keep'] ?>;
-
-        var dataset = [{
-            label: 'untagged',
-            size: size_untagged
-        }, {
-            label: 'delete',
-            size: size_delete
-        }, {
-            label: 'archive',
-            size: size_archive
-        }, {
-            label: 'keep',
-            size: size_keep
-        }];
-
-        var width = 200;
-        var height = 200;
-        var radius = Math.min(width, height) / 2;
-
-        var color = d3.scale.ordinal()
-            //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+    var color = d3.scale.ordinal()
         .range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
 
-        var svg = d3.select("#filesizechart")
-            .append('svg')
-            .attr('width', width)
-            .attr('height', height)
-            .append('g')
-            .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+    var svg = d3.select("#tagcountchart")
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .append('g')
+        .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-        var pie = d3.layout.pie()
-            .value(function(d) {
-                return d.size;
-            })
-            .sort(null);
+    var pie = d3.layout.pie()
+        .value(function(d) {
+            return d.count;
+        })
+        .sort(null);
 
-        var path = d3.svg.arc()
-            .outerRadius(radius - 10)
-            .innerRadius(40);
+    var path = d3.svg.arc()
+        .outerRadius(radius - 10)
+        .innerRadius(40);
 
-        var label = d3.svg.arc()
-            .outerRadius(radius - 40)
-            .innerRadius(radius - 40);
+    var label = d3.svg.arc()
+        .outerRadius(radius - 40)
+        .innerRadius(radius - 40);
 
-        var arc = svg.selectAll('.arc')
-            .data(pie(dataset))
-            .enter().append('g')
-            .attr('class', 'arc');
+    var arc = svg.selectAll('.arc')
+        .data(pie(dataset))
+        .enter().append('g')
+        .attr('class', 'arc');
 
-        arc.append('path')
-            .attr('d', path)
-            .attr('fill', function(d) {
-                return color(d.data.label);
-            });
+    arc.append('path')
+        .attr('d', path)
+        .attr('fill', function(d) {
+            return color(d.data.label);
+        });
 
-        arc.append('text')
-            .attr("transform", function(d) {
-                return "translate(" + label.centroid(d) + ")";
-            })
-            .attr("dy", "0.35em")
-            .text(function(d) {
-                return d.data.label;
-            });
-    </script>
-    <script>
-        var size_total = <?php echo $diskspace_total; ?>;
-        var size_used = <?php echo $diskspace_used; ?>;
-        var size_free = <?php echo $diskspace_free; ?>;
-        var size_available = <?php echo $diskspace_available; ?>;
+    arc.append('text')
+        .attr("transform", function(d) {
+            return "translate(" + label.centroid(d) + ")";
+        })
+        .attr("dy", "0.35em")
+        .text(function(d) {
+            return d.data.label;
+        });
+</script>
 
-        var height = 20,
-            maxBarWidth = 400;
+<script>
+    var size_untagged = <?php echo $totalFilesize['untagged'] ?>;
+    var size_delete = <?php echo $totalFilesize['delete'] ?>;
+    var size_archive = <?php echo $totalFilesize['archive'] ?>;
+    var size_keep = <?php echo $totalFilesize['keep'] ?>;
 
-        var svg = d3.select("#diskspacechart")
-            .append('svg')
-            .attr('width', maxBarWidth)
-            .attr('height', height)
-            .append('g');
+    var dataset = [{
+        label: 'untagged',
+        size: size_untagged
+    }, {
+        label: 'delete',
+        size: size_delete
+    }, {
+        label: 'archive',
+        size: size_archive
+    }, {
+        label: 'keep',
+        size: size_keep
+    }];
 
-        var bar = svg.selectAll('.bar')
-            .data([size_used])
-            .enter().append('g')
-            .attr('class', 'bar');
+    var width = 200;
+    var height = 200;
+    var radius = Math.min(width, height) / 2;
 
-        bar.append('rect')
-            .attr('height', height)
-            .attr('class', 'bar')
-            .attr('width', function(d) {
-                percent = parseInt(d / size_total * 100) + "%";
-                return percent;
-            });
+    var color = d3.scale.ordinal()
+        //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+    .range(["#666666", "#F69327", "#65C165", "#52A3BB"]);
 
-        var label = svg.selectAll(".label")
-            .data([size_used])
-            .enter()
-            .append('text')
-            .attr('transform', 'translate(' + maxBarWidth / 2 + ',0)')
-            .attr("dy", "1.35em")
-            .attr('class', 'label')
-            .attr('text-anchor', 'middle')
-            .text(function(d) {
-                percent = d3.round(d / size_total * 100, 2) + "%";
-                return percent + ' used';
-            });
+    var svg = d3.select("#filesizechart")
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .append('g')
+        .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-    </script>
-    <script>
-        var size_used = <?php echo $diskspace_used; ?>;
-        var size_indexed = <?php echo $totalFilesizeAll; ?>;
+    var pie = d3.layout.pie()
+        .value(function(d) {
+            return d.size;
+        })
+        .sort(null);
 
-        var height = 16,
-            maxBarWidth = 400;
+    var path = d3.svg.arc()
+        .outerRadius(radius - 10)
+        .innerRadius(40);
 
-        var svg = d3.select("#diskspacechart-indexed")
-            .append('svg')
-            .attr('width', maxBarWidth)
-            .attr('height', height)
-            .append('g');
+    var label = d3.svg.arc()
+        .outerRadius(radius - 40)
+        .innerRadius(radius - 40);
 
-        var bar = svg.selectAll('.bar')
-            .data([size_indexed])
-            .enter().append('g')
-            .attr('class', 'bar');
+    var arc = svg.selectAll('.arc')
+        .data(pie(dataset))
+        .enter().append('g')
+        .attr('class', 'arc');
 
-        bar.append('rect')
-            .attr('height', height)
-            .attr('class', 'bar')
-            .attr('width', function(d) {
-                percent = parseInt(d / size_used * 100);
-                if (percent > 100) {
-                    percent = 100;
-                }
-                return percent + "%";
-            });
+    arc.append('path')
+        .attr('d', path)
+        .attr('fill', function(d) {
+            return color(d.data.label);
+        });
 
-        var label = svg.selectAll(".label")
-            .data([size_indexed])
-            .enter()
-            .append('text')
-            .attr('transform', 'translate(' + maxBarWidth / 2 + ',0)')
-            .attr("dy", "1.3em")
-            .attr('class', 'label')
-            .attr('text-anchor', 'middle')
-            .text(function(d) {
-                percent = d3.round(d / size_used * 100, 2);
-                if (percent > 100) {
-                    percent = 100;
-                }
-                return percent + '% indexed';
-            });
+    arc.append('text')
+        .attr("transform", function(d) {
+            return "translate(" + label.centroid(d) + ")";
+        })
+        .attr("dy", "0.35em")
+        .text(function(d) {
+            return d.data.label;
+        });
+</script>
+<script>
+    var size_total = <?php echo $diskspace_total; ?>;
+    var size_used = <?php echo $diskspace_used; ?>;
+    var size_free = <?php echo $diskspace_free; ?>;
+    var size_available = <?php echo $diskspace_available; ?>;
 
-    </script>
+    var height = 20,
+        maxBarWidth = 400;
 
-    <script>
-        var data;
-        var indexname = '<?php echo $esIndex; ?>';
+    var svg = d3.select("#diskspacechart")
+        .append('svg')
+        .attr('width', maxBarWidth)
+        .attr('height', height)
+        .append('g');
 
-        // init worker chart
-        var margin = {top: 20, right: 20, bottom: 120, left: 70},
-        width = 700 - margin.left - margin.right,
-        height = 350 - margin.top - margin.bottom;
+    var bar = svg.selectAll('.bar')
+        .data([size_used])
+        .enter().append('g')
+        .attr('class', 'bar');
 
-        var svg = d3.select("#workerchart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform",
-                  "translate(" + margin.left + "," + margin.top + ")");
+    bar.append('rect')
+        .attr('height', height)
+        .attr('class', 'bar')
+        .attr('width', function(d) {
+            percent = parseInt(d / size_total * 100) + "%";
+            return percent;
+        });
 
-        function getjsondata(refreshcharts) {
-            // config references
-            var chartConfig = {
-                target: 'workerchart',
-                data_url: 'd3_data_workers.php?index=' + indexname
-            };
+    var label = svg.selectAll(".label")
+        .data([size_used])
+        .enter()
+        .append('text')
+        .attr('transform', 'translate(' + maxBarWidth / 2 + ',0)')
+        .attr("dy", "1.35em")
+        .attr('class', 'label')
+        .attr('text-anchor', 'middle')
+        .text(function(d) {
+            percent = d3.round(d / size_total * 100, 2) + "%";
+            return percent + ' used';
+        });
 
-            // loader settings
-            var opts = {
-                lines: 12, // The number of lines to draw
-                length: 5, // The length of each line
-                width: 3, // The line thickness
-                radius: 6, // The radius of the inner circle
-                color: '#EE3124', // #rgb or #rrggbb or array of colors
-                speed: 1.9, // Rounds per second
-                trail: 40, // Afterglow percentage
-                className: 'spinner', // The CSS class to assign to the spinner
-            };
+</script>
+<script>
+    var size_used = <?php echo $diskspace_used; ?>;
+    var size_indexed = <?php echo $totalFilesizeAll; ?>;
 
-            // loader settings
-            var target = document.getElementById(chartConfig.target);
-            if (refreshcharts === false) {
-                // trigger loader
-                var spinner = new Spinner(opts).spin(target);
+    var height = 16,
+        maxBarWidth = 400;
+
+    var svg = d3.select("#diskspacechart-indexed")
+        .append('svg')
+        .attr('width', maxBarWidth)
+        .attr('height', height)
+        .append('g');
+
+    var bar = svg.selectAll('.bar')
+        .data([size_indexed])
+        .enter().append('g')
+        .attr('class', 'bar');
+
+    bar.append('rect')
+        .attr('height', height)
+        .attr('class', 'bar')
+        .attr('width', function(d) {
+            percent = parseInt(d / size_used * 100);
+            if (percent > 100) {
+                percent = 100;
             }
+            return percent + "%";
+        });
 
-            // load json data from Elasticsearch
-            d3.json(chartConfig.data_url, function(error, dataset) {
-
-                // update global data vars
-                data = dataset;
-
-                if (refreshcharts === false) {
-                    // stop spin.js loader
-                    spinner.stop();
-                } else {
-                    svg.selectAll("*").remove();
-                }
-                // load chart
-                loadworkerchart()
-            });
-        }
-
-        function loadworkerchart() {
-
-            var xData = ['file', 'directory'];
-
-            var x = d3.scale.ordinal()
-                .rangeRoundBands([0, width], .35);
-
-            var y = d3.scale.linear()
-                .rangeRound([height, 0]);
-
-            var color = d3.scale.category20b();
-
-            var xAxis = d3.svg.axis()
-                .scale(x)
-                .orient("bottom");
-
-            var yAxis = d3.svg.axis()
-                .scale(y)
-                .orient("left")
-                .ticks(10);
-
-            var dataIntermediate=xData.map(function (c){
-                return data.map(function(d) {
-                    return {x: d.worker_name, y: d[c]};
-                });
-            });
-
-            var dataStackLayout = d3.layout.stack()(dataIntermediate);
-
-            x.domain(dataStackLayout[0].map(function(d) {
-                return d.x;
-            }));
-
-            y.domain([0,
-                d3.max(dataStackLayout[dataStackLayout.length - 1],
-                    function (d) { return d.y0 + d.y;})
-                ])
-                .nice();
-
-            var layer = svg.selectAll(".stack")
-                .data(dataStackLayout)
-                .enter().append("g")
-                .attr("class", "stack")
-                .style("fill", function (d, i) {
-                    return color(i);
-                });
-
-            layer.selectAll("rect")
-                .data(function (d) {
-                    return d;
-                })
-                .enter().append("rect")
-                .attr("x", function (d) {
-                    return x(d.x);
-                })
-                .attr("y", function (d) {
-                    return y(d.y + d.y0);
-                })
-                .attr("height", function (d) {
-                    return y(d.y0) - y(d.y + d.y0);
-                })
-                .attr("width", x.rangeBand())
-                .on("mouseover", function(d) {
-                    tip.show(d);
-                })
-                .on("mouseout", function(d) {
-                    tip.hide(d);
-                })
-                .on('mousemove', function() {
-                    return tip
-                      .style("top", (d3.event.pageY - 10) + "px")
-                      .style("left", (d3.event.pageX + 10) + "px");
-                });
-
-            svg.append("g")
-                .attr("class", "axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(xAxis)
-                .selectAll("text")
-                  .attr("transform", "rotate(-90)")
-                    .attr("y", 0)
-                    .attr("x", 0)
-                    .attr("dx", "-.8em")
-                    .attr("dy", ".15em")
-                    .style("text-anchor", "end");
-
-            svg.append("g")
-                .attr("class", "axis")
-                .attr("transform", "translate(0,0)")
-                .call(yAxis)
-                .append("text")
-                  .attr("transform", "rotate(-90)")
-                  .attr("y", 0)
-                  .attr("x", 0)
-                  .attr("dy", ".71em")
-                  .style("text-anchor", "end")
-                  .text("Queue items");
-
-            // tooltips
-            var tip = d3.tip()
-                .attr('class', 'd3-tip')
-                .html(function(d) {
-                  var t = (d.y0===0) ? "files" : "dirs"
-                    return "<span style='font-size:12px;color:white;'>" + d.x + "</span><br>\
-                    <span style='font-size:12px; color:red;'>"+t+": " + d.y + "</span><br>";
-                });
-
-            svg.call(tip);
-
-            d3.select("#workerchart").append("div")
-                .attr("class", "tooltip")
-                .style("opacity", 0);
-        }
-
-        var crawlfinished = '<?php echo $crawlfinished ? "true" : "false"; ?>';
-        var worker_refreshtime = 2000;
-        // get json data for workers chart and load vis
-        getjsondata(false);
-        // auto refresh the workers chart
-        var auto_refresh;
-        if (crawlfinished === 'false') {
-            autorefresh(worker_refreshtime)
-        } else {  // crewl is finished so disable interval
-            worker_refreshtime = 0;
-            autorefresh(worker_refreshtime)
-        }
-        function autorefresh(n) {
-            worker_refreshtime = n
-            if (worker_refreshtime == 0) {
-                clearInterval(auto_refresh);
-                $('#autorefresh_off').attr('style', 'color: #000 !important');
-                $('#autorefresh_2s').attr('style', 'color: #FFF !important');
-                $('#autorefresh_1s').attr('style', 'color: #FFF !important');
-            } else {
-                auto_refresh = setInterval(
-                    function () {
-                        // reload data for workers chart
-                        getjsondata(true);
-                    }, worker_refreshtime); // refresh every n ms
-                    if (worker_refreshtime == 1000) {
-                        $('#autorefresh_1s').attr('style', 'color: #000 !important');
-                        $('#autorefresh_2s').attr('style', 'color: #FFF !important');
-                        $('#autorefresh_off').attr('style', 'color: #FFF !important');
-                    } else if (worker_refreshtime == 2000) {
-                        $('#autorefresh_2s').attr('style', 'color: #000 !important');
-                        $('#autorefresh_1s').attr('style', 'color: #FFF !important');
-                        $('#autorefresh_off').attr('style', 'color: #FFF !important');
-                    }
+    var label = svg.selectAll(".label")
+        .data([size_indexed])
+        .enter()
+        .append('text')
+        .attr('transform', 'translate(' + maxBarWidth / 2 + ',0)')
+        .attr("dy", "1.3em")
+        .attr('class', 'label')
+        .attr('text-anchor', 'middle')
+        .text(function(d) {
+            percent = d3.round(d / size_used * 100, 2);
+            if (percent > 100) {
+                percent = 100;
             }
+            return percent + '% indexed';
+        });
+
+</script>
+
+<script>
+    var data;
+    var indexname = '<?php echo $esIndex; ?>';
+
+    // init worker chart
+    var margin = {top: 20, right: 20, bottom: 120, left: 70},
+    width = 700 - margin.left - margin.right,
+    height = 350 - margin.top - margin.bottom;
+
+    var svg = d3.select("#workerchart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+    function getjsondata(refreshcharts) {
+        // config references
+        var chartConfig = {
+            target: 'workerchart',
+            data_url: 'd3_data_workers.php?index=' + indexname
         };
-    </script>
+
+        // loader settings
+        var opts = {
+            lines: 12, // The number of lines to draw
+            length: 5, // The length of each line
+            width: 3, // The line thickness
+            radius: 6, // The radius of the inner circle
+            color: '#EE3124', // #rgb or #rrggbb or array of colors
+            speed: 1.9, // Rounds per second
+            trail: 40, // Afterglow percentage
+            className: 'spinner', // The CSS class to assign to the spinner
+        };
+
+        // loader settings
+        var target = document.getElementById(chartConfig.target);
+        if (refreshcharts === false) {
+            // trigger loader
+            var spinner = new Spinner(opts).spin(target);
+        }
+
+        // load json data from Elasticsearch
+        d3.json(chartConfig.data_url, function(error, dataset) {
+
+            // update global data vars
+            data = dataset;
+
+            if (refreshcharts === false) {
+                // stop spin.js loader
+                spinner.stop();
+            } else {
+                svg.selectAll("*").remove();
+            }
+            // load chart
+            loadworkerchart()
+        });
+    }
+
+    function loadworkerchart() {
+
+        var xData = ['file', 'directory'];
+
+        var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .35);
+
+        var y = d3.scale.linear()
+            .rangeRound([height, 0]);
+
+        var color = d3.scale.category20b();
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .ticks(10);
+
+        var dataIntermediate=xData.map(function (c){
+            return data.map(function(d) {
+                return {x: d.worker_name, y: d[c]};
+            });
+        });
+
+        var dataStackLayout = d3.layout.stack()(dataIntermediate);
+
+        x.domain(dataStackLayout[0].map(function(d) {
+            return d.x;
+        }));
+
+        y.domain([0,
+            d3.max(dataStackLayout[dataStackLayout.length - 1],
+                function (d) { return d.y0 + d.y;})
+            ])
+            .nice();
+
+        var layer = svg.selectAll(".stack")
+            .data(dataStackLayout)
+            .enter().append("g")
+            .attr("class", "stack")
+            .style("fill", function (d, i) {
+                return color(i);
+            });
+
+        layer.selectAll("rect")
+            .data(function (d) {
+                return d;
+            })
+            .enter().append("rect")
+            .attr("x", function (d) {
+                return x(d.x);
+            })
+            .attr("y", function (d) {
+                return y(d.y + d.y0);
+            })
+            .attr("height", function (d) {
+                return y(d.y0) - y(d.y + d.y0);
+            })
+            .attr("width", x.rangeBand())
+            .on("mouseover", function(d) {
+                tip.show(d);
+            })
+            .on("mouseout", function(d) {
+                tip.hide(d);
+            })
+            .on('mousemove', function() {
+                return tip
+                  .style("top", (d3.event.pageY - 10) + "px")
+                  .style("left", (d3.event.pageX + 10) + "px");
+            });
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+              .attr("transform", "rotate(-90)")
+                .attr("y", 0)
+                .attr("x", 0)
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .style("text-anchor", "end");
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0,0)")
+            .call(yAxis)
+            .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 0)
+              .attr("x", 0)
+              .attr("dy", ".71em")
+              .style("text-anchor", "end")
+              .text("Queue items");
+
+        // tooltips
+        var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .html(function(d) {
+              var t = (d.y0===0) ? "files" : "dirs"
+                return "<span style='font-size:12px;color:white;'>" + d.x + "</span><br>\
+                <span style='font-size:12px; color:red;'>"+t+": " + d.y + "</span><br>";
+            });
+
+        svg.call(tip);
+
+        d3.select("#workerchart").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+    }
+
+    var crawlfinished = '<?php echo $crawlfinished ? "true" : "false"; ?>';
+    // get json data for workers chart and load vis
+    getjsondata(false);
+    // auto refresh the workers chart
+    var auto_refresh;
+    if (crawlfinished === 'false') {
+        autorefresh(3000);
+    } else {  // crewl is finished so disable interval
+        autorefresh(0);
+    }
+    function autorefresh(worker_refreshtime) {
+        if (worker_refreshtime == 0) {
+            clearInterval(auto_refresh);
+            $('#autorefresh_off').attr('style', 'color: #000 !important');
+            $('#autorefresh_on').attr('style', 'color: #FFF !important');
+        } else {
+            auto_refresh = setInterval(
+                function () {
+                    // reload data for workers chart
+                    getjsondata(true);
+                }, worker_refreshtime); // refresh every 3 sec
+                $('#autorefresh_on').attr('style', 'color: #000 !important');
+                $('#autorefresh_off').attr('style', 'color: #FFF !important');
+        }
+    };
+</script>
 </body>
 </html>

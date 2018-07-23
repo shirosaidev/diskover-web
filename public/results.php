@@ -67,8 +67,8 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                     <i title="socket server not listening or client not enabled" class="glyphicon glyphicon-off text-warning"></i>
                 <?php } ?></span>
                     <div class="btn-group" style="display:inline-block;">
-                      <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                        <i title="export" class="glyphicon glyphicon-export"></i>
+                      <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="export search results">
+                        <i class="glyphicon glyphicon-export"></i>
                         <span class="caret"></span>
                       </a>
                       <ul class="dropdown-menu">
@@ -312,7 +312,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                           </ul>
                   </div>
                   <div class="dropdown" style="display:inline-block;">
-                      <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-filter"></i>
+                      <button title="filter" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-filter"></i>
                           <span class="caret"></span></button>
                           <ul class="dropdown-menu">
                               <li class="small"><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
@@ -473,13 +473,9 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
 	</div>
   </div>
 </div>
-<div class="alert alert-dismissible alert-danger" id="errormsg-container" style="display:none; width:500px; position: fixed; left: 50px; bottom: 20px; z-index:2">
+<div class="alert alert-dismissible alert-danger" id="errormsg-container">
     <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
-  <div id="progressbar-container" class="progress progress-striped active" style="display:none; width:99vw; height:99vh; position:absolute; z-index:2">
-    <div id="progressbar" class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; height: 20px; color:white; font-weight:bold;">
-    </div>
-  </div>
 <?php
 } // END if there are search results
 else {

@@ -263,6 +263,14 @@ tbody a:hover {
   font-weight: bold;
 }
 
+#errormsg-container {
+    display: none;
+    position: fixed;
+    width: 500px;
+    left: 50px;
+    bottom: 20px;
+    z-index: 2;
+}
 
 .dropdown-submenu {
     position: relative;

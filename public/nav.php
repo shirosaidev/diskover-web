@@ -145,6 +145,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <li><a href="tags.php?<?php echo $urlvars; ?>">Tags</a></li>
                         <li><a href="smartsearches.php?<?php echo $urlvars; ?>">Smart Searches</a></li>
                         <?php if (!$s3_index) { ?><li><a href="crawlstats.php?<?php echo $urlvars; ?>">Crawl Stats</a></li><?php } ?>
+                        <li><a href="timechange.php?<?php echo $urlvars; ?>">Time Change</a></li>
 					</ul>
 				</li>
 			</ul>

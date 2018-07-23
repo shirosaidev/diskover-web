@@ -191,7 +191,7 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
             </div>
             <div class="row">
                 <div class="col-xs-12 text-right">
-                    <span style="margin-right:30px;"><small><i class="glyphicon glyphicon-repeat"></i> Auto refresh <a href="#_self" id="autorefresh_2s" onclick="autorefresh(2000);">2s</a> <a id="autorefresh_1s" href="#_self" onclick="autorefresh(1000);">1s</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
+                    <span style="margin-right:30px;"><small><i class="glyphicon glyphicon-repeat"></i> Auto refresh <a href="#_self" id="autorefresh_on" onclick="autorefresh(3000);">on</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
                 </div>
             </div>
 			<div class="row">
@@ -676,43 +676,29 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
 
         // auto refresh crawl stats charts
         var crawlfinished = '<?php echo $crawlfinished ? "true" : "false"; ?>';
-        var refreshtime = 2000;
-
         // load d3 data
         getjsondata(false);
-
         // auto refresh
         var auto_refresh;
         if (crawlfinished === 'false') {
-            autorefresh(refreshtime)
+            autorefresh(3000);
         } else {  // crewl is finished so disable interval
-            refreshtime = 0;
-            autorefresh(refreshtime)
+            autorefresh(0);
         }
-
-        function autorefresh(n) {
-            refreshtime = n
-            if (refreshtime == 0) {
+        function autorefresh(worker_refreshtime) {
+            if (worker_refreshtime == 0) {
                 clearInterval(auto_refresh);
                 $('#autorefresh_off').attr('style', 'color: #33A0D4 !important');
-                $('#autorefresh_2s').attr('style', 'color: #FFF !important');
-                $('#autorefresh_1s').attr('style', 'color: #FFF !important');
+                $('#autorefresh_on').attr('style', 'color: #FFF !important');
             } else {
                 auto_refresh = setInterval(
                     function () {
                         //d3.selectAll(".d3-tip").remove();
                         // fetch new d3 data
                         getjsondata(true);
-                    }, refreshtime); // refresh every n ms
-                    if (refreshtime == 1000) {
-                        $('#autorefresh_1s').attr('style', 'color: #33A0D4 !important');
-                        $('#autorefresh_2s').attr('style', 'color: #FFF !important');
-                        $('#autorefresh_off').attr('style', 'color: #FFF !important');
-                    } else if (refreshtime == 2000) {
-                        $('#autorefresh_2s').attr('style', 'color: #33A0D4 !important');
-                        $('#autorefresh_1s').attr('style', 'color: #FFF !important');
-                        $('#autorefresh_off').attr('style', 'color: #FFF !important');
-                    }
+                    }, worker_refreshtime); // refresh every 3 sec
+                    $('#autorefresh_on').attr('style', 'color: #33A0D4 !important');
+                    $('#autorefresh_off').attr('style', 'color: #FFF !important');
             }
         };
         </script>

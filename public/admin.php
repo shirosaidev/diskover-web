@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -266,20 +266,11 @@ if ($result == "pong") {
 
 <h4>Run diskover socket command</h4>
 <fieldset>
-    <!--<div class="form-group">
-        <select class="form-control" id="commandset" name="commandset" style="width:200px; display: inline;">
-            <?php $cmd = '{"action": "finddupes", "index": "'.$esIndex.'"}'; ?>
-          <option value='<?php echo $cmd; ?>'>Find duplicate files</option>
-        </select>
+    <div class="form-group">
+        <input name="command" type="text" id="command" placeholder="json command" class="form-control" size="80" />
     </div>
     <div class="form-group">
-        <button type="submit" class="btn btn-primary run-btn" onclick="runCommand(JSON.parse(document.getElementById('commandset').value))">Run</button>
-    </div>-->
-    <div class="form-group">
-        <input name="command" type="text" id="command" placeholder="Command" class="form-control" size="80" />
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary run-btn" onclick="runCommand(JSON.parse(document.getElementById('command').value))">Run</button>
+        <button type="submit" class="btn btn-primary run-btn" onclick="runCommand()">Run</button>
     </div>
     <p>See <a href="help.php">help page</a> for command examples.</p>
 </fieldset>
@@ -526,16 +517,8 @@ $tagtext = file_get_contents($file_customtags);
         <br />
 	</div>
 </div>
-<div class="alert alert-dismissible alert-danger" id="errormsg-container" style="display:none; width:400px; position: fixed; right: 50px; bottom: 20px; z-index:2">
-            <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
-</div>
-<div id="progress-container" class="alert alert-dismissible alert-info" style="display:none; width:400px; height:80px; position: fixed; right: 50px; bottom: 20px; z-index:2">
-  <strong>Task running</strong>, keep this window open until done.<br />
-  <div id="progress" class="progress">
-    <div id="progressbar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 0%; color:white; font-weight:bold; height:20px;">
-      0%
-    </div>
-  </div>
+<div class="alert alert-dismissible alert-danger" id="errormsg-container">
+    <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
 </div>
 
@@ -587,6 +570,10 @@ listenSocketServer();
 var color = document.getElementById('eshealth').value;
 document.getElementById('eshealthheart').style.color=color;
 </script>
+<div id="loading">
+  <img id="loading-image" width="32" height="32" src="images/ajax-loader.gif" alt="Updating..." />
+  <div id="loading-text"></div>
+</div>
 </body>
 
 </html>
