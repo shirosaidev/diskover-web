@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc12] - 2018-07-26
+### changed
+- improved Time Change analytics page
+
 # [1.5.0-rc12] - 2018-07-23
 ### added
 - hardlinks count/size to dashboard page
