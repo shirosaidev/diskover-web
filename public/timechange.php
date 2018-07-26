@@ -415,7 +415,7 @@ foreach ($dirSizeDateRange as $key => $value) {
 
             .hovertext {
                 fill: red;
-                font-size: 10px;
+                font-size: 11px;
                 font-weight: bold;
             }
 
@@ -482,7 +482,7 @@ foreach ($dirSizeDateRange as $key => $value) {
           function draw_chart(jsondata, divid, charttype) {
             var data_raw = jsondata;
 
-            var margin = { top: 20, right: 80, bottom: 30, left: 70 };
+            var margin = { top: 20, right: 80, bottom: 30, left: 100 };
             var height = 300 - margin.top - margin.bottom;
             var width = 750 - margin.left - margin.right;
 
@@ -528,17 +528,10 @@ foreach ($dirSizeDateRange as $key => $value) {
             // import data and create chart
 
             var data = data_raw.map(function(d) {
-              if (charttype === "count") {
-                  var file = +d.file;
-                  var directory = +d.directory;
-                } else {
-                  var file = +d.file / 1024 / 1024;
-                  var directory = +d.directory / 1024 / 1024;
-                }
               return {
                 date: parseDate(d.date),
-                file: file,
-                directory: directory
+                file: +d.file,
+                directory: +d.directory
               };
             });
             
@@ -555,10 +548,17 @@ foreach ($dirSizeDateRange as $key => $value) {
               return {
                 type: type,
                 values: data.map(function(d){
-                  return {
-                    date: d.date, 
-                    y: +d[type]
-                  };
+                  if (charttype === "count") {
+                    return {
+                      date: d.date, 
+                      y: +d[type]
+                    };
+                  } else {
+                    return {
+                      date: d.date, 
+                      y: +d[type] / 1024 / 1024 / 1024
+                    };
+                  }
                 })
               };
             }));
@@ -618,7 +618,7 @@ foreach ($dirSizeDateRange as $key => $value) {
                 .attr("y",10)
                 .attr("dy",".71em")
                 .style("text-anchor","end")
-                .text(function() { if (charttype === "count") { return "Modified Count"; } else { return "Modified Size (MB)"; } });
+                .text(function() { if (charttype === "count") { return "Modified Count"; } else { return "Modified Size (GB)"; } });
             
             // add the area groups
             var doctype = svg.selectAll(".doctype")
@@ -756,7 +756,7 @@ foreach ($dirSizeDateRange as $key => $value) {
                     }
                     
                     d3.select(this).select('text')
-                      .text(yScale_line.invert(pos.y).toFixed(0));
+                      .text(function() { if (charttype === "count") { return yScale_line.invert(pos.y).toFixed(0); } else { return format(yScale_line.invert(pos.y), 1); } });
                       
                     return "translate(" + mouse[0] + "," + pos.y +")";
                   });
