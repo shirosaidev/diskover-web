@@ -1,12 +1,14 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc13] - 2018-08-04
+# [1.5.0-rc13] - 2018-08-05
 ### added
 - dynamic chart sizing (browser window size) for filetree analytics page
 ### changed
 - increased size of any very small fonts on filetree and treemap pages
 ### fixed
 - bug with path cookie not getting updated when switching indices
+- bug searching for full path where file contains many . characters
+- bug with search button on filetree and treemap pages
 
 # [1.5.0-rc12] - 2018-07-26
 ### changed

@@ -500,7 +500,7 @@ function predict_search($q) {
         if (preg_match('/\.(\w)$|\.(\w){1,4}$/', $request)) {
             $request = rtrim($request, '\\');
             $filearr = explode('.', basename($request));
-            $request = 'path_parent:' . dirname($request) . ' AND filename:' . $filearr[0] . '* AND extension:' . $filearr[1] . '*';
+            $request = 'path_parent:' . dirname($request) . ' AND filename:' . basename($request) . '* AND extension:' . end($filearr) . '*';
         } elseif (preg_match('/\*$/', $request)) {
             $request = 'path_parent:' . rtrim($request, '\*') . ' OR path_parent:' . rtrim($request, '\*') . '\/*';
         } else {
