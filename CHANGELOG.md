@@ -1,5 +1,13 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc13] - 2018-08-04
+### added
+- dynamic chart sizing (browser window size) for filetree analytics page
+### changed
+- increased size of any very small fonts on filetree and treemap pages
+### fixed
+- bug with path cookie not getting updated when switching indices
+
 # [1.5.0-rc12] - 2018-07-26
 ### changed
 - improved Time Change analytics page

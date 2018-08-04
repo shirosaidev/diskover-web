@@ -549,7 +549,7 @@ if ($s3_index) {
   <div class="row">
     <div class="col-xs-6">
       <div class="well well-sm">
-        <strong><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web!</strong> Become a patron for diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span>
+        <span style="font-weight: bold;"><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! Become a patron for diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></span>
       </div>
       <?php if (!$crawlfinished) { ?>
       <div class="alert alert-dismissible alert-warning">

@@ -220,7 +220,7 @@ input:checked + .slider:before {
 }
 
 .statustext {
-    font-size: 10px;
+    font-size: 11px;
     color: gray;
     padding: 4px;
 }
@@ -229,17 +229,17 @@ input:checked + .slider:before {
 
 #piechart {
     top: 20px;
-    width: 960px;
-    height: 400px;
+    width: 50vw;
+    height: 40vh;
     position: relative;
     display: block;
     margin: 0 auto;
 }
 
 #piechart-ext {
-    top: 20px;
-    width: 360px;
-    height: 300px;
+    top: 30px;
+    width: 20vw;
+    height: 30vh;
     position: relative;
     display: block;
     margin: 0 auto;
@@ -274,7 +274,7 @@ polyline {
 
 text {
     fill: gray;
-    font-size: 10px;
+    font-size: 11px;
     pointer-events: none;
 }
 
@@ -329,8 +329,8 @@ text {
 
 #barchart-mtime {
     top: 60px;
-    width: 340px;
-    height: 250px;
+    width: 20vw;
+    height: 30vh;
     position: relative;
     display: block;
     margin: 0 auto;
@@ -338,8 +338,8 @@ text {
 
 #barchart-filesizes {
     top: 60px;
-    width: 340px;
-    height: 250px;
+    width: 20vw;
+    height: 30vh;
     position: relative;
     display: block;
     margin: 0 auto;
@@ -361,14 +361,14 @@ text {
 
 .barlabel text {
     fill: gray;
-    font-size: 10px;
+    font-size: 11px;
     text-anchor: end;
     pointer-events: none;
 }
 
 .barvaluelabel text {
-    fill: gray;
-    font-size: 10px;
+    fill: lightgray;
+    font-size: 11px;
     text-anchor: start;
     pointer-events: none;
 }

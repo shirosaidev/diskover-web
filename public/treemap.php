@@ -139,7 +139,7 @@ require "d3_inc.php";
 					<div id="tree-container"></div>
 				</div>
 			</div>
-			<div class="row treemap-wrapper" id="treemap-wrapper" style="display:none;">
+			<div class="row treemap-wrapper" id="treemap-wrapper" style="display:none;margin-top:20px;">
 				<div class="col-xs-12">
 					<div id="treemap-container"></div>
 				</div>

@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc12';
+$VERSION = '1.5.0-rc13';
 
 
 function connectES() {
@@ -885,6 +885,7 @@ if (empty($path)) {
         $path = get_es_path($client, $esIndex);
     }
     createCookie('path', $path);
+    $_SESSION['rootpath'] = $path;
 }
 // remove any trailing slash (unless root)
 if ($path !== "/") {

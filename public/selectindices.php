@@ -94,6 +94,8 @@ if (isset($_POST['index'])) {
     }
     // delete existing path cookie
     deleteCookie('path');
+    // unset session rootpath
+    unset($_SESSION['rootpath']);
 
     // delete existing sort cookies
     deleteCookie('sort');

@@ -84,9 +84,11 @@ svg.append("g")
     .attr("class", "labels");
 svg.append("g")
     .attr("class", "lines");
-
-var width = 960,
-    height = 400,
+var margin = {top: 10, right: 5, bottom: 10, left: 5},
+    width = parseInt(d3.select('#piechart').style('width'), 10),
+    width = width - margin.left - margin.right,
+    height = parseInt(d3.select('#piechart').style('height'), 10),
+    height = height - margin.top - margin.bottom,
     radius = Math.min(width, height) / 2;
 
 var pie = d3.layout.pie()
@@ -244,7 +246,8 @@ function changePie(data) {
         .style("stroke", "#060606")
         .style("fill", "#1B1D23")
         .style("cursor", "pointer")
-        .attr("r", 118)
+        //.attr("r", 118)
+        .attr("r", radius / 1.7)
         .attr("cx", 0)
         .attr("cy", 0)
         .on("mouseover", function() {
@@ -381,8 +384,11 @@ svg2.append("g")
 svg2.append("g")
     .attr("class", "lines");
 
-var width2 = 360,
-    height2 = 300,
+var margin2 = {top: 20, right: 10, bottom: 20, left: 10},
+    width2 = parseInt(d3.select('#piechart-ext').style('width'), 10),
+    width2 = width2 - margin2.left - margin2.right,
+    height2 = parseInt(d3.select('#piechart-ext').style('height'), 10),
+    height2 = height2 - margin2.top - margin2.bottom,
     radius2 = Math.min(width2, height2) / 2.5;
 
 var color2 = d3.scale.category20b();
@@ -617,11 +623,11 @@ function changePieFileExt(node) {
  */
 
 var valueLabelWidth = 40; // space reserved for value labels (right)
-var barHeight = 15; // height of one bar
+var barHeight = parseInt(d3.select('#barchart-mtime').style('height'), 10) / 20; // height of one bar
 var barLabelWidth = 80; // space reserved for bar labels
 var barLabelPadding = 10; // padding between bar and bar labels (left)
 var gridChartOffset = 0; // space between start of grid and first bar
-var maxBarWidth = 200; // width of the bar with the max value
+var maxBarWidth = parseInt(d3.select('#barchart-mtime').style('width'), 10) - (barLabelWidth + barLabelWidth + barLabelPadding); // width of the bar with the max value
 
 /*
  * d3 Mtime bar chart for diskover-web

@@ -83,14 +83,14 @@ input:checked + .slider:before {
 
 .barlabel text {
     fill: gray;
-    font-size: 10px;
+    font-size: 11px;
     text-anchor: end;
     pointer-events: none;
 }
 
 .barvaluelabel text {
     fill: lightgray;
-    font-size: 10px;
+    font-size: 11px;
     text-anchor: start;
     pointer-events: none;
 }
