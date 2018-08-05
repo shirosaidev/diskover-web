@@ -259,9 +259,9 @@ rect:hover {
 .heatmap-wrapper
 {
   float: left;
-  height: 43vh;
+  height: 39vh;
   width: 99vw;
-  overflow: scroll;
+  overflow: hidden;
   border: 0;
 }
 
@@ -289,7 +289,7 @@ rect:hover {
 }
 
 .statustext {
-    font-size: 10px;
+    font-size: 11px;
     color: gray;
     padding: 4px;
 }

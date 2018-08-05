@@ -198,7 +198,7 @@ if ($show_change_percent) {
         </div>
         </div>
 <div class="container-fluid" id="mainwindow" style="display:none;margin-top:70px;">
-  <div class="row heatmap-wrapper" style="position:relative;" id="heatmap-wrapper">
+  <div class="row heatmap-wrapper" style="position:relative;margin-bottom:20px;" id="heatmap-wrapper">
     <form>
       <input type="hidden" title="radius" type="range" id="radius" value="25" min="1" max="100" />
       <input type="hidden" title="blur" type="range" id="blur" value="15" min="1" max="60" />
