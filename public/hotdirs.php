@@ -198,16 +198,18 @@ if ($show_change_percent) {
         </div>
         </div>
 <div class="container-fluid" id="mainwindow" style="display:none;margin-top:70px;">
-  <div class="row heatmap-wrapper" style="position:relative;margin-bottom:20px;" id="heatmap-wrapper">
+  <div class="row">
+    <div class="col-xs-12">
+    <div class="heatmap-wrapper" style="position:relative;" id="heatmap-wrapper">
     <form>
       <input type="hidden" title="radius" type="range" id="radius" value="25" min="1" max="100" />
       <input type="hidden" title="blur" type="range" id="blur" value="15" min="1" max="60" />
       <input type="hidden" title="max" type="range" id="maxs" value="" min="" max="" />
     </form>
-      <div class="col-xs-12">
-          <canvas id="heatmap-overlay" style="position:absolute;"></canvas>
-          <div id="heatmap-container" style="z-index:0;position:absolute;"></div>
-      </div>
+      <canvas id="heatmap-overlay" style="position:absolute;"></canvas>
+      <div id="heatmap-container" style="z-index:0;position:absolute;"></div>
+    </div>
+    </div>
   </div>
   <div class="row">
     <div class="col-xs-12">

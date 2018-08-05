@@ -414,8 +414,8 @@ if (index2 === "") {
     console.log("SORTORDER:" + sortorder);
 
     // d3 treemap
-    var w = window.innerWidth - 40,
-        h = (window.innerHeight / 2) - 83,
+    var w = parseInt(d3.select('#heatmap-wrapper').style('width'), 10) - 15,
+        h = parseInt(d3.select('#heatmap-wrapper').style('height'), 10) - 15,
         x = d3.scale.linear().range([0, w]),
         y = d3.scale.linear().range([0, h]);
 

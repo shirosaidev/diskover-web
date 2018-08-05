@@ -10,6 +10,7 @@
 - bug searching for full path where file contains many . characters
 - bug with search button on filetree and treemap pages
 - scrollbars appearing around heatmap on hotdirs page
+- chart dynamic sizing issues on hotdirs and treemap pages
 
 # [1.5.0-rc12] - 2018-07-26
 ### changed

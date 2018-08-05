@@ -261,7 +261,7 @@ rect:hover {
   float: left;
   height: 39vh;
   width: 99vw;
-  overflow: hidden;
+  overflow: visible;
   border: 0;
 }
 
