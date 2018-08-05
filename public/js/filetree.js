@@ -392,7 +392,7 @@ function updateTree(data, parent) {
             if (d.count > 0) {
                 var sp = d.name.split('/')
                 var pp = sp.slice(0, sp.length - 1).join('/');
-                return '<a target="_blank" href="simple.php?submitted=true&amp;p=1&amp;q=(path_parent:' + encodeURIComponent(escapeHTML(pp)) + ' filename:' + encodeURIComponent(escapeHTML(d.name.split('/').pop())) + ') (path_parent:' + encodeURIComponent(escapeHTML(d.name)) + ' OR path_parent:' + encodeURIComponent(escapeHTML(d.name) + '\\/*)') + '"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
+                return '<a target="_blank" href="simple.php?submitted=true&amp;p=1&amp;q=(path_parent:' + encodeURIComponent(escapeHTML(pp)) + ' AND filename:' + encodeURIComponent(escapeHTML(d.name.split('/').pop())) + ') (path_parent:' + encodeURIComponent(escapeHTML(d.name)) + ' OR path_parent:' + encodeURIComponent(escapeHTML(d.name) + '\\/*)') + '"><label title="search" class="btn btn-default btn-xs filetree-btns"><i class="glyphicon glyphicon-search"></i></label></a>';
             }
         });
 

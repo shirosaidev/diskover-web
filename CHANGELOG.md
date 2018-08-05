@@ -1,6 +1,6 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc13] - 2018-08-05
+# [1.5.0-rc13] - 2018-08-06
 ### added
 - dynamic chart sizing (browser window size) for filetree analytics page
 ### changed
