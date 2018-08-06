@@ -3,14 +3,17 @@
 # [1.5.0-rc13] - 2018-08-06
 ### added
 - dynamic chart sizing (browser window size) for filetree analytics page
+- "show new dirs" toggle to heatmap to toggle highlighting 100% change for new dirs
 ### changed
 - increased size of any very small fonts on filetree and treemap pages
+- setting "show new dirs" toggle to off on hotdirs page now disables showing 100% red color highlight for new directories
 ### fixed
 - bug with path cookie not getting updated when switching indices
 - bug searching for full path where file contains many . characters
 - bug with search button on filetree and treemap pages
 - scrollbars appearing around heatmap on hotdirs page
 - chart dynamic sizing issues on hotdirs and treemap pages
+- bug with showing 100% change when directory changed from 0 bytes to > 0 bytes on search results, view page and hotdirs page
 
 # [1.5.0-rc12] - 2018-07-26
 ### changed

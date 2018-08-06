@@ -234,7 +234,7 @@ rect {
     stroke: #060606;
     cursor: pointer;
     stroke-width: 1px;
-    fill-opacity: .7;
+    fill-opacity: .6;
 }
 
 rect:hover {

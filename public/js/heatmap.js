@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -117,6 +117,9 @@ function renderTreeMap(data) {
         var x = d.x + (d.dx / 2);
         var y = d.y + (d.dy / 2);
         if (d.change_percent !== 0) {
+            if (d.change_percent === 100 & show_new_dirs === 0) {
+                return;
+            }
             heatmapdata.push([x, y, d.change_percent]);
         }
     });
@@ -182,6 +185,9 @@ function renderTreeMap(data) {
             return Math.max(0, d.dy - 1) + "px";
         })
         .style("fill", function(d) {
+            if (d.change_percent === 100 & show_new_dirs === 0) {
+                return color(0);
+            }
             return color(d.change_percent);
         })
         .attr("rx", 4);
@@ -222,35 +228,35 @@ function renderTreeMap(data) {
         setCookie('maxdepth', 1)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
     d3.select("#depth2").on("click", function() {
         maxdepth = 2;
         setCookie('maxdepth', 2)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
     d3.select("#depth3").on("click", function() {
         maxdepth = 3;
         setCookie('maxdepth', 3)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
     d3.select("#depth4").on("click", function() {
         maxdepth = 4;
         setCookie('maxdepth', 4)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
     d3.select("#depth5").on("click", function() {
         maxdepth = 5;
         setCookie('maxdepth', 5)
         console.log("removing json data on local storage because maxdepth changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
 
     d3.select("#depth"+maxdepth).classed("active", true);
@@ -268,7 +274,7 @@ function renderTreeMap(data) {
         setCookie('show_files', show_files)
         console.log("removing json data on local storage because show files changed");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
 
     /* ------- SIZE/COUNT BUTTONS -------*/
@@ -278,7 +284,7 @@ function renderTreeMap(data) {
         setCookie('use_count', use_count)
         console.log("removing json data on local storage because size/count clicked");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
 
     d3.select("#count").on("click", function() {
@@ -286,8 +292,19 @@ function renderTreeMap(data) {
         setCookie('use_count', use_count)
         console.log("removing json data on local storage because size/count clicked");
 		sessionStorage.removeItem("diskover-heatmap");
-        location.href='heatmap.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files;
+        location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
     });
+
+    /* ------- SHOW NEW DIRS CHECKBOX -------*/
+
+     d3.select("#shownewdirs").on("change", function() {
+         var snd = document.getElementById('shownewdirs').checked;
+         (snd) ? show_new_dirs = 1 : show_new_dirs = 0;
+         setCookie('show_new_dirs', show_new_dirs);
+         console.log("removing json data on local storage because show new dirs changed");
+         sessionStorage.removeItem("diskover-heatmap");
+         location.href="heatmap.php?index=" + index +"&index2=" + index2 + "&path=" + path + "&filter=" + filter + "&mtime=" + mtime + '&maxdepth=' + maxdepth + "&use_count=" + use_count + "&show_new_dirs=" + show_new_dirs + '&show_files=' + show_files;
+     });
 
     function size(d) {
         return d.size;
@@ -393,11 +410,16 @@ if (index2 === "") {
     (!show_files || show_files === '1') ? show_files = 1 : show_files = 0;
     (show_files === 1) ? $('#showfiles').prop('checked', true) : $('#showfiles').prop('checked', false);
 
+    var show_new_dirs = ($_GET('show_new_dirs')) ? parseInt($_GET('show_new_dirs')) : parseInt(getCookie('show_new_dirs'));
+    (show_new_dirs === '' || show_new_dirs === 1) ? show_new_dirs = 1 : show_new_dirs = 0;
+    (show_new_dirs === 1) ? $('#shownewdirs').prop('checked', true) : $('#shownewdirs').prop('checked', false);
+
     console.log("PATH:" + path);
     console.log("SIZE_FILTER:" + filter);
     console.log("MTIME_FILTER:" + mtime);
     console.log("MAXDEPTH:" + maxdepth);
     console.log("USECOUNT:" + use_count);
+    console.log("SHOWNEWDIRS:" + show_new_dirs);
     console.log("SHOWFILES:" + show_files);
 
     console.time('loadtime')

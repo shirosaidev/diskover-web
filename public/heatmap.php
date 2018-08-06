@@ -72,6 +72,7 @@ require "d3_inc.php";
                                 <button class="btn btn-default btn-sm" id="depth4">4</button>
                                 <button class="btn btn-default btn-sm" id="depth5">5</button>
                             </div>
+                            <span style="font-size:11px; color:gray;">Show new dirs </span><span style="position:relative; top:8px;"><label class="switch"><input id="shownewdirs" name="shownewdirs" type="checkbox"><span class="slider round"></span></label></span>
                             <span style="font-size:11px; color:gray;">Show files </span><span style="position:relative; top:8px;"><label class="switch"><input id="showfiles" name="showfiles" type="checkbox"><span class="slider round"></span></label></span>
                             <span style="font-size:10px; color:gray; margin:10px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page</span>
 					</div>

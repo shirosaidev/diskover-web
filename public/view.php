@@ -229,6 +229,8 @@ exit();
             <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
             if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
                 $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
+            } else if ($file['filesize'] > 0 && $fileinfo_index2[0] == 0) {
+                $filesize_change = 100.0;
             }
             if ($filesize_change != 0) { ?>
             <small><?php echo formatBytes($fileinfo_index2[0]); ?>
@@ -248,6 +250,8 @@ exit();
             <?php
             if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
                 $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
+            } else if ($file['items'] > 0 && $fileinfo_index2[1] == 0) {
+                $diritems_change = 100.0;
             }
             if ($diritems_change != 0) { ?>
             <small><?php echo $fileinfo_index2[1]; ?>
@@ -266,6 +270,8 @@ exit();
             <?php
             if ($file['items_files'] > 0 && $fileinfo_index2[2] > 0) {
                 $diritems_files_change = number_format(changePercent($file['items_files'], $fileinfo_index2[2]), 2);
+            } else if ($file['items_files'] > 0 && $fileinfo_index2[2] == 0) {
+                $diritems_files_change = 100.0;
             }
             if ($diritems_files_change != 0) { ?>
             <small><?php echo $fileinfo_index2[2]; ?>
@@ -284,6 +290,8 @@ exit();
             <?php
             if ($file['items_subdirs'] > 0 && $fileinfo_index2[3] > 0) {
                 $diritems_subdirs_change = number_format(changePercent($file['items_subdirs'], $fileinfo_index2[3]), 2);
+            } else if ($file['items_subdirs'] > 0 && $fileinfo_index2[3] == 0) {
+                $diritems_subdirs_change = 100.0;
             }
             if ($diritems_subdirs_change != 0) { ?>
             <small><?php echo $fileinfo_index2[3]; ?>

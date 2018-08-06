@@ -330,7 +330,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
           if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
               $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
-          } else if ($file['filesize'] > 0 && $fileinfo_index2[0] === 0) {
+          } else if ($file['filesize'] > 0 && $fileinfo_index2[0] == 0) {
               $filesize_change = 100.0;
           }
           if ($filesize_change != 0) { ?>
@@ -347,7 +347,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php
         if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
             $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
-        } else if ($file['items'] > 0 && $fileinfo_index2[1] === 0) {
+        } else if ($file['items'] > 0 && $fileinfo_index2[1] == 0) {
               $diritems_change = 100.0;
         }
         if ($diritems_change != 0) { ?>

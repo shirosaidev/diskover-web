@@ -1,11 +1,11 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
 /*
- * d3 Heat map for diskover-web
+ * d3 Hotdirs Heat map for diskover-web
  */
 
 $(document).ready(function() {
@@ -13,11 +13,11 @@ $(document).ready(function() {
     getJSONHeatmap();
 
     // set cookies
-     setCookie('path', encodeURIComponent(path));
-     setCookie('filter', filter);
-     setCookie('mtime', mtime);
-     setCookie('min_change_percent', min_change_percent);
-     setCookie('show_new_dirs', show_new_dirs);
+    setCookie('path', encodeURIComponent(path));
+    setCookie('filter', filter);
+    setCookie('mtime', mtime);
+    setCookie('min_change_percent', min_change_percent);
+    setCookie('show_new_dirs', show_new_dirs);
 
 });
 
@@ -167,11 +167,7 @@ function renderTreeMap(data) {
         } else {
             d.change_percent = 100.0;
         }
-        if (d.change_percent < min_change_percent) {
-            nodes.slice(d,1);
-        }
     });
-    //console.log(nodes);
 
     // add node data to heatmap data list
     heatmapdata = [];
@@ -179,6 +175,9 @@ function renderTreeMap(data) {
         var x = d.x + (d.dx / 2);
         var y = d.y + (d.dy / 2);
         if (d.change_percent !== 0) {
+            if (d.change_percent === 100 & show_new_dirs === 0) {
+                return;
+            }
             heatmapdata.push([x, y, d.change_percent]);
         }
     });
@@ -250,6 +249,9 @@ function renderTreeMap(data) {
             return Math.max(0, d.dy - 1) + "px";
         })
         .style("fill", function(d) {
+            if (d.change_percent === 100 & show_new_dirs === 0) {
+                return color(0);
+            }
             return color(d.change_percent);
         })
         .attr("rx", 4);

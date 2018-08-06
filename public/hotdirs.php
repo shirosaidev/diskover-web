@@ -134,14 +134,12 @@ if ($show_change_percent) {
 
     if (! $show_new_dirs) {
       $searchParams['body']['query']['bool']['must_not'] = [
-                      [ 'term' => [
+                        'term' => [
                           'change_percent_filesize' => 100.0
-                          ]
-                    ],
-                    [ 'term' => [
+                          ],
+                        'term' => [
                           'change_percent_items' => 100.0
                           ]
-                    ] 
                   ];
     }
 
