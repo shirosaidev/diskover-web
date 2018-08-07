@@ -364,3 +364,17 @@ tbody a:hover {
     font-size:10px;
     line-height:0.1em!important;
 }
+
+.percent {
+    background-color: #D20915;
+    opacity: .9;
+    border: 1px solid black;
+    display: inline-block;
+    height: 14px;
+    left: 0px;
+    bottom: -2px;
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
+}
+

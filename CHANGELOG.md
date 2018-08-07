@@ -1,12 +1,15 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc13] - 2018-08-06
+# [1.5.0-rc13] - 2018-08-07
 ### added
 - dynamic chart sizing (browser window size) for filetree analytics page
 - "show new dirs" toggle to heatmap to toggle highlighting 100% change for new dirs
+- rating column to search results page (based on last modified time)
+- % column bar chart to search results page (based on total file size of items on page)
 ### changed
 - increased size of any very small fonts on filetree and treemap pages
 - setting "show new dirs" toggle to off on hotdirs page now disables showing 100% red color highlight for new directories
+- improved table layout for search results page for adjusting to diff browser sizes
 ### fixed
 - bug with path cookie not getting updated when switching indices
 - bug searching for full path where file contains many . characters

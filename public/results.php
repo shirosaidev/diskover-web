@@ -92,23 +92,24 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
   </div>
   <div class="row">
     <div class="counter pull-right"></div>
-    <?php $numofcol = 9; ?>
-    <table class="table results table-striped table-hover">
+    <?php $numofcol = 11; ?>
+    <table class="table results table-striped table-hover table-condensed">
       <thead>
         <tr>
-          <th class="text-nowrap">#</th>
+          <th class="text-nowrap">#</th>-
           <th class="text-nowrap">Name <?php echo sortURL('filename'); ?></th>
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
 		      <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
+          <th class="text-nowrap">% <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <?php if ($show_change_percent) { ?>
-          <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
+          <th width="8%" class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
           <?php $numofcol+=1; ?>
           <?php } ?>
           <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
           <?php if ($show_change_percent) { ?>
-          <th class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
+          <th width="8%" class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
           <?php $numofcol+=1; ?>
           <?php } ?>
           <th class="text-nowrap">Items (files) <?php echo sortURL('items_files'); ?></th>
@@ -123,11 +124,12 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
           <?php } ?>
-          <th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
+          <th width="8%" class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
+          <th width="4%" class="text-nowrap">Rating <span style="color:darkgray;font-size: 11px;"><i title="Rating is based on last modified time, older is higher rating" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php if ($qumulo_index == '1') { ?>
           <th class="text-nowrap">Created (utc) <?php echo sortURL('creation_time'); ?></th>
           <?php } elseif ($s3_index != '1') { ?>
-          <th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
+          <th width="8%" class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
           <?php } ?>
           <?php
           if (count($extra_fields) > 0) {
@@ -147,6 +149,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                     <th class="text-nowrap">Tags</th>
 					<th class="text-nowrap">Path</th>
 					<th class="text-nowrap">File Size</th>
+          <th class="text-nowrap">%</th>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change %</th>
@@ -167,17 +170,18 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
 					<th class="text-nowrap">Group</th>
           <?php } ?>
 					<th class="text-nowrap">Modified (utc)</th>
-                    <?php if ($qumulo_index) { ?>
-                    <th class="text-nowrap">Created (utc)</th>
-                    <?php } elseif (!$s3_index) { ?>
+          <th class="text-nowrap">Rating</th>
+          <?php if ($qumulo_index) { ?>
+          <th class="text-nowrap">Created (utc)</th>
+          <?php } elseif (!$s3_index) { ?>
 					<th class="text-nowrap">Accessed (utc)</th>
-                    <?php } ?>
-                    <?php
-                    if (count($extra_fields) > 0) {
-                      foreach ($extra_fields as $key => $value) { ?>
-                          <th class="text-nowrap"><?php echo $value; ?></th>
-                      <?php }
-                    } ?>
+          <?php } ?>
+          <?php
+          if (count($extra_fields) > 0) {
+            foreach ($extra_fields as $key => $value) { ?>
+                <th class="text-nowrap"><?php echo $value; ?></th>
+            <?php }
+          } ?>
 				</tr>
       </tfoot>
       <tbody id="results-tbody">
@@ -187,6 +191,26 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         $i = $p * $limit - $limit;
         foreach ($results[$p] as $result) {
           $file = $result['_source'];
+
+          // calculate rating
+          $date1 = date_create(date('Y-m-dTH:i:s'));
+          $date2 = date_create($file['last_modified']);
+          $diff = date_diff($date1,$date2);
+          $mtime_daysago = $diff->format('%a');
+          if ($mtime_daysago > 730) {
+            $file_rating = 5;
+          } elseif ($mtime_daysago < 730 && $mtime_daysago > 365 ) {
+            $file_rating = 4;
+          } elseif ($mtime_daysago < 365 && $mtime_daysago > 180 ) {
+            $file_rating = 3;
+          } elseif ($mtime_daysago < 180 && $mtime_daysago > 90 ) {
+            $file_rating = 2;
+          } elseif ($mtime_daysago < 90 && $mtime_daysago > 30 ) {
+            $file_rating = 1;
+          } else {
+            $file_rating = 0;
+          }
+
           $i += 1;
       ?>
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'deleterow'; } elseif ($file['tag'] == 'archive') { echo 'archiverow'; } elseif ($file['tag'] == 'keep') { echo 'keeprow'; }?>">
@@ -208,7 +232,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                 $filename = $file['filename'];
             }
             ?>
-            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><?php if ($s3_index && $file['path_parent'] == '/') { ?><i class="glyphicon glyphicon-cloud" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else if ($s3_index && $file['path_parent'] == '/s3') { ?><i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else { ?><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i><?php } ?> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><span style="color:#666;font-size:13px;top:1px;position:relative;padding-left:2px;padding-right:2px"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></span></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php } ?>
+            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><?php if ($s3_index && $file['path_parent'] == '/') { ?><i class="glyphicon glyphicon-cloud" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else if ($s3_index && $file['path_parent'] == '/s3') { ?><i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else { ?><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i><?php } ?> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><button class="btn btn-default btn-xs" type="button" style="color:gray;font-size:11px;margin-left:3px;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></button></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php } ?>
             <!-- socket commands dropdown -->
             <?php if ($socketlistening) {
             if ($result['_type'] == 'directory') { ?>
@@ -322,11 +346,12 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
               <!-- end path buttons -->
               <span class="highlight"><?php echo $file['path_parent']; ?></span>
           </td>
-        <td class="text-nowrap highlight"><?php echo formatBytes($file['filesize']); ?></td>
+        <td class="text-nowrap highlight" style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file['filesize']); ?></td>
+        <td width="8%" class="highlight"><div class="text-right percent" style="width:<?php echo number_format(($file['filesize'] / $total_size) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($file['filesize'] / $total_size) * 100, 2); ?>%</small></span></td>
         <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <!-- show comparison file size -->
         <?php if ($show_change_percent) { $filesize_change = 0; ?>
-          <td class="text-nowrap highlight">
+          <td class="highlight">
           <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
           if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
               $filesize_change = number_format(changePercent($file['filesize'], $fileinfo_index2[0]), 2);
@@ -343,7 +368,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <td class="text-nowrap highlight"><?php echo $file['items']; ?>
         <!-- show comparison items -->
         <?php if ($show_change_percent) { ?>
-        <td class="text-nowrap highlight">
+        <td class="highlight">
         <?php
         if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
             $diritems_change = number_format(changePercent($file['items'], $fileinfo_index2[1]), 2);
@@ -362,23 +387,24 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
     </td>
         <?php } ?>
         <?php if ($s3_index) { ?>
-        <td class="text-nowrap highlight"><?php echo $file['s3_bucket']; ?></td>
+        <td class="highlight"><?php echo $file['s3_bucket']; ?></td>
         <td class="path highlight"><?php echo $file['s3_key']; ?></td>
-        <td class="text-nowrap highlight"><?php echo $file['s3_storage_class']; ?></td>
+        <td class="highlight"><?php echo $file['s3_storage_class']; ?></td>
         <?php } else { ?>
-        <td class="text-nowrap highlight"><?php echo $file['owner']; ?></td>
-        <td class="text-nowrap highlight"><?php echo $file['group']; ?></td>
+        <td class="highlight"><?php echo $file['owner']; ?></td>
+        <td class="highlight"><?php echo $file['group']; ?></td>
         <?php } ?>
-        <td class="text-nowrap highlight"><?php echo $file['last_modified']; ?></td>
+        <td class="highlight"><span style="color:#6D5293;font-weight:bold;"><?php echo $file['last_modified']; ?></span></td>
+        <td class="highlight"><?php for ($n = 0; $n < $file_rating; $n++) { echo "<span style=\"font-size:14px;color:#6E5396;font-weight:bold;letter-spacing:-2px;\"><i class=\"glyphicon glyphicon-remove\"></i></span>"; } ?></td>
         <?php if ($qumulo_index) { ?>
-        <td class="text-nowrap highlight"><?php echo $file['creation_time']; ?></td>
+        <td class="highlight"><?php echo $file['creation_time']; ?></td>
         <?php } elseif (!$s3_index) { ?>
-        <td class="text-nowrap highlight"><?php echo $file['last_access']; ?></td>
+        <td class="highlight"><?php echo $file['last_access']; ?></td>
         <?php } ?>
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>
-              <td class="text-nowrap highlight"><?php echo $file[$key]; ?></td>
+              <td class="highlight"><?php echo $file[$key]; ?></td>
           <?php }
           } ?>
       </tr>
