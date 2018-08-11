@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -32,12 +32,22 @@ require "d3_inc.php";
 		<?php include "nav.php"; ?>
 		<div class="container" id="error" style="display:none; margin-top:70px;">
 			<div class="row">
-				<div class="alert alert-dismissible alert-warning col-xs-8">
+				<div class="alert alert-dismissible alert-danger col-xs-8">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or worker bots are still calculating directory sizes.</strong> Choose a different path and try again or check if worker bots are still running in rq. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
+					<span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, an error has occured :( </strong><a href="#" onclick="window.history.go(-1); return false;">Go back</a>.<br /><br />
+                    <small><a href="#" onclick="document.getElementById('debugerror').style.display = 'block'; return false;"> show debug error</a><br />
+                    <span id="debugerror" style="display:none;"></span></small>
 				</div>
 			</div>
 		</div>
+        <div class="container" id="warning" style="display:none; margin-top:70px;">
+            <div class="row">
+                <div class="alert alert-dismissible alert-info col-xs-8">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or worker bots are still calculating directory sizes.</strong> Choose a different path and try again or check if worker bots are still running in rq. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
+                </div>
+            </div>
+        </div>
 		<div class="container-fluid" id="mainwindow" style="margin-top:70px;">
             <div class="row">
 				<div class="col-xs-7">
@@ -93,6 +103,7 @@ require "d3_inc.php";
                         <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Hide Thresh
 <span class="caret"></span></button>
                         <ul class="dropdown-menu">
+                            <li><a href="#_self" onclick="changeThreshold(0);">0 (disable)</a></li>
                             <li><a href="#_self" onclick="changeThreshold(0.01);">0.01</a></li>
                             <li><a href="#_self" onclick="changeThreshold(0.1);">0.1</a></li>
                             <li><a href="#_self" onclick="changeThreshold(0.3);">0.3</a></li>
@@ -108,7 +119,7 @@ require "d3_inc.php";
                     </div>
                     <span style="font-size:11px; color:gray;">Show files </span><span style="position:relative; top:8px;"><label class="switch"><input id="showfiles" name="showfiles" type="checkbox"><span class="slider round"></span></label></span>
                     <div id="statustext" class="statustext">
-                        <i class="glyphicon glyphicon-filter"></i> Filters: <span id="statusfilters"></span><span id="statushidethresh"></span>
+                        <i class="glyphicon glyphicon-filter"></i> Filters: <span id="statusfilters"></span>&nbsp;&nbsp;<i class="glyphicon glyphicon-adjust"></i> Hide thresh: <span id="statushidethresh"></span>
                         &nbsp;&nbsp;<i class="glyphicon glyphicon-info-sign"></i> filters affect all analytics pages
                     </div>
                 </div>

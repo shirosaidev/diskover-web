@@ -51,8 +51,14 @@ function get_dir_info($client, $index, $path, $filter, $mtime) {
         ];
     }
 
-    // Send search query to Elasticsearch
-    $queryResponse = $client->search($searchParams);
+    try {
+        // Send search query to Elasticsearch
+        $queryResponse = $client->search($searchParams);
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+        die;
+    }
 
     // Get total count (files+subdirs)
     $totalcount = (int)$queryResponse['hits']['hits'][0]['_source']['items'];
@@ -107,8 +113,14 @@ function get_files($client, $index, $path, $filter, $mtime) {
                 ]
         ];
 
-    // Send search query to Elasticsearch and get scroll id and first page of results
-    $queryResponse = $client->search($searchParams);
+    try {
+        // Send search query to Elasticsearch and get scroll id and first page of results
+        $queryResponse = $client->search($searchParams);
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+        die;
+    }
 
     // Get files
     $results = $queryResponse['hits']['hits'];
@@ -190,8 +202,14 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
         ];
     }
 
-    // Send search query to Elasticsearch and get results
-    $queryResponse = $client->search($searchParams);
+    try {
+        // Send search query to Elasticsearch and get results
+        $queryResponse = $client->search($searchParams);
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+        die;
+    }
 
     // Get directories
     $results = $queryResponse['hits']['hits'];
@@ -289,7 +307,7 @@ function get_file_mtime($client, $index, $path, $filter, $mtime) {
                 'query' => [
                     'query_string' => [
                         'query' => 'path_parent: ' . $escapedpath . '*
-                        AND last_modified: {* TO ' . $mtime . '}',
+                        AND last_modified: {* TO ' . $mtime . '} AND filesize: >=' . $filter,
                         'analyze_wildcard' => 'true'
                     ]
                 ]
@@ -301,7 +319,7 @@ function get_file_mtime($client, $index, $path, $filter, $mtime) {
                 'query_string' => [
                     'query' => '(path_parent: ' . $escapedpath . ' OR
                     path_parent: ' . $escapedpath . '\/*) AND
-                    last_modified: {* TO ' . $mtime . '}',
+                    last_modified: {* TO ' . $mtime . '}  AND filesize: >=' . $filter,
                     'analyze_wildcard' => 'true'
                 ]
             ]
@@ -340,8 +358,14 @@ function get_file_mtime($client, $index, $path, $filter, $mtime) {
         ]
     ];
 
-    // Send search query to Elasticsearch and get scroll id and first page of results
-    $queryResponse = $client->search($searchParams);
+    try {
+        // Send search query to Elasticsearch and get scroll id and first page of results
+        $queryResponse = $client->search($searchParams);
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+        die;
+    }
 
     // Get mtime ranges
     $results = $queryResponse['aggregations']['mtime_ranges']['buckets'];
@@ -374,7 +398,7 @@ function get_file_sizes($client, $index, $path, $filter, $mtime) {
                 'query' => [
                     'query_string' => [
                         'query' => 'path_parent: ' . $escapedpath . '*
-                        AND last_modified: {* TO ' . $mtime . '}',
+                        AND last_modified: {* TO ' . $mtime . '} AND filesize: >=' . $filter,
                         'analyze_wildcard' => 'true'
                     ]
                 ]
@@ -386,7 +410,7 @@ function get_file_sizes($client, $index, $path, $filter, $mtime) {
                 'query_string' => [
                     'query' => '(path_parent: ' . $escapedpath . ' OR
                     path_parent: ' . $escapedpath . '\/*) AND
-                    last_modified: {* TO ' . $mtime . '}',
+                    last_modified: {* TO ' . $mtime . '} AND filesize: >=' . $filter,
                     'analyze_wildcard' => 'true'
                 ]
             ]
@@ -427,8 +451,14 @@ function get_file_sizes($client, $index, $path, $filter, $mtime) {
         ]
     ];
 
-    // Send search query to Elasticsearch and get scroll id and first page of results
-    $queryResponse = $client->search($searchParams);
+    try {
+        // Send search query to Elasticsearch and get scroll id and first page of results
+        $queryResponse = $client->search($searchParams);
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+        die;
+    }
 
     // Get mtime ranges
     $results = $queryResponse['aggregations']['filesize_ranges']['buckets'];
@@ -460,7 +490,7 @@ function get_file_ext($client, $index, $path, $filter, $mtime) {
                 'query' => [
                     'query_string' => [
                         'query' => 'path_parent: ' . $escapedpath . '*
-                        AND last_modified: {* TO ' . $mtime . '}',
+                        AND last_modified: {* TO ' . $mtime . '} AND filesize: >=' . $filter,
                         'analyze_wildcard' => 'true'
                     ]
                 ]
@@ -472,7 +502,7 @@ function get_file_ext($client, $index, $path, $filter, $mtime) {
                 'query_string' => [
                     'query' => '(path_parent: ' . $escapedpath . ' OR
                     path_parent: ' . $escapedpath . '\/*) AND
-                    last_modified: {* TO ' . $mtime . '}',
+                    last_modified: {* TO ' . $mtime . '} AND filesize: >=' . $filter,
                     'analyze_wildcard' => 'true'
                 ]
             ]
@@ -500,8 +530,14 @@ function get_file_ext($client, $index, $path, $filter, $mtime) {
             ]
         ];
 
-    // Send search query to Elasticsearch and get scroll id and first page of results
-    $queryResponse = $client->search($searchParams);
+    try {
+        // Send search query to Elasticsearch and get scroll id and first page of results
+        $queryResponse = $client->search($searchParams);
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+        die;
+    }
 
     // Get file extensions
     $results = $queryResponse['aggregations']['top_extensions']['buckets'];

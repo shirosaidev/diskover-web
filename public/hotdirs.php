@@ -179,13 +179,23 @@ if ($show_change_percent) {
         </div>
 <?php } else { ?>
 <div class="container" id="error" style="display:none; margin-top:70px;">
-            <div class="row">
-        <div class="alert alert-dismissible alert-warning col-xs-8">
+      <div class="row">
+        <div class="alert alert-dismissible alert-danger col-xs-8">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
-          <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or worker bots are still calculating directory sizes.</strong> Choose a different path and try again or check if worker bots are still running in rq. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
+          <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, an error has occured :( </strong><a href="#" onclick="window.history.go(-1); return false;">Go back</a>.<br /><br />
+                    <small><a href="#" onclick="document.getElementById('debugerror').style.display = 'block'; return false;"> show debug error</a><br />
+                    <span id="debugerror" style="display:none;"></span></small>
         </div>
       </div>
     </div>
+        <div class="container" id="warning" style="display:none; margin-top:70px;">
+            <div class="row">
+                <div class="alert alert-dismissible alert-info col-xs-8">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or worker bots are still calculating directory sizes.</strong> Choose a different path and try again or check if worker bots are still running in rq. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
+                </div>
+            </div>
+        </div>
         <div class="container" id="index2req" style="display:none; margin-top:70px;">
             <div class="row">
                 <div class="alert alert-dismissible alert-info col-xs-8">

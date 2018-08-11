@@ -17,10 +17,10 @@ $(document).ready(function() {
 // add filtersto statustext
 var hide_thresh = (getCookie('hide_thresh')) ? parseFloat(getCookie('hide_thresh')) : HIDE_THRESH;
 var status_filter = 'minsize:' + format(filter) + ', ';
-var status_mtime = ' mtime:' + mtime + ', ';
+var status_mtime = ' mtime:' + mtime;
 document.getElementById('statusfilters').append(status_filter);
 document.getElementById('statusfilters').append(status_mtime);
-document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
+document.getElementById('statushidethresh').innerHTML = hide_thresh;
 
 
 function getESJsonDataTreeMap() {
@@ -56,10 +56,17 @@ function getESJsonDataTreeMap() {
     d3.json(chartConfig.data_url, function(error, data) {
 
         // display error if data has error message
-        if ((data && data.error) || error) {
+        if (data.error) {
             spinner.stop();
-            console.warn("Elasticsearch data fetch error: " + error);
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
             document.getElementById('error').style.display = 'block';
+            return false;
+        // display warning if data has 0 items
+        } else if (data.count === 0 && data.size === 0) {
+            spinner.stop();
+            console.warn('No docs found in Elasticsearch');
+            document.getElementById('warning').style.display = 'block';
             return false;
         }
 
@@ -109,6 +116,21 @@ function changeTreeMap(node) {
     // load json data from Elasticsearch
     d3.json(chartConfig.data_url, function(error, data) {
 
+        // display error if data has error message
+        if (data.error) {
+            spinner.stop();
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
+            document.getElementById('error').style.display = 'block';
+            return false;
+        // display warning if data has 0 items
+        } else if (data.count === 0 && data.size === 0) {
+            spinner.stop();
+            console.warn('No docs found in Elasticsearch');
+            document.getElementById('warning').style.display = 'block';
+            return false;
+        }
+
         root2 = data;
 
         // stop spin.js loader
@@ -123,7 +145,7 @@ function changeTreeMap(node) {
 function changeThreshold(a) {
     hide_thresh = a;
     setCookie('hide_thresh', hide_thresh);
-    document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
+    document.getElementById('statushidethresh').innerHTML = hide_thresh;
     changeTreeMap(node);
 }
 
@@ -135,7 +157,7 @@ function treeMapData(data) {
     function filterItems(item) {
         var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
         var rootval = (use_count) ? data.count : data.size;
-        var percent = (val / rootval * 100).toFixed(1);
+        var percent = (val / rootval * 100).toFixed(3);
         if (percent > hide_thresh) {
             items.push(item);
         }
@@ -150,6 +172,9 @@ function renderTreeMap(data) {
 
     // remove existing treemap elements
     svg.selectAll('.cell').remove();
+
+    // remove existing mouse tips
+    d3.selectAll(".d3-tip").remove();
 
     var treemap = d3.layout.treemap()
         .size([w, h])

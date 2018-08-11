@@ -11,7 +11,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc13';
+$VERSION = '1.5.0-rc14';
 
 
 function connectES() {
@@ -116,8 +116,8 @@ function getmtime($mtime) {
         $mtime = 'now-2y/d';
     } elseif ($mtime === "3y") {
         $mtime = 'now-3y/d';
-    } elseif ($mtime === "6y") {
-        $mtime = 'now-6y/d';
+    } elseif ($mtime === "5y") {
+        $mtime = 'now-5y/d';
     } elseif ($mtime === "10y") {
         $mtime = 'now-10y/d';
     }

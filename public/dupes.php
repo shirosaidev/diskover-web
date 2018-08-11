@@ -31,13 +31,23 @@ require "d3_inc.php";
 	<body>
 		<?php include "nav.php"; ?>
         <div class="container" id="error" style="display:none; margin-top:70px;">
-			<div class="row">
-				<div class="alert alert-dismissible alert-info col-xs-8">
-					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					<i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found.</strong> Run diskover using --finddupes to search for duplicate files, or try searching for a different directory and clicking it's dupes analytics button, or changing filters (on filetree page) or mindupes value.
-				</div>
-			</div>
-		</div>
+            <div class="row">
+                <div class="alert alert-dismissible alert-danger col-xs-8">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, an error has occured :( </strong><a href="#" onclick="window.history.go(-1); return false;">Go back</a>.<br /><br />
+                    <small><a href="#" onclick="document.getElementById('debugerror').style.display = 'block'; return false;"> show debug error</a><br />
+                    <span id="debugerror" style="display:none;"></span></small>
+                </div>
+            </div>
+        </div>
+        <div class="container" id="warning" style="display:none; margin-top:70px;">
+            <div class="row">
+                <div class="alert alert-dismissible alert-info col-xs-8">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, no files found, all files too small (filtered) or worker bots are still calculating directory sizes.</strong> Choose a different path and try again or check if worker bots are still running in rq. <a href="#" onclick="window.history.go(-1); return false;">Go back</a>.
+                </div>
+            </div>
+        </div>
 		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
             <div id="dupescharts-wrapper" style="display:none;">
                 <div class="row">

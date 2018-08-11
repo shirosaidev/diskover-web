@@ -1,5 +1,15 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc14] - 2018-08-11
+### added
+- disable 0 option to Hide Thresh dropdown on filetree and treemap pages
+### fixed
+- bug with Rating on search results page
+- bug with items change % on search results page
+- bug with min size filter on filetree page not affecting all charts
+- bug with percent calculation for extension pie, mtime and size bar charts on filetree page
+- bug with existing mousetips still showing when switching directories on treemap
+
 # [1.5.0-rc13] - 2018-08-07
 ### added
 - dynamic chart sizing (browser window size) for filetree analytics page

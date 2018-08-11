@@ -25,12 +25,6 @@ $data = [];
 foreach ($indices as $key => $value) {
     $dirinfo = get_dir_info($client, $value, $path, $filter, $mtime);
 
-    // check for error
-    if ($dirinfo[0] === 0) {
-        echo "Error: diskover index " . $value . " has no data";
-        exit;
-    }
-
     // append each index info to data list
     $data[] = [
         "name" => $path,

@@ -222,6 +222,7 @@ input:checked + .slider:before {
 .statustext {
     font-size: 11px;
     color: gray;
+    font-weight: bold;
     padding: 4px;
 }
 

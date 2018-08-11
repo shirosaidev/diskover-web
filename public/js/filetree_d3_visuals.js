@@ -17,10 +17,10 @@ var hide_thresh = (getCookie('hide_thresh')) ? parseFloat(getCookie('hide_thresh
 
 // add filtersto statustext
 var status_filter = 'minsize:' + format(filter) + ', ';
-var status_mtime = ' mtime:' + mtime + ', ';
+var status_mtime = ' mtime:' + mtime;
 document.getElementById('statusfilters').append(status_filter);
 document.getElementById('statusfilters').append(status_mtime);
-document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
+document.getElementById('statushidethresh').innerHTML = hide_thresh;
 
 console.log("PATH:" + path);
 console.log("SIZE_FILTER:" + filter);
@@ -38,10 +38,9 @@ var duration = 250;
 function changeThreshold(a) {
     hide_thresh = a;
     setCookie('hide_thresh', hide_thresh);
-    document.getElementById('statushidethresh').innerHTML = ' hide_thresh:' + hide_thresh;
+    document.getElementById('statushidethresh').innerHTML = hide_thresh;
     changePie(node);
     changePieFileExt(node);
-    changeBarMtime(node);
 }
 
 function getMtime() {
@@ -123,7 +122,7 @@ function pieData(data) {
     function addLabels(item) {
         var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
         var rootval = (use_count) ? (node || root).count : (node || root).size;
-        var percent = (val / rootval * 100).toFixed(1);
+        var percent = (val / rootval * 100).toFixed(3);
         if (percent > hide_thresh) {
             labels.push({
                 'label': item.name,
@@ -444,7 +443,7 @@ function loadPieFileExt(data) {
         function addLabels(item) {
             var val = (use_count) ? (item.count) ? item.count : 0 : item.size;
             var rootval = (use_count) ? (node2 || root2).count : (node2 || root2).size;
-            var percent = (val / rootval * 100).toFixed(1);
+            var percent = (val / rootval * 100).toFixed(3);
             if (percent > hide_thresh) {
                 labels.push({
                     'label': item.name,
@@ -459,6 +458,8 @@ function loadPieFileExt(data) {
     }
 
     node2 = data;
+
+    console.log(node2)
 
     data = pieExtData(data);
 
@@ -606,6 +607,15 @@ function changePieFileExt(node) {
 
     // load json data from Elasticsearch
     d3.json(chartConfig.data_url, function(error, data) {
+
+        // display error if data has error message
+        if (data.error) {
+            spinner.stop();
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
+            document.getElementById('error').style.display = 'block';
+            return false;
+        }
 
         root2 = data;
 
@@ -858,6 +868,15 @@ function changeBarMtime(node) {
     // load json data from Elasticsearch
     d3.json(chartConfig.data_url, function(error, data) {
 
+        // display error if data has error message
+        if (data.error) {
+            spinner.stop();
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
+            document.getElementById('error').style.display = 'block';
+            return false;
+        }
+
         root3 = data;
 
         // stop spin.js loader
@@ -1104,6 +1123,15 @@ function changeBarFileSizes(node) {
 
     // load json data from Elasticsearch
     d3.json(chartConfig.data_url, function(error, data) {
+
+        // display error if data has error message
+        if (data.error) {
+            spinner.stop();
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
+            document.getElementById('error').style.display = 'block';
+            return false;
+        }
 
         root4 = data;
 

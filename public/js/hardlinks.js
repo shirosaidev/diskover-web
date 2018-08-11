@@ -59,23 +59,24 @@ function getESJsonData() {
 
      // load json data from Elasticsearch
      d3.json(chartConfig.data_url, function(error, data) {
-         // display error if data has error message
-         if ((data && data.error) || error || data === null) {
-             spinner.stop();
-             console.warn("No Elasticsearch results or timeout: " + error);
-             document.getElementById('error').style.display = 'block';
-             deleteCookie("minhardlinks");
-             return false;
-         }
+      
+        // display error if data has error message
+        if (data.error) {
+            spinner.stop();
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
+            document.getElementById('error').style.display = 'block';
+            return false;
+        }
 
-         console.log("storing json data in session storage");
-         // store in session Storage
-         sessionStorage.setItem('diskover-hardlinks', JSON.stringify(data));
+        console.log("storing json data in session storage");
+        // store in session Storage
+        sessionStorage.setItem('diskover-hardlinks', JSON.stringify(data));
 
-         // stop spin.js loader
-         spinner.stop();
+        // stop spin.js loader
+        spinner.stop();
 
-         renderHardLinksCharts(data);
+        renderHardLinksCharts(data);
 
      });
 }

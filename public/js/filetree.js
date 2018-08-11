@@ -101,12 +101,19 @@ function getChildJSON(d) {
 	d3.json(chartConfig.data_url, function (error, data) {
 
 		// display error if data has error message
-		if ((data && data.error) || error) {
-			spinner.stop();
-			console.warn("Elasticsearch data fetch error: " + error);
-			//document.getElementById('error').style.display = 'block';
-			return false;
-		}
+        if (data.error) {
+            spinner.stop();
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
+            document.getElementById('error').style.display = 'block';
+            return false;
+        // display warning if data has 0 items
+        } else if (data.count === 0 && data.size === 0) {
+            spinner.stop();
+            console.warn('No docs found in Elasticsearch');
+            document.getElementById('warning').style.display = 'block';
+            return false;
+        }
 
 		if (data.children.length > 0) {
 			// update children in root
@@ -182,12 +189,19 @@ function getJSON() {
 		d3.json(chartConfig.data_url, function (error, data) {
 
 			// display error if data has error message
-			if ((data && data.error) || error) {
+			if (data.error) {
 				spinner.stop();
-				console.warn("Elasticsearch data fetch error: " + error);
+				console.error('Elasticsearch error: ' + JSON.stringify(data));
+                document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
 				document.getElementById('error').style.display = 'block';
 				return false;
-			}
+            // display warning if data has 0 items
+			} else if (data.count === 0 && data.size === 0) {
+                spinner.stop();
+                console.warn('No docs found in Elasticsearch');
+                document.getElementById('warning').style.display = 'block';
+                return false;
+            }
 
 			root = data;
 

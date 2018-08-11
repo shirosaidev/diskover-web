@@ -40,11 +40,18 @@ function getESJsonData() {
     // load json data from Elasticsearch
     d3.json(chartConfig.data_url, function(error, data) {
 
-        // display error if data has error message or no index2 selected
-        if ((data && data.error) || error) {
+        // display error if data has error message
+        if (data.error) {
             spinner.stop();
-            console.warn("Elasticsearch data fetch error: " + error);
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
             document.getElementById('error').style.display = 'block';
+            return false;
+        // display warning if data has 0 items
+        } else if (data.count === 0 && data.size === 0) {
+            spinner.stop();
+            console.warn('No docs found in Elasticsearch');
+            document.getElementById('warning').style.display = 'block';
             return false;
         }
 

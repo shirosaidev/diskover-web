@@ -197,15 +197,15 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           $date2 = date_create($file['last_modified']);
           $diff = date_diff($date1,$date2);
           $mtime_daysago = $diff->format('%a');
-          if ($mtime_daysago > 730) {
+          if ($mtime_daysago >= 730) {
             $file_rating = 5;
-          } elseif ($mtime_daysago < 730 && $mtime_daysago > 365 ) {
+          } elseif ($mtime_daysago < 730 && $mtime_daysago >= 365 ) {
             $file_rating = 4;
-          } elseif ($mtime_daysago < 365 && $mtime_daysago > 180 ) {
+          } elseif ($mtime_daysago < 365 && $mtime_daysago >= 180 ) {
             $file_rating = 3;
-          } elseif ($mtime_daysago < 180 && $mtime_daysago > 90 ) {
+          } elseif ($mtime_daysago < 180 && $mtime_daysago >= 90 ) {
             $file_rating = 2;
-          } elseif ($mtime_daysago < 90 && $mtime_daysago > 30 ) {
+          } elseif ($mtime_daysago < 90 && $mtime_daysago >= 30 ) {
             $file_rating = 1;
           } else {
             $file_rating = 0;
@@ -367,7 +367,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <!-- end show comparison file size -->
         <td class="text-nowrap highlight"><?php echo $file['items']; ?>
         <!-- show comparison items -->
-        <?php if ($show_change_percent) { ?>
+        <?php if ($show_change_percent) { $diritems_change = 0; ?>
         <td class="highlight">
         <?php
         if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {

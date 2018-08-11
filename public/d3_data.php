@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -16,12 +16,6 @@ $mtime = getmtime($mtime);
 
 // get dir total size and file count
 $dirinfo = get_dir_info($client, $esIndex, $path, $filter, $mtime);
-
-// check for error
-if ($dirinfo[0] === 0) {
-    echo "Error: diskover index " . $esIndex . " has no data or other error";
-    exit;
-}
 
 $data = [
     "name" => $path,
