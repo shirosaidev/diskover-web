@@ -60,8 +60,16 @@ function getESJsonData() {
      // load json data from Elasticsearch
      d3.json(chartConfig.data_url, function(error, data) {
       
+        // display hardlinks message if no results
+        if (data === undefined) {
+             spinner.stop();
+             console.warn("No Elasticsearch results");
+             document.getElementById('nohardlinks').style.display = 'block';
+             deleteCookie("minhardlinks");
+             return false;
+        }
         // display error if data has error message
-        if (data.error) {
+        else if (data.error) {
             spinner.stop();
             console.error('Elasticsearch error: ' + JSON.stringify(data));
             document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);

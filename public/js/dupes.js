@@ -59,23 +59,32 @@ function getESJsonData() {
 
      // load json data from Elasticsearch
      d3.json(chartConfig.data_url, function(error, data) {
-         // display error if data has error message
-         if ((data && data.error) || error || data === null) {
+
+        // display finddupes message if no results
+        if (data === undefined) {
              spinner.stop();
-             console.warn("No Elasticsearch results or timeout: " + error);
-             document.getElementById('error').style.display = 'block';
+             console.warn("No Elasticsearch results");
+             document.getElementById('finddupes').style.display = 'block';
              deleteCookie("mindupes");
              return false;
          }
+        // display error if data has error message
+        else if (data.error) {
+            spinner.stop();
+            console.error('Elasticsearch error: ' + JSON.stringify(data));
+            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
+            document.getElementById('error').style.display = 'block';
+            return false;
+        }
 
-         console.log("storing json data in session storage");
-         // store in session Storage
-         sessionStorage.setItem('diskover-dupes', JSON.stringify(data));
+        console.log("storing json data in session storage");
+        // store in session Storage
+        sessionStorage.setItem('diskover-dupes', JSON.stringify(data));
 
-         // stop spin.js loader
-         spinner.stop();
+        // stop spin.js loader
+        spinner.stop();
 
-         renderDupesCharts(data);
+        renderDupesCharts(data);
 
      });
 }

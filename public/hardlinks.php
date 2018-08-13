@@ -30,11 +30,21 @@ require "d3_inc.php";
 
 	<body>
 		<?php include "nav.php"; ?>
-		<div class="container" id="error" style="display:none; margin-top:70px;">
+		<div class="container" id="nohardlinks" style="display:none; margin-top:70px;">
             <div class="row">
                 <div class="alert alert-dismissible alert-info col-xs-8">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                     <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no hardlinks found.</strong> Try searching for a different directory and clicking it's hardlinks analytics button, or changing filters (on filetree page) or minhardlinks value.
+                </div>
+            </div>
+        </div>
+        <div class="container" id="error" style="display:none; margin-top:70px;">
+            <div class="row">
+                <div class="alert alert-dismissible alert-danger col-xs-8">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <span class="glyphicon glyphicon-exclamation-sign"></span> <strong>Sorry, an error has occured :( </strong><a href="#" onclick="window.history.go(-1); return false;">Go back</a>.<br /><br />
+                    <small><a href="#" onclick="document.getElementById('debugerror').style.display = 'block'; return false;"> show debug error</a><br />
+                    <span id="debugerror" style="display:none;"></span></small>
                 </div>
             </div>
         </div>

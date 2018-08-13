@@ -5,6 +5,7 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
+session_start();
 use diskover\Constants;
 use Elasticsearch\ClientBuilder;
 

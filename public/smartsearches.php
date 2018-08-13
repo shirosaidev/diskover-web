@@ -5,7 +5,6 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
-session_start();
 require '../vendor/autoload.php';
 use diskover\Constants;
 error_reporting(E_ALL ^ E_NOTICE);

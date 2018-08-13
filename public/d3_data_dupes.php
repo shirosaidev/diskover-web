@@ -16,7 +16,6 @@ $mindupes = $_GET['mindupes'];
 // Get search results from Elasticsearch for duplicate files
 
 // find all the files with dupe_md5 values that are not empty ""
-$md5s = [];
 $results = [];
 $searchParams = [];
 $totalMd5Count = 0;
@@ -63,8 +62,15 @@ $queryResponse = $client->search($searchParams);
 // Get top dupes
 $results = $queryResponse['aggregations']['top_dupes']['buckets'];
 
+
+$md5s_unique = [];
 foreach ($results as $result) {
     $md5s_unique[] = $result['key'];
+}
+
+if (sizeof($md5s_unique) === 0) {
+  echo "No Elasticsearch results";
+  die;
 }
 
 // find files that match each md5

@@ -41,7 +41,7 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 foreach ($queryResponse['hits']['hits'] as $key => $value) {
-    if ($value['_source']['path'] !== $path) {
+    if ($value['_source']['path'] !== $_SESSION['rootpath']) {
         $elapsed = number_format($value['_source']['crawl_time'], 3);
         $slowestcrawlers[] = ['path' => $value['_source']['path'], 'crawltime' => (float)$elapsed];
         $dirnames[] = basename($value['_source']['path']);

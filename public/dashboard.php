@@ -589,10 +589,14 @@ if ($s3_index) {
                 <span class="badge"><?php echo secondsToTime($crawlcumulativetime); ?></span>
                 <i class="glyphicon glyphicon-time"></i> Total crawl time (cumulative)
               </li>
-              <?php } else { ?>
-                    <strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
-                <?php } ?>
+              <li class="list-group-item">
+                <span class="badge"><?php echo number_format($crawlelapsedtime/$totalfiles*1000, 6) . ' / ' . number_format($crawlelapsedtime/$totaldirs*1000, 6); ?></span>
+                <i class="glyphicon glyphicon-dashboard"></i> Crawl time per file/directory (average ms)
+              </li>
             </ul>
+            <?php } else { ?>
+                    <p><strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
+                <?php } ?>
                 <p><small><span style="color:#666"><i class="glyphicon glyphicon-info-sign"></i> Started at time is first crawl and finished at time is last crawl. Elapsed time is how long it took to crawl the tree and scrape meta. Total crawl time is the cumulative time for all worker bots.</span></small></p>
           </div>
         </div>

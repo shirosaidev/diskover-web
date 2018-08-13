@@ -30,6 +30,14 @@ require "d3_inc.php";
 
 	<body>
 		<?php include "nav.php"; ?>
+        <div class="container" id="finddupes" style="display:none; margin-top:70px;">
+            <div class="row">
+                <div class="alert alert-dismissible alert-info col-xs-8">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <i class="glyphicon glyphicon-exclamation-sign"></i> <strong>Sorry, no duplicate files found.</strong> Run diskover using --finddupes to search for duplicate files, or try searching for a different directory and clicking it's dupes analytics button, or changing filters (on filetree page) or mindupes value.
+                </div>
+            </div>
+        </div>
         <div class="container" id="error" style="display:none; margin-top:70px;">
             <div class="row">
                 <div class="alert alert-dismissible alert-danger col-xs-8">
