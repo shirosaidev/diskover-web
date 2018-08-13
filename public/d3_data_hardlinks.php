@@ -17,7 +17,6 @@ $minhardlinks = $_GET['minhardlinks'];
 // Get search results from Elasticsearch for harlinks
 
 // find all the files with hardlinks >= minhardlinks
-$inodes = [];
 $results = [];
 $searchParams = [];
 $totalHardLinkCount = 0;
@@ -68,8 +67,14 @@ $queryResponse = $client->search($searchParams);
 // Get top hardlinks
 $results = $queryResponse['aggregations']['top_hardlinks']['buckets'];
 
+$inodes_unique = [];
 foreach ($results as $result) {
     $inodes_unique[] = $result['key'];
+}
+
+if (sizeof($inodes_unique) === 0) {
+  echo "No Elasticsearch results";
+  die;
 }
 
 // find files that match each inode
