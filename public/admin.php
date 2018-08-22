@@ -330,7 +330,7 @@ $configtext = file_get_contents($file_config);
     				// optimize indices
     				if (isset($_POST['optimizeindices'])) {
     					foreach ($_POST['optimizeindices'] as $i) {
-                            curl_es('/' . $i . '/_forcemerge?only_expunge_deletes=true', 'POST', false);
+                            curl_es('/' . $i . '/_forcemerge?max_num_segments=1', 'POST', false);
     					}
                     ?>
                     <script>alert("selected indices optimized");</script>

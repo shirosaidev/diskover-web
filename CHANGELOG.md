@@ -1,9 +1,11 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc14] - 2018-08-13
+# [1.5.0-rc14] - 2018-08-22
 ### added
 - disable 0 option to Hide Thresh dropdown on filetree and treemap pages
 - crawl time per file/directory (average in milliseonds) to dashboard
+### changed
+- optimizing code to better optimize indices on Admin page
 ### fixed
 - bug with Rating on search results page
 - bug with items change % on search results page
