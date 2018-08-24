@@ -1,11 +1,13 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc14] - 2018-08-22
+# [1.5.0-rc14] - 2018-08-24
 ### added
 - disable 0 option to Hide Thresh dropdown on filetree and treemap pages
 - crawl time per file/directory (average in milliseonds) to dashboard
+- process time (page load time) to bottom of dashboard
 ### changed
 - optimizing code to better optimize indices on Admin page
+- set doctype to file (instead of all) when clicking on files in filetree, treemap, file view pages to search for file
 ### fixed
 - bug with Rating on search results page
 - bug with items change % on search results page
@@ -13,6 +15,7 @@
 - bug with percent calculation for extension pie, mtime and size bar charts on filetree page
 - bug with existing mousetips still showing when switching directories on treemap
 - bug with crawl stats page showing crawl time for rootdir
+- bug with quick search and > 250 MB
 
 # [1.5.0-rc13] - 2018-08-07
 ### added

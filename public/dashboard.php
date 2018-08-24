@@ -445,6 +445,8 @@ if ($s3_index) {
     $buckets = $queryResponse['hits']['hits'];
 }
 
+$estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -1277,5 +1279,14 @@ if ($s3_index) {
         }
     };
 </script>
+<center>
+<hr>
+<p style="font-size:11px; color:#555;">
+<?php
+$time = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
+echo "ES Process Time: {$estime}, Process Time: {$time}";
+?>
+</p>
+</center>
 </body>
 </html>
