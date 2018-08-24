@@ -593,7 +593,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
               </li>
               <li class="list-group-item">
                 <span class="badge"><?php echo number_format($crawlelapsedtime/$totalfiles*1000, 6) . ' / ' . number_format($crawlelapsedtime/$totaldirs*1000, 6); ?></span>
-                <i class="glyphicon glyphicon-dashboard"></i> Crawl time per file/directory (average ms)
+                <i class="glyphicon glyphicon-dashboard"></i> Elapsed time per file/directory (average ms)
               </li>
             </ul>
             <?php } else { ?>
