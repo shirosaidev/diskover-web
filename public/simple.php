@@ -116,6 +116,9 @@ if (!empty($_REQUEST['submitted'])) {
         $i += 1;
     }
 }
+
+$estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
+
 ?>
 	<!DOCTYPE html>
 	<html lang="en">
@@ -256,5 +259,4 @@ if (isset($_REQUEST['submitted'])) {
 </div>
 <iframe name="hiddeniframe" width=0 height=0 style="display:none;"></iframe>
 </body>
-
 </html>

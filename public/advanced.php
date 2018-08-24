@@ -218,6 +218,7 @@ if (!empty($_REQUEST['submitted'])) {
         $querystring = $q[0];
         $keyword = 
         $searchParams['body']['query']['query_string']['query'] = $querystring;
+        $searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
     } elseif (count($q) > 1) {
         $querystring = "";
         $i = 0;
@@ -229,10 +230,10 @@ if (!empty($_REQUEST['submitted'])) {
             $i += 1;
         }
         $searchParams['body']['query']['query_string']['query'] = $querystring;
+        $searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
     } else {
         $searchParams['body'] = [ 'query' => [ 'match_all' => (object) [] ] ];
     }
-    $searchParams['body']['query']['query_string']['analyze_wildcard'] = 'true';
     $request = $querystring;
     // Save search query
     saveSearchQuery($querystring);
@@ -281,6 +282,9 @@ if (!empty($_REQUEST['submitted'])) {
         $i += 1;
     }
 }
+
+$estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

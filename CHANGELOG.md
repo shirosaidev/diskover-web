@@ -4,7 +4,7 @@
 ### added
 - disable 0 option to Hide Thresh dropdown on filetree and treemap pages
 - crawl time per file/directory (average in milliseonds) to dashboard
-- process time (page load time) to bottom of dashboard
+- process time (page load time) to bottom of dashboard and search results pages
 ### changed
 - optimizing code to better optimize indices on Admin page
 - set doctype to file (instead of all) when clicking on files in filetree, treemap, file view pages to search for file
@@ -16,6 +16,7 @@
 - bug with existing mousetips still showing when switching directories on treemap
 - bug with crawl stats page showing crawl time for rootdir
 - bug with quick search and > 250 MB
+- ES error when submitting search with all fields empty on Advanced Search
 
 # [1.5.0-rc13] - 2018-08-07
 ### added
