@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -12,15 +12,15 @@ require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
 
-// Get search results from Elasticsearch for worker bot usage
+// Get search results from Elasticsearch for worker usage
 $results = [];
 $searchParams = [];
 
+// Setup search query
 $worker_usage = [];
 $workers = [];
 
-// Setup search query
-// get all the worker names
+// get all the worker info
 $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'worker';
 $searchParams['body'] = [
@@ -32,44 +32,41 @@ $searchParams['body'] = [
 ];
 // Send search query to Elasticsearch
 $queryResponse = $client->search($searchParams);
+
 foreach ($queryResponse['hits']['hits'] as $key => $value) {
     $workers[] = $value['_source']['worker_name'];
 }
 $workers = array_unique($workers);
 
 foreach ($workers as $key => $value) {
-    // Execute the search
     $searchParams['index'] = $esIndex;
-    $searchParams['type']  = 'file';
+    $searchParams['type'] = 'worker';
     $searchParams['body'] = [
-     'size' => 0,
-     'query' => [
-       'match' => [
-         'worker_name' => $value
-       ]
-     ]
+       'size' => 0,
+        'aggs' => [
+          'total_files' => [
+            'sum' => [
+              'field' => 'file_count'
+            ]
+          ],
+          'total_dirs' => [
+            'sum' => [
+              'field' => 'dir_count'
+            ]
+          ]
+        ],
+        'query' => [
+          'match' => [
+            'worker_name' => $value
+          ]
+        ]
     ];
-    // Send search query to Elasticsearch
-    $queryResponseFile = $client->search($searchParams);
+    $queryResponse = $client->search($searchParams);
+    $totalfilecount = $queryResponse['aggregations']['total_files']['value'];
+    $totaldircount = $queryResponse['aggregations']['total_dirs']['value'];
 
-    // Execute the search
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = 'directory';
-    // Execute the search
-    $searchParams['body'] = [
-     'size' => 0,
-     'query' => [
-       'match' => [
-         'worker_name' => $value
-       ]
-     ]
-    ];
-
-    // Send search query to Elasticsearch
-    $queryResponseDir = $client->search($searchParams);
-
-    if ($queryResponseFile['hits']['total'] || $queryResponseDir['hits']['total'] > 0) {
-        $worker_usage[] = [ 'worker_name' => $value, 'file' => $queryResponseFile['hits']['total'], 'directory' => $queryResponseDir['hits']['total'] ];
+    if ($totalfilecount > 0 || $totaldircount > 0) {
+        $worker_usage[] = [ 'worker_name' => $value, 'file' => $totalfilecount, 'directory' => $totaldircount ];
     }
 }
 

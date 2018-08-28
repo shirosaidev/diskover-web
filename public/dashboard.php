@@ -106,68 +106,6 @@ $queryResponse = $client->search($searchParams);
 $crawlcumulativetime = $queryResponse['aggregations']['total_elapsed']['value'];
 
 
-// Get search results from Elasticsearch for worker usage
-$results = [];
-$searchParams = [];
-
-// Setup search query
-$worker_usage = [];
-$workers = [];
-
-// get all the worker names
-$searchParams['index'] = $esIndex;
-$searchParams['type']  = 'worker';
-$searchParams['body'] = [
-    '_source' => ['worker_name'],
-    'size' => 100,
-    'query' => [
-        'match_all' => (object) []
-    ]
-];
-// Send search query to Elasticsearch
-$queryResponse = $client->search($searchParams);
-foreach ($queryResponse['hits']['hits'] as $key => $value) {
-    $workers[] = $value['_source']['worker_name'];
-}
-$workers = array_unique($workers);
-
-foreach ($workers as $key => $value) {
-    // Execute the search
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = 'file';
-    $searchParams['body'] = [
-     'size' => 0,
-     'query' => [
-       'match' => [
-         'worker_name' => $value
-       ]
-     ]
-    ];
-    // Send search query to Elasticsearch
-    $queryResponseFile = $client->search($searchParams);
-
-    // Execute the search
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = 'directory';
-    // Execute the search
-    $searchParams['body'] = [
-     'size' => 0,
-     'query' => [
-       'match' => [
-         'worker_name' => $value
-       ]
-     ]
-    ];
-
-    // Send search query to Elasticsearch
-    $queryResponseDir = $client->search($searchParams);
-
-    if ($queryResponseFile['hits']['total'] || $queryResponseDir['hits']['total'] > 0) {
-        $worker_usage[$value] = [ 'worker_name' => $value, 'file' => $queryResponseFile['hits']['total'], 'directory' => $queryResponseDir['hits']['total'] ];
-    }
-}
-
-
 // Get search results from Elasticsearch for tags
 $results = [];
 $searchParams = [];
@@ -1171,6 +1109,8 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
             .scale(y)
             .orient("left")
             .ticks(10);
+
+        console.log(data)
 
         var dataIntermediate=xData.map(function (c){
             return data.map(function(d) {
