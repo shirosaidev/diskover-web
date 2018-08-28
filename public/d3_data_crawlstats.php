@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -19,6 +19,7 @@ $results = [];
 $searchParams = [];
 $slowestcrawlers = [];
 $sizes = [];
+$items = [];
 $filecount = [];
 $directorycount = [];
 $paths = [];
@@ -26,9 +27,9 @@ $dirnames = [];
 $crawltimes = [];
 
 $searchParams['index'] = $esIndex;
-$searchParams['type'] = 'crawlstat';
+$searchParams['type'] = 'directory';
 $searchParams['body'] = [
-    '_source' => ['path', 'crawl_time'],
+    '_source' => ['path_parent', 'filename', 'crawl_time', 'items', 'items_files', 'items_subdirs', 'filesize'],
     'size' => $num,
     'query' => [
         'match_all' => (object) []
@@ -41,67 +42,18 @@ $searchParams['body'] = [
 ];
 $queryResponse = $client->search($searchParams);
 foreach ($queryResponse['hits']['hits'] as $key => $value) {
-    if ($value['_source']['path'] !== $_SESSION['rootpath']) {
+    $fullpath = $value['_source']['path_parent'] . '/' . $value['_source']['filename'];
+    if ($fullpath !== $_SESSION['rootpath']) {
         $elapsed = number_format($value['_source']['crawl_time'], 3);
-        $slowestcrawlers[] = ['path' => $value['_source']['path'], 'crawltime' => (float)$elapsed];
-        $dirnames[] = basename($value['_source']['path']);
-        $paths[] = $value['_source']['path'];
+        $slowestcrawlers[] = ['path' => $fullpath, 'crawltime' => (float)$elapsed, 'filesize' => $value['_source']['filesize'], 'items' => $value['_source']['items'], 'directorycount' => $value['_source']['items_subdirs'], 'filecount' => $value['_source']['items_files']];
+        $directorycount[] = $value['_source']['items_subdirs'];
+        $filecount[] = $value['_source']['items_files'];
+        $sizes[] = $value['_source']['filesize'];
+        $items[] = $value['_source']['items'];
+        $dirnames[] = basename($fullpath);
+        $paths[] = $fullpath;
         $crawltimes[] = (float)$elapsed;
     }
-}
-
-// grab the total items for each directory
-$searchParams['type'] = 'directory';
-foreach ($slowestcrawlers as $key => $value) {
-    $searchParams['body'] = [
-    '_source' => ['filesize', 'items'],
-     'size' => 1,
-     'query' => [
-       'query_string' => [
-         'query' => 'path_parent:' . escape_chars(dirname($value['path'])) . ' AND filename:' . escape_chars(basename($value['path']))
-       ]
-     ]
-    ];
-    $queryResponse = $client->search($searchParams);
-    $slowestcrawlers[$key]['filesize'] = $queryResponse['hits']['hits'][0]['_source']['filesize'];
-    $slowestcrawlers[$key]['items'] = $queryResponse['hits']['hits'][0]['_source']['items'];
-    $sizes[] = $queryResponse['hits']['hits'][0]['_source']['filesize'];
-    $items[] = $queryResponse['hits']['hits'][0]['_source']['items'];
-}
-
-// grab the total sub directories for each directory
-$searchParams['type'] = 'directory';
-foreach ($slowestcrawlers as $key => $value) {
-    $searchParams['body'] = [
-    '_source' => [],
-     'size' => 0,
-     'query' => [
-       'query_string' => [
-         'query' => 'path_parent:' . escape_chars($value['path']) . ' OR path_parent:' . escape_chars($value['path']) . '\/*',
-         'analyze_wildcard' => 'true'
-       ]
-     ]
-    ];
-    $queryResponse = $client->search($searchParams);
-    $directorycount[] = $queryResponse['hits']['total'];
-    $slowestcrawlers[$key]['directorycount'] = $queryResponse['hits']['total'];
-}
-// grab the total files for each directory
-$searchParams['type'] = 'file';
-foreach ($slowestcrawlers as $key => $value) {
-    $searchParams['body'] = [
-    '_source' => [],
-     'size' => 0,
-     'query' => [
-       'query_string' => [
-         'query' => 'path_parent:' . escape_chars($value['path']) . ' OR path_parent:' . escape_chars($value['path']) . '\/*',
-         'analyze_wildcard' => 'true'
-       ]
-     ]
-    ];
-    $queryResponse = $client->search($searchParams);
-    $filecount[] = $queryResponse['hits']['total'];
-    $slowestcrawlers[$key]['filecount'] = $queryResponse['hits']['total'];
 }
 
 $data = [

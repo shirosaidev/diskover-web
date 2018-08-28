@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -27,16 +27,17 @@ $searchParams['body'] = [
     'size' => 1,
     'query' => [
             'match' => [
-                'worker_name' => 'main'
+                'state' => 'finished_dircalc'
             ]
      ]
 ];
 $queryResponse = $client->search($searchParams);
 
-// determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
+// determine if crawl is finished by checking if there is state "finished_dircalc" which only gets added at end of crawl
 $crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
 
 // get first crawl index time
+$searchParams['type']  = 'directory,file';
 $searchParams['body'] = [
     '_source' => ['indexing_date'],
     'size' => 1,
@@ -71,6 +72,7 @@ $queryResponse = $client->search($searchParams);
 $lastcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
 // get total crawl elapsed time (cumulative)
+$searchParams['type']  = 'directory';
 $searchParams['body'] = [
    'size' => 0,
     'aggs' => [

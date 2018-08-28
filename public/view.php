@@ -57,25 +57,7 @@ $extra_fields = get_extra_fields();
 
 // get crawl elased time for directory
 if ($filedoctype == 'directory') {
-    $searchParams = [];
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = 'crawlstat';
-    $searchParams['body'] = [
-        '_source' => ['crawl_time'],
-        'size' => 1,
-        'query' => [
-                'match' => [
-                    'path' => $fullpath
-                ]
-         ],
-         'sort' => [
-             'crawl_time' => [
-                 'order' => 'desc'
-             ]
-         ]
-    ];
-    $queryResponse = $client->search($searchParams);
-    $crawltime = $queryResponse['hits']['hits'][0]['_source']['crawl_time'];
+    $crawltime = $file['crawl_time'];
 }
 
 // Grab all the custom tags from file
@@ -115,7 +97,7 @@ exit();
   <div class="row">
     <div class="col-xs-12">
       <?php if ($s3_index && $file['path_parent'] == '/') { $foldericon = '<i class="glyphicon glyphicon-cloud" style="color:#FD9827;"></i>'; } else if ($s3_index && $file['path_parent'] == '/s3') { $foldericon = '<i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;"></i>'; } else { $foldericon = '<i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;"></i>'; } ?>
-      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : $foldericon; ?> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><?php echo $filename; ?></a></h2>
+      <h2 class="path"><?php echo ($_REQUEST['doctype'] == 'file') ? '<i class="glyphicon glyphicon-file" style="color:#738291;"></i>' : $foldericon; ?> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;filename=<?php echo rawurlencode($file['filename']); ?>&amp;path_parent=<?php echo rawurlencode($file['path_parent']); echo ($_REQUEST['doctype'] == 'file') ? '&doctype=file' : '&doctype=directory'; ?>"><?php echo $filename; ?></a></h2>
       <!-- tag dropdown -->
       <form id="changetag" name="changetag" class="form-inline">
       <input type="hidden" name="id" value="<?php echo $fileid; ?>">

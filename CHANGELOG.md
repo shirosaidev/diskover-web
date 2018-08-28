@@ -1,5 +1,11 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc15] - 2018-08-28
+### note
+- requires indices created with diskover >= 1.5.0-rc15
+### changed
+- crawl stats to work with diskover indices >= 1.5.0-rc15
+
 # [1.5.0-rc14] - 2018-08-24
 ### added
 - disable 0 option to Hide Thresh dropdown on filetree and treemap pages

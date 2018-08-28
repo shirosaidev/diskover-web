@@ -26,20 +26,31 @@ $searchParams['body'] = [
     'size' => 1,
     'query' => [
             'match' => [
-                'worker_name' => 'main'
+                'state' => 'finished_dircalc'
             ]
      ]
 ];
 $queryResponse = $client->search($searchParams);
 
+// determine if crawl is finished by checking if there is state "finished_dircalc" which only gets added at end of crawl
 if (sizeof($queryResponse['hits']['hits']) > 0) {
-    // determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
     $crawlfinished = true;
-    // Get total elapsed time (in seconds) of crawl
+    $searchParams['body'] = [
+    'size' => 1,
+    'query' => [
+            'match' => [
+                'state' => 'finished_crawl'
+            ]
+     ]
+    ];
+    $queryResponse = $client->search($searchParams);
+    // Get total elapsed time (in seconds) of crawl (not inc dir calc time)
     $crawlelapsedtime = $queryResponse['hits']['hits'][0]['_source']['crawl_time'];
 } else {
     $crawlfinished = false;
 }
+
+$searchParams['type']  = 'directory,file';
 
 // get first crawl index time
 $searchParams['body'] = [
@@ -76,6 +87,7 @@ $queryResponse = $client->search($searchParams);
 $lastcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
 // Get total crawl cumulative time (in seconds) of crawls
+$searchParams['type'] = 'directory';
 $searchParams['body'] = [
    'size' => 0,
     'aggs' => [

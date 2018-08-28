@@ -70,7 +70,7 @@ if (!empty($indices)) {
         'size' => 1,
         'query' => [
                 'match' => [
-                    'worker_name' => 'main'
+                    'state' => 'finished_dircalc'
                 ]
          ]
     ];
