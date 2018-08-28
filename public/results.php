@@ -339,7 +339,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                       <button title="filter" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-filter"></i>
                           <span class="caret"></span></button>
                           <ul class="dropdown-menu">
-                              <li class="small"><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;path_parent=<?php echo rawurlencode($file['path_parent']); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
+                              <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'])); ?>"><i class="glyphicon glyphicon-filter"></i> filter (non-recursive)</a></li>
                               <li class="small"><a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'])); ?> OR path_parent:<?php echo rawurlencode(escape_chars($file['path_parent']) . '\/*'); ?>"><i class="glyphicon glyphicon-filter"></i> filter (recursive)</a></li>
                               </ul>
                       </div>
