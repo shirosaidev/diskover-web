@@ -3,6 +3,10 @@
 # [1.5.0-rc15] - 2018-08-28
 ### note
 - requires indices created with diskover >= 1.5.0-rc15
+### added
+- worker chart on dashboard is now clickable to search for results
+- crawl stats bar charts are now clickable to search for results
+- links for path column text on search results
 ### changed
 - crawl stats to work with diskover indices >= 1.5.0-rc15
 
