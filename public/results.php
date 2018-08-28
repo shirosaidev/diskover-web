@@ -320,9 +320,9 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                 </div>
                <!-- end tag dropdown -->
            </td>
-          <td class="path pathdropdown">
+          <td class="path">
               <!-- path buttons -->
-              <div class="dropdown" style="display:inline-block;">
+              <div class="dropdown pathdropdown" style="display:inline-block;">
                   <button title="analytics" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-stats"></i>
                       <span class="caret"></span></button>
                       <ul class="dropdown-menu">
@@ -335,7 +335,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                           <li class="small"><a href="hardlinks.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;path=<?php echo rawurlencode($file['path_parent']); ?>&amp;filter=<?php echo $_COOKIE['filter']; ?>&amp;mtime=<?php echo $_COOKIE['mtime']; ?>&amp;minhardlinks=<?php echo $_COOKIE['minhardlinks']; ?>"><i class="glyphicon glyphicon-link"></i> hardlinks</a></li>
                           </ul>
                   </div>
-                  <div class="dropdown" style="display:inline-block;">
+                  <div class="dropdown pathdropdown" style="display:inline-block;">
                       <button title="filter" class="btn btn-default dropdown-toggle btn-xs file-btns" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-filter"></i>
                           <span class="caret"></span></button>
                           <ul class="dropdown-menu">
@@ -344,7 +344,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                               </ul>
                       </div>
               <!-- end path buttons -->
-              <span class="highlight"><?php echo $file['path_parent']; ?></span>
+              <span class="highlight"><a class="pathdark" href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'])); ?>"><?php echo $file['path_parent']; ?></a></span>
           </td>
         <td class="text-nowrap highlight" style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file['filesize']); ?></td>
         <td width="8%" class="highlight"><div class="text-right percent" style="width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td>
@@ -394,8 +394,8 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <td class="highlight"><?php echo $file['owner']; ?></td>
         <td class="highlight"><?php echo $file['group']; ?></td>
         <?php } ?>
-        <td class="highlight"><span style="color:#6D5293;font-weight:bold;"><?php echo $file['last_modified']; ?></span></td>
-        <td class="highlight"><?php for ($n = 0; $n < $file_rating; $n++) { echo "<span style=\"font-size:14px;color:#6E5396;font-weight:bold;letter-spacing:-2px;\"><i class=\"glyphicon glyphicon-remove\"></i></span>"; } ?></td>
+        <td class="highlight modified"><?php echo $file['last_modified']; ?></td>
+        <td class="highlight rating"><?php for ($n = 0; $n < $file_rating; $n++) { echo "<i class=\"glyphicon glyphicon-remove\"></i>"; } ?></td>
         <?php if ($qumulo_index) { ?>
         <td class="highlight"><?php echo $file['creation_time']; ?></td>
         <?php } elseif (!$s3_index) { ?>

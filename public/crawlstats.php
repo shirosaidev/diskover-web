@@ -122,17 +122,21 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
                 height: 200px;
             }
             .stack rect {
-                opacity: .8
+                opacity: .8;
+                cursor: pointer;
             }
             .stack rect:hover {
-                opacity: .7
+                opacity: .7;
+                cursor: pointer;
             }
 
             circle {
                 opacity: .8;
+                cursor: pointer;
             }
             circle:hover {
                 opacity: .7;
+                cursor: pointer;
             }
 
             text {
@@ -387,6 +391,9 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
                             .style("top", (d3.event.pageY - 10) + "px")
                             .style("left", (d3.event.pageX + 10) + "px");
                     }
+                })
+                .on('click', function(d) {
+                    window.open('simple.php?submitted=true&p=1&q=path_parent:(' + encodeURIComponent(escapeHTML(d.x)) + ' ' + encodeURIComponent(escapeHTML(d.x)) + '\\/*)','_blank');
                 });
 
             layer.transition().duration(250)
@@ -487,6 +494,9 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
                             .style("top", (d3.event.pageY - 10) + "px")
                             .style("left", (d3.event.pageX + 10) + "px");
                     }
+                })
+                .on('click', function(d,i) {
+                    window.open('simple.php?submitted=true&p=1&q=path_parent:(' + encodeURIComponent(escapeHTML(paths[i])) + ' ' + encodeURIComponent(escapeHTML(paths[i])) + '\\/*)','_blank');
                 });
 
             g.selectAll('scatterplot')
@@ -610,6 +620,10 @@ $crawlelapsedtime = $queryResponse['aggregations']['total_elapsed']['value'];
                             .style("top", (d3.event.pageY - 10) + "px")
                             .style("left", (d3.event.pageX + 10) + "px");
                     }
+                })
+                .on('click', function(d) {
+                    var t = (d.y0===0) ? "file" : "directory";
+                    window.open('simple.php?submitted=true&p=1&q=path_parent:(' + encodeURIComponent(escapeHTML(d.x)) + ' ' + encodeURIComponent(escapeHTML(d.x)) + '\\/*)&doctype='+t,'_blank');
                 });
 
             // line

@@ -391,6 +391,10 @@ exit();
             <a href="advanced.php?submitted=true&amp;p=1&amp;index=<?php echo $_REQUEST['index']; ?>&amp;doctype=<?php echo $_REQUEST['doctype']; ?>">Index name</a>
           </li>
           <li class="list-group-item">
+            <span class="badge"><?php echo $file['worker_name']; ?></span>
+            <a href="simple.php?submitted=true&amp;p=1&amp;q=worker_name:<?php echo $file['worker_name']; ?>">Worker</a>
+          </li>
+          <li class="list-group-item">
             <span class="badge"><?php echo $file['indexing_date']; ?></span>
             Indexed at (utc)
           </li>

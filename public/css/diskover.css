@@ -85,6 +85,14 @@ body::-webkit-scrollbar-thumb
     word-break: break-all;
 }
 
+.pathdark {
+    color: #808080 !important;
+}
+
+.pathdark:hover {
+    color: #808080 !important;
+}
+
 .pathdropdown a:link {
     color: lightgray !important;
     text-decoration: none !important;
@@ -376,5 +384,17 @@ tbody a:hover {
     position: relative;
     z-index: 0;
     overflow: hidden;
+}
+
+.modified {
+    color:#6D5293;
+    font-weight:bold;
+}
+
+.rating {
+    font-size:13px;
+    color:#6E5396;
+    font-weight:bold;
+    letter-spacing:-2px;
 }
 

@@ -472,6 +472,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
       }
       #workerchart rect {
           stroke: black;
+          cursor: pointer;
       }
       .d3-tip {
           font-size: 11px;
@@ -1163,6 +1164,10 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
                 return tip
                   .style("top", (d3.event.pageY - 10) + "px")
                   .style("left", (d3.event.pageX + 10) + "px");
+            })
+            .on('click', function(d) {
+                var t = (d.y0===0) ? "file" : "directory";
+                window.open('simple.php?submitted=true&p=1&q=worker_name:' + d.x + '&doctype=' + t,'_blank');
             });
 
         svg.append("g")
@@ -1170,8 +1175,8 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis)
             .selectAll("text")
-              .attr("transform", "rotate(-90)")
-                .attr("y", 0)
+              .attr("transform", "rotate(-45)")
+                .attr("y", 10)
                 .attr("x", 0)
                 .attr("dx", "-.8em")
                 .attr("dy", ".15em")
