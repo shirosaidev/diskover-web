@@ -102,6 +102,7 @@ require "d3_inc.php";
 		<script language="javascript" src="js/bootstrap.min.js"></script>
 		<script language="javascript" src="js/diskover.js"></script>
 		<script language="javascript" src="js/d3.v3.min.js"></script>
+		<script language="javascript" src="js/d3-queue.v3.min.js"></script>
 		<script language="javascript" src="js/spin.min.js"></script>
 		<script language="javascript" src="js/d3.tip.v0.6.3.js"></script>
         <script language="javascript" src="js/simpleheat.js"></script>

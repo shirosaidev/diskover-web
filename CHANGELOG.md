@@ -1,5 +1,13 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc16] - 2018-09-13
+### added
+- faster page loading times for heatmap, hotdirs, treemap
+- d3-queue javascript js file for speeding up heatmap/hotdirs load times
+### changed
+- heatmap and hotdirs now use d3-queue to simultaneous load the two indices
+- optimized code for tree walking
+
 # [1.5.0-rc15] - 2018-08-28
 ### note
 - requires indices created with diskover >= 1.5.0-rc15

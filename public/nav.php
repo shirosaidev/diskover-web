@@ -53,7 +53,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=26214400&amp;doctype=file">Size >25 MB</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=52428800&amp;doctype=file">Size >50 MB</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=104857600&amp;doctype=file">Size >100 MB</a></li>
-                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=26214400&amp;doctype=file">Size >250 MB</a></li>
+                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=262144000&amp;doctype=file">Size >250 MB</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=524288000&amp;doctype=file">Size >500 MB</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=1048576000&amp;doctype=file">Size >1 GB</a></li>
 						<?php if (!$s3_index && !$qumulo_index) { ?><li class="divider"></li>
@@ -87,7 +87,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=26214400&amp;doctype=directory">Size >25 MB</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=52428800&amp;doctype=directory">Size >50 MB</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=104857600&amp;doctype=directory">Size >100 MB</a></li>
-                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=26214400&amp;doctype=directory">Size >250 MB</a></li>
+                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=262144000&amp;doctype=directory">Size >250 MB</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=524288000&amp;doctype=directory">Size >500 MB</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;file_size_bytes_low=1048576000&amp;doctype=directory">Size >1 GB</a></li>
                         <?php if (!$s3_index && !$qumulo_index) { ?><li class="divider"></li>

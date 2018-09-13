@@ -502,15 +502,13 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
 <div class="alert alert-dismissible alert-danger" id="errormsg-container">
     <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
-<center>
 <hr>
-<p style="font-size:11px; color:#555;">
+<p style="text-align:center; font-size:11px; color:#555;">
 <?php
 $time = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
 echo "ES Process Time: {$estime}, Process Time: {$time}";
 ?>
 </p>
-</center>
 <?php
 } // END if there are search results
 else {

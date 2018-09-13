@@ -152,6 +152,11 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
     // gets the largest sub dirs by filesize or item count (use_count true)
     // non-recursive
     // sorted by size/filename
+    // returns directory path and directory info
+    $totalsize = 0;
+    $totalcount = 0;
+    $totalcount_files = 0;
+    $totalcount_subdirs = 0;
     $dirs = [];
 
     $searchParams['body'] = [];
@@ -173,7 +178,7 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
     }
 
     $searchParams['body'] = [
-        '_source' => ["path_parent", "filename"],
+        '_source' => ["path_parent","filename","filesize","items","items_files","items_subdirs","last_modified"],
             'query' => [
                 'query_string' => [
                 'query' => $query
@@ -216,10 +221,27 @@ function get_sub_dirs($client, $index, $path, $filter, $use_count) {
 
     foreach ($results as $arr) {
         if ($path === '/') {
-            $dirs[] = $arr['_source']['path_parent'] . $arr['_source']['filename'];
+            $fullpath = $arr['_source']['path_parent'] . $arr['_source']['filename'];
         } else {
-            $dirs[] = $arr['_source']['path_parent'] . '/' . $arr['_source']['filename'];
+            $fullpath = $arr['_source']['path_parent'] . '/' . $arr['_source']['filename'];  
         }
+        // Get total count (files+subdirs)
+        $totalcount = (int)$arr['_source']['items'];
+
+        // Get total count of files
+        $totalcount_files = (int)$arr['_source']['items_files'];
+
+        // Get total count of subdirs
+        $totalcount_subdirs = (int)$arr['_source']['items_subdirs'];
+
+        // Get total size of directory and all subdirs
+        $totalsize = (int)$arr['_source']['filesize'];
+
+        // Get directory modified time
+        $modified = $arr['_source']['last_modified'];
+
+        // Add to dirs array a new array with full path, total size (of all files), total count (file items/subdir items) and dir modified time
+        $dirs[] = [$fullpath, $totalsize, $totalcount, $totalcount_files, $totalcount_subdirs, $modified];
     }
 
     return $dirs;
@@ -237,7 +259,7 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
         $items = get_files($client, $index, $path, $filter, $mtime);
     }
 
-    // get directories in current path (not recursive)
+    // get directories (inc. their total size and file count) in current path (not recursive)
     $subdirs = get_sub_dirs($client, $index, $path, $filter, $use_count);
 
     // return if there are no sub directories
@@ -253,17 +275,15 @@ function walk_tree($client, $index, $path, $filter, $mtime, $depth, $maxdepth, $
     $subdirs_modified = [];
 
     foreach ($subdirs as $d) {
-        // get dir total size and file count
-        $dirinfo = get_dir_info($client, $index, $d, $filter, $mtime);
         // if directory is empty don't show it in the tree
-        if ($dirinfo[0] === 0 || $dirinfo[1] === 0) {
+        if ($d[1] === 0 || $d[2] === 0) {
             continue;
         } else {
-            $subdirs_size[$d] = $dirinfo[0];
-            $subdirs_count[$d] = $dirinfo[1];
-            $subdirs_count_files[$d] = $dirinfo[2];
-            $subdirs_count_subdirs[$d] = $dirinfo[3];
-            $subdirs_modified[$d] = $dirinfo[4];
+            $subdirs_size[$d[0]] = $d[1];
+            $subdirs_count[$d[0]] = $d[2];
+            $subdirs_count_files[$d[0]] = $d[3];
+            $subdirs_count_subdirs[$d[0]] = $d[4];
+            $subdirs_modified[$d[0]] = $d[5];
         }
     }
 

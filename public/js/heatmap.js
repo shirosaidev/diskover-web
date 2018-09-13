@@ -13,7 +13,8 @@ function getESJsonData() {
     // config references
     var chartConfig = {
         target: 'mainwindow',
-        data_url: 'd3_data_hm.php?path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files
+        data_url1: 'd3_data_hm.php?index=' + index + '&path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files,
+        data_url2: 'd3_data_hm.php?index=' + index2 + '&path=' + encodeURIComponent(path) + '&filter=' + filter + '&mtime=' + mtime + '&maxdepth=' + maxdepth + '&use_count=' + use_count + '&show_files=' + show_files
     };
 
     // loader settings
@@ -38,33 +39,48 @@ function getESJsonData() {
     console.log("no json data in session storage, grabbing from Elasticsearch");
 
     // load json data from Elasticsearch
-    d3.json(chartConfig.data_url, function(error, data) {
-
-        // display error if data has error message
-        if (data.error) {
-            spinner.stop();
-            console.error('Elasticsearch error: ' + JSON.stringify(data));
-            document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data);
-            document.getElementById('error').style.display = 'block';
-            return false;
-        // display warning if data has 0 items
-        } else if (data.count === 0 && data.size === 0) {
-            spinner.stop();
-            console.warn('No docs found in Elasticsearch');
-            document.getElementById('warning').style.display = 'block';
-            return false;
-        }
-
-        console.log("storing json data in session storage");
-        // store in session Storage
-        sessionStorage.setItem('diskover-heatmap', JSON.stringify(data));
-
-        // stop spin.js loader
-        spinner.stop();
-
-        renderTreeMap(data);
-
-    });
+    // use d3 queue to load json files simultaneously
+    var q = d3.queue()
+        .defer(d3.json, chartConfig.data_url1)
+        .defer(d3.json, chartConfig.data_url2)
+        .await(function(error, data1, data2) {
+            // display error if data1 has error message
+            if (data1.error) {
+                spinner.stop();
+                console.error('Elasticsearch error: ' + JSON.stringify(data1));
+                document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data1);
+                document.getElementById('error').style.display = 'block';
+                return false;
+            } else if (data2.error) {
+                spinner.stop();
+                console.error('Elasticsearch error: ' + JSON.stringify(data2));
+                document.getElementById('debugerror').innerHTML = 'Elasticsearch error: ' + JSON.stringify(data2);
+                document.getElementById('error').style.display = 'block';
+                return false;
+            // display warning if data1 has 0 items
+            } else if (data1.count === 0 && data1.size === 0) {
+                spinner.stop();
+                console.warn('No docs found in Elasticsearch');
+                document.getElementById('warning').style.display = 'block';
+                return false;
+            // display warning if data2 has 0 items
+            } else if (data2.count === 0 && data2.size === 0) {
+                spinner.stop();
+                console.warn('No docs found in Elasticsearch');
+                document.getElementById('warning').style.display = 'block';
+                return false;
+            } else {
+                // combine data1 and data2
+                var data = data1.concat(data2);
+                console.log(data);
+                console.log("storing json data in session storage");
+                // store in session Storage
+                sessionStorage.setItem('diskover-heatmap', JSON.stringify(data));
+                // stop spin.js loader
+                spinner.stop();
+                renderTreeMap(data);
+            }
+        });
 }
 
 function renderTreeMap(data) {

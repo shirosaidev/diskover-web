@@ -15,28 +15,26 @@ require "d3_inc.php";
 // get mtime in ES format
 $mtime = getmtime($mtime);
 
-// create list of indices
-$indices = [$esIndex, $esIndex2];
+// get indexname
+$index = $_GET['index'];
 
 // create list to hold file/directory data from ES
 $data = [];
 
-// get dir total size and file count for each index
-foreach ($indices as $key => $value) {
-    $dirinfo = get_dir_info($client, $value, $path, $filter, $mtime);
+// get dir total size and file count for index
+$dirinfo = get_dir_info($client, $index, $path, $filter, $mtime);
 
-    // append each index info to data list
-    $data[] = [
-        "name" => $path,
-        "size" => $dirinfo[0],
-        "count" => $dirinfo[1],
-        "count_files" => $dirinfo[2],
-        "count_subdirs" => $dirinfo[3],
-        "modified" => $dirinfo[4],
-        "type" => 'directory',
-        "children" => walk_tree($client, $value, $path, $filter, $mtime, $depth=0, $maxdepth, $use_count, $show_files)
-    ];
-}
+// append index info to data list
+$data[] = [
+    "name" => $path,
+    "size" => $dirinfo[0],
+    "count" => $dirinfo[1],
+    "count_files" => $dirinfo[2],
+    "count_subdirs" => $dirinfo[3],
+    "modified" => $dirinfo[4],
+    "type" => 'directory',
+    "children" => walk_tree($client, $index, $path, $filter, $mtime, $depth=0, $maxdepth, $use_count, $show_files)
+];
 
 // output json encoded data for d3
 echo json_encode($data);

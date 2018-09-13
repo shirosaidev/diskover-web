@@ -1111,8 +1111,6 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
             .orient("left")
             .ticks(10);
 
-        console.log(data)
-
         var dataIntermediate=xData.map(function (c){
             return data.map(function(d) {
                 return {x: d.worker_name, y: d[c]};
@@ -1236,14 +1234,12 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
         }
     };
 </script>
-<center>
 <hr>
-<p style="font-size:11px; color:#555;">
+<p style="text-align:center; font-size:11px; color:#555;">
 <?php
 $time = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
 echo "ES Process Time: {$estime}, Process Time: {$time}";
 ?>
 </p>
-</center>
 </body>
 </html>

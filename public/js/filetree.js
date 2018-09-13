@@ -277,7 +277,7 @@ function click(d) {
         setTimeout(function() { changeBarMtime(d.parent) },500);
     } else if (!d.count) {
         // display file in search results
-        window.open('advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name),'_blank');
+        window.open('advanced.php?submitted=true&p=1&filename=' + encodeURIComponent(d.name.split('/').pop()) +'&path_parent=' + encodeURIComponent(d.parent.name) + '&doctype=file','_blank');
     }
 }
 
