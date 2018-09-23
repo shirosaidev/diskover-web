@@ -3,6 +3,7 @@
 # [1.5.0-rc16] - 2018-09-23
 ### fixed
 - bug with exporting when searching using smartsearches, example !compress from simple search or nav search
+- bug with api using curl and redirecting to selectindices.php page
 
 # [1.5.0-rc16] - 2018-09-13
 ### added
