@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -52,10 +52,12 @@ if (empty($_REQUEST['q'])) {
     ];
     // match what's in the search field
 } else {
+    // get request string from predict_search
+    $request = predict_search($_REQUEST['q']);
     $searchParams['body'] = [
         'query' => [
             'query_string' => [
-                'query' => $_REQUEST['q'],
+                'query' => $request,
                 'analyze_wildcard' => 'true'
             ]
         ]
@@ -127,19 +129,16 @@ if ((string)$p === "all") {
     }
 }
 
-function array2csv(array &$array)
-{
-   if (count($array) == 0) {
+function array2csv($arr) {
+   if (count($arr) == 0) {
      return null;
    }
-   ob_start();
    $df = fopen("php://output", 'w');
-   fputcsv($df, array_keys(reset($array)));
-   foreach ($array as $row) {
+   fputcsv($df, array_keys($arr[0]));
+   foreach ($arr as $row) {
       fputcsv($df, $row);
    }
    fclose($df);
-   return ob_get_clean();
 }
 
 // separate doc source by file and directory (separate exports since different fields)

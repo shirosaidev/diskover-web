@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc16] - 2018-09-23
+### fixed
+- bug with exporting when searching using smartsearches, example !compress from simple search or nav search
+
 # [1.5.0-rc16] - 2018-09-13
 ### added
 - faster page loading times for heatmap, hotdirs, treemap
