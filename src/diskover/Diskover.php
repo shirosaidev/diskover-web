@@ -44,7 +44,7 @@ function connectES() {
   $bool_index = $client->indices()->exists($params);
   $params = ['index' => $esIndex2];
   $bool_index2 = $client->indices()->exists($params);
-  if ((!$bool_index || !$bool_index2) && basename($_SERVER['PHP_SELF']) !== 'selectindices.php') {
+  if ((!$bool_index || !$bool_index2) && basename($_SERVER['PHP_SELF']) !== 'selectindices.php' && explode('/', $_SERVER['PHP_SELF'])[1] !== 'api.php') {
       deleteCookie('index');
       deleteCookie('index2');
       header("Location: /selectindices.php");
@@ -848,7 +848,7 @@ if (isset($_GET['index'])) {
     // get index from env var or cookie
     $esIndex = (!empty(getenv('APP_ES_INDEX'))) ? getenv('APP_ES_INDEX') : getCookie('index');
     // redirect to select indices page if no index cookie
-    if (empty($esIndex) && basename($_SERVER['PHP_SELF']) !== 'selectindices.php') {
+    if (empty($esIndex) && basename($_SERVER['PHP_SELF']) !== 'selectindices.php' && explode('/', $_SERVER['PHP_SELF'])[1] !== 'api.php') {
         header("location:selectindices.php");
         exit();
     }
