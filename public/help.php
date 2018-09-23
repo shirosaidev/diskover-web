@@ -65,7 +65,7 @@ require "../src/diskover/Diskover.php";
 					<h4>Get (with curl or web browser)</h4>
 					<p>Getting file/directory tag info is done with the GET method.<br />
 					<p>Curl example:<br />
-					<code>curl -X GET http://localhost:8000/api.php/index/endpoint</code></p>
+					<code>curl -X GET http://localhost:8000/api.php/indexname/endpoint</code></p>
                     <p>List all files with no tag (untagged):<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tags?tag=&type=file</code></p>
                     <p>List all directories with no tag (untagged) and no custom tag:<br />
@@ -87,7 +87,7 @@ require "../src/diskover/Diskover.php";
 					<p>List total size (in bytes) of files with custom tag "version 1":<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tagsize?tag_custom=version%201&type=file</code></p>
 					<p>List total number of files for each tag:<br />
-					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tagcount&type=file</code></p>
+					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tagcount?type=file</code></p>
 					<p>List total number of files tagged delete:<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tagcount?tag=delete&type=file</code></p>
 					<p>List total number of files with custom tag "version 1":<br />
