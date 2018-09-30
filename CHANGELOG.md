@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc17] - 2018-09-30
+### changed
+- versioned up to match diskover
+
 # [1.5.0-rc16] - 2018-09-23
 ### fixed
 - bug with exporting when searching using smartsearches, example !compress from simple search or nav search
