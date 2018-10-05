@@ -86,8 +86,8 @@ $queryResponse = $client->search($searchParams);
 
 $lastcrawltime = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 
-// Get total crawl cumulative time (in seconds) of crawls
-$searchParams['type'] = 'directory';
+// Get total worker crawl cumulative time (in seconds) 
+$searchParams['type'] = 'worker';
 $searchParams['body'] = [
    'size' => 0,
     'aggs' => [
@@ -105,6 +105,24 @@ $queryResponse = $client->search($searchParams);
 
 $crawlcumulativetime = $queryResponse['aggregations']['total_elapsed']['value'];
 
+// Get total worker bulk cumulative time (in seconds) 
+$searchParams['type'] = 'worker';
+$searchParams['body'] = [
+   'size' => 0,
+    'aggs' => [
+      'total_elapsed' => [
+        'sum' => [
+          'field' => 'bulk_time'
+        ]
+      ]
+    ],
+    'query' => [
+            'match_all' => (object) []
+     ]
+];
+$queryResponse = $client->search($searchParams);
+
+$bulkcumulativetime = $queryResponse['aggregations']['total_elapsed']['value'];
 
 // Get search results from Elasticsearch for tags
 $results = [];
@@ -543,6 +561,10 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
                 <i class="glyphicon glyphicon-time"></i> Total crawl time (cumulative)
               </li>
               <li class="list-group-item">
+                <span class="badge"><?php echo secondsToTime($bulkcumulativetime); ?></span>
+                <i class="glyphicon glyphicon-time"></i> Total bulk update time (cumulative)
+              </li>
+              <li class="list-group-item">
                 <span class="badge"><?php echo number_format($crawlelapsedtime/$totalfiles*1000, 6) . ' / ' . number_format($crawlelapsedtime/$totaldirs*1000, 6); ?></span>
                 <i class="glyphicon glyphicon-dashboard"></i> Elapsed time per file/directory (average ms)
               </li>
@@ -550,7 +572,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
             <?php } else { ?>
                     <p><strong><i class="glyphicon glyphicon-tasks text-danger"></i> Crawl is still running. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a> to see updated results.</strong><small> (Last updated: <?php echo (new \DateTime())->format('Y-m-d\TH:i:s T'); ?>)</small></p>
                 <?php } ?>
-                <p><small><span style="color:#666"><i class="glyphicon glyphicon-info-sign"></i> Started at time is first crawl and finished at time is last crawl. Elapsed time is how long it took to crawl the tree and scrape meta. Total crawl time is the cumulative time for all worker bots.</span></small></p>
+                <p><small><span style="color:#666"><i class="glyphicon glyphicon-info-sign"></i> Started at time is first crawl and finished at time is last crawl. Elapsed time is how long it took to crawl the tree and scrape meta. Total crawl time and bulk update time is the cumulative time for all worker bots.</span></small></p>
           </div>
         </div>
       <div class="panel panel-success chartbox">

@@ -1,8 +1,13 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc17] - 2018-09-30
+# [1.5.0-rc17] - 2018-10-05
+### added
+- total es bulk update cumulative time to dashboard
+- worker indexing stats tables and indexing rate chart to Crawl Stats page
 ### changed
-- versioned up to match diskover
+- improved time change page
+### fixed
+- bug with total cumulative crawl time on dashboard
 
 # [1.5.0-rc16] - 2018-09-23
 ### fixed

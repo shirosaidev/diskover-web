@@ -430,14 +430,21 @@ foreach ($dirSizeDateRange as $key => $value) {
               shape-rendering: crispEdges;
             }
 
+            .path,
             .line {
               fill: none;
               stroke-width: 1px;
+              stroke: steelblue;
+              pointer-events: none;
+              shape-rendering: crispEdges;
+              opacity: .6;
             }
 
-            .area { 
-                fill: none;
-                opacity: .9;
+            .area_mtimechart-month,
+            .area_sizechart-month,
+            .area_mtimechart-year,
+            .area_sizechart-year { 
+                opacity: .4;
             }
         </style>
 	</head>
@@ -452,7 +459,7 @@ foreach ($dirSizeDateRange as $key => $value) {
             </div>
 			<div class="row">
                 <div class="col-xs-12 text-center">
-                      <div id="chart-container-month" class="text-center">
+                      <div id="chart-container-month" class="text-center" style="margin-top: 30px;">
                           <p class="small">File and directory total counts/sizes which have been modified over the past month, aggregated daily</p>
                           <div id="mtimechart-month" class="text-center"></div>
                           <div id="sizechart-month" class="text-center"></div>
@@ -461,7 +468,7 @@ foreach ($dirSizeDateRange as $key => $value) {
 			</div>
             <div class="row">
                 <div class="col-xs-12 text-center">
-                      <div id="chart-container-year" class="text-center">
+                      <div id="chart-container-year" class="text-center" style="margin-top: 50px;">
                           <p class="small">File and directory total counts/sizes which have been modified over the past year, aggregated weekly</p>
                           <div id="mtimechart-year" class="text-center"></div>
                           <div id="sizechart-year" class="text-center"></div>
