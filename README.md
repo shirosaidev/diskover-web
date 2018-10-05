@@ -42,7 +42,7 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 * `Composer Dependency Manager for PHP` (install composer with apt or yum)
 * `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.3.2, installed when running composer install)
 * `php-curl` (install with apt or yum, if you are running php7.1 or php7.2 install php7.x-curl)
-* `Elasticsearch` (tested on Elasticsearch 5.4.2, 5.6.4)
+* `Elasticsearch 5` (tested on Elasticsearch 5.6.9) Elasticsearch 6 not supported yet.
 * `Apache or Nginx` (if you don't want to use PHP built-in web server)
 * `diskover` (Elasticsearch index created by diskover)
 
