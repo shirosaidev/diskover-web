@@ -130,15 +130,20 @@ if ((string)$p === "all") {
 }
 
 function array2csv($arr) {
-   if (count($arr) == 0) {
+    if (count($arr) == 0) {
      return null;
-   }
-   $df = fopen("php://output", 'w');
-   fputcsv($df, array_keys($arr[0]));
-   foreach ($arr as $row) {
-      fputcsv($df, $row);
-   }
-   fclose($df);
+    }
+    $df = fopen("php://output", 'w');
+    $headers = array_keys($arr[0]);
+    fputcsv($df, $headers);
+    foreach ($arr as $row) {
+        $line = [];
+        foreach ($headers as $key => $value) {
+            $line[] = $row[$value];
+        }
+        fputcsv($df, $line);
+    }
+    fclose($df);
 }
 
 // separate doc source by file and directory (separate exports since different fields)
