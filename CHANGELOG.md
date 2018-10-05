@@ -8,6 +8,7 @@
 - improved time change page
 ### fixed
 - bug with total cumulative crawl time on dashboard
+- bug with exporting to csv and having different field orders printed
 
 # [1.5.0-rc16] - 2018-09-23
 ### fixed
