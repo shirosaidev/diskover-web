@@ -523,9 +523,9 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
         <span style="font-weight: bold;"><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! Become a patron for diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></span>
       </div>
       <?php if (!$crawlfinished) { ?>
-      <div class="alert alert-dismissible alert-warning">
+      <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><i class="glyphicon glyphicon-exclamation-sign"></i> Worker bots still running!</strong> Some analytics pages will not load until worker bots have finished crawling and calculating directory sizes. Check worker bots in rq or rq-dashboard. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
+        <strong><i class="glyphicon glyphicon-exclamation-sign"></i> Worker bots still building index!</strong> Some pages will not load until worker bots have finished crawling and calculating directory sizes. Check worker bots in rq or rq-dashboard. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
       </div>
       <?php } ?>
       <div class="jumbotron">
@@ -653,11 +653,11 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
             <span class="label label-default">Used <?php echo formatBytes($diskspace_used); ?> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small></span><?php } ?></span>&nbsp;&nbsp;
             <span class="label label-default">Free <?php echo formatBytes($diskspace_free); ?><span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?></span></span>&nbsp;&nbsp;
             <span class="label label-default">Available <?php echo formatBytes($diskspace_available); ?><span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></span></span>
-            <?php if ((($diskspace_used / $diskspace_total) * 100) >= 80 && (($diskspace_used / $diskspace_total) * 100) < 90) { ?>
+            <?php if ($diskspace_total > 0) { if ((($diskspace_used / $diskspace_total) * 100) >= 80 && (($diskspace_used / $diskspace_total) * 100) < 90) { ?>
             <br /><span class="label label-warning"><i class="glyphicon glyphicon-warning-sign"></i> Used disk space is above 80%</span>
             <?php } else if ((($diskspace_used / $diskspace_total) * 100) >= 90) { ?>
             <br /><span class="label label-danger"><i class="glyphicon glyphicon-warning-sign"></i> Used disk space is above 90%</span>
-            <?php } ?>
+            <?php } } else { echo "<p class=\"text-warning\">No data in Elasticsearch index... try again later...</p>"; } ?>
         <?php } ?>
         </div>
         </div>

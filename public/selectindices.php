@@ -181,13 +181,15 @@ if (isset($_POST['index'])) {
 			<select name="index" id="index" class="form-control" required autofocus>
                 <option selected><?php echo getCookie('index') ? getCookie('index') : ""; ?></option>
                 <?php
-                foreach ($indices_sorted as $key => $val) {
-                    if ($val == $newest_index && !$crawlfinished) {
-                        echo "<option>".$val." <- newest *crawl still running*</option>";
-                    } elseif ($val == $newest_index && $crawlfinished) {
-                        echo "<option>".$val." <- newest</option>";
-                    } else {
-                        echo "<option>".$val."</option>";
+                if (!empty($indices_sorted)) {
+                    foreach ($indices_sorted as $key => $val) {
+                        if ($val == $newest_index && !$crawlfinished) {
+                            echo "<option>".$val." <- newest *crawl still running*</option>";
+                        } elseif ($val == $newest_index && $crawlfinished) {
+                            echo "<option>".$val." <- newest</option>";
+                        } else {
+                            echo "<option>".$val."</option>";
+                        }
                     }
                 }
                 ?></select>
@@ -195,8 +197,10 @@ if (isset($_POST['index'])) {
             <select name="index2" id="index2" class="form-control">
                 <option selected><?php echo getCookie('index2') ? getCookie('index2') : ""; ?></option>
                 <?php
-                foreach ($indices_sorted as $key => $val) {
-                    echo "<option>".$val."</option>";
+                if (!empty($indices_sorted)) {
+                    foreach ($indices_sorted as $key => $val) {
+                        echo "<option>".$val."</option>";
+                    }
                 }
                 echo "<option>none</option>";
                 ?></select>

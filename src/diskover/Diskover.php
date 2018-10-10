@@ -853,83 +853,87 @@ if (isset($_GET['index'])) {
         exit();
     }
 }
-// check for Qumulo index
-if (strpos($esIndex, 'diskover_qumulo-') !== false) {
-    createCookie('qumulo', 1);
-    $qumulo_index = 1;
-} else {
-    createCookie('qumulo', 0);
-    $qumulo_index = 0;
-}
-// check for AWS S3 index
-if (strpos($esIndex, 'diskover_s3-') !== false) {
-    createCookie('s3', 1);
-    $s3_index = 1;
-} else {
-    createCookie('s3', 0);
-    $s3_index = 0;
-}
-// check for index2 in url
-if (isset($_GET['index2'])) {
-    $esIndex2 = $_GET['index2'];
-    createCookie('index2', $esIndex2);
-} else {
-    $esIndex2 = (!empty(getenv('APP_ES_INDEX2'))) ? getenv('APP_ES_INDEX2') : getCookie('index2');
-}
 
-// set path
-$path = (isset($_GET['path'])) ? $_GET['path'] : getCookie('path');
-// check if no path grab from session and then if still can't find grab from ES
-if (empty($path)) {
-    $path = $_SESSION['rootpath'];
+if (basename($_SERVER['PHP_SELF']) !== 'selectindices.php') {
+    // check for Qumulo index
+    if (strpos($esIndex, 'diskover_qumulo-') !== false) {
+        createCookie('qumulo', 1);
+        $qumulo_index = 1;
+    } else {
+        createCookie('qumulo', 0);
+        $qumulo_index = 0;
+    }
+    // check for AWS S3 index
+    if (strpos($esIndex, 'diskover_s3-') !== false) {
+        createCookie('s3', 1);
+        $s3_index = 1;
+    } else {
+        createCookie('s3', 0);
+        $s3_index = 0;
+    }
+    // check for index2 in url
+    if (isset($_GET['index2'])) {
+        $esIndex2 = $_GET['index2'];
+        createCookie('index2', $esIndex2);
+    } else {
+        $esIndex2 = (!empty(getenv('APP_ES_INDEX2'))) ? getenv('APP_ES_INDEX2') : getCookie('index2');
+    }
+
+    // set path
+    $path = (isset($_GET['path'])) ? $_GET['path'] : getCookie('path');
+    // check if no path grab from session and then if still can't find grab from ES
     if (empty($path)) {
-        $path = get_es_path($client, $esIndex);
+        $path = $_SESSION['rootpath'];
+        if (empty($path)) {
+            $path = get_es_path($client, $esIndex);
+        }
+        createCookie('path', $path);
+        $_SESSION['rootpath'] = $path;
     }
-    createCookie('path', $path);
-    $_SESSION['rootpath'] = $path;
-}
-// remove any trailing slash (unless root)
-if ($path !== "/") {
-    $path = rtrim($path, '/');
-}
+    // remove any trailing slash (unless root)
+    if ($path !== "/") {
+        $path = rtrim($path, '/');
+    }
 
-// set analytics vars
-$filter = (isset($_GET['filter'])) ? (int)$_GET['filter'] : getCookie('filter'); // filesize filter
-if ($filter === "") {
-    $filter = Constants::FILTER;
-    createCookie('filter', $filter);
-}
-$mtime = (isset($_GET['mtime'])) ? (string)$_GET['mtime'] : getCookie('mtime'); // mtime
-if ($mtime === "") {
-    $mtime = Constants::MTIME;
-    createCookie('mtime', $mtime);
-}
-// get use_count
-$use_count = (isset($_GET['use_count'])) ? (int)$_GET['use_count'] : getCookie('use_count'); // use count
-if ($use_count === "") {
-    $use_count = Constants::USE_COUNT;
-    createCookie('use_count', $use_count);
-}
-// get show_files
-$show_files = (isset($_GET['show_files'])) ? (int)$_GET['show_files'] : getCookie('show_files'); // show files
-if ($show_files === "") {
-    $show_files = Constants::SHOW_FILES;
-    createCookie('show_files', $show_files);
-}
-$maxdepth = (isset($_GET['maxdepth'])) ? (int)$_GET['maxdepth'] : getCookie('maxdepth'); // maxdepth
-if ($maxdepth === "") {
-    $maxdepth = Constants::MAXDEPTH;
-    createCookie('maxdepth', $maxdepth);
-}
-if (!$s3_index) {
-    $minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : (int)getCookie('minhardlinks'); // minhardlinks
-    if ($minhardlinks === "" || $minhardlinks === 0) {
-        $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
-        createCookie('minhardlinks', $minhardlinks);
+    // set analytics vars
+    $filter = (isset($_GET['filter'])) ? (int)$_GET['filter'] : getCookie('filter'); // filesize filter
+    if ($filter === "") {
+        $filter = Constants::FILTER;
+        createCookie('filter', $filter);
     }
-    $mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : (int)getCookie('mindupes'); // mindupes
-    if ($mindupes === "" || $mindupes === 0) {
-        $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
-        createCookie('mindupes', $mindupes);
+    $mtime = (isset($_GET['mtime'])) ? (string)$_GET['mtime'] : getCookie('mtime'); // mtime
+    if ($mtime === "") {
+        $mtime = Constants::MTIME;
+        createCookie('mtime', $mtime);
     }
+    // get use_count
+    $use_count = (isset($_GET['use_count'])) ? (int)$_GET['use_count'] : getCookie('use_count'); // use count
+    if ($use_count === "") {
+        $use_count = Constants::USE_COUNT;
+        createCookie('use_count', $use_count);
+    }
+    // get show_files
+    $show_files = (isset($_GET['show_files'])) ? (int)$_GET['show_files'] : getCookie('show_files'); // show files
+    if ($show_files === "") {
+        $show_files = Constants::SHOW_FILES;
+        createCookie('show_files', $show_files);
+    }
+    $maxdepth = (isset($_GET['maxdepth'])) ? (int)$_GET['maxdepth'] : getCookie('maxdepth'); // maxdepth
+    if ($maxdepth === "") {
+        $maxdepth = Constants::MAXDEPTH;
+        createCookie('maxdepth', $maxdepth);
+    }
+    if (!$s3_index) {
+        $minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : (int)getCookie('minhardlinks'); // minhardlinks
+        if ($minhardlinks === "" || $minhardlinks === 0) {
+            $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
+            createCookie('minhardlinks', $minhardlinks);
+        }
+        $mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : (int)getCookie('mindupes'); // mindupes
+        if ($mindupes === "" || $mindupes === 0) {
+            $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
+            createCookie('mindupes', $mindupes);
+        }
+    }
+
 }
