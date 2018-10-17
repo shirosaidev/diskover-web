@@ -1,10 +1,11 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc17] - 2018-10-10
+# [1.5.0-rc17] - 2018-10-18
 ### fixed
 - elasticsearch BadRequest400Exception error (No mapping found for [hardlinks] in order to sort on) when no diskover indices and cookies on selectindices page
 - PHP Warning:  Invalid argument supplied for foreach() on selectindices page
 - PHP warning on dashboard when crawl first starts and there is no data in index
+- date range on crawlstats indexing rate chart
 
 # [1.5.0-rc17] - 2018-10-05
 ### added

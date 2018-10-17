@@ -625,19 +625,21 @@ function loadchart3() {
     });
 
     // add domain ranges to the x and y scales
-    xScale.domain([
-      d3.min(doctypes, function(c) { return d3.min(c.values, function(v) { return v.date; }); }),
-      d3.max(doctypes, function(c) { return d3.max(c.values, function(v) { return v.date; }); })
-    ]);
+    //xScale.domain([
+    //  d3.min(doctypes, function(c) { return d3.min(c.values, function(v) { return v.date; }); }),
+    //  d3.max(doctypes, function(c) { return d3.max(c.values, function(v) { return v.date; }); })
+    //]);
+    xScale.domain(d3.extent(data, function(d) { return d.date; }));
     yScale.domain([
       0,
       // d3.min(doctypes, function(c) { return d3.min(c.values, function(v) { return v.y; }); }),
       d3.max(doctypes, function(c) { return d3.max(c.values, function(v) { return v.y; }); })
     ]);
-    xScale_line.domain([
-      d3.min(doctypes_line, function(c) { return d3.min(c.values, function(v) { return v.date; }); }),
-      d3.max(doctypes_line, function(c) { return d3.max(c.values, function(v) { return v.date; }); })
-    ]);
+    //xScale_line.domain([
+    //  d3.min(doctypes_line, function(c) { return d3.min(c.values, function(v) { return v.date; }); }),
+    //  d3.max(doctypes_line, function(c) { return d3.max(c.values, function(v) { return v.date; }); })
+    //]);
+    xScale_line.domain(d3.extent(data, function(d) { return d.date; }));
     yScale_line.domain([
       0,
       // d3.min(doctypes, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
