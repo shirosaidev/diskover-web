@@ -124,6 +124,29 @@ $queryResponse = $client->search($searchParams);
 
 $bulkcumulativetime = $queryResponse['aggregations']['total_elapsed']['value'];
 
+
+// Get total number of workers
+$workers = [];
+
+// get all the worker info
+$searchParams['type']  = 'worker';
+$searchParams['body'] = [
+    '_source' => ['worker_name'],
+    'size' => 100,
+    'query' => [
+        'match_all' => (object) []
+    ]
+];
+// Send search query to Elasticsearch
+$queryResponse = $client->search($searchParams);
+
+foreach ($queryResponse['hits']['hits'] as $key => $value) {
+    $workers[] = $value['_source']['worker_name'];
+}
+$workers = array_unique($workers);
+$numworkers = sizeof($workers);
+
+
 // Get search results from Elasticsearch for tags
 $results = [];
 $searchParams = [];
@@ -519,9 +542,6 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
 <div class="container-fluid" style="margin-top:70px;">
   <div class="row">
     <div class="col-xs-6">
-      <div class="well well-sm">
-        <span style="font-weight: bold;"><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! Become a patron for diskover on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></span>
-      </div>
       <?php if (!$crawlfinished) { ?>
       <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -1263,5 +1283,82 @@ $time = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
 echo "ES Process Time: {$estime}, Process Time: {$time}";
 ?>
 </p>
+
+<div id="statsModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Send anonymous stats to the diskover developer</h4>
+      </div>
+      <div class="modal-body">
+        <p>Allow usage statistics to be sent to the diskover developer to help improve the product. You can change this later from admin page.</p>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="sendstats" onclick="sendStats();">
+            <label class="form-check-label" for="sendstats">Allow limited anonymous usage stats</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="supportModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Support the development of diskover</h4>
+      </div>
+      <div class="modal-body">
+        <p><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! If you are using diskover in a commercial environment or just want to help advance the software, please become a patron on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></p>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="sponsoring" onclick="sponsoring();">
+            <label class="form-check-label" for="sponsor">I'm already supporting</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// set cookie for sending anonymous stats
+function sendStats() {
+    if (document.getElementById('sendstats').checked) {
+        setCookie('sendstats', 1);
+    } else {
+        setCookie('sendstats', 0);
+    }
+}
+// set cookie for sponsoring
+function sponsoring() {
+    if (document.getElementById('sponsoring').checked) {
+        setCookie('sponsoring', 1, 365);
+    } else {
+        setCookie('sponsoring', 0);
+    }
+}
+$(window).on('load',function(){
+    if (getCookie('sendstats') == '') {
+      setCookie('sendstats', 1);
+      document.getElementById('sendstats').checked = true;
+      $('#statsModal').modal('show');
+    }
+    if (getCookie('support') == '' && getCookie('sponsoring') != 1) {
+      setCookie('support', 1, 7);
+      $('#supportModal').modal('show');
+    }
+});
+</script>
+
+<?php require "logform.php"; ?>
+
 </body>
 </html>

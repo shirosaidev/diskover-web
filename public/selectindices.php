@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -216,6 +216,7 @@ if (isset($_POST['index'])) {
 
 <script language="javascript" src="js/jquery.min.js"></script>
 <script language="javascript" src="js/bootstrap.min.js"></script>
+<script language="javascript" src="js/diskover.js"></script>
 
 </body>
 

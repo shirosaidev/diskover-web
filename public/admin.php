@@ -167,7 +167,7 @@ select::-webkit-scrollbar-thumb
             <span style="color:gray"><small><i class="glyphicon glyphicon-stats"></i> docs (count/deleted): <?php echo $indexdoccount['count'].'/'.$indexdoccount['deleted']; ?> size: <?php echo formatBytes($indexsize); ?></small></span><br />
             <span class="text-info"><small><i class="glyphicon glyphicon-info-sign"></i> If deleted count is high you may want to optimize the index (below) to reduce size.</small></span><br />
             <br /><strong>Index 2:</strong> <?php echo $esIndex2; ?><br /><br />
-            <i class="glyphicon glyphicon-cog"></i> <a href="selectindices.php">Change</a>
+            <a href="selectindices.php"><button type="button" class="btn btn-primary"><i class="glyphicon glyphicon-cog"></i> Change</button></a>
         </div>
 
         <hr />
@@ -517,6 +517,18 @@ $tagtext = file_get_contents($file_customtags);
         <br />
 	</div>
 </div>
+<div class="row">
+    <div class="col-xs-12">
+        <hr />
+        <h5>Send anonymous stats to the diskover developer</h5>
+        <p>Allow usage statistics to be sent to the diskover developer to help improve the product.</p>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="sendstats" onclick="sendStats();">
+            <label class="form-check-label" for="sendstats">Allow limited anonymous usage stats</label>
+        </div>
+        <br />
+    </div>
+</div>
 <div class="alert alert-dismissible alert-danger" id="errormsg-container">
     <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
@@ -532,7 +544,7 @@ function clearCache() {
     cookies = ['filter', 'mtime', 'maxdepth', 'hide_thresh', 'path', 'use_count', 'show_files', 'sort', 'sortorder',
                 'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
                 'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 's3', 'minhardlinks', 
-                'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID'];
+                'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'sendstats', 'support', 'sponsoring'];
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
     }
@@ -543,6 +555,15 @@ function clearCache() {
     }
 	alert('cleared, please restart browser');
     return true;
+}
+
+// send anonymous stats
+function sendStats() {
+    if (document.getElementById('sendstats').checked) {
+        setCookie('sendstats', 1);
+    } else {
+        setCookie('sendstats', 0);
+    }
 }
 
 // del index check
@@ -563,12 +584,18 @@ function optimizeIndex() {
 }
 // listen for msgs from diskover socket server
 listenSocketServer();
-</script>
 
-<script>
+
 // set es health heart color at top of page
 var color = document.getElementById('eshealth').value;
 document.getElementById('eshealthheart').style.color=color;
+
+// set sendstats checkbox
+if (getCookie('sendstats') == 1) {
+    document.getElementById('sendstats').checked = true;
+} else {
+    document.getElementById('sendstats').checked = false;
+}
 </script>
 <div id="loading">
   <img id="loading-image" width="32" height="32" src="images/ajax-loader.gif" alt="Updating..." />

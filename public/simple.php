@@ -258,5 +258,6 @@ if (isset($_REQUEST['submitted'])) {
   <div id="loading-text"></div>
 </div>
 <iframe name="hiddeniframe" width=0 height=0 style="display:none;"></iframe>
+<?php require "logform.php"; ?>
 </body>
 </html>
