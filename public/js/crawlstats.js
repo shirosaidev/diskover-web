@@ -574,6 +574,7 @@ function loadchart3() {
       .x(function(d) { return xScale_line(d.date); })
       .y(function(d) { return yScale_line(d.value); });
 
+    console.log(bulkdata)
     // import data and create chart
 
     var data = bulkdata.map(function(d) {

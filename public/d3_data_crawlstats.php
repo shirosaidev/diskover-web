@@ -197,17 +197,20 @@ $rangesecs = [];
 
 // Create datetime object from time string
 $firstdate = DateTime::createFromFormat('Y-m-d\TH:i:s.u', $firstcrawltime);
-$firstdate = $firstdate->sub(new DateInterval('PT1S'));
+$firstdate = $firstdate->sub(new DateInterval('PT2S'));
 $lastdate = DateTime::createFromFormat('Y-m-d\TH:i:s.u', $lastcrawltime);
-$lastdate = $lastdate->add(new DateInterval('PT1S'));
+$lastdate = $lastdate->add(new DateInterval('PT2S'));
 // Calc time diff in seconds
-$timediff = date_diff($firstdate, $lastdate);
-$interval = $timediff->format('%s');
+$duration = $firstdate->diff($lastdate);
+$interval = $duration->format('%H:%I:%S');
+$dt = new DateTime("1970-01-01 $interval", new DateTimeZone('UTC'));
+$seconds = (int)$dt->getTimestamp();
+
 // Create date ranges
 $i = 1;
 $nextdate = $lastdate;
 $prevdate = clone $nextdate;
-while ($i <= $interval) {
+while ($i <= $seconds) {
     // Get previous time 1 sec ago
     $prevdate = $prevdate->sub(new DateInterval('PT1S'))->format('Y-m-d\TH:i:s');
     $nextdate = $nextdate->format('Y-m-d\TH:i:s');

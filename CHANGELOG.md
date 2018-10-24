@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc19] - 2018-10-25
+### fixed
+- date range on crawlstats indexing rate chart
+
 # [1.5.0-rc18] - 2018-10-21
 ### added
 - pop up option on dashboard to opt in or out of sending anonymous usage stats to diskover developer, can change this later on admin page
@@ -10,7 +14,6 @@
 - elasticsearch BadRequest400Exception error (No mapping found for [hardlinks] in order to sort on) when no diskover indices and cookies on selectindices page
 - PHP Warning:  Invalid argument supplied for foreach() on selectindices page
 - PHP warning on dashboard when crawl first starts and there is no data in index
-- date range on crawlstats indexing rate chart
 
 # [1.5.0-rc17] - 2018-10-05
 ### added
