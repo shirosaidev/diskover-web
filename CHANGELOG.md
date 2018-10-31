@@ -1,13 +1,13 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc19] - 2018-10-25
-### fixed
-- date range on crawlstats indexing rate chart
-
-# [1.5.0-rc18] - 2018-10-21
+# [1.5.0-rc20] - 2018-10-31
+### NOTE
+- bugs with dir calcs in diskover rc18 and rc19, please update to rc20
 ### added
 - pop up option on dashboard to opt in or out of sending anonymous usage stats to diskover developer, can change this later on admin page
 - pop up on dashboard to remind to help support by donation on Patreon
+### fixed
+- date range on crawlstats indexing rate chart
 
 # [1.5.0-rc17] - 2018-10-18
 ### fixed
