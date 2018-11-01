@@ -1256,9 +1256,11 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
     // auto refresh the workers chart
     var auto_refresh;
     if (crawlfinished === 'false') {
+        setCookie('crawlfinished', 0);
         autorefresh(3000);
     } else {  // crewl is finished so disable interval
         autorefresh(0);
+        setCookie('crawlfinished', 1);
     }
     function autorefresh(worker_refreshtime) {
         if (worker_refreshtime == 0) {
