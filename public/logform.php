@@ -15,7 +15,8 @@
     <input type="hidden" name="crawlcumulativetime" value="<?php echo $crawlcumulativetime; ?>">
     <input type="hidden" name="bulkupdatetime" value="<?php echo $bulkcumulativetime; ?>">
     <input type="hidden" name="workerbots" value="<?php echo $numworkers; ?>">
-    <input type="hidden" name="loadtime" value="<?php echo $time; ?>">
+    <input type="hidden" name="estime" value="<?php echo $estime; ?>">
+    <input type="hidden" name="pageloadtime" value="<?php echo $time; ?>">
 </form>
 <script>
 $(document).ready(function(){
