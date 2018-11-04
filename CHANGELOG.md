@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc21] - 2018-11-04
+### NOTE
+- increased version number
+
 # [1.5.0-rc20] - 2018-10-31
 ### NOTE
 - bugs with dir calcs in diskover rc18 and rc19, please update to rc20
