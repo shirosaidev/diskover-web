@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc22] - 2018-11-11
+### NOTE
+- increased version number to match diskover
+
 # [1.5.0-rc21] - 2018-11-04
 ### NOTE
 - increased version number
