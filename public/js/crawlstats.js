@@ -79,7 +79,7 @@ var svg2 = d3.select("#crawlstatschart2").append("svg")
     .attr("transform",
         "translate(" + margin2.left + "," + margin2.top + ")");
 
-var margin3 = { top: 20, right: 80, bottom: 30, left: 80 },
+var margin3 = { top: 20, right: 80, bottom: 40, left: 80 },
 height3 = 300 - margin3.top - margin3.bottom,
 width3 = 1400 - margin3.left - margin3.right;
 
@@ -548,10 +548,10 @@ function loadchart3() {
     var yScale_line = d3.scale.linear().range([height3, 0]);
     var color = d3.scale.ordinal()
         .domain(["docs"])
-        .range(["#66D9EF"]);
+        .range(["#6BD4E7"]);
 
     // setup the axes
-    var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(d3.time.format("%H:%M:%S"));
     var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
     // create function to parse dates into date objects
@@ -574,9 +574,7 @@ function loadchart3() {
       .x(function(d) { return xScale_line(d.date); })
       .y(function(d) { return yScale_line(d.value); });
 
-    console.log(bulkdata)
     // import data and create chart
-
     var data = bulkdata.map(function(d) {
       return {
         date: parseDate(d.date),
@@ -618,40 +616,35 @@ function loadchart3() {
     });
 
     // Find the value of the date with highest total value
+    /*
     var maxDateVal = d3.max(data, function(d){
       var vals = d3.keys(d).map(
         function(key){ 
           return key !== "date" ? d[key] : 0 });
       return d3.sum(vals);
     });
+    */
 
     // add domain ranges to the x and y scales
-    //xScale.domain([
-    //  d3.min(doctypes, function(c) { return d3.min(c.values, function(v) { return v.date; }); }),
-    //  d3.max(doctypes, function(c) { return d3.max(c.values, function(v) { return v.date; }); })
-    //]);
     xScale.domain(d3.extent(data, function(d) { return d.date; }));
-    yScale.domain([
-      0,
-      // d3.min(doctypes, function(c) { return d3.min(c.values, function(v) { return v.y; }); }),
-      d3.max(doctypes, function(c) { return d3.max(c.values, function(v) { return v.y; }); })
+    yScale.domain([0, d3.max(doctypes, function(c) { return d3.max(c.values, function(v) { return v.y; }); })
     ]);
-    //xScale_line.domain([
-    //  d3.min(doctypes_line, function(c) { return d3.min(c.values, function(v) { return v.date; }); }),
-    //  d3.max(doctypes_line, function(c) { return d3.max(c.values, function(v) { return v.date; }); })
-    //]);
     xScale_line.domain(d3.extent(data, function(d) { return d.date; }));
-    yScale_line.domain([
-      0,
-      // d3.min(doctypes, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
-      d3.max(doctypes_line, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
+    yScale_line.domain([0, d3.max(doctypes_line, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
     ]);
 
     // add the x axis
     svg3.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height3 + ")")
-      .call(xAxis);
+      .call(xAxis)
+      .selectAll("text")
+          .attr("transform", "rotate(-45)")
+          .attr("y", 10)
+          .attr("x", 0)
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+          .style("text-anchor", "end");
 
     // add the y axis
     svg3.append("g")
@@ -779,7 +772,7 @@ function loadchart3() {
 
         d3.selectAll(".mouse-per-line_bulkindexchart")
           .attr("transform", function(d, i) {
-            console.log(width/mouse[0])
+            //console.log(width/mouse[0])
             var xDate = xScale_line.invert(mouse[0]),
                 bisect = d3.bisector(function(d) { return d.date; }).right;
                 idx = bisect(d.values, xDate);

@@ -197,7 +197,7 @@ $rangesecs = [];
 
 // Create datetime object from time string
 $firstdate = DateTime::createFromFormat('Y-m-d\TH:i:s.u', $firstcrawltime);
-$firstdate = $firstdate->sub(new DateInterval('PT2S'));
+$firstdate = $firstdate->sub(new DateInterval('PT1S'));
 $lastdate = DateTime::createFromFormat('Y-m-d\TH:i:s.u', $lastcrawltime);
 $lastdate = $lastdate->add(new DateInterval('PT2S'));
 // Calc time diff in seconds

@@ -286,12 +286,17 @@ function listenSocketServer() {
 }
 
 // send command to diskover socket server
-function runCommand() {
-    var command = document.getElementById('command').value;
+function runCommand(command) {
+    if (!command) {
+        var command = document.getElementById('command').value;
+    } else {
+        command = JSON.stringify(command)
+    }
     if (!command) {
         alert("no command entered")
         return false;
     }
+    console.log(command)
     try {
         command = JSON.parse(command);
     }

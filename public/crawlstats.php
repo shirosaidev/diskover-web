@@ -23,8 +23,21 @@ $searchParams = [];
 $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'crawlstat';
 
+// determine if and how many crawls ran for the index
 $searchParams['body'] = [
-    'size' => 1,
+    'size' => 100,
+    'query' => [
+            'match' => [
+                'state' => 'running'
+            ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+$totalcrawls = $queryResponse['hits']['total'];
+
+// determine if crawl is finished by checking if there is state "finished_dircalc" which only gets added at end of each crawl
+$searchParams['body'] = [
+    'size' => 100,
     'query' => [
             'match' => [
                 'state' => 'finished_dircalc'
@@ -32,9 +45,27 @@ $searchParams['body'] = [
      ]
 ];
 $queryResponse = $client->search($searchParams);
+$totalcrawls_finished = $queryResponse['hits']['total'];
 
-// determine if crawl is finished by checking if there is state "finished_dircalc" which only gets added at end of crawl
-$crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
+if ($totalcrawls_finished == $totalcrawls) {
+    $crawlfinished = true;
+    // Get total elapsed time (in seconds) of all crawls (not inc dir calc time)
+    $searchParams['body'] = [
+    'size' => 100,
+    'query' => [
+            'match' => [
+                'state' => 'finished_crawl'
+            ]
+     ]
+    ];
+    $queryResponse = $client->search($searchParams);
+    $crawlelapsedtime = 0;
+    foreach ($queryResponse['hits']['hits'] as $key => $value) {
+        $crawlelapsedtime += $value['_source']['crawl_time'];
+    }
+} else {
+    $crawlfinished = false;
+}
 
 ?>
 
@@ -173,9 +204,8 @@ $crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
                       </div>
                 </div>
 			</div>
-		</div><br />
-        <br />
-        <div class="container">
+		</div>
+        <div class="container" style="margin-top: 70px;">
             <div class="row">
                 <div class="col-xs-12">
                     <div id="workerindexingstats" style="display: none;">

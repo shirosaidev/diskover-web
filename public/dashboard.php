@@ -22,8 +22,21 @@ $searchParams = [];
 $searchParams['index'] = $esIndex;
 $searchParams['type']  = 'crawlstat';
 
+// determine if and how many crawls ran for the index
 $searchParams['body'] = [
-    'size' => 1,
+    'size' => 100,
+    'query' => [
+            'match' => [
+                'state' => 'running'
+            ]
+     ]
+];
+$queryResponse = $client->search($searchParams);
+$totalcrawls = $queryResponse['hits']['total'];
+
+// determine if crawl is finished by checking if there is state "finished_dircalc" which only gets added at end of each crawl
+$searchParams['body'] = [
+    'size' => 100,
     'query' => [
             'match' => [
                 'state' => 'finished_dircalc'
@@ -31,12 +44,13 @@ $searchParams['body'] = [
      ]
 ];
 $queryResponse = $client->search($searchParams);
+$totalcrawls_finished = $queryResponse['hits']['total'];
 
-// determine if crawl is finished by checking if there is state "finished_dircalc" which only gets added at end of crawl
-if (sizeof($queryResponse['hits']['hits']) > 0) {
+if ($totalcrawls_finished == $totalcrawls) {
     $crawlfinished = true;
+    // Get total elapsed time (in seconds) of all crawls (not inc dir calc time)
     $searchParams['body'] = [
-    'size' => 1,
+    'size' => 100,
     'query' => [
             'match' => [
                 'state' => 'finished_crawl'
@@ -44,8 +58,10 @@ if (sizeof($queryResponse['hits']['hits']) > 0) {
      ]
     ];
     $queryResponse = $client->search($searchParams);
-    // Get total elapsed time (in seconds) of crawl (not inc dir calc time)
-    $crawlelapsedtime = $queryResponse['hits']['hits'][0]['_source']['crawl_time'];
+    $crawlelapsedtime = 0;
+    foreach ($queryResponse['hits']['hits'] as $key => $value) {
+        $crawlelapsedtime += $value['_source']['crawl_time'];
+    }
 } else {
     $crawlfinished = false;
 }
@@ -332,9 +348,14 @@ $searchParams['index'] = $esIndex;
 $searchParams['type']  = "diskspace";
 
 $searchParams['body'] = [
-    'size' => 1,
+    'size' => 100,
     'query' => [
         'match_all' => (object) []
+     ],
+     'sort' => [
+         'indexing_date' => [
+             'order' => 'asc'
+         ]
      ]
 ];
 $queryResponse = $client->search($searchParams);

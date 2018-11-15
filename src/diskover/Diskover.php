@@ -12,7 +12,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc22';
+$VERSION = '1.5.0-rc23';
 
 
 function connectES() {

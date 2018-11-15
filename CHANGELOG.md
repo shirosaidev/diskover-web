@@ -1,5 +1,12 @@
 # Diskover Web Change Log
 
+
+# [1.5.0-rc23] - 2018-11-16
+### added
+- additional directory drop down options for socket commands in search results
+### fixed
+- directory socket command drop down actions not working
+
 # [1.5.0-rc22] - 2018-11-11
 ### NOTE
 - increased version number to match diskover
