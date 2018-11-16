@@ -61,6 +61,12 @@ $ cd diskover-web
 $ composer install
 ```
 
+## Docker hub image
+
+You can set up diskover and diskover-web in docker, there are a few choices for easily running diskover in docker using pre-built images/compose files.
+
+linuxserver.io Docker hub image: https://hub.docker.com/r/linuxserver/diskover/
+
 ## Installation Guide - Using docker compose
 
 You can use docker-compose to test and run diskover-web. In the docker-compose it is also included Elasticsearch and Redis so that it is possible to create a full test environment for diskover.
