@@ -65,7 +65,7 @@ $ composer install
 
 You can set up diskover and diskover-web in docker, there are a few choices for easily running diskover in docker using pre-built images/compose files.
 
-linuxserver.io Docker hub image: https://hub.docker.com/r/linuxserver/diskover/
+[linuxserver.io](https://linuxserver.io) Docker hub image: https://hub.docker.com/r/linuxserver/diskover/
 
 ## Installation Guide - Using docker compose
 
