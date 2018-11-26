@@ -561,14 +561,19 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
 <body>
 <?php include "nav.php"; ?>
 <div class="container-fluid" style="margin-top:70px;">
-  <div class="row">
-    <div class="col-xs-6">
-      <?php if (!$crawlfinished) { ?>
+<?php if ($totalfiles == 0 && $totaldirs == 0) { ?>
+    <div class="alert alert-dismissible alert-danger">
+      <strong><i class="glyphicon glyphicon-exclamation-sign"></i> No data in Elasticsearch index!</strong> After a crawl starts it can take up to 30 sec (refresh time) for index to be updated... <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
+    </div>
+<?php die(); } ?>
+<?php if (!$crawlfinished) { ?>
       <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><i class="glyphicon glyphicon-exclamation-sign"></i> Worker bots still building index!</strong> Some pages will not load until worker bots have finished crawling and calculating directory sizes. Check worker bots in rq or rq-dashboard. <a href="dashboard.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reload</a>.
       </div>
-      <?php } ?>
+<?php } ?>
+  <div class="row">
+    <div class="col-xs-6">
       <div class="jumbotron">
         <h1><i class="glyphicon glyphicon-hdd"></i> Space Savings</h1>
         <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files. 
@@ -694,11 +699,11 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
             <span class="label label-default">Used <?php echo formatBytes($diskspace_used); ?> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_used); ?></span> <span style="color:<?php echo $diskspace_used_change > 0 ? "red" : "#29FE2F"; ?>;">(<?php echo $diskspace_used_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_used_change;  ?>%)</span></small></span><?php } ?></span>&nbsp;&nbsp;
             <span class="label label-default">Free <?php echo formatBytes($diskspace_free); ?><span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_free); ?></span> <span style="color:<?php echo $diskspace_free_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_free_change >= 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_free_change; ?>%)</span></small><?php } ?></span></span>&nbsp;&nbsp;
             <span class="label label-default">Available <?php echo formatBytes($diskspace_available); ?><span> <?php if ($esIndex2 != "") { ?><small><span style="color:gray;"><?php echo formatBytes($diskspace2_available); ?></span> <span style="color:<?php echo $diskspace_available_change >= 0 ? "#29FE2F" : "red"; ?>;">(<?php echo $diskspace_available_change > 0 ? '<i class="glyphicon glyphicon-chevron-up"></i> +' : '<i class="glyphicon glyphicon-chevron-down"></i>'; ?><?php echo $diskspace_available_change; ?>%)</span></small><?php } ?></span></span>
-            <?php if ($diskspace_total > 0) { if ((($diskspace_used / $diskspace_total) * 100) >= 80 && (($diskspace_used / $diskspace_total) * 100) < 90) { ?>
+            <?php if ((($diskspace_used / $diskspace_total) * 100) >= 80 && (($diskspace_used / $diskspace_total) * 100) < 90) { ?>
             <br /><span class="label label-warning"><i class="glyphicon glyphicon-warning-sign"></i> Used disk space is above 80%</span>
             <?php } else if ((($diskspace_used / $diskspace_total) * 100) >= 90) { ?>
             <br /><span class="label label-danger"><i class="glyphicon glyphicon-warning-sign"></i> Used disk space is above 90%</span>
-            <?php } } else { echo "<p class=\"text-warning\">No data in Elasticsearch index... try again later...</p>"; } ?>
+            <?php } ?>
         <?php } ?>
         </div>
         </div>
