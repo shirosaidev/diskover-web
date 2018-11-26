@@ -12,6 +12,11 @@ require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
+$mindupes = (int)getCookie('mindupes');
+if ($mindupes === "" || $mindupes === 0) {
+    $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
+}
+
 ?>
 
 	<!DOCTYPE html>

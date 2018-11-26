@@ -5,6 +5,8 @@
 ### added
 - additional directory drop down options for socket commands in search results
 - better indication on dashboard if crawl just started and no data in index
+### changed
+- improved method for finding avg min dupes and avg min hardlinks for dupes and hardlinks analytics pages
 ### fixed
 - directory socket command drop down actions not working
 

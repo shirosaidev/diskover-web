@@ -721,7 +721,7 @@ function getAvgDupes($client, $esIndex, $path, $filter, $mtime) {
     $searchParams['size'] = 1;
 
     $searchParams['body'] = [
-        '_source' => ['md5_sum'],
+        '_source' => ['dupe_md5'],
             'query' => [
                   'bool' => [
                     'must' => [
@@ -768,7 +768,7 @@ function getAvgDupes($client, $esIndex, $path, $filter, $mtime) {
     $maxdupes = $queryResponse['aggregations']['top-dupe_md5']['buckets'][0]['doc_count'];
 
     $searchParams['body'] = [
-        '_source' => ['md5_sum'],
+        '_source' => ['dupe_md5'],
             'query' => [
                   'bool' => [
                     'must' => [
@@ -923,17 +923,4 @@ if (basename($_SERVER['PHP_SELF']) !== 'selectindices.php') {
         $maxdepth = Constants::MAXDEPTH;
         createCookie('maxdepth', $maxdepth);
     }
-    if (!$s3_index) {
-        $minhardlinks = (isset($_GET['minhardlinks'])) ? (int)$_GET['minhardlinks'] : (int)getCookie('minhardlinks'); // minhardlinks
-        if ($minhardlinks === "" || $minhardlinks === 0) {
-            $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
-            createCookie('minhardlinks', $minhardlinks);
-        }
-        $mindupes = (isset($_GET['mindupes'])) ? (int)$_GET['mindupes'] : (int)getCookie('mindupes'); // mindupes
-        if ($mindupes === "" || $mindupes === 0) {
-            $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
-            createCookie('mindupes', $mindupes);
-        }
-    }
-
 }

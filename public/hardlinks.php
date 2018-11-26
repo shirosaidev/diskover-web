@@ -12,6 +12,11 @@ require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
+$minhardlinks = (int)getCookie('minhardlinks');
+if ($minhardlinks === "" || $minhardlinks === 0) {
+    $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
+}
+
 ?>
 
 	<!DOCTYPE html>
