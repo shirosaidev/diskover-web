@@ -1,9 +1,10 @@
 # Diskover Web Change Log
 
 
-# [1.5.0-rc23] - 2018-11-16
+# [1.5.0-rc23] - 2018-11-26
 ### added
 - additional directory drop down options for socket commands in search results
+- better indication on dashboard if crawl just started and no data in index
 ### fixed
 - directory socket command drop down actions not working
 
