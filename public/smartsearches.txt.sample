@@ -7,6 +7,6 @@
 !datab|extension:(csv OR dat OR db OR dbf OR log OR mdb OR sav OR sql OR tar OR xml OR data OR sqlite OR sqlite3)
 !exe|extension:(apk OR bat OR bin OR cgi OR pl OR com OR exe OR gadget OR jar OR py OR wsf)
 !web|extension:(asp OR aspx OR cer OR cfm OR cgi OR pl OR css OR htm OR html OR js OR jsp OR part OR php OR py OR rss OR xhtml)
-!doc|extension(doc OR docx OR odt OR pdf OR rtf OR tex OR txt OR wks OR wps OR wpd OR key OR odp OR pps OR ppt OR pptx OR ods OR xlr OR xls OR xlsx OR xcf)
+!doc|extension:(doc OR docx OR odt OR pdf OR rtf OR tex OR txt OR wks OR wps OR wpd OR key OR odp OR pps OR ppt OR pptx OR ods OR xlr OR xls OR xlsx OR xcf)
 !code|extension:(py OR c OR class OR cpp OR cs OR h OR java OR sh OR swift OR vb)
 !sys|extension:(bak OR cab OR cfg OR cpl OR cur OR dll OR dmp OR drv OR icns OR ico OR ini OR lnk OR msi OR sys OR tmp OR plist)

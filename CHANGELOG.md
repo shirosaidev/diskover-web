@@ -1,7 +1,7 @@
 # Diskover Web Change Log
 
 
-# [1.5.0-rc23] - 2018-11-26
+# [1.5.0-rc23] - 2018-11-27
 ### added
 - additional directory drop down options for socket commands in search results
 - better indication on dashboard if crawl just started and no data in index
@@ -9,6 +9,7 @@
 - improved method for finding avg min dupes and avg min hardlinks for dupes and hardlinks analytics pages
 ### fixed
 - directory socket command drop down actions not working
+- bug for !doc smart search type in smartsearches.txt.sample
 
 # [1.5.0-rc22] - 2018-11-11
 ### NOTE
