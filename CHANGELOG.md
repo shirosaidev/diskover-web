@@ -1,5 +1,8 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc24] - 2018-11-29
+### changed
+- increased rc version number
 
 # [1.5.0-rc23] - 2018-11-27
 ### added
