@@ -322,6 +322,102 @@ function get($endpoint, $query) {
 
 
 	switch ($endpoint) {
+		case $endpoint[0] == 'list':
+		    $indices = $client->cat()->indices([]);
+		    for($i=0;$i<count($indices);$i++) {
+			// Get search results from Elasticsearch for duplicate files
+			$results = [];
+			$searchParams = [];
+			// Setup search query
+			$searchParams['index'] = $indices[$i][index];
+			$searchParams['type']  = 'file';
+			// Setup search query for dupes count
+			$searchParams['body'] = [
+			   'size' => 0,
+			    'aggs' => [
+			      'total_size' => [
+				'sum' => [
+				  'field' => 'filesize'
+				]
+			      ]
+			    ],
+			    'query' => [
+			      'query_string' => [
+				'query' => 'dupe_md5:(NOT "")',
+				'analyze_wildcard' => 'true'
+			      ]
+			    ]
+			];
+			$queryResponse = $client->search($searchParams);
+			// Get total count of duplicate files
+			$indices[$i][dupes] = $queryResponse['hits']['total'];
+			// Get total size of all duplicate files
+			$indices[$i][dupessize] = $queryResponse['aggregations']['total_size']['value'];
+
+			// Get search results from Elasticsearch for number of files
+			$results = [];
+			$searchParams = [];
+			// Setup search query
+			$searchParams['index'] = $indices[$i][index];
+			$searchParams['type']  = "file";
+			$searchParams['body'] = [
+			    'size' => 0,
+			    'query' => [
+				'match_all' => (object) []
+			     ]
+			];
+			$queryResponse = $client->search($searchParams);
+			// Get total count of files
+			$indices[$i][totalfiles] = $queryResponse['hits']['total'];
+
+			// Get search results from Elasticsearch for number of directories
+			$results = [];
+			$searchParams = [];
+			// Setup search query
+			$searchParams['index'] = $indices[$i][index];
+			$searchParams['type']  = "directory";
+			$searchParams['body'] = [
+			    'size' => 0,
+			    'query' => [
+				'match_all' => (object) []
+			     ]
+			];
+			$queryResponse = $client->search($searchParams);
+			// Get total count of directories
+			$indices[$i][totaldirs] = $queryResponse['hits']['total'];
+
+			// Get search results from Elasticsearch for hardlink files
+			$results = [];
+			$searchParams = [];
+			$totalHardlinkFiles = 0;
+			$totalFilesizeHardlinkFiles = 0;
+			// Setup search query
+			$searchParams['index'] = $indices[$i][index];
+			$searchParams['type']  = 'file';
+			// Setup search query for hardlink count
+			$searchParams['body'] = [
+			   'size' => 0,
+			    'aggs' => [
+			      'total_size' => [
+				'sum' => [
+				  'field' => 'filesize'
+				]
+			      ]
+			    ],
+			    'query' => [
+			      'query_string' => [
+				'query' => 'hardlinks:>1'
+			      ]
+			    ]
+			];
+			$queryResponse = $client->search($searchParams);
+			// Get total count of hardlink files
+			$indices[$i][totalHardlinkFiles] = $queryResponse['hits']['total'];
+
+		    }
+	
+		    echo json_encode($indices, JSON_PRETTY_PRINT);
+		break;
 
 		case $endpoint[1] == 'tagcount':
 
