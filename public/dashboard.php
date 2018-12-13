@@ -528,9 +528,11 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
         shape-rendering: crispEdges;
       }
       #workerchart {
-          width: 700px;
-          height: 350px;
+          width: 600px;
+          height: 300px;
           position: relative;
+          display: block;
+          margin: 0 auto;
       }
       #workerchart rect {
           stroke: black;
@@ -626,7 +628,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
           <h3 class="panel-title" style="display:inline"><i class="glyphicon glyphicon-tasks"></i> Crawl Worker Bot Usage</h3>&nbsp;&nbsp;&nbsp;&nbsp;<span style="display:inline"><small>Auto refresh <a href="#_self" id="autorefresh_on" onclick="autorefresh(3000);">on</a> <a href="#_self" id="autorefresh_off" onclick="autorefresh(0);">off</a></small></span>
       </div>
       <div class="panel-body">
-        <div id="workerchart" class="text-center" style="display: block; margin: auto;"></div>
+        <div id="workerchart" class="text-center"></div>
       </div>
     </div>
       <?php
@@ -1105,8 +1107,8 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
 
     // init worker chart
     var margin = {top: 20, right: 20, bottom: 120, left: 70},
-    width = 700 - margin.left - margin.right,
-    height = 350 - margin.top - margin.bottom;
+    width = 600 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
 
     var svg = d3.select("#workerchart").append("svg")
         .attr("width", width + margin.left + margin.right)
