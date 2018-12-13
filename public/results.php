@@ -96,7 +96,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
     <table class="table results table-striped table-hover table-condensed">
       <thead>
         <tr>
-          <th class="text-nowrap">#</th>-
+          <th class="text-nowrap">#</th>
           <th class="text-nowrap">Name <?php echo sortURL('filename'); ?></th>
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
@@ -104,12 +104,12 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">% <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <?php if ($show_change_percent) { ?>
-          <th width="8%" class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
+          <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
           <?php $numofcol+=1; ?>
           <?php } ?>
           <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
           <?php if ($show_change_percent) { ?>
-          <th width="8%" class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
+          <th class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
           <?php $numofcol+=1; ?>
           <?php } ?>
           <th class="text-nowrap">Items (files) <?php echo sortURL('items_files'); ?></th>
@@ -124,12 +124,12 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
           <?php } ?>
-          <th width="8%" class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
-          <th width="4%" class="text-nowrap">Rating <span style="color:darkgray;font-size: 11px;"><i title="Rating is based on last modified time, older is higher rating" class="glyphicon glyphicon-question-sign"></i></span></th>
+          <th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
+          <th class="text-nowrap">Rating <span style="color:darkgray;font-size: 11px;"><i title="Rating is based on last modified time, older is higher rating" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php if ($qumulo_index == '1') { ?>
           <th class="text-nowrap">Created (utc) <?php echo sortURL('creation_time'); ?></th>
           <?php } elseif ($s3_index != '1') { ?>
-          <th width="8%" class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
+          <th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
           <?php } ?>
           <?php
           if (count($extra_fields) > 0) {
@@ -452,7 +452,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             </div>
     </div>
 </div>
-</form><br />
+</form>
   <div class="row">
     <div class="col-xs-12 text-center center">
 			<div class="row">
@@ -496,7 +496,6 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php if ($page >= $last) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpageurl . '">'; } ?>&raquo;</a></li>
         <?php if ($end < $last) { echo '<li><a href="' . $lastpageurl . '">' . $last . '</a></li>'; } ?>
       </ul>
-      <br />
     </div>
 	</div>
   </div>
