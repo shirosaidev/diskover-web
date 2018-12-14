@@ -1,8 +1,11 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc25] - 2018-12-13
+# [1.5.0-rc25] - 2018-12-14
+### added
+- support for indices created with diskover v1.5.0-rc25
+- list endpoint to api for getting diskover indices info, use with GET /api.php/list
 ### changed
-- increased rc version number
+- improved browser rendering of dashboard, filetree, treemap and search results pages for >=1080p screen resolution (diskover-web recommended screen res is 1080p or higher in Chrome browser)
 
 # [1.5.0-rc24] - 2018-11-29
 ### changed

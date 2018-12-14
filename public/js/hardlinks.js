@@ -110,7 +110,7 @@ function renderHardLinksCharts(data) {
 
     var valueLabelWidth = 20; // space reserved for value labels (right)
     var barHeight = 10; // height of one bar
-    var barLabelWidth = 80; // space reserved for bar labels
+    var barLabelWidth = 120; // space reserved for bar labels
     var barLabelPadding = 10; // padding between bar and bar labels (left)
     var gridChartOffset = 0; // space between start of grid and first bar
     var maxBarWidth = 500; // width of the bar with the max value
@@ -159,7 +159,7 @@ function renderHardLinksCharts(data) {
                   break;
                 }
             }
-            return "<span style='font-size:10px;color:lightgray;'>" + files + "</span><br><span style='font-size:12px; color:white;'>inode: " + d.label + "</span><br><span style='font-size:12px; color:white;'>size: " + format(d.size) + "</span><br><span style='font-size:12px; color:red;'>count: " + d.count + " (" + percent + ")</span>";
+            return "<span style='font-size:10px;color:lightgray;'>" + files + "</span><br><span style='font-size:12px; color:white;'>inode: " + d.label.toString() + "</span><br><span style='font-size:12px; color:white;'>size: " + format(d.size) + "</span><br><span style='font-size:12px; color:red;'>count: " + d.count + " (" + percent + ")</span>";
         });
 
     svg.call(tip);
@@ -172,7 +172,7 @@ function renderHardLinksCharts(data) {
 
     // accessor functions
     var barLabel = function(d) {
-        return d['label'];
+        return d['label'].toString();
     };
     var barValue = function(d) {
         return d['count'];

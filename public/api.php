@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -800,6 +800,105 @@ function get($endpoint, $query) {
 			header('Content-Type: application/json');
 			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);
 			break;
+
+		case $endpoint[0] == 'list':
+			$indices = $client->cat()->indices([]);
+			$diskover_indices = [];
+			for($i=0;$i<count($indices);$i++) {
+				if (strpos($indices[$i]['index'], 'diskover') !== false) {
+					$diskover_indices[] = $indices[$i];
+				}
+			}
+		    for($i=0;$i<count($diskover_indices);$i++) {
+				// Get search results from Elasticsearch for duplicate files
+				$results = [];
+				$searchParams = [];
+				// Setup search query
+				$searchParams['index'] = $diskover_indices[$i]['index'];
+				$searchParams['type']  = 'file';
+				// Setup search query for dupes count
+				$searchParams['body'] = [
+				'size' => 0,
+					'aggs' => [
+					'total_size' => [
+					'sum' => [
+					'field' => 'filesize'
+					]
+					]
+					],
+					'query' => [
+					'query_string' => [
+					'query' => 'dupe_md5:(NOT "")',
+					'analyze_wildcard' => 'true'
+					]
+					]
+				];
+				$queryResponse = $client->search($searchParams);
+				// Get total count of duplicate files
+				$diskover_indices[$i]['dupes'] = $queryResponse['hits']['total'];
+				// Get total size of all duplicate files
+				$diskover_indices[$i]['dupessize'] = $queryResponse['aggregations']['total_size']['value'];
+				// Get search results from Elasticsearch for number of files
+				$results = [];
+				$searchParams = [];
+				// Setup search query
+				$searchParams['index'] = $diskover_indices[$i]['index'];
+				$searchParams['type']  = "file";
+				$searchParams['body'] = [
+					'size' => 0,
+					'query' => [
+					'match_all' => (object) []
+					]
+				];
+				$queryResponse = $client->search($searchParams);
+				// Get total count of files
+				$diskover_indices[$i]['totalfiles'] = $queryResponse['hits']['total'];
+				// Get search results from Elasticsearch for number of directories
+				$results = [];
+				$searchParams = [];
+				// Setup search query
+				$searchParams['index'] = $diskover_indices[$i]['index'];
+				$searchParams['type']  = "directory";
+				$searchParams['body'] = [
+					'size' => 0,
+					'query' => [
+					'match_all' => (object) []
+					]
+				];
+				$queryResponse = $client->search($searchParams);
+				// Get total count of directories
+				$diskover_indices[$i]['totaldirs'] = $queryResponse['hits']['total'];
+				// Get search results from Elasticsearch for hardlink files
+				$results = [];
+				$searchParams = [];
+				$totalHardlinkFiles = 0;
+				$totalFilesizeHardlinkFiles = 0;
+				// Setup search query
+				$searchParams['index'] = $diskover_indices[$i]['index'];
+				$searchParams['type']  = 'file';
+				// Setup search query for hardlink count
+				$searchParams['body'] = [
+				'size' => 0,
+					'aggs' => [
+					'total_size' => [
+					'sum' => [
+					'field' => 'filesize'
+					]
+					]
+					],
+					'query' => [
+					'query_string' => [
+					'query' => 'hardlinks:>1'
+					]
+					]
+				];
+				$queryResponse = $client->search($searchParams);
+				// Get total count of hardlink files
+				$diskover_indices[$i]['totalHardlinkFiles'] = $queryResponse['hits']['total'];
+			}
+		
+			echo json_encode($diskover_indices, JSON_PRETTY_PRINT);
+		break;
 
 		default:
 			header('Content-Type: application/json');
