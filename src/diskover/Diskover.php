@@ -147,14 +147,23 @@ function build_url($param, $val) {
 
 
 // human readable file size format function
-function formatBytes($bytes, $precision = 2) {
+function formatBytes($bytes, $precision = 1) {
   if ($bytes == 0) {
     return "0 Bytes";
   }
-  $base = log($bytes) / log(1024);
+  if (getCookie('filesizebase10') == '1') {
+    $basen = 1000; 
+  } else {
+    $basen = 1024;
+  }
+  $precision_cookie = getCookie('filesizedec');
+  if ($precision_cookie != '') {
+      $precision = $precision_cookie;
+  }
+  $base = log($bytes) / log($basen);
   $suffix = array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")[floor($base)];
 
-  return round(pow(1024, $base - floor($base)), $precision) . " " . $suffix;
+  return round(pow($basen, $base - floor($base)), $precision) . " " . $suffix;
 }
 
 // convert human readable file size format to bytes

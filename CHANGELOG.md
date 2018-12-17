@@ -1,11 +1,16 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc25] - 2018-12-14
+# [1.5.0-rc25] - 2018-12-17
 ### added
 - support for indices created with diskover v1.5.0-rc25
 - list endpoint to api for getting diskover indices info, use with GET /api.php/list
+- improved top50 analytics page, added cost per gb and top 50 groups
+- cost per gb to dashboard, search results and file info page (for indices created with diskover's -G flag)
+- file size display section to Admin page - decimal system base-10 or binary system base-2 (default) setting, file size decimal setting
 ### changed
 - improved browser rendering of dashboard, filetree, treemap and search results pages for >=1080p screen resolution (diskover-web recommended screen res is 1080p or higher in Chrome browser)
+- top50 analytics page code is now all in one file top50.php
+- default num of decimals for file size is now 1 (prev was 2)
 
 # [1.5.0-rc24] - 2018-11-29
 ### changed

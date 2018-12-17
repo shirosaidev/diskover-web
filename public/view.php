@@ -330,6 +330,14 @@ exit();
         </li>
         <?php } ?>
     </ul>
+    <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <span class="badge">$ <?php echo number_format(round($file['costpergb'], 2), 2); ?></span>
+            Cost per GB
+        </li>
+    </ul>
+    <?php } ?> 
     <ul class="list-group">
         <?php
         if (count($extra_fields) > 0) {

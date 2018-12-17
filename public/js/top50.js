@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2018
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -24,6 +24,7 @@ function top50Switch(a) {
 
 // buttons
 
+var top50type = $_GET('top50type');
 var path = $_GET('path');
 var filter = $_GET('filter');
 var mtime = $_GET('mtime');
@@ -31,14 +32,17 @@ var index = $_GET('index') || getCookie('index');
 var index2 = $_GET('index2') || getCookie('index2');
 var doctype = $_GET('doctype');
 $(".button-largest").click(function () {
-    window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype;
+    window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype + '&top50type=Largest';
 });
 $(".button-oldest").click(function () {
-    window.location.href = 'top50_oldest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype;
+    window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype + '&top50type=Oldest';
 });
 $(".button-newest").click(function () {
-    window.location.href = 'top50_newest.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype;
+    window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype + '&top50type=Newest';
 });
-$(".button-user").click(function () {
-    window.location.href = 'top50_users.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime;
+$(".button-users").click(function () {
+    window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype + '&top50type=Users';
+});
+$(".button-groups").click(function () {
+    window.location.href = 'top50.php?index=' + index + '&index2=' + index2 + '&path=' + path + '&filter='  + filter + '&mtime=' + mtime + '&doctype=' + doctype + '&top50type=Groups';
 });

@@ -180,9 +180,21 @@ function $_GET(param) {
 
 // format bytes to mb, gb
 function format(a, b) {
-	if (0 === a) return "0 Bytes";
-	var c = 1024,
-		d = b || 2,
+    if (0 === a) return "0 Bytes";
+    // check if we are using base10 or base2 (default)
+    if (getCookie('filesizebase10') == '1') {
+        var c = 1000;  // base 10
+    } else {
+        var c = 1024;  // base 2
+    }
+    // set decimals
+    var dec = getCookie('filesizedec');
+    if (dec == '') {
+        var dec = 1;  // default 1
+    } else {
+        var dec = parseInt(dec);
+    }
+	var d = b || dec,
 		e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
 		f = Math.floor(Math.log(a) / Math.log(c));
 	return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f]

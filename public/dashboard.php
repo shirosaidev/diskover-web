@@ -430,8 +430,43 @@ if (!$s3_index && !$qumulo_index) {
     $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
 }
 
+// Get search results from Elasticsearch for cost per gb
+if (!$s3_index) {
+    $results = [];
+    $searchParams = [];
+
+    // Setup search query
+    $searchParams['index'] = $esIndex;
+    $searchParams['type']  = 'file';
+
+    $searchParams['body'] = [
+        'size' => 0,
+        'query' => [
+            'match_all' => (object) []
+        ],
+        'aggs' => [
+            'avg_cost_per_gb' => [
+                'avg' => [
+                    'field' => 'costpergb'
+                ]
+            ],
+            'cost_per_gb' => [
+                'sum' => [
+                    'field' => 'costpergb'
+                ]
+            ]
+        ]
+    ];
+    $queryResponse = $client->search($searchParams);
+
+    $costpergb = $queryResponse['aggregations']['cost_per_gb']['value'];
+    $avgcostpergb = $queryResponse['aggregations']['avg_cost_per_gb']['value'];
+
+    createCookie('costpergb', $costpergb);
+}
+
+// Get s3 bucket names
 if ($s3_index) {
-    // Get s3 bucket names
     $buckets = [];
 
     $results = [];
@@ -578,10 +613,12 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
     <div class="col-xs-6">
       <div class="jumbotron">
         <h1><i class="glyphicon glyphicon-hdd"></i> Space Savings</h1>
-        <p>You could save <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> of disk space if you delete or archive all your files. 
-            <?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.<br /><span style="font-size:12px;color:#666;"><i class="glyphicon glyphicon-info-sign"></i> Does not account for hardlinks. Recommended files is based on >6M mtime &amp; atime.</span><?php } ?></p>
-        <p><span class="label label-default"><i class="glyphicon glyphicon-file" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Files</span> <?php echo number_format($totalfiles); ?></span> &nbsp;&nbsp; <span class="label label-default"><i class="glyphicon glyphicon-folder-close" style="color:skyblue;font-weight:bold;"></i> <span style="color:lightgray">Directories</span> <?php echo number_format($totaldirs); ?></span> &nbsp;&nbsp;
-            <?php if (!$s3_index) { ?><span class="label label-default"><i class="glyphicon glyphicon-duplicate" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Dupes</span> <?php echo number_format($totalDupes); ?> (<?php echo formatBytes($totalFilesizeDupes); ?>)</span> &nbsp;&nbsp; <span class="label label-default"><i class="glyphicon glyphicon-link" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Hardlink files</span> <?php echo number_format($totalHardlinkFiles); ?> (<?php echo formatBytes($totalFilesizeHardlinkFiles); ?>)</span><?php } ?></p>
+        <p>You could free up <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> if you delete or archive all your files. 
+            <?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.</p>
+                <?php if (!$s3_index && $costpergb > 0) { ?><?php echo '<p>Cost per GB: $ ' . number_format(round($costpergb, 2), 2) . ' total cost, $ ' . number_format(round($avgcostpergb, 2), 2) , ' average per file.</p>'; } ?>
+                <p><span style="font-size:12px;color:#666;"><i class="glyphicon glyphicon-info-sign"></i> Does not account for hardlink sizes. Recommended files is based on >6M mtime &amp; atime.</span><?php } ?></p>
+        <p><span class="label label-default"><i class="glyphicon glyphicon-file" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Files</span> <?php echo number_format($totalfiles); ?></span> &nbsp; <span class="label label-default"><i class="glyphicon glyphicon-folder-close" style="color:skyblue;font-weight:bold;"></i> <span style="color:lightgray">Directories</span> <?php echo number_format($totaldirs); ?></span> &nbsp;
+            <?php if (!$s3_index) { ?><span class="label label-default"><i class="glyphicon glyphicon-duplicate" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Dupes</span> <?php echo number_format($totalDupes); ?> (<?php echo formatBytes($totalFilesizeDupes); ?>)</span> &nbsp; <span class="label label-default"><i class="glyphicon glyphicon-link" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Hardlink files</span> <?php echo number_format($totalHardlinkFiles); ?> (<?php echo formatBytes($totalFilesizeHardlinkFiles); ?>)</span><?php } ?></p>
       </div>
       <div class="panel panel-default chartbox">
         <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-dashboard"></i> Crawl Stats</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="crawlstats.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View more</a></small></div>
@@ -767,7 +804,6 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
                   // Setup search query
                   $searchParams['index'] = $esIndex;
                   $searchParams['type']  = 'file';
-
 
                   // Setup search query for largest files
                   $searchParams['body'] = [

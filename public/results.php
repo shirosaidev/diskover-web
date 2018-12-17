@@ -100,8 +100,12 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">Name <?php echo sortURL('filename'); ?></th>
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
-		      <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
+		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
           <th class="text-nowrap">% <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
+          <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
+          <th class="text-nowrap">Cost per GB <?php echo sortURL('costpergb'); ?></th>
+          <?php $numofcol+=1; ?>
+          <?php } ?>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
@@ -143,46 +147,49 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         </tr>
       </thead>
       <tfoot>
-				<tr>
-					<th class="text-nowrap">#</th>
-					<th class="text-nowrap">Name</th>
-                    <th class="text-nowrap">Tags</th>
-					<th class="text-nowrap">Path</th>
-					<th class="text-nowrap">File Size</th>
-          <th class="text-nowrap">%</th>
-          <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
-          <?php if ($show_change_percent) { ?>
-          <th class="text-nowrap">Change %</th>
-          <?php } ?>
-          <th class="text-nowrap">Items</th>
-          <?php if ($show_change_percent) { ?>
-          <th class="text-nowrap">Change %</th>
-          <?php } ?>
-          <th class="text-nowrap">Items (files)</th>
-          <th class="text-nowrap">Items (subdirs)</th>
-          <?php } ?>
-          <?php if ($s3_index) { ?>
-          <th class="text-nowrap">Bucket <?php echo sortURL('s3_bucket'); ?></th>
-          <th class="text-nowrap">Key <?php echo sortURL('s3_key'); ?></th>
-          <th class="text-nowrap">Storage class <?php echo sortURL('s3_storage_class'); ?></th>
-          <?php } else { ?>
-					<th class="text-nowrap">Owner</th>
-					<th class="text-nowrap">Group</th>
-          <?php } ?>
-					<th class="text-nowrap">Modified (utc)</th>
-          <th class="text-nowrap">Rating</th>
-          <?php if ($qumulo_index) { ?>
-          <th class="text-nowrap">Created (utc)</th>
-          <?php } elseif (!$s3_index) { ?>
-					<th class="text-nowrap">Accessed (utc)</th>
-          <?php } ?>
-          <?php
-          if (count($extra_fields) > 0) {
-            foreach ($extra_fields as $key => $value) { ?>
-                <th class="text-nowrap"><?php echo $value; ?></th>
-            <?php }
-          } ?>
-				</tr>
+          <tr>
+            <th class="text-nowrap">#</th>
+            <th class="text-nowrap">Name</th>
+            <th class="text-nowrap">Tags</th>
+            <th class="text-nowrap">Path</th>
+            <th class="text-nowrap">File Size</th>
+            <th class="text-nowrap">%</th>
+            <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
+            <th class="text-nowrap">Cost per GB</th>
+            <?php } ?>
+            <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
+            <?php if ($show_change_percent) { ?>
+            <th class="text-nowrap">Change %</th>
+            <?php } ?>
+            <th class="text-nowrap">Items</th>
+            <?php if ($show_change_percent) { ?>
+            <th class="text-nowrap">Change %</th>
+            <?php } ?>
+            <th class="text-nowrap">Items (files)</th>
+            <th class="text-nowrap">Items (subdirs)</th>
+            <?php } ?>
+            <?php if ($s3_index) { ?>
+            <th class="text-nowrap">Bucket <?php echo sortURL('s3_bucket'); ?></th>
+            <th class="text-nowrap">Key <?php echo sortURL('s3_key'); ?></th>
+            <th class="text-nowrap">Storage class <?php echo sortURL('s3_storage_class'); ?></th>
+            <?php } else { ?>
+                        <th class="text-nowrap">Owner</th>
+                        <th class="text-nowrap">Group</th>
+            <?php } ?>
+                        <th class="text-nowrap">Modified (utc)</th>
+            <th class="text-nowrap">Rating</th>
+            <?php if ($qumulo_index) { ?>
+            <th class="text-nowrap">Created (utc)</th>
+            <?php } elseif (!$s3_index) { ?>
+                        <th class="text-nowrap">Accessed (utc)</th>
+            <?php } ?>
+            <?php
+            if (count($extra_fields) > 0) {
+                foreach ($extra_fields as $key => $value) { ?>
+                    <th class="text-nowrap"><?php echo $value; ?></th>
+                <?php }
+            } ?>
+            </tr>
       </tfoot>
       <tbody id="results-tbody">
       <?php
@@ -349,7 +356,10 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
               <span class="highlight"><a class="pathdark" href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'])); ?>"><?php echo $file['path_parent']; ?></a></span>
           </td>
         <td class="text-nowrap highlight" style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file['filesize']); ?></td>
-        <td width="8%" class="highlight"><div class="text-right percent" style="width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td>
+        <td width="8%" class="highlight"><div class="text-right percent" style="width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div>&nbsp;<span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td>
+        <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
+        <td class="text-nowrap highlight">$ <?php echo number_format(round($file['costpergb'], 2), 2); ?></td>
+        <?php } ?>
         <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <!-- show comparison file size -->
         <?php if ($show_change_percent) { $filesize_change = 0; ?>

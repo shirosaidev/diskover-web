@@ -171,6 +171,15 @@ select::-webkit-scrollbar-thumb
         </div>
 
         <hr />
+        <h5>File size display</h5>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="sizedisplay" onclick="setFileSizeDisplay();">
+            <label class="form-check-label" for="sizedisplay">Use decimal system base-10 (1000) instead of binary system base-2 (1024)</label>
+        </div>
+        <div class="form-group form-inline">
+            <label>File size decimals</label>&nbsp;<input class="form-control input" name="filesizedec" id="filesizedec" value="<?php if (getCookie('filesizedec') != '') { echo getCookie('filesizedec'); } else { echo '1'; } ?>" size="1">&nbsp;<button type="submit" id="changefilesizedecbutton" class="btn btn-primary" title="submit" onclick="setFileSizeDisplayDec()">Set </button>
+        </div>
+        <hr />
         <?php
             $diskover_indices = curl_es('/diskover*?pretty');
             $fields_file = $diskover_indices[$esIndex]['mappings']['file']['properties'];
@@ -545,7 +554,7 @@ function clearCache() {
                 'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
                 'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 's3', 'minhardlinks', 
                 'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'sendstats', 'support', 'sponsoring',
-                'crawlfinished'];
+                'crawlfinished', 'costpergb', 'filesizebase10', 'filesizedec'];
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
     }
@@ -556,6 +565,22 @@ function clearCache() {
     }
 	alert('cleared, please restart browser');
     return true;
+}
+
+// set file size display in base10 or base2 (default)
+function setFileSizeDisplay() {
+    if (document.getElementById('sizedisplay').checked) {
+        setCookie('filesizebase10', 1);
+    } else {
+        setCookie('filesizebase10', 0);
+    }
+}
+
+// set file size display decimals cookie
+function setFileSizeDisplayDec() {
+    var d = document.getElementById('filesizedec').value;
+    setCookie('filesizedec', d);
+    alert("file size decimals set to " + d);
 }
 
 // send anonymous stats
@@ -596,6 +621,13 @@ if (getCookie('sendstats') == 1) {
     document.getElementById('sendstats').checked = true;
 } else {
     document.getElementById('sendstats').checked = false;
+}
+
+// set file size display checkbox
+if (getCookie('filesizebase10') == 1) {
+    document.getElementById('sizedisplay').checked = true;
+} else {
+    document.getElementById('sizedisplay').checked = false;
 }
 </script>
 <div id="loading">
