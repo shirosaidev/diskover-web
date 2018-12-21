@@ -66,6 +66,8 @@ require "../src/diskover/Diskover.php";
 					<p>Getting file/directory tag info is done with the GET method.<br />
 					<p>Curl example:<br />
 					<code>curl -X GET http://localhost:8000/api.php/indexname/endpoint</code></p>
+					<p>List all diskover indices and stats for each:<br />
+					<code>GET http://localhost:8000/api.php/list</code></p>
                     <p>List all files with no tag (untagged):<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tags?tag=&type=file</code></p>
                     <p>List all directories with no tag (untagged) and no custom tag:<br />
