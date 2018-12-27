@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc26] - 2018-12-27
+### changed
+- increased version number
+
 # [1.5.0-rc25] - 2018-12-17
 ### added
 - support for indices created with diskover v1.5.0-rc25
