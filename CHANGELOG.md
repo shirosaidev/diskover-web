@@ -1,8 +1,8 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc26] - 2018-12-27
-### changed
-- increased version number
+# [1.5.0-rc26] - 2018-12-29
+### added
+- cost savings for recommended files on dashboard (for indices created with diskover's -G flag)
 
 # [1.5.0-rc25] - 2018-12-17
 ### added
