@@ -343,7 +343,7 @@ exit();
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>
               <li class="list-group-item">
-                  <span class="badge"><?php echo $file[$key]; ?></span>
+                  <span class="badge"><?php echo nl2br($file[$key]); ?></span>
                   <?php echo $value; ?>
               </li>
           <?php }
