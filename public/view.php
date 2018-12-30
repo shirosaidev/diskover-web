@@ -345,7 +345,7 @@ exit();
           <?php if (strpos($file[$key], "\n")) { ?>
               <li class="list-group-item">
                   <?php echo $value; ?><br />
-                  <span class="small"><?php echo nl2br($file[$key]); ?></span>
+                  <span class="small" style="color:white;font-weight:bold;"><?php echo nl2br($file[$key]); ?></span>
               </li>
           <?php } else { ?>
               <li class="list-group-item">
