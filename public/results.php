@@ -186,7 +186,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             <?php
             if (count($extra_fields) > 0) {
                 foreach ($extra_fields as $key => $value) { ?>
-                    <th class="text-nowrap"><?php echo nl2br($value); ?></th>
+                    <th class="text-nowrap"><?php $value; ?></th>
                 <?php }
             } ?>
             </tr>
@@ -416,7 +416,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>
-              <td class="highlight"><?php echo $file[$key]; ?></td>
+              <td class="highlight"><?php echo nl2br($file[$key]); ?></td>
           <?php }
           } ?>
       </tr>
