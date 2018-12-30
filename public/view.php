@@ -342,10 +342,17 @@ exit();
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>
+          <?php if (strpos($file[$key], '\n')) { ?>
               <li class="list-group-item">
-                  <span class="badge"><?php echo nl2br($file[$key]); ?></span>
+                  <?php echo $value; ?><br />
+                  <span class="small"><?php echo nl2br($file[$key]); ?></span>
+              </li>
+          <?php } else { ?>
+              <li class="list-group-item">
+                  <span class="badge"><?php echo $file[$key]; ?></span>
                   <?php echo $value; ?>
               </li>
+          <?php } ?>
           <?php }
           } ?>
     </ul>
