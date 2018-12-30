@@ -416,7 +416,8 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>
-              <td class="highlight"><?php echo $file[$key]; ?></td>
+          <?php $fk = strlen($file[$key]) > 50 ? substr($file[$key],0,50)."..." : $fk; ?>
+              <td class="highlight"><?php echo $fk; ?></td>
           <?php }
           } ?>
       </tr>
