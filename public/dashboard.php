@@ -44,6 +44,10 @@ $searchParams['body'] = [
      ]
 ];
 $queryResponse = $client->search($searchParams);
+$dircalcstime = 0;
+foreach ($queryResponse['hits']['hits'] as $key => $value) {
+    $dircalcstime += $value['_source']['crawl_time'];
+}
 $totalcrawls_finished = $queryResponse['hits']['total'];
 
 if ($totalcrawls_finished == $totalcrawls) {
@@ -62,6 +66,8 @@ if ($totalcrawls_finished == $totalcrawls) {
     foreach ($queryResponse['hits']['hits'] as $key => $value) {
         $crawlelapsedtime += $value['_source']['crawl_time'];
     }
+    // get total dircalcs time
+    $dircalcstime = $dircalcstime - $crawlelapsedtime;
 } else {
     $crawlfinished = false;
 }
@@ -647,8 +653,9 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
                 <i class="glyphicon glyphicon-flag"></i> Finished at
               </li>
               <li class="list-group-item">
+                <span class="badge"><?php echo secondsToTime($dircalcstime); ?></span>
                 <span class="badge"><?php echo secondsToTime($crawlelapsedtime); ?></span>
-                <i class="glyphicon glyphicon-time"></i> Elapsed time
+                <i class="glyphicon glyphicon-time"></i> Elapsed time (crawl/dir calcs)
               </li>
               <li class="list-group-item">
                 <span class="badge"><?php echo secondsToTime($crawlcumulativetime); ?></span>
