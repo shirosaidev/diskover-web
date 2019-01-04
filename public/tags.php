@@ -195,7 +195,7 @@ foreach ($tagCountsCustom as $tag => $value) {
                 <div class="row">
                     <div class="col-xs-6">
                         <div class="chartbox text-center">
-                          <span class="label" style="font-size:16px;background-color:#666666"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo $tagCounts['untagged']; ?></a></span>
+                          <span class="label" style="font-size:16px;background-color:#666666"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo $tagCounts['untagged']; ?></a></span>
                           <span class="label" style="font-size:16px;background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo $tagCounts['delete']; ?></a></span>
                           <span class="label" style="font-size:16px;background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo $tagCounts['archive']; ?></a></span>
                           <span class="label" style="font-size:16px;background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo $tagCounts['keep']; ?></a></span>
@@ -207,7 +207,7 @@ foreach ($tagCountsCustom as $tag => $value) {
                   </div>
                   <div class="col-xs-6">
                       <div class="chartbox text-center" style="display:absolute;">
-                        <span class="label" style="font-size:16px;background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
+                        <span class="label" style="font-size:16px;background-color:#666666;"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=untagged">untagged <?php echo formatBytes($totalFilesize['untagged']); ?></a></span>
                         <span class="label" style="font-size:16px;background-color:#F69327"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=delete">delete <?php echo formatBytes($totalFilesize['delete']); ?></a></span>
                         <span class="label" style="font-size:16px;background-color:#65C165"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=archive">archive <?php echo formatBytes($totalFilesize['archive']); ?></a></span>
                         <span class="label" style="font-size:16px;background-color:#52A3BB"><a href="advanced.php?<?php echo $_SERVER['QUERY_STRING']; ?>&amp;submitted=true&amp;p=1&amp;tag=keep">keep <?php echo formatBytes($totalFilesize['keep']); ?></a></span>

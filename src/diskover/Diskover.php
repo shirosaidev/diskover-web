@@ -12,7 +12,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0-rc26';
+$VERSION = '1.5.0-rc27';
 
 
 function connectES() {
@@ -491,7 +491,7 @@ function sortSearchResults($request, $searchParams) {
 // predict search request and handle smartsearch requests
 function predict_search($q) {
     // remove any extra white space
-    $q = trim($q);
+    //$q = trim($q);
 
     // Grab all the smart searches from file
     $smartsearches = get_smartsearches();

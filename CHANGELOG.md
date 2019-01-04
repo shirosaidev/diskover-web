@@ -1,5 +1,13 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc27] - 2019-01-03
+### added
+- more tag options in advanced search
+### fixed
+- searching for untagged on advanced search
+- untagged link on dashboard and tags analytics page
+- bug searching for paths with trailing space character at end of path
+
 # [1.5.0-rc26] - 2018-12-29
 ### added
 - cost savings for recommended files on dashboard (for indices created with diskover's -G flag)

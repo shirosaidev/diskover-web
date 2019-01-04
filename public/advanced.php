@@ -121,11 +121,23 @@ if (!empty($_REQUEST['submitted'])) {
     }
 
     if (!empty($_REQUEST['tag'])) {
-        $q[] = "tag:" . $_REQUEST['tag'];
+        if ($_REQUEST['tag'] == "untagged") {
+            $q[] = "tag:\"\"";
+        } elseif ($_REQUEST['tag'] == "any") {
+            $q[] = "tag:(NOT \"\")";
+        } else {
+            $q[] = "tag:" . $_REQUEST['tag'];
+        }
     }
 
     if (!empty($_REQUEST['tag_custom'])) {
-        $q[] = "tag_custom:" . '"' . $_REQUEST['tag_custom'] . '"';
+        if ($_REQUEST['tag_custom'] == "none") {
+            $q[] = "tag_custom:\"\"";
+        } elseif ($_REQUEST['tag_custom'] == "any") {
+            $q[] = "tag_custom:(NOT \"\")";
+        } else {
+            $q[] = "tag_custom:" . '"' . $_REQUEST['tag_custom'] . '"';
+        }
     }
 
     if (!empty($_REQUEST['inode'])) {
@@ -420,19 +432,22 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		<label for="tag">Tag is...</label>
 		<select class="form-control" name="tag">
           <option value="" selected></option>
-		  <option value="">untagged</option>
+		  <option value="untagged">untagged</option>
 		  <option value="delete">delete</option>
 		  <option value="archive">archive</option>
-		  <option value="keep">keep</option>
+          <option value="keep">keep</option>
+          <option value="any">any tag</option>
 		</select>
 	  </div>
 	  <div class="col-xs-4">
 		<label for="tag_custom">Custom Tag is...</label>
 		<select name="tag_custom" class="form-control">
              <option value="" selected></option>
+
         <?php foreach($customtags as $key => $value) { ?>
             <option value="<?php echo $value[0]; ?>"><?php echo $value[0]; ?></option>
         <?php } ?>
+             <option value="any">any custom tag</option>
         </select>
 	  </div>
 	</div>
