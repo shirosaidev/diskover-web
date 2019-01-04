@@ -1,8 +1,9 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc27] - 2019-01-03
+# [1.5.0-rc27] - 2019-01-04
 ### added
 - more tag options in advanced search
+- dir calcs elapsed time to dashboard
 ### fixed
 - searching for untagged on advanced search
 - untagged link on dashboard and tags analytics page
