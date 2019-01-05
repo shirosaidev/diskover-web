@@ -666,8 +666,9 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
                 <i class="glyphicon glyphicon-time"></i> Total bulk update time (cumulative)
               </li>
               <li class="list-group-item">
-                <span class="badge"><?php echo number_format($crawlelapsedtime/$totalfiles*1000, 6) . ' / ' . number_format($crawlelapsedtime/$totaldirs*1000, 6); ?></span>
-                <i class="glyphicon glyphicon-dashboard"></i> Elapsed time per file/directory (average ms)
+              <span class="badge"><?php echo number_format($totaldirs/$crawlelapsedtime, 3) . " dirs/sec"; ?></span>
+                <span class="badge"><?php echo number_format($crawlelapsedtime/$totalfiles*1000, 3) . ' / ' . number_format($crawlelapsedtime/$totaldirs*1000, 3); ?></span>
+                <i class="glyphicon glyphicon-dashboard"></i> Elapsed time per file/directory (average ms) / crawl speed
               </li>
             </ul>
             <?php } else { ?>
