@@ -895,6 +895,48 @@ function get($endpoint, $query) {
 				$queryResponse = $client->search($searchParams);
 				// Get total count of hardlink files
 				$diskover_indices[$i]['totalHardlinkFiles'] = $queryResponse['hits']['total'];
+			    	
+			    	// Get search results from Elasticsearch for disk space info
+				$results = [];
+				$searchParams = [];
+				// Setup search query
+				$searchParams['index'] = $diskover_indices[$i]['index'];
+				$searchParams['type']  = "diskspace";
+				$searchParams['body'] = [
+				    'size' => 100,
+				    'query' => [
+					'match_all' => (object) []
+				     ],
+				     'sort' => [
+					 'indexing_date' => [
+					     'order' => 'asc'
+					 ]
+				     ]
+				];
+				$queryResponse = $client->search($searchParams);
+				// Get disk space info from queryResponse
+				$diskover_indices[$i]['path'] = $queryResponse['hits']['hits'][0]['_source']['path'];
+
+			   	// Get total worker crawl cumulative time (in seconds) 
+				$searchParams['type'] = 'worker';
+				$searchParams['body'] = [
+				   'size' => 0,
+				    'aggs' => [
+				      'total_elapsed' => [
+					'sum' => [
+					  'field' => 'crawl_time'
+					]
+				      ]
+				    ],
+				    'query' => [
+					    'match_all' => (object) []
+				     ]
+				];
+				$queryResponse = $client->search($searchParams);
+
+				$diskover_indices[$i]['elapsedTime'] = $queryResponse['aggregations']['total_elapsed']['value'];
+
+			    	
 			}
 		
 			echo json_encode($diskover_indices, JSON_PRETTY_PRINT);
