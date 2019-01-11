@@ -398,3 +398,6 @@ tbody a:hover {
     letter-spacing:-2px;
 }
 
+.extra-field {
+    max-width: 10%;
+}
