@@ -399,7 +399,9 @@ tbody a:hover {
 }
 
 .extra-field {
-    word-wrap: normal!important;
-    word-break: normal!important;
+    word-wrap: break-word;
+    word-break: break-word;
     overflow: hidden;
+    white-space: nowrap;
+    max-width: 15%;
 }
