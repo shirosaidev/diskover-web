@@ -399,7 +399,7 @@ tbody a:hover {
 }
 
 .extra-field {
-    word-wrap: break-word;
+    word-wrap: normal;
     word-break: normal;
     max-width: 10%;
     overflow: hidden;
