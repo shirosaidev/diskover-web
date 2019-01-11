@@ -347,6 +347,11 @@ exit();
                   <?php echo $value; ?><br />
                   <span class="small" style="color:white;font-weight:bold;"><?php echo nl2br($file[$key]); ?></span>
               </li>
+          <?php } elseif (is_array($file[$key])) { $arr_str = implode("\n",$file[$key]); ?>
+              <li class="list-group-item">
+                  <?php echo $value; ?><br />
+                  <span class="small" style="color:white;font-weight:bold;"><?php echo nl2br($arr_str); ?></span>
+              </li>
           <?php } else { ?>
               <li class="list-group-item">
                   <span class="badge"><?php echo $file[$key]; ?></span>
