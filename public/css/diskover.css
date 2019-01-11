@@ -82,7 +82,7 @@ body::-webkit-scrollbar-thumb
 
 .path {
     word-wrap: break-word;
-    word-break: break-all;
+    word-break: break-word;
 }
 
 .pathdark {
@@ -399,8 +399,8 @@ tbody a:hover {
 }
 
 .extra-field {
-    word-wrap: normal;
-    word-break: normal;
+    word-wrap: break-word;
+    word-break: break-word;
     max-width: 10%;
     overflow: hidden;
 }
