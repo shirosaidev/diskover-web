@@ -186,7 +186,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             <?php
             if (count($extra_fields) > 0) {
                 foreach ($extra_fields as $key => $value) { if (is_array($value)) { $value = implode("\n",$value); } ?>
-                    <th class="text-nowrap"><?php $value; ?></th>
+                    <th class="text-nowrap"><?php echo $value; ?></th>
                 <?php }
             } ?>
             </tr>
