@@ -416,7 +416,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>
-              <td class="extra-field text-nowrap highlight"><?php echo (is_array($file[$key])) ? nl2br(implode("\n",$file[$key])) : $file[$key]; ?></td>
+              <td class="extra-field highlight"><?php echo (is_array($file[$key])) ? nl2br(implode("\n",$file[$key])) : $file[$key]; ?></td>
           <?php }
           } ?>
       </tr>
