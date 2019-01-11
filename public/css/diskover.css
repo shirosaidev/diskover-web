@@ -397,11 +397,3 @@ tbody a:hover {
     font-weight:bold;
     letter-spacing:-2px;
 }
-
-.extra-field {
-    word-wrap: normal;
-    word-break: keep-all;
-    overflow: hidden;
-    white-space: nowrap;
-    max-width: 15%;
-}
