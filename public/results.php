@@ -185,7 +185,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             <?php } ?>
             <?php
             if (count($extra_fields) > 0) {
-                foreach ($extra_fields as $key => $value) { if (is_array($value)) { $value = implode("\n",$value); } ?>
+                foreach ($extra_fields as $key => $value) { ?>
                     <th class="text-nowrap"><?php echo $value; ?></th>
                 <?php }
             } ?>
@@ -416,7 +416,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>
-              <td class="highlight"><?php echo $file[$key]; ?></td>
+              <td class="highlight"><?php echo (is_array($file[$key])) ? implode("\n",$file[$key]) : $file[$key]; ?></td>
           <?php }
           } ?>
       </tr>
