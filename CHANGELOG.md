@@ -1,9 +1,14 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc28] - 2019-01-11
+### changed
+- improved file tree pie chart
+
 # [1.5.0-rc27] - 2019-01-04
 ### added
 - more tag options in advanced search
 - dir calcs elapsed time to dashboard
+- crawl speed (dirs/sec) to dashhboard
 ### fixed
 - searching for untagged on advanced search
 - untagged link on dashboard and tags analytics page

@@ -230,8 +230,8 @@ input:checked + .slider:before {
 
 #piechart {
     top: 40px;
-    width: 50vw;
-    height: 45vh;
+    width: 60vw;
+    height: 40vh;
     position: relative;
     display: block;
     margin: 0 auto;
