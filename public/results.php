@@ -90,9 +90,59 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             </div>
     </div>
   </div>
+    <?php
+    $limit = $searchParams['size'];
+    $i = $p * $limit - $limit;
+    ?>
+  <div class="row">
+    <div class="col-xs-12 text-center center">
+        <div class="row">
+            <ul class="pagination" style="margin: 0;">
+                <?php
+                parse_str($_SERVER["QUERY_STRING"], $querystring);
+                $links = 7;
+                $page = $querystring['p'];
+                $last = ceil($total / $limit);
+                $start = (($page - $links) > 0) ? $page - $links : 1;
+                $end = (($page + $links) < $last) ? $page + $links : $last;
+                $qsfp = $qslp = $qsp = $qsn = $querystring;
+                $qsfp['p'] = 1;
+                $qslp['p'] = $last;
+                if ($qsp['p'] > 1) {
+                $qsp['p'] -= 1;
+                }
+                if ($qsn['p'] < $last) {
+                $qsn['p'] += 1;
+                }
+                $qsfp = http_build_query($qsfp);
+                $qslp = http_build_query($qslp);
+                $qsn = http_build_query($qsn);
+                $qsp = http_build_query($qsp);
+                $firstpageurl = $_SERVER['PHP_SELF'] . "?" . $qsfp;
+                $lastpageurl = $_SERVER['PHP_SELF'] . "?" . $qslp;
+                $prevpageurl = $_SERVER['PHP_SELF'] . "?" . $qsp;
+                $nextpageurl = $_SERVER['PHP_SELF'] . "?" . $qsn;
+                ?>
+                <?php if ($start > 1) { echo '<li><a href="' . $firstpageurl . '">1</a></li>'; } ?>
+                <?php if ($page == 1) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $prevpageurl . '">'; } ?>&laquo;</a></li>
+                <?php
+                for ($i=$start; $i<=$end; $i++) {
+                $qs = $querystring;
+                $qs['p'] = $i;
+                $qs1 = http_build_query($qs);
+                $url = $_SERVER['PHP_SELF'] . "?" . $qs1;
+                ?>
+                <li<?php if ($page == $i) { echo ' class="active"'; } ?>><a href="<?php echo $url; ?>"><?php echo $i; ?></a></li>
+                <?php } ?>
+                <?php if ($page >= $last) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpageurl . '">'; } ?>&raquo;</a></li>
+                <?php if ($end < $last) { echo '<li><a href="' . $lastpageurl . '">' . $last . '</a></li>'; } ?>
+            </ul>
+        </div>
+	</div>
+  </div>
   <div class="row">
     <div class="counter pull-right"></div>
-    <?php $numofcol = 11; ?>
+    <?php $numofcol = 11; $hiddencol = []; // default num of table columns ?>
     <table class="table results table-striped table-hover table-condensed">
       <thead>
         <tr>
@@ -101,39 +151,46 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
           <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
 		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
-          <th class="text-nowrap">% <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
+          <?php if (getCookie('hidefield_sizep') != "1") { ?><th class="text-nowrap">% <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
+          <?php } else { $hiddencol[] = 'sizep'; } ?>
           <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
-          <th class="text-nowrap">Cost per GB <?php echo sortURL('costpergb'); ?></th>
-          <?php $numofcol+=1; ?>
-          <?php } ?>
+          <?php if (getCookie('hidefield_cost') != "1") { ?><th class="text-nowrap">Cost per GB <?php echo sortURL('costpergb'); ?></th>
+          <?php } else { $hiddencol[] = 'cost'; } ?>
+          <?php $numofcol+=1; } ?>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
-          <?php $numofcol+=1; ?>
-          <?php } ?>
-          <th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
+          <?php $numofcol+=1; } ?>
+          <?php if (getCookie('hidefield_items') != "1") { ?><th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
           <?php if ($show_change_percent) { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
-          <?php $numofcol+=1; ?>
-          <?php } ?>
-          <th class="text-nowrap">Items (files) <?php echo sortURL('items_files'); ?></th>
-          <th class="text-nowrap">Items (subdirs) <?php echo sortURL('items_subdirs'); ?></th>
-          <?php $numofcol+=3; ?>
-          <?php } ?>
+          <?php $numofcol+=1; } ?>
+          <?php } else { $hiddencol[] = 'items'; } ?>
+          <?php if (getCookie('hidefield_itemsfiles') != "1") { ?><th class="text-nowrap">Items (files) <?php echo sortURL('items_files'); ?></th>
+          <?php } else { $hiddencol[] = 'itemsfiles'; } ?>
+          <?php if (getCookie('hidefield_itemssubdirs') != "1") { ?><th class="text-nowrap">Items (subdirs) <?php echo sortURL('items_subdirs'); ?></th>
+          <?php } else { $hiddencol[] = 'itemssubdirs'; } ?>
+          <?php $numofcol+=3; } ?>
           <?php if ($s3_index) { ?>
           <th class="text-nowrap">Bucket <?php echo sortURL('s3_bucket'); ?></th>
           <th class="text-nowrap">Key <?php echo sortURL('s3_key'); ?></th>
           <th class="text-nowrap">Storage class <?php echo sortURL('s3_storage_class'); ?></th>
           <?php } else { ?>
-          <th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
-          <th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
+          <?php if (getCookie('hidefield_owner') != "1") { ?><th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
+          <?php } else { $hiddencol[] = 'owner'; } ?>
+          <?php if (getCookie('hidefield_group') != "1") { ?><th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
+          <?php } else { $hiddencol[] = 'group'; } ?>
           <?php } ?>
-          <th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
-          <th class="text-nowrap">Rating <span style="color:darkgray;font-size: 11px;"><i title="Rating is based on last modified time, older is higher rating" class="glyphicon glyphicon-question-sign"></i></span></th>
+          <?php if (getCookie('hidefield_modified') != "1") { ?><th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
+          <?php } else { $hiddencol[] = 'modified'; } ?>
+          <?php if (getCookie('hidefield_rating') != "1") { ?><th class="text-nowrap">Rating <span style="color:darkgray;font-size: 11px;"><i title="Rating is based on last modified time, older is higher rating" class="glyphicon glyphicon-question-sign"></i></span></th>
+          <?php } else { $hiddencol[] = 'rating'; } ?>
           <?php if ($qumulo_index == '1') { ?>
-          <th class="text-nowrap">Created (utc) <?php echo sortURL('creation_time'); ?></th>
+          <?php if (getCookie('hidefield_created') != "1") { ?><th class="text-nowrap">Created (utc) <?php echo sortURL('creation_time'); ?></th>
+          <?php } else { $hiddencol[] = 'created'; } ?>
           <?php } elseif ($s3_index != '1') { ?>
-          <th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
+          <?php if (getCookie('hidefield_accessed') != "1") { ?><th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
+          <?php } else { $hiddencol[] = 'accessed'; } ?>
           <?php } ?>
           <?php
           if (count($extra_fields) > 0) {
@@ -143,59 +200,12 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             } ?>
         </tr>
         <tr class="info no-result">
+          <?php $numofcol -= count($hiddencol); ?>
           <td colspan=<?php echo $numofcol; ?>><span style="color:white;"><strong><i class="glyphicon glyphicon-info-sign"></i> No results on this page</strong></td>
         </tr>
       </thead>
-      <tfoot>
-          <tr>
-            <th class="text-nowrap">#</th>
-            <th class="text-nowrap">Name</th>
-            <th class="text-nowrap">Tags</th>
-            <th class="text-nowrap">Path</th>
-            <th class="text-nowrap">File Size</th>
-            <th class="text-nowrap">%</th>
-            <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
-            <th class="text-nowrap">Cost per GB</th>
-            <?php } ?>
-            <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
-            <?php if ($show_change_percent) { ?>
-            <th class="text-nowrap">Change %</th>
-            <?php } ?>
-            <th class="text-nowrap">Items</th>
-            <?php if ($show_change_percent) { ?>
-            <th class="text-nowrap">Change %</th>
-            <?php } ?>
-            <th class="text-nowrap">Items (files)</th>
-            <th class="text-nowrap">Items (subdirs)</th>
-            <?php } ?>
-            <?php if ($s3_index) { ?>
-            <th class="text-nowrap">Bucket <?php echo sortURL('s3_bucket'); ?></th>
-            <th class="text-nowrap">Key <?php echo sortURL('s3_key'); ?></th>
-            <th class="text-nowrap">Storage class <?php echo sortURL('s3_storage_class'); ?></th>
-            <?php } else { ?>
-                        <th class="text-nowrap">Owner</th>
-                        <th class="text-nowrap">Group</th>
-            <?php } ?>
-                        <th class="text-nowrap">Modified (utc)</th>
-            <th class="text-nowrap">Rating</th>
-            <?php if ($qumulo_index) { ?>
-            <th class="text-nowrap">Created (utc)</th>
-            <?php } elseif (!$s3_index) { ?>
-                        <th class="text-nowrap">Accessed (utc)</th>
-            <?php } ?>
-            <?php
-            if (count($extra_fields) > 0) {
-                foreach ($extra_fields as $key => $value) { ?>
-                    <th class="text-nowrap"><?php echo $value; ?></th>
-                <?php }
-            } ?>
-            </tr>
-      </tfoot>
       <tbody id="results-tbody">
       <?php
-        error_reporting(E_ALL ^ E_NOTICE);
-        $limit = $searchParams['size'];
-        $i = $p * $limit - $limit;
         foreach ($results[$p] as $result) {
           $file = $result['_source'];
 
@@ -356,9 +366,9 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
               <span class="highlight"><a class="pathdark" href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'])); ?>"><?php echo $file['path_parent']; ?></a></span>
           </td>
         <td class="text-nowrap highlight" style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file['filesize']); ?></td>
-        <td width="8%" class="highlight"><div class="text-right percent" style="width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div>&nbsp;<span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td>
+        <?php if (!in_array('sizep', $hiddencol)) { ?><td width="8%" class="highlight"><div class="text-right percent" style="width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div>&nbsp;<span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td><?php } ?>
         <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
-        <td class="text-nowrap highlight">$ <?php echo number_format(round($file['costpergb'], 2), 2); ?></td>
+        <?php if (!in_array('cost', $hiddencol)) { ?><td class="text-nowrap highlight">$ <?php echo number_format(round($file['costpergb'], 2), 2); ?></td><?php } ?>
         <?php } ?>
         <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <!-- show comparison file size -->
@@ -377,7 +387,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           </td>
         <?php } } ?>
         <!-- end show comparison file size -->
-        <td class="text-nowrap highlight"><?php echo $file['items']; ?>
+        <?php if (!in_array('items', $hiddencol)) { ?><td class="text-nowrap highlight"><?php echo $file['items']; ?>
         <!-- show comparison items -->
         <?php if ($show_change_percent) { $diritems_change = 0; ?>
         <td class="highlight">
@@ -393,8 +403,9 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php echo $diritems_change; ?>%)</span></small>
       </td>
     <?php } } ?>
-    <td class="text-nowrap highlight"><?php echo $file['items_files']; ?>
-    <td class="text-nowrap highlight"><?php echo $file['items_subdirs']; ?>
+    <?php } ?>
+    <?php if (!in_array('itemsfiles', $hiddencol)) { ?><td class="text-nowrap highlight"><?php echo $file['items_files']; ?><?php } ?>
+    <?php if (!in_array('itemssubdirs', $hiddencol)) { ?><td class="text-nowrap highlight"><?php echo $file['items_subdirs']; ?><?php } ?>
     <!-- end show comparison items -->
     </td>
         <?php } ?>
@@ -403,15 +414,15 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <td class="path highlight"><?php echo $file['s3_key']; ?></td>
         <td class="highlight"><?php echo $file['s3_storage_class']; ?></td>
         <?php } else { ?>
-        <td class="highlight"><?php echo $file['owner']; ?></td>
-        <td class="highlight"><?php echo $file['group']; ?></td>
+        <?php if (!in_array('owner', $hiddencol)) { ?><td class="highlight"><?php echo $file['owner']; ?></td><?php } ?>
+        <?php if (!in_array('group', $hiddencol)) { ?><td class="highlight"><?php echo $file['group']; ?></td><?php } ?>
         <?php } ?>
-        <td class="highlight modified"><?php echo $file['last_modified']; ?></td>
-        <td class="highlight rating"><?php for ($n = 0; $n < $file_rating; $n++) { echo "<i class=\"glyphicon glyphicon-remove\"></i>"; } ?></td>
+        <?php if (!in_array('modified', $hiddencol)) { ?><td class="highlight modified"><?php echo $file['last_modified']; ?></td><?php } ?>
+        <?php if (!in_array('rating', $hiddencol)) { ?><td class="highlight rating"><?php for ($n = 0; $n < $file_rating; $n++) { echo "<i class=\"glyphicon glyphicon-remove\"></i>"; } ?></td><?php } ?>
         <?php if ($qumulo_index) { ?>
-        <td class="highlight"><?php echo $file['creation_time']; ?></td>
+        <?php if (!in_array('created', $hiddencol)) { ?><td class="highlight"><?php echo $file['creation_time']; ?></td><?php } ?>
         <?php } elseif (!$s3_index) { ?>
-        <td class="highlight"><?php echo $file['last_access']; ?></td>
+        <?php if (!in_array('accessed', $hiddencol)) { ?><td class="highlight"><?php echo $file['last_access']; ?></td><?php } ?>
         <?php } ?>
         <?php
         if (count($extra_fields) > 0) {
@@ -465,48 +476,48 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
 </form>
   <div class="row">
     <div class="col-xs-12 text-center center">
-			<div class="row">
-      <ul class="pagination">
-        <?php
-        parse_str($_SERVER["QUERY_STRING"], $querystring);
-        $links = 7;
-        $page = $querystring['p'];
-        $last = ceil($total / $limit);
-        $start = (($page - $links) > 0) ? $page - $links : 1;
-        $end = (($page + $links) < $last) ? $page + $links : $last;
-        $qsfp = $qslp = $qsp = $qsn = $querystring;
-        $qsfp['p'] = 1;
-        $qslp['p'] = $last;
-        if ($qsp['p'] > 1) {
-          $qsp['p'] -= 1;
-        }
-        if ($qsn['p'] < $last) {
-          $qsn['p'] += 1;
-        }
-        $qsfp = http_build_query($qsfp);
-        $qslp = http_build_query($qslp);
-        $qsn = http_build_query($qsn);
-        $qsp = http_build_query($qsp);
-        $firstpageurl = $_SERVER['PHP_SELF'] . "?" . $qsfp;
-        $lastpageurl = $_SERVER['PHP_SELF'] . "?" . $qslp;
-        $prevpageurl = $_SERVER['PHP_SELF'] . "?" . $qsp;
-        $nextpageurl = $_SERVER['PHP_SELF'] . "?" . $qsn;
-        ?>
-        <?php if ($start > 1) { echo '<li><a href="' . $firstpageurl . '">1</a></li>'; } ?>
-        <?php if ($page == 1) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $prevpageurl . '">'; } ?>&laquo;</a></li>
-        <?php
-        for ($i=$start; $i<=$end; $i++) {
-          $qs = $querystring;
-          $qs['p'] = $i;
-          $qs1 = http_build_query($qs);
-          $url = $_SERVER['PHP_SELF'] . "?" . $qs1;
-        ?>
-        <li<?php if ($page == $i) { echo ' class="active"'; } ?>><a href="<?php echo $url; ?>"><?php echo $i; ?></a></li>
-        <?php } ?>
-        <?php if ($page >= $last) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpageurl . '">'; } ?>&raquo;</a></li>
-        <?php if ($end < $last) { echo '<li><a href="' . $lastpageurl . '">' . $last . '</a></li>'; } ?>
-      </ul>
-    </div>
+        <div class="row">
+            <ul class="pagination" style="margin: 0;">
+                <?php
+                parse_str($_SERVER["QUERY_STRING"], $querystring);
+                $links = 7;
+                $page = $querystring['p'];
+                $last = ceil($total / $limit);
+                $start = (($page - $links) > 0) ? $page - $links : 1;
+                $end = (($page + $links) < $last) ? $page + $links : $last;
+                $qsfp = $qslp = $qsp = $qsn = $querystring;
+                $qsfp['p'] = 1;
+                $qslp['p'] = $last;
+                if ($qsp['p'] > 1) {
+                $qsp['p'] -= 1;
+                }
+                if ($qsn['p'] < $last) {
+                $qsn['p'] += 1;
+                }
+                $qsfp = http_build_query($qsfp);
+                $qslp = http_build_query($qslp);
+                $qsn = http_build_query($qsn);
+                $qsp = http_build_query($qsp);
+                $firstpageurl = $_SERVER['PHP_SELF'] . "?" . $qsfp;
+                $lastpageurl = $_SERVER['PHP_SELF'] . "?" . $qslp;
+                $prevpageurl = $_SERVER['PHP_SELF'] . "?" . $qsp;
+                $nextpageurl = $_SERVER['PHP_SELF'] . "?" . $qsn;
+                ?>
+                <?php if ($start > 1) { echo '<li><a href="' . $firstpageurl . '">1</a></li>'; } ?>
+                <?php if ($page == 1) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $prevpageurl . '">'; } ?>&laquo;</a></li>
+                <?php
+                for ($i=$start; $i<=$end; $i++) {
+                $qs = $querystring;
+                $qs['p'] = $i;
+                $qs1 = http_build_query($qs);
+                $url = $_SERVER['PHP_SELF'] . "?" . $qs1;
+                ?>
+                <li<?php if ($page == $i) { echo ' class="active"'; } ?>><a href="<?php echo $url; ?>"><?php echo $i; ?></a></li>
+                <?php } ?>
+                <?php if ($page >= $last) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpageurl . '">'; } ?>&raquo;</a></li>
+                <?php if ($end < $last) { echo '<li><a href="' . $lastpageurl . '">' . $last . '</a></li>'; } ?>
+            </ul>
+        </div>
 	</div>
   </div>
 </div>
@@ -516,7 +527,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
 <hr>
 <p style="text-align:center; font-size:11px; color:#555;">
 <?php
-$time = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
+$time = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
 echo "ES Process Time: {$estime}, Process Time: {$time}";
 ?>
 </p>

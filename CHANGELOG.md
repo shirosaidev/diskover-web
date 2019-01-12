@@ -1,6 +1,9 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc28] - 2019-01-11
+# [1.5.0-rc28] - 2019-01-12
+### added
+- pagination to top of search results as well as bottom
+- hide search results fields/columns toggle on Admin page
 ### changed
 - improved file tree pie chart
 

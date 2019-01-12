@@ -237,19 +237,46 @@ $extrafieldstext = file_get_contents($file_extrafields);
                         <button type="submit" class="btn btn-primary">Save</button>
                         <?php if (isset($extrafields_ret)) {
                             if ($extrafields_ret !== FALSE) { ?>
-                            <script>alert("extra fields saved to extrafields.txt");</script>
-                            <meta http-equiv='refresh' content='0'>
+                        <script>alert("extra fields saved to extrafields.txt");</script>
+                        <meta http-equiv='refresh' content='0'>
                         <?php } else { ?>
-                            <script>alert("error saving extra fields to extrafields.txt");</script>
-                            <meta http-equiv='refresh' content='0'>
+                        <script>alert("error saving extra fields to extrafields.txt");</script>
+                        <meta http-equiv='refresh' content='0'>
                         <?php } } ?>
                     </div>
                 </div>
             </fieldset>
         </form>
-
+        <div class="well well-sm">
+            <div class="form-group form-check">
+                <h5>Hide fields</h5>
+                <input type="checkbox" class="form-check-input" id="hidefield_sizep" onclick="setHideFields('sizep');" <?php echo getCookie('hidefield_sizep') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_sizep">Size %</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_items" onclick="setHideFields('items');" <?php echo getCookie('hidefield_items') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_items">Items</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_itemsfiles" onclick="setHideFields('itemsfiles');" <?php echo getCookie('hidefield_itemsfiles') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_itemsfiles">Items files</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_itemssubdirs" onclick="setHideFields('itemssubdirs');" <?php echo getCookie('hidefield_itemssubdirs') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_itemssubdirs">Items subdirs</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_owner" onclick="setHideFields('owner');" <?php echo getCookie('hidefield_owner') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_owner">Owner</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_group" onclick="setHideFields('group');" <?php echo getCookie('hidefield_group') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_group">Group</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_modified" onclick="setHideFields('modified');" <?php echo getCookie('hidefield_modified') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_modified">Modified</label>
+                <br /><input type="checkbox" class="form-check-input" id="hidefield_rating" onclick="setHideFields('rating');" <?php echo getCookie('hidefield_rating') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_rating">Rating</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_accessed" onclick="setHideFields('accessed');" <?php echo getCookie('hidefield_accessed') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_accessed">Accessed</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_cost" onclick="setHideFields('cost');" <?php echo getCookie('hidefield_cost') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_cost">Cost</label>
+                <input type="checkbox" class="form-check-input" id="hidefield_created" onclick="setHideFields('created');" <?php echo getCookie('hidefield_created') == "1" ? "checked" : ""; ?>>
+                <label class="form-check-label" for="hidefield_created">Created</label><br />
+                <span class="small"><i class="glyphicon glyphicon-info-sign"></i> Not hidden on file/dir info page</span>
+            </div>
+        </div>
         <br />
-        <div class="well">
+        <div class="well well-sm">
 			<h5>diskover socket server status</h5>
 		<?php
 error_reporting(E_ERROR | E_PARSE);
@@ -327,66 +354,6 @@ $configtext = file_get_contents($file_config);
         <hr />
 		<h4>Clear diskover cookies/cache</h4>
 		<button type="submit" class="btn btn-primary" onclick=clearCache()>Clear</button>
-
-        <hr />
-        <h4>Optimize diskover indices</h4>
-        <span style="color:yellow"><strong><i class="glyphicon glyphicon-warning-sign"></i> Could cause temp high load on ES</strong></span>
-    	<form name="optimizeindices" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
-    	<fieldset>
-            <div class="col-xs-12">
-    		<div class="form-group">
-    			<?php
-    				// optimize indices
-    				if (isset($_POST['optimizeindices'])) {
-    					foreach ($_POST['optimizeindices'] as $i) {
-                            curl_es('/' . $i . '/_forcemerge?max_num_segments=1', 'POST', false);
-    					}
-                    ?>
-                    <script>alert("selected indices optimized");</script>
-                    <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
-    				<?php } ?>
-    			<select multiple="" name="optimizeindices[]" id="optimizeindices" class="form-control"><?php
-    				foreach ($diskover_indices as $key => $val) {
-    					echo "<option>".$key."</option>";
-    				}
-    				?></select>
-    		</div>
-    		<div class="form-group">
-    			<button type="submit" class="btn btn-success" onclick="optimizeIndex()">Optimize</button>
-    		</div>
-        </div>
-        </fieldset>
-    </form>
-
-    <hr />
-    <h4>Delete diskover indices</h4>
-    <span style="color:red"><strong><i class="glyphicon glyphicon-warning-sign"></i> Careful, index will be deleted permanently!</strong></span>
-    <form name="deleteindices" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
-    <fieldset>
-        <div class="col-xs-12">
-        <div class="form-group">
-            <?php
-                // delete indices
-                if (isset($_POST['delindices'])) {
-                    foreach ($_POST['delindices'] as $i) {
-                        curl_es('/' . $i . '?pretty', 'DELETE', false);
-                    }
-                ?>
-                <script>alert("selected indices deleted");</script>
-                <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
-                <?php } ?>
-            <select multiple="" name="delindices[]" id="delindices" class="form-control"><?php
-                foreach ($diskover_indices as $key => $val) {
-                    echo "<option>".$key."</option>";
-                }
-                ?></select>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-danger" onclick="delIndex()">Delete</button>
-        </div>
-    </div>
-    </fieldset>
-    </form>
 </div>
 <div class="col-xs-6">
     <div class="form-group">
@@ -527,6 +494,70 @@ $tagtext = file_get_contents($file_customtags);
 	</div>
 </div>
 <div class="row">
+    <div class="col-xs-6">
+        <hr />
+            <h4>Delete diskover indices</h4>
+            <span style="color:red"><strong><i class="glyphicon glyphicon-warning-sign"></i> Careful, index will be deleted permanently!</strong></span>
+            <form name="deleteindices" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
+            <fieldset>
+                <div class="col-xs-12">
+                <div class="form-group">
+                    <?php
+                        // delete indices
+                        if (isset($_POST['delindices'])) {
+                            foreach ($_POST['delindices'] as $i) {
+                                curl_es('/' . $i . '?pretty', 'DELETE', false);
+                            }
+                        ?>
+                        <script>alert("selected indices deleted");</script>
+                        <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
+                        <?php } ?>
+                    <select multiple="" name="delindices[]" id="delindices" class="form-control"><?php
+                        foreach ($diskover_indices as $key => $val) {
+                            echo "<option>".$key."</option>";
+                        }
+                        ?></select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger" onclick="delIndex()">Delete</button>
+                </div>
+            </div>
+            </fieldset>
+            </form>
+    </div>
+    <div class="col-xs-6">
+    <hr />
+        <h4>Optimize diskover indices</h4>
+        <span style="color:yellow"><strong><i class="glyphicon glyphicon-warning-sign"></i> Could cause temp high load on ES</strong></span>
+    	<form name="optimizeindices" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" class="form-horizontal">
+    	<fieldset>
+            <div class="col-xs-12">
+    		<div class="form-group">
+    			<?php
+    				// optimize indices
+    				if (isset($_POST['optimizeindices'])) {
+    					foreach ($_POST['optimizeindices'] as $i) {
+                            curl_es('/' . $i . '/_forcemerge?max_num_segments=1', 'POST', false);
+    					}
+                    ?>
+                    <script>alert("selected indices optimized");</script>
+                    <?php echo "<meta http-equiv='refresh' content='0'>"; ?>
+    				<?php } ?>
+    			<select multiple="" name="optimizeindices[]" id="optimizeindices" class="form-control"><?php
+    				foreach ($diskover_indices as $key => $val) {
+    					echo "<option>".$key."</option>";
+    				}
+    				?></select>
+    		</div>
+    		<div class="form-group">
+    			<button type="submit" class="btn btn-success" onclick="optimizeIndex()">Optimize</button>
+    		</div>
+        </div>
+        </fieldset>
+    </form>
+    </div>
+</div>
+<div class="row">
     <div class="col-xs-12">
         <hr />
         <h5>Send anonymous stats to the diskover developer</h5>
@@ -554,7 +585,9 @@ function clearCache() {
                 'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
                 'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 's3', 'minhardlinks', 
                 'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'sendstats', 'support', 'sponsoring',
-                'crawlfinished', 'costpergb', 'filesizebase10', 'filesizedec'];
+                'crawlfinished', 'costpergb', 'filesizebase10', 'filesizedec', 'hidefield_sizep', 'hidefield_items',
+                'hidefield_itemsfiles', 'hidefield_itemssubdirs', 'hidefield_owner', 'hidefield_group',
+                'hidefield_modified', 'hidefield_rating', 'hidefield_accessed', 'hidefield_cost', 'hidefield_created'];
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
     }
@@ -573,6 +606,15 @@ function setFileSizeDisplay() {
         setCookie('filesizebase10', 1);
     } else {
         setCookie('filesizebase10', 0);
+    }
+}
+
+// set hidden fields for search results
+function setHideFields(fieldname) {
+    if (document.getElementById('hidefield_' + fieldname).checked) {
+        setCookie('hidefield_' + fieldname, 1);
+    } else {
+        setCookie('hidefield_' + fieldname, 0);
     }
 }
 

@@ -295,7 +295,7 @@ if (!empty($_REQUEST['submitted'])) {
     }
 }
 
-$estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 6);
+$estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
 
 ?>
 <!DOCTYPE html>
