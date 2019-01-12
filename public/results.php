@@ -90,15 +90,13 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             </div>
     </div>
   </div>
-    <?php
-    $limit = $searchParams['size'];
-    $i = $p * $limit - $limit;
-    ?>
   <div class="row">
     <div class="col-xs-12 text-center center">
         <div class="row">
             <ul class="pagination" style="margin: 0;">
                 <?php
+                $limit = $searchParams['size'];
+                $i = $p * $limit - $limit;
                 parse_str($_SERVER["QUERY_STRING"], $querystring);
                 $links = 7;
                 $page = $querystring['p'];
@@ -136,6 +134,9 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                 <?php } ?>
                 <?php if ($page >= $last) { echo '<li class="disabled"><a href="#">'; } else { echo '<li><a href="' . $nextpageurl . '">'; } ?>&raquo;</a></li>
                 <?php if ($end < $last) { echo '<li><a href="' . $lastpageurl . '">' . $last . '</a></li>'; } ?>
+                <?php
+                $i = $p * $limit - $limit;
+                ?>
             </ul>
         </div>
 	</div>
