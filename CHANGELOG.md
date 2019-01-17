@@ -4,6 +4,8 @@
 ### added
 - pagination to top of search results as well as bottom
 - hide search results fields/columns toggle on Admin page
+- search endpoint to API to allow es query syntax searches, see wiki for how to or help page
+- API list endpoint now includes path, workerCrawlTime, elapsedCrawlTime for each index
 ### changed
 - improved search results page column sizing
 - improved file tree pie chart

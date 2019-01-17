@@ -895,6 +895,63 @@ function get($endpoint, $query) {
 				$queryResponse = $client->search($searchParams);
 				// Get total count of hardlink files
 				$diskover_indices[$i]['totalHardlinkFiles'] = $queryResponse['hits']['total'];
+
+				// Get search results from Elasticsearch for disk space info
+				$results = [];
+				$searchParams = [];
+				// Setup search query
+				$searchParams['index'] = $diskover_indices[$i]['index'];
+				$searchParams['type']  = "diskspace";
+				$searchParams['body'] = [
+				    'size' => 100,
+				    'query' => [
+					'match_all' => (object) []
+				     ],
+				     'sort' => [
+					 'indexing_date' => [
+					     'order' => 'asc'
+					 ]
+				     ]
+				];
+				$queryResponse = $client->search($searchParams);
+				// Get disk space info from queryResponse
+				$diskover_indices[$i]['path'] = $queryResponse['hits']['hits'][0]['_source']['path'];
+
+			   	// Get total worker crawl cumulative time (in seconds) 
+				$searchParams['type'] = 'worker';
+				$searchParams['body'] = [
+				   'size' => 0,
+				    'aggs' => [
+				      'total_elapsed' => [
+					'sum' => [
+					  'field' => 'crawl_time'
+					]
+				      ]
+				    ],
+				    'query' => [
+					    'match_all' => (object) []
+				     ]
+				];
+				$queryResponse = $client->search($searchParams);
+				$diskover_indices[$i]['workerCrawlTime'] = round($queryResponse['aggregations']['total_elapsed']['value'], 6);
+
+				// Get total elapsed time (in seconds) of all crawls (not inc dir calc time)
+				$searchParams['type'] = 'crawlstat';
+				$searchParams['body'] = [
+					'size' => 100,
+					'query' => [
+						'match' => [
+							'state' => 'finished_crawl'
+						]
+					 ]
+				];
+				$queryResponse = $client->search($searchParams);
+				$crawlelapsedtime = 0;
+				foreach ($queryResponse['hits']['hits'] as $key => $value) {
+					$crawlelapsedtime += $value['_source']['crawl_time'];
+				}
+				$queryResponse = $client->search($searchParams);
+				$diskover_indices[$i]['elapsedCrawlTime'] = $crawlelapsedtime;
 			}
 			
 			header('Content-Type: application/json');
