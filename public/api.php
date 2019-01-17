@@ -896,7 +896,8 @@ function get($endpoint, $query) {
 				// Get total count of hardlink files
 				$diskover_indices[$i]['totalHardlinkFiles'] = $queryResponse['hits']['total'];
 			}
-		
+			
+			header('Content-Type: application/json');
 			echo json_encode($diskover_indices, JSON_PRETTY_PRINT);
 		break;
 
