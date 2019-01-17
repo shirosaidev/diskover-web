@@ -58,23 +58,51 @@ $searchParams['type']  = $doctype;
 
 // grab all the file and directory sizes
 
+$path_escaped = escape_chars($path);
+
 // Execute the search
 foreach ($totalFilesize as $tag => $value) {
     if ($tag === "untagged") { $t = ""; } else { $t = $tag; }
+
     $searchParams['body'] = [
-     'size' => 0,
-     'query' => [
-       'match' => [
-         'tag' => $t
-       ]
-     ],
-      'aggs' => [
-        'total_size' => [
-          'sum' => [
-            'field' => 'filesize'
-          ]
+        'size' => 0,
+        'query' => [
+            'bool' => [
+            'must' => [
+                    'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+            ],
+            'filter' => [
+                'bool' => [
+                    'must' => [
+                        'match' => [
+                            'tag' => $t
+                        ]
+                    ],
+                    'should' => [
+                        'range' => [
+                            'last_modified' => [
+                                'lte' => $mtime
+                            ]
+                        ],
+                        'range' => [
+                            'filesize' => [
+                                'gte' => $filter
+                            ]
+                        ]
+
+                    ]
+                ]
+            ]
+            ]
+        ],
+        'aggs' => [
+            'total_size' => [
+                'sum' => [
+                'field' => 'filesize'
+                ]
+            ]
         ]
-      ]
+
     ];
 
     // Send search query to Elasticsearch
@@ -86,19 +114,43 @@ foreach ($totalFilesize as $tag => $value) {
 // Execute the search
 foreach ($totalFilesizeCustom as $tag => $value) {
     $searchParams['body'] = [
-       'size' => 0,
-       'query' => [
-         'match' => [
-           'tag_custom' => $tag
-         ]
-     ],
-      'aggs' => [
-        'total_size' => [
-          'sum' => [
-            'field' => 'filesize'
-          ]
+        'size' => 0,
+        'query' => [
+            'bool' => [
+            'must' => [
+                    'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+            ],
+            'filter' => [
+                'bool' => [
+                    'must' => [
+                        'match' => [
+                            'tag_custom' => $tag
+                        ]
+                    ],
+                    'should' => [
+                        'range' => [
+                            'last_modified' => [
+                                'lte' => $mtime
+                            ]
+                        ],
+                        'range' => [
+                            'filesize' => [
+                                'gte' => $filter
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+            ]
+        ],
+        'aggs' => [
+            'total_size' => [
+                'sum' => [
+                'field' => 'filesize'
+                ]
+            ]
         ]
-      ]
+
     ];
 
     // Send search query to Elasticsearch
@@ -126,13 +178,37 @@ $searchParams['type']  = $doctype;
 // Execute the search
 foreach ($tagCounts as $tag => $value) {
     if ($tag === "untagged") { $t = ""; } else { $t = $tag; }
+
     $searchParams['body'] = [
-       'size' => 0,
-       'query' => [
-         'match' => [
-           'tag' => $t
-         ]
-       ]
+        'size' => 0,
+        'query' => [
+            'bool' => [
+            'must' => [
+                    'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+            ],
+            'filter' => [
+                'bool' => [
+                    'must' => [
+                        'match' => [
+                            'tag' => $t
+                        ]
+                    ],
+                    'should' => [
+                        'range' => [
+                            'last_modified' => [
+                                'lte' => $mtime
+                            ]
+                        ],
+                        'range' => [
+                            'filesize' => [
+                                'gte' => $filter
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+            ]
+        ]
     ];
 
     // Send search query to Elasticsearch
@@ -144,12 +220,35 @@ foreach ($tagCounts as $tag => $value) {
 // Execute the search
 foreach ($tagCountsCustom as $tag => $value) {
     $searchParams['body'] = [
-       'size' => 0,
-       'query' => [
-         'match' => [
-           'tag_custom' => $tag
-         ]
-       ]
+        'size' => 0,
+        'query' => [
+            'bool' => [
+            'must' => [
+                    'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+            ],
+            'filter' => [
+                'bool' => [
+                    'must' => [
+                        'match' => [
+                            'tag_custom' => $tag
+                        ]
+                    ],
+                    'should' => [
+                        'range' => [
+                            'last_modified' => [
+                                'lte' => $mtime
+                            ]
+                        ],
+                        'range' => [
+                            'filesize' => [
+                                'gte' => $filter
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+            ]
+        ]
     ];
 
     // Send search query to Elasticsearch
@@ -180,6 +279,17 @@ foreach ($tagCountsCustom as $tag => $value) {
             <div class="row">
                 <div class="col-xs-12 text-center">
                     <h2>Tags</h2>
+                    <div class="row">
+                    		<div class="col-xs-12 text-center">
+                    			<form class="form-horizontal" id="changemindupes">
+                    			<div class="form-group form-inline">
+                    			     <span style="font-size:10px; color:gray; margin-left:20px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page<br />
+                                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
+                                    <span style="margin-right:20px;"><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
+                    			</div>
+                    			</form>
+                    		</div>
+                    	</div>
                 </div>
             </div>
 			<div class="row">

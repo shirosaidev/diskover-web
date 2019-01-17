@@ -90,11 +90,11 @@ if ($totalcrawls_finished == $totalcrawls) {
                 position: relative;
             }
             #crawlstatschart1 svg {
-                width: 1400px;
+                width: 1300px;
                 height: 600px;
             }
             #crawlstatschart2 svg {
-                width: 1400px;
+                width: 1300px;
                 height: 200px;
             }
             #bulkindexchart {
@@ -102,7 +102,7 @@ if ($totalcrawls_finished == $totalcrawls) {
                 position: relative;
             }
             #bulkindexchart svg {
-                width: 1400px;
+                width: 1300px;
                 height: 300px;
             }
             .stack rect {

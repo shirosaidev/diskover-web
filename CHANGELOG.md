@@ -6,9 +6,12 @@
 - hide search results fields/columns toggle on Admin page
 - search endpoint to API to allow es query syntax searches, see wiki for how to or help page
 - API list endpoint now includes path, workerCrawlTime, elapsedCrawlTime for each index
+- tags and time change analytics pages are now path aware and use filters set on file tree page
+- tags and time change links to analytics dropdown button (in path column) on search results page
 ### changed
 - improved search results page column sizing
 - improved file tree pie chart
+- improved tags and time change analytics pages
 ### fixed
 - top 50 directories not displaying correctly if one of the directories has special characters (=<?, etc)
 - bug with api and using tagfiles key

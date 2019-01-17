@@ -58,7 +58,7 @@ var numdocs = $_GET('numdocs');
 // init d3 charts
 
 var margin = {top: 40, right: 20, bottom: 300, left: 70},
-width = 1400 - margin.left - margin.right,
+width = 1300 - margin.left - margin.right,
 height = 600 - margin.top - margin.bottom;
 
 var svg = d3.select("#crawlstatschart1").append("svg")
@@ -69,7 +69,7 @@ var svg = d3.select("#crawlstatschart1").append("svg")
           "translate(" + margin.left + "," + margin.top + ")");
 
 var margin2 = {top: 30, right: 20, bottom: 20, left: 70},
-width2 = 1400 - margin2.left - margin2.right,
+width2 = 1300 - margin2.left - margin2.right,
 height2 = 200 - margin2.top - margin2.bottom;
 
 var svg2 = d3.select("#crawlstatschart2").append("svg")
@@ -81,7 +81,7 @@ var svg2 = d3.select("#crawlstatschart2").append("svg")
 
 var margin3 = { top: 20, right: 80, bottom: 40, left: 80 },
 height3 = 300 - margin3.top - margin3.bottom,
-width3 = 1400 - margin3.left - margin3.right;
+width3 = 1300 - margin3.left - margin3.right;
 
 var svg3 = d3.select("#bulkindexchart").append("svg")
     .attr("width",width3 + margin3.left + margin3.right)

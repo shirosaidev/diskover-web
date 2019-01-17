@@ -12,6 +12,8 @@ require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
+// escape characters in path
+$path_escaped = escape_chars($path);
 
 $monthrangeDays = [
              [ 'from' => 'now-1d/d', 'to' => 'now/d' ],
@@ -111,6 +113,31 @@ $searchParams['type']  = 'file';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+    'bool' => [
+        'must' => [
+                'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+        ],
+        'filter' => [
+            'bool' => [
+                'must' => [
+                    'range' => [
+                        'filesize' => [
+                            'gte' => $filter
+                        ]
+                    ]
+                ],
+                'should' => [
+                    'range' => [
+                        'last_modified' => [
+                            'lte' => $mtime
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+  ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -132,6 +159,31 @@ $searchParams['type']  = 'directory';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+      'bool' => [
+          'must' => [
+                  'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+          ],
+          'filter' => [
+              'bool' => [
+                  'must' => [
+                      'range' => [
+                          'filesize' => [
+                              'gte' => $filter
+                          ]
+                      ]
+                  ],
+                  'should' => [
+                      'range' => [
+                          'last_modified' => [
+                              'lte' => $mtime
+                          ]
+                      ]
+                  ]
+              ]
+          ]
+      ]
+    ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -165,6 +217,31 @@ $searchParams['type']  = 'file';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+    'bool' => [
+        'must' => [
+                'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+        ],
+        'filter' => [
+            'bool' => [
+                'must' => [
+                    'range' => [
+                        'filesize' => [
+                            'gte' => $filter
+                        ]
+                    ]
+                ],
+                'should' => [
+                    'range' => [
+                        'last_modified' => [
+                            'lte' => $mtime
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+  ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -193,6 +270,31 @@ $searchParams['type']  = 'directory';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+    'bool' => [
+        'must' => [
+                'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+        ],
+        'filter' => [
+            'bool' => [
+                'must' => [
+                    'range' => [
+                        'filesize' => [
+                            'gte' => $filter
+                        ]
+                    ]
+                ],
+                'should' => [
+                    'range' => [
+                        'last_modified' => [
+                            'lte' => $mtime
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+  ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -233,6 +335,31 @@ $searchParams['type']  = 'file';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+    'bool' => [
+        'must' => [
+                'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+        ],
+        'filter' => [
+            'bool' => [
+                'must' => [
+                    'range' => [
+                        'filesize' => [
+                            'gte' => $filter
+                        ]
+                    ]
+                ],
+                'should' => [
+                    'range' => [
+                        'last_modified' => [
+                            'lte' => $mtime
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+  ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -254,6 +381,31 @@ $searchParams['type']  = 'directory';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+    'bool' => [
+        'must' => [
+                'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+        ],
+        'filter' => [
+            'bool' => [
+                'must' => [
+                    'range' => [
+                        'filesize' => [
+                            'gte' => $filter
+                        ]
+                    ]
+                ],
+                'should' => [
+                    'range' => [
+                        'last_modified' => [
+                            'lte' => $mtime
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+  ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -287,6 +439,31 @@ $searchParams['type']  = 'file';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+    'bool' => [
+        'must' => [
+                'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+        ],
+        'filter' => [
+            'bool' => [
+                'must' => [
+                    'range' => [
+                        'filesize' => [
+                            'gte' => $filter
+                        ]
+                    ]
+                ],
+                'should' => [
+                    'range' => [
+                        'last_modified' => [
+                            'lte' => $mtime
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+  ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -315,6 +492,31 @@ $searchParams['type']  = 'directory';
 
 $searchParams['body'] = [
    'size' => 0,
+   'query' => [
+    'bool' => [
+        'must' => [
+                'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
+        ],
+        'filter' => [
+            'bool' => [
+                'must' => [
+                    'range' => [
+                        'filesize' => [
+                            'gte' => $filter
+                        ]
+                    ]
+                ],
+                'should' => [
+                    'range' => [
+                        'last_modified' => [
+                            'lte' => $mtime
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+  ],
     'aggs' => [
       'range' => [
         'date_range' => [
@@ -369,7 +571,7 @@ foreach ($dirSizeDateRange as $key => $value) {
             }
 
             #mtimechart-month svg {
-                width: 750;
+                width: 650px;
                 height: 300px;
             }
 
@@ -379,7 +581,7 @@ foreach ($dirSizeDateRange as $key => $value) {
             }
 
             #sizechart-month svg {
-                width: 750px;
+                width: 650px;
                 height: 300px;
             }
 
@@ -394,7 +596,7 @@ foreach ($dirSizeDateRange as $key => $value) {
             }
 
             #mtimechart-year svg {
-                width: 750px;
+                width: 650px;
                 height: 300px;
             }
 
@@ -404,7 +606,7 @@ foreach ($dirSizeDateRange as $key => $value) {
             }
 
             #sizechart-year svg {
-                width: 750px;
+                width: 650px;
                 height: 300px;
             }
 
@@ -437,14 +639,14 @@ foreach ($dirSizeDateRange as $key => $value) {
               stroke: steelblue;
               pointer-events: none;
               shape-rendering: crispEdges;
-              opacity: .6;
+              opacity: .9;
             }
 
             .area_mtimechart-month,
             .area_sizechart-month,
             .area_mtimechart-year,
             .area_sizechart-year { 
-                opacity: .4;
+                opacity: .6;
             }
         </style>
 	</head>
@@ -455,23 +657,36 @@ foreach ($dirSizeDateRange as $key => $value) {
             <div class="row">
                 <div class="col-xs-12 text-center">
                     <h2>Time Change</h2>
+                    <div class="row">
+                    		<div class="col-xs-12 text-center">
+                    			<form class="form-horizontal" id="changemindupes">
+                    			<div class="form-group form-inline">
+                    			     <span style="font-size:10px; color:gray; margin-left:20px;"><i class="glyphicon glyphicon-info-sign"></i> filters on filetree page affect this page<br />
+                                     <h5 style="display: inline;"><span class="text-success bold"><?php echo stripslashes($path); ?></span></h5>
+                                    <span style="margin-right:20px;"><a title="<?php echo getParentDir($path); ?>" class="btn btn-primary btn-sm" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>';"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</a></span>
+                    			</div>
+                    			</form>
+                    		</div>
+                    	</div>
                 </div>
             </div>
 			<div class="row">
                 <div class="col-xs-12 text-center">
-                      <div id="chart-container-month" class="text-center" style="margin-top: 30px;">
-                          <p class="small">File and directory total counts/sizes which have been modified over the past month, aggregated daily</p>
+                      <div id="chart-container-month" class="text-center" style="margin-top: 10px;">
+                          <div class="well"><p>File and directory total counts/sizes which have been modified over the past month, aggregated daily</p><br />
                           <div id="mtimechart-month" class="text-center"></div>
                           <div id="sizechart-month" class="text-center"></div>
+                      </div>
                       </div>
                 </div>
 			</div>
             <div class="row">
                 <div class="col-xs-12 text-center">
-                      <div id="chart-container-year" class="text-center" style="margin-top: 50px;">
-                          <p class="small">File and directory total counts/sizes which have been modified over the past year, aggregated weekly</p>
+                      <div id="chart-container-year" class="text-center" style="margin-top: 10px;">
+                          <div class="well"><p>File and directory total counts/sizes which have been modified over the past year, aggregated weekly</p><br />
                           <div id="mtimechart-year" class="text-center"></div>
                           <div id="sizechart-year" class="text-center"></div>
+                      </div>
                       </div>
                 </div>
             </div>
@@ -489,9 +704,9 @@ foreach ($dirSizeDateRange as $key => $value) {
           function draw_chart(jsondata, divid, charttype) {
             var data_raw = jsondata;
 
-            var margin = { top: 20, right: 80, bottom: 30, left: 100 };
+            var margin = { top: 20, right: 80, bottom: 60, left: 70 };
             var height = 300 - margin.top - margin.bottom;
-            var width = 750 - margin.left - margin.right;
+            var width = 650 - margin.left - margin.right;
 
             var svg = d3.select("#" + divid).append("svg")
                 .attr("width",width + margin.left + margin.right)
@@ -509,7 +724,9 @@ foreach ($dirSizeDateRange as $key => $value) {
                 .range(["#738290", "#89CAE3"]);
 
             // setup the axes
-            var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+            var xAxis = d3.svg.axis().scale(xScale)
+                .orient("bottom").ticks(10)
+                .tickFormat(d3.time.format("%Y-%m-%d"));
             var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
             // create function to parse dates into date objects
@@ -612,9 +829,15 @@ foreach ($dirSizeDateRange as $key => $value) {
 
             // add the x axis
             svg.append("g")
-              .attr("class", "x axis")
-              .attr("transform", "translate(0," + height + ")")
-              .call(xAxis);
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis)
+              .selectAll("text")
+                .attr("y", 7)
+                .attr("x", -9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end");
 
             // add the y axis
             svg.append("g")

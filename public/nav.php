@@ -141,11 +141,11 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <li><a href="top50.php?<?php echo $urlvars; ?>">Top 50</a></li>
                         <?php if (!$s3_index) { ?><li><a href="dupes.php?<?php echo $urlvars; ?>">Dupes</a></li><?php } ?>
                         <?php if (!$s3_index) { ?><li><a href="hardlinks.php?<?php echo $urlvars; ?>">Hardlinks</a></li><?php } ?>
-                        <li class="divider"></li>
                         <li><a href="tags.php?<?php echo $urlvars; ?>">Tags</a></li>
+                        <li><a href="timechange.php?<?php echo $urlvars; ?>">Time Change</a></li>
+                        <li class="divider"></li>
                         <li><a href="smartsearches.php?<?php echo $urlvars; ?>">Smart Searches</a></li>
                         <?php if (!$s3_index) { ?><li><a href="crawlstats.php?<?php echo $urlvars; ?>">Crawl Stats</a></li><?php } ?>
-                        <li><a href="timechange.php?<?php echo $urlvars; ?>">Time Change</a></li>
 					</ul>
 				</li>
 			</ul>
