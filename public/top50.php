@@ -15,6 +15,9 @@ require "d3_inc.php";
 // get mtime in ES format
 $mtime = getmtime($mtime);
 
+// escape characters in path
+$path_escaped = escape_chars($path);
+
 // get top 50 type
 if (!isset($_REQUEST['top50type'])) {
     $top50type = 'Largest';
@@ -56,7 +59,7 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
         'query' => [
             'bool' => [
                 'must' => [
-                        'wildcard' => [ 'path_parent' => $path . '*' ]
+                        'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
                 ],
                 'must_not' => [
                         'match' => [ 'path_parent' => "/" ],
@@ -112,7 +115,7 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
         'query' => [
             'bool' => [
                 'must' => [
-                        'wildcard' => [ 'path_parent' => $path . '*' ]
+                        'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
                 ],
                 'filter' => [
                     'bool' => [
@@ -170,7 +173,7 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
         'query' => [
             'bool' => [
                 'must' => [
-                        'wildcard' => [ 'path_parent' => $path . '*' ]
+                        'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
                 ],
                 'filter' => [
                     'bool' => [
@@ -288,7 +291,7 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
                   <th class="text-nowrap">#</th>
                   <th class="text-nowrap">Name</th>
                   <th class="text-nowrap">File Size</th>
-                  <th>%</th>
+                  <th>%  <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
                   <?php if (!$s3_index && getCookie('costpergb') > 0) { ?>
                   <th class="text-nowrap">Cost per GB</th>
                   <?php } ?>
@@ -341,7 +344,7 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
                   <th class="text-nowrap">#</th>
                   <th class="text-nowrap">Name</th>
                   <th class="text-nowrap">Size</th>
-                  <th>%</th>
+                  <th>%  <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
                   <?php if (!$s3_index && getCookie('costpergb') > 0) { ?>
                   <th class="text-nowrap">Cost per GB</th>
                   <?php } ?>
@@ -373,12 +376,12 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
                         <tr><td class="darken" width="10"><?php echo $n; ?></td>
                             <td class="path"><a href="<?php echo build_url('path', $fullpath); ?>&amp;doctype=directory"><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a></td>
                             <td class="text-nowrap"><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['_source']['filesize']); ?></span></td>
-                            <td width="15%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['filesize'] / $totalsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totalsize) * 100, 2); ?>%</small></span></td>
+                            <td width="15%"><div class="text-right percent" style="max-width:100%; width:<?php echo number_format(($value['_source']['filesize'] / $totalsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['filesize'] / $totalsize) * 100, 2); ?>%</small></span></td>
                             <?php if (!$s3_index && getCookie('costpergb') > 0) { ?>
                             <td class="text-nowrap darken">$ <?php echo number_format(round($value['_source']['costpergb'], 2), 2); ?></td>
                             <?php } ?>
                             <td class="text-nowrap"><?php echo $value['_source']['items']; ?></td>
-                            <td width="15%"><div class="text-right percent" style="width:<?php echo number_format(($value['_source']['items'] / $totalcount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['items'] / $totalcount) * 100, 2); ?>%</small></span></td>
+                            <td width="15%"><div class="text-right percent" style="max-width:100%; width:<?php echo number_format(($value['_source']['items'] / $totalcount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['_source']['items'] / $totalcount) * 100, 2); ?>%</small></span></td>
                             <td class="text-nowrap darken"><?php echo $value['_source']['last_modified']; ?></td>
                             <td class="path darken"><a href="<?php echo build_url('path', $value['_source']['path_parent']); ?>"><?php echo $value['_source']['path_parent']; ?></a></td>
                         </tr>

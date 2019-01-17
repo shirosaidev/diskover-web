@@ -367,7 +367,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
               <span class="highlight"><a class="pathdark" href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;q=path_parent:<?php echo rawurlencode(escape_chars($file['path_parent'])); ?>"><?php echo $file['path_parent']; ?></a></span>
           </td>
         <td class="text-nowrap highlight" style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file['filesize']); ?></td>
-        <?php if (!in_array('sizep', $hiddencol)) { ?><td class="highlight"><div class="text-right percent" style="width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div>&nbsp;<span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td><?php } ?>
+        <?php if (!in_array('sizep', $hiddencol)) { ?><td class="highlight"><div class="text-right percent" style="max-width:100%; width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div>&nbsp;<span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td><?php } ?>
         <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
         <?php if (!in_array('cost', $hiddencol)) { ?><td class="text-nowrap highlight">$ <?php echo number_format(round($file['costpergb'], 2), 2); ?></td><?php } ?>
         <?php } ?>

@@ -878,6 +878,9 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
                   $searchParams['index'] = $esIndex;
                   $searchParams['type']  = 'directory';
 
+                  // escape characters
+                  $path_escaped = escape_chars($diskspace_path);
+
                   // Setup search query for largest files
                   $searchParams['body'] = [
                       'size' => 10,
@@ -885,7 +888,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
                       'query' => [
                         'bool' => [
                             'must' => [
-                                    'wildcard' => [ 'path_parent' => $diskspace_path . '*' ]
+                                    'wildcard' => [ 'path_parent' => $path_escaped . '*' ]
                             ],
                             'must_not' => [
                                     'match' => [ 'path_parent' => "/" ],
