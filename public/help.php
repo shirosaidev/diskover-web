@@ -106,7 +106,7 @@ require "../src/diskover/Diskover.php";
 					<h4>Update (with JSON object)</h4>
 					<p>Updating file/directory tags is done with the PUT method. You can send a JSON object in the body. The call returns the number of items affected.<br />
 					<p>Curl example:<br />
-					<code>curl -X PUT http://localhost:8000/api.php/index/endpoint -d {}</code></p>
+					<code>curl -X PUT http://localhost:8000/api.php/index/endpoint -d '{}'</code></p>
 					<p>Tag files delete:<br />
 					<code>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagfile</code></p>
 					<code>{"tag": "delete", "files": ["/Users/shirosai/file1.png", "/Users/shirosai/file2.png"]}</code></p>

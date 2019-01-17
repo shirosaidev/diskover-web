@@ -113,14 +113,16 @@ function put($endpoint, $input) {
 
             // now let's get all the doc id's in the directory
 
-            if ($recursive === "true" || $get_files === "true") {
+            if ($recursive === "true" || $tagfiles === "true") {
                 $queryResponse = [];
 
     			// Scroll parameter alive time
     			$searchParams['scroll'] = "1m";
 
     			// scroll size
-    			$searchParams['size'] = 1000;
+				$searchParams['size'] = 1000;
+				
+				$pp = addcslashes($path_parent, '+-&|!(){}[]^"~*?:\/ ');
 
                 if ($recursive === "true") {
                     $type = ($tagfiles === "true") ? 'file,directory' : 'directory';

@@ -11,6 +11,7 @@
 - improved file tree pie chart
 ### fixed
 - top 50 directories not displaying correctly if one of the directories has special characters (=<?, etc)
+- bug with api and using tagfiles key
 
 # [1.5.0-rc27] - 2019-01-04
 ### added
