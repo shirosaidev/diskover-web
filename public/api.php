@@ -900,6 +900,68 @@ function get($endpoint, $query) {
 			echo json_encode($diskover_indices, JSON_PRETTY_PRINT);
 		break;
 
+		case $endpoint[1] == 'search':
+			// Scroll parameter alive time
+			$searchParams['scroll'] = "1m";
+
+			//$searchParams['type'] = "file,directory";
+
+			// scroll size
+			$searchParams['size'] = 1000;
+
+			$searchParams['body'] = [
+					'query' => [
+						'query_string' => [
+							'query' => $output['query'],
+							'analyze_wildcard' => 'true'
+						]
+					]
+			];
+
+			// Send search query to Elasticsearch and get scroll id and first page of results
+			try {
+				// Send search query to Elasticsearch
+				$queryResponse = $client->search($searchParams);
+			}
+
+			catch (Exception $e) {
+				error('Message: ' . $e);
+			}
+
+			// set total hits
+			$total = $queryResponse['hits']['total'];
+
+			// Get the first scroll_id
+			$scroll_id = $queryResponse['_scroll_id'];
+
+			$i = 1;
+			$results = [];
+			// Loop through all the pages of results and store in results array
+			while ($i <= ceil($total/$searchParams['size'])) {
+				foreach ($queryResponse['hits']['hits'] as $hit) {
+					$results[] = $hit;
+				}
+
+				// Execute a Scroll request and repeat
+				$queryResponse = $client->scroll([
+					"scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+					"scroll" => "1m"           // and the same timeout window
+				]);
+
+				// Get the scroll_id for next page of results
+				$scroll_id = $queryResponse['_scroll_id'];
+				$i += 1;
+			}
+
+			// print results
+			header('Content-Type: application/json');
+			if ($results) {
+				echo json_encode($results, JSON_PRETTY_PRINT);
+			} else {
+				error('no docs found');
+			}
+		break;
+
 		default:
 			header('Content-Type: application/json');
 			$json = [

@@ -68,7 +68,7 @@ require "../src/diskover/Diskover.php";
 					<code>curl -X GET http://localhost:8000/api.php/indexname/endpoint</code></p>
 					<p>List all diskover indices and stats for each:<br />
 					<code>GET http://localhost:8000/api.php/list</code></p>
-                    <p>List all files with no tag (untagged):<br />
+					<p>List all files with no tag (untagged):<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tags?tag=&type=file</code></p>
                     <p>List all directories with no tag (untagged) and no custom tag:<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/tags?tag=&tag_custom=&type=directory</code></p>
@@ -100,6 +100,8 @@ require "../src/diskover/Diskover.php";
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/dupes</code></p>
 					<p>List total file size of duplicate files:<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/dupessize</code></p>
+					<p>Search index using ES query syntax:<br />
+					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/search?query=extension:png%20AND%20_type:file%20AND%20filesize:>1048576</code></p>
 					<br>
 					<h4>Update (with JSON object)</h4>
 					<p>Updating file/directory tags is done with the PUT method. You can send a JSON object in the body. The call returns the number of items affected.<br />
