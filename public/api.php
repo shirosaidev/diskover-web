@@ -79,8 +79,10 @@ function put($endpoint, $input) {
             // doc type
 			$searchParams['type'] = 'directory';
 
-            $pp = addcslashes(dirname($path_parent), '+-&|!(){}[]^"~*?:\/ ');
-            $f = addcslashes(basename($path_parent), '+-&|!(){}[]^"~*?:\/ ');
+			// esccape special characters
+            $pp = addcslashes(dirname($path_parent), '<>+-&|!(){}[]^"~*?:/= @\'$.#\\');
+			$f = addcslashes(basename($path_parent), '<>+-&|!(){}[]^"~*?:/= @\'$.#\\');
+				
             $searchParams['body'] = [
                     '_source' => [],
 				 	'query' => [
