@@ -63,6 +63,10 @@ $ cd diskover-web
 $ composer install
 ```
 
+### User guide
+
+Read [getting started](https://github.com/shirosaidev/diskover-web/wiki/Getting-Started) in the wiki.
+
 ## Docker hub image
 
 You can set up diskover and diskover-web in docker, there are a few choices for easily running diskover in docker using pre-built images/compose files.
