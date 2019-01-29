@@ -56,14 +56,7 @@ $ cd diskover-web
 ```
 [Download latest version](https://github.com/shirosaidev/diskover-web/releases/latest)
 
-### Install application dependencies
-
-```sh
-$ cd diskover-web
-$ composer install
-```
-
-### User guide
+### Set up
 
 Read [getting started](https://github.com/shirosaidev/diskover-web/wiki/Getting-Started) in the wiki.
 
