@@ -208,7 +208,7 @@ foreach ($SmartSearchesQueries as $key => $value) {
                     return d.count;
                 });
 
-        		var width = 720;
+        		var width = 640;
         		var height = 500;
         		var radius = Math.min(width, height) / 2;
 

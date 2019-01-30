@@ -50,16 +50,16 @@ require "d3_inc.php";
         </div>
 		<div class="container-fluid" id="mainwindow" style="margin-top: 70px;">
 			<div class="row">
-				<div class="col-xs-6">
+				<div class="col-xs-5">
 						<form class="form-inline" id="path-container" style="display:none;">
 							<div class="form-group">
-								<input type="text" size="80" class="form-control input-sm" style="color:#66C266!important;font-weight:bold;" name="pathinput" id="pathinput" value="">
+								<input type="text" size="60" class="form-control input-sm" style="color:#66C266!important;font-weight:bold;" name="pathinput" id="pathinput" value="">
 							</div>
 							<button title="change path" type="submit" id="changepath" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-circle-arrow-right"></i> Go</button>
                             <button title="<?php echo getParentDir($path); ?>" type="button" class="btn btn-primary btn-sm" onclick="window.location.href='<?php echo build_url('path', getParentDir($path)); ?>'; return false;"><i class="glyphicon glyphicon-circle-arrow-up"></i> Up level</button>
                         </form>
 				</div>
-                <div class="col-xs-6 pull-right text-right" id="chart-buttons" style="display:none;">
+                <div class="col-xs-7 pull-right text-right" id="chart-buttons" style="display:none;">
                     <button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
                         <div class="btn-group">
                             <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Min Size Filter
