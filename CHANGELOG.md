@@ -1,6 +1,8 @@
 # Diskover Web Change Log
 
 # [1.5.0-rc29] - 2019-01-30
+### added
+- Change % checkbox to Hide fields setting on Admin page
 ### changed
 - improved layout of analytics pages for smaller browser windows
 

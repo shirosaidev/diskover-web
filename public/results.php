@@ -159,11 +159,11 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <?php } else { $hiddencol[] = 'cost'; } ?>
           <?php $numofcol+=1; } ?>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
-          <?php if ($show_change_percent) { ?>
+          <?php if ($show_change_percent && getCookie('hidefield_change') != "1") { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
           <?php $numofcol+=1; } ?>
           <?php if (getCookie('hidefield_items') != "1") { ?><th class="text-nowrap">Items <?php echo sortURL('items'); ?></th>
-          <?php if ($show_change_percent) { ?>
+          <?php if ($show_change_percent && getCookie('hidefield_change') != "1") { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_items'); ?></th>
           <?php $numofcol+=1; } ?>
           <?php } else { $hiddencol[] = 'items'; } ?>
@@ -375,7 +375,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php } ?>
         <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <!-- show comparison file size -->
-        <?php if ($show_change_percent) { $filesize_change = 0; ?>
+        <?php if ($show_change_percent && getCookie('hidefield_change') != "1") { $filesize_change = 0; ?>
           <td class="highlight">
           <?php $fileinfo_index2 = get_index2_fileinfo($client, $esIndex2, $file['path_parent'], $file['filename']);
           if ($file['filesize'] > 0 && $fileinfo_index2[0] > 0) {
@@ -392,7 +392,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <!-- end show comparison file size -->
         <?php if (!in_array('items', $hiddencol)) { ?><td class="text-nowrap highlight"><?php echo $file['items']; ?>
         <!-- show comparison items -->
-        <?php if ($show_change_percent) { $diritems_change = 0; ?>
+        <?php if ($show_change_percent && getCookie('hidefield_change') != "1") { $diritems_change = 0; ?>
         <td class="highlight">
         <?php
         if ($file['items'] > 0 && $fileinfo_index2[1] > 0) {
