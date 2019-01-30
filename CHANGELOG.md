@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc29] - 2019-01-30
+### fixed
+- layout of hotdirs page for smaller browser windows
+
 # [1.5.0-rc28] - 2019-01-17
 ### added
 - pagination to top of search results as well as bottom

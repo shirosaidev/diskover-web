@@ -223,10 +223,7 @@ if ($show_change_percent) {
     <div class="col-xs-12">
         <div id="hotdirs">
             <div class="row">
-    			     <div class="col-xs-2">
-      				    <h2 style="display: inline;"><i class="glyphicon glyphicon-fire"></i> Hot Dirs</h2>
-                </div>
-                <div class="col-xs-4">
+                <div class="col-xs-5">
                   <span style="font-size:11px; color:gray;">Sort by</span> 
                       <div class="btn-group">
                           <button class="btn btn-default btn-sm button-sizechange-desc"> Size Change % <i class="glyphicon glyphicon-sort-by-attributes-alt"></i></button>
@@ -235,7 +232,7 @@ if ($show_change_percent) {
                           <button class="btn btn-default btn-sm button-itemschange-asc"> Items Change % <i class="glyphicon glyphicon-sort-by-attributes"></i></button>
                       </div>
                 </div>
-                <div class="col-xs-6 pull-right text-right" id="chart-buttons">
+                <div class="col-xs-7 pull-right text-right" id="chart-buttons">
                     <button type="submit" id="reload" class="btn btn-default btn-sm" title="reload"><i class="glyphicon glyphicon-refresh"></i> </button>
                         <div class="btn-group">
                             <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">Min Size Filter

@@ -260,8 +260,8 @@ rect:hover {
 {
   float: left;
   height: 39vh;
-  width: 99vw;
-  overflow: visible;
+  width: 98vw;
+  overflow: scroll;
   border: 0;
 }
 
