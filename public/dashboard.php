@@ -1400,7 +1400,7 @@ echo "ES Process Time: {$estime}, Process Time: {$time}";
         <h4 class="modal-title">Support the development of diskover</h4>
       </div>
       <div class="modal-body">
-        <p><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! If you are using diskover in a commercial environment or just want to help advance the software, please become a patron on <a target="_blank" href="https://www.patreon.com/diskover">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></p>
+        <p><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! If you are using diskover in a commercial environment or just want to help advance the software, please become a patron on <a target="_blank" href="https://www.patreon.com/shirosaidev">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></p>
         <div class="form-check">
             <input type="checkbox" class="form-check-input" id="sponsoring" onclick="sponsoring();">
             <label class="form-check-label" for="sponsor">I'm already supporting</label>
