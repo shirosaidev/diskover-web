@@ -395,13 +395,8 @@ exit();
       </li>
       <?php } else { ?>
       <li class="list-group-item">
-        <?php if ($qumulo == '1') { ?>
-        <span class="badge"><?php echo $file['creation_time']; ?></span>
-        Creation time (utc)
-        <?php } else { ?>
         <span class="badge"><?php echo $file['last_access']; ?></span>
         Last access (utc)
-        <?php } ?>
       </li>
       <li class="list-group-item">
         <span class="badge"><?php echo $file['last_change']; ?></span>

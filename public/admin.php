@@ -585,7 +585,7 @@ function clearCache() {
 	console.log("purging cookies/cache");
     cookies = ['filter', 'mtime', 'maxdepth', 'hide_thresh', 'path', 'use_count', 'show_files', 'sort', 'sortorder',
                 'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
-                'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'qumulo', 's3', 'minhardlinks', 
+                'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 's3', 'minhardlinks', 
                 'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'sendstats', 'support', 'sponsoring',
                 'crawlfinished', 'costpergb', 'filesizebase10', 'filesizedec', 'hidefield_sizep', 'hidefield_items',
                 'hidefield_itemsfiles', 'hidefield_itemssubdirs', 'hidefield_owner', 'hidefield_group',

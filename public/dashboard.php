@@ -400,7 +400,7 @@ if ($esIndex2 != "") {
     $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 }
 
-if (!$s3_index && !$qumulo_index) {
+if (!$s3_index) {
     // Get recommended file delete size/count/cost
     $file_recommended_delete_size = 0;
     $file_recommended_delete_count = 0;
@@ -629,7 +629,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
       <div class="jumbotron">
         <h1><i class="glyphicon glyphicon-hdd"></i> Space Savings</h1>
         <p>You could free up <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> if you delete or archive all your files. 
-<?php if (!$s3_index && !$qumulo_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <?php if (!$s3_index && $costpergb > 0) { echo "($ " . number_format($file_recommended_delete_cost, 2) . ")"; } ?> <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.</p>
+<?php if (!$s3_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <?php if (!$s3_index && $costpergb > 0) { echo "($ " . number_format($file_recommended_delete_cost, 2) . ")"; } ?> <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.</p>
                 <?php if (!$s3_index && $costpergb > 0) { ?><?php echo '<p>Cost per GB: $ ' . number_format(round($costpergb, 2), 2) . ' total cost, $ ' . number_format(round($avgcostpergb, 2), 2) , ' average per file.</p>'; } ?>
                 <p><span style="font-size:12px;color:#666;"><i class="glyphicon glyphicon-info-sign"></i> Does not account for hardlink sizes. Recommended files is based on >6M mtime &amp; atime.</span><?php } ?></p>
         <p><span class="label label-default"><i class="glyphicon glyphicon-file" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Files</span> <?php echo number_format($totalfiles); ?></span> &nbsp; <span class="label label-default"><i class="glyphicon glyphicon-folder-close" style="color:skyblue;font-weight:bold;"></i> <span style="color:lightgray">Directories</span> <?php echo number_format($totaldirs); ?></span> &nbsp;

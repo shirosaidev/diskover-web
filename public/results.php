@@ -186,10 +186,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <?php } else { $hiddencol[] = 'modified'; } ?>
           <?php if (getCookie('hidefield_rating') != "1") { ?><th class="text-nowrap">Rating <span style="color:darkgray;font-size: 11px;"><i title="Rating is based on last modified time, older is higher rating" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php } else { $hiddencol[] = 'rating'; } ?>
-          <?php if ($qumulo_index == '1') { ?>
-          <?php if (getCookie('hidefield_created') != "1") { ?><th class="text-nowrap">Created (utc) <?php echo sortURL('creation_time'); ?></th>
-          <?php } else { $hiddencol[] = 'created'; } ?>
-          <?php } elseif ($s3_index != '1') { ?>
+          <?php if ($s3_index != '1') { ?>
           <?php if (getCookie('hidefield_accessed') != "1") { ?><th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
           <?php } else { $hiddencol[] = 'accessed'; } ?>
           <?php } ?>
@@ -422,9 +419,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
         <?php } ?>
         <?php if (!in_array('modified', $hiddencol)) { ?><td class="highlight modified"><?php echo $file['last_modified']; ?></td><?php } ?>
         <?php if (!in_array('rating', $hiddencol)) { ?><td class="highlight rating"><?php for ($n = 0; $n < $file_rating; $n++) { echo "<i class=\"glyphicon glyphicon-remove\"></i>"; } ?></td><?php } ?>
-        <?php if ($qumulo_index) { ?>
-        <?php if (!in_array('created', $hiddencol)) { ?><td class="highlight"><?php echo $file['creation_time']; ?></td><?php } ?>
-        <?php } elseif (!$s3_index) { ?>
+        <?php if (!$s3_index) { ?>
         <?php if (!in_array('accessed', $hiddencol)) { ?><td class="highlight"><?php echo $file['last_access']; ?></td><?php } ?>
         <?php } ?>
         <?php

@@ -402,7 +402,7 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		<label for="last_mod_time_high">and</label>
 		<input name="last_mod_time_high" value="" type="string" placeholder="2017-03-06T00:00:00 or now-6M/d" class="form-control" />
 	  </div>
-      <?php if (!$s3_index && !$qumulo_index) { ?>
+      <?php if (!$s3_index) { ?>
 	  <div class="col-xs-3">
 		<label for="last_access_time_low">Last access time (utc) is between...</label>
 		<input name="last_access_time_low" value="" type="string" placeholder="2015-03-06T00:00:00 or now-2w" class="form-control" />

@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0-rc30] - 2019-06-16
+### changed
+- removed support for qumulo api indices
+
 # [1.5.0-rc29] - 2019-01-30
 ### added
 - Change % checkbox to Hide fields setting on Admin page
