@@ -1,8 +1,10 @@
 # Diskover Web Change Log
 
-# [1.5.0-rc30] - 2019-06-16
+# [1.5.0-rc30] - 2019-07-02
 ### changed
 - removed support for qumulo api indices
+### fixed
+- api calls with nginx redirecting to select indices page
 
 # [1.5.0-rc29] - 2019-01-30
 ### added

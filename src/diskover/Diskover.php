@@ -44,7 +44,8 @@ function connectES() {
   $bool_index = $client->indices()->exists($params);
   $params = ['index' => $esIndex2];
   $bool_index2 = $client->indices()->exists($params);
-  if ((!$bool_index || !$bool_index2) && basename($_SERVER['PHP_SELF']) !== 'selectindices.php' && explode('/', $_SERVER['PHP_SELF'])[1] !== 'api.php') {
+  $basepage = basename($_SERVER['PHP_SELF']);
+  if ($basepage !== 'api.php' && $basepage !== 'selectindices.php' && (!$bool_index || !$bool_index2)) {
       deleteCookie('index');
       deleteCookie('index2');
       header("Location: /selectindices.php");
