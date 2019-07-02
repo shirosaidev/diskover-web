@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0.1] - 2019-07-02
+### changed
+- ended release candidate (rc) ver
+
 # [1.5.0-rc30] - 2019-07-02
 ### changed
 - removed support for qumulo api indices
