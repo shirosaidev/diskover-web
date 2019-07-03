@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0.2] - 2019-07-03
+### fixed
+- curl api calls redirecting to select indices page
+
 # [1.5.0.1] - 2019-07-02
 ### changed
 - ended release candidate (rc) ver
