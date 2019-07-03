@@ -124,7 +124,7 @@ require "../src/diskover/Diskover.php";
 					<code>{"tag_custom": "version 1", "path_parent": "/Users/shirosai/Downloads", "recursive": "true"}</code></p>
                     <p>Tag directory and all items (files/directories) in directory and all sub dirs with custom tag "version 1" (recursive):<br />
 					<code>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagdir</code></p>
-					<code>{"tag_custom": "version 1", "path_parent": "/Users/shirosai/Downloads", "recursive": "true", "files": "true"}</code></p>
+					<code>{"tag_custom": "version 1", "path_parent": "/Users/shirosai/Downloads", "recursive": "true", "tagfiles": "true"}</code></p>
                     <p>Remove tag from directory and all files in directory (non-recursive):<br />
 					<code>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagdir</code></p>
 					<code>{"tag": "", "path_parent": "/Users/shirosai/Downloads", "tagfiles": "true"}</code></p>
@@ -133,7 +133,7 @@ require "../src/diskover/Diskover.php";
 					<code>{"tag_custom": "", "path_parent": "/Users/shirosai/Downloads", "tagfiles": "true"}</code></p>
                     <p>Remove tag and tag_custom from directory and all items (files/directories) in directory and all sub dirs (recursive):<br />
 					<code>PUT http://localhost:8000/api.php/diskover-2018.01.17/tagdir</code></p>
-					<code>{"tag": "", "tag_custom": "", "path_parent": "/Users/shirosai/Downloads", "recursive": "true"}</code></p>
+					<code>{"tag": "", "tag_custom": "", "path_parent": "/Users/shirosai/Downloads", "recursive": "true", "tagfiles": "true"}</code></p>
 				</div>
 			</div>
 			<div class="col-xs-6">
