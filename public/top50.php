@@ -239,11 +239,11 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
     }
 
     // calculate total file size and count
-    $totalfilesize = 0;
-    $totalfilecount = 0;
+    $totalusersize = 0;
+    $totalusercount = 0;
     foreach ($topconsumers as $key => $value) {
-        $totalfilesize += $value['filesize'];
-        $totalfilecount += $value['filecount'];
+        $totalusersize += $value['filesize'];
+        $totalusercount += $value['filecount'];
     }
 }
 
@@ -419,13 +419,13 @@ if ($top50type == 'Largest' || $top50type == 'Oldest' || $top50type == 'Newest')
                     <tr><td class="darken" width="10"><?php echo $n; ?></td>
                         <td><i class="glyphicon glyphicon-user" style="color:#D19866; font-size:13px; padding-right:3px;"></i> <a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&<?php if ($top50type == "Users") { echo 'owner'; } else { echo 'group'; } ?>=<?php echo $value['name']; ?>"><?php echo $value['name']; ?></a></td>
                         <td><span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($value['filesize']); ?></span></td>
-                        <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['filesize'] / $totalsize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filesize'] / $totalsize) * 100, 2); ?>%</small></span></td>
+                        <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['filesize'] / $totalusersize) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filesize'] / $totalusersize) * 100, 2); ?>%</small></span></td>
                         <?php if (!$s3_index && getCookie('costpergb') > 0) { ?>
                         <td class="text-nowrap darken">$ <?php echo number_format(round($value['costpergb'], 2), 2); ?></td>
                         <td class="text-nowrap darken">$ <?php echo number_format(round($value['avgcostpergb'], 2), 2); ?></td>
                         <?php } ?>
                         <td><?php echo $value['filecount']; ?></td>
-                        <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['filecount'] / $totalcount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filecount'] / $totalcount) * 100, 2); ?>%</small></span></td>
+                        <td width="15%"><div class="percent" style="width:<?php echo number_format(($value['filecount'] / $totalusercount) * 100, 2); ?>%;"></div> <span style="color:gray;"><small><?php echo number_format(($value['filecount'] / $totalusercount) * 100, 2); ?>%</small></span></td>
                     </tr>
                   <?php $n++; }
                    ?>
