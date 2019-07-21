@@ -1,5 +1,10 @@
 # Diskover Web Change Log
 
+# [1.5.0.3] - 2019-07-20
+### fixed
+- directory command button drop down menu overlay issue when search results row tagged
+- overylay issue with mouse over tool tip for anaytics pages
+
 # [1.5.0.2] - 2019-07-03
 ### fixed
 - curl api calls redirecting to select indices page

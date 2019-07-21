@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -48,36 +48,28 @@ $indices = json_decode($curlresp, true);
 curl_close($curl);
 
 if (!empty($indices)) {
-    // sort indices by creation_date
+    // check crawl status of every index and sort indices by creation_date
     $indices_sorted = [];
+    $indices_crawl_status = [];
     foreach ($indices as $key => $val) {
+        $searchParams = [];
+        $searchParams['index'] = $key;
+        $searchParams['type']  = 'crawlstat';
+        $searchParams['body'] = [
+            'size' => 1,
+            'query' => [
+                    'match' => [
+                        'state' => 'finished_dircalc'
+                    ]
+             ]
+        ];
+        $queryResponse = $client->search($searchParams);
+        $crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
+        $indices_crawl_status[$key] = $crawlfinished;
         $indices_sorted[$indices[$key]['settings']['index']['creation_date']] = $key;
     }
     krsort($indices_sorted);
     $newest_index = reset($indices_sorted);
-
-    // check if it's finished being indexed
-
-    // Get search results from Elasticsearch for index stats and to see if crawl finished
-    $results = [];
-    $searchParams = [];
-
-    // Setup search query
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = 'crawlstat';
-
-    $searchParams['body'] = [
-        'size' => 1,
-        'query' => [
-                'match' => [
-                    'state' => 'finished_dircalc'
-                ]
-         ]
-    ];
-    $queryResponse = $client->search($searchParams);
-
-    // determine if crawl is finished by checking if there is worker_name "main" which only gets added at end of crawl
-    $crawlfinished = (sizeof($queryResponse['hits']['hits']) > 0) ? true : false;
 }
 
 $indexselected = "";
@@ -183,10 +175,12 @@ if (isset($_POST['index'])) {
                 <?php
                 if (!empty($indices_sorted)) {
                     foreach ($indices_sorted as $key => $val) {
-                        if ($val == $newest_index && !$crawlfinished) {
+                        if ($val == $newest_index && !$indices_crawl_status[$val]) {
                             echo "<option>".$val." <- newest *crawl still running*</option>";
-                        } elseif ($val == $newest_index && $crawlfinished) {
+                        } elseif ($val == $newest_index && $indices_crawl_status[$val]) {
                             echo "<option>".$val." <- newest</option>";
+                        } elseif ($val != $newest_index && !$indices_crawl_status[$val]) {
+                            echo "<option>".$val." *crawl still running*</option>";
                         } else {
                             echo "<option>".$val."</option>";
                         }

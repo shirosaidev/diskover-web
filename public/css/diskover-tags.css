@@ -119,7 +119,7 @@ text {
     background: rgba(0, 0, 0, 0.6);
     color: #fff;
     border-radius: 2px;
-    pointer-events: none;
+    pointer-events: none !important;
     word-break: break-all;
     word-wrap: break-word;
 }

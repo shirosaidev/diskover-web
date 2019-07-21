@@ -69,7 +69,7 @@ text {
     background: rgba(50, 50, 50, 0.5);
     color: #fff;
     border-radius: 2px;
-    pointer-events: none;
+    pointer-events: none !important;
     word-break: break-all;
     word-wrap: break-word;
 }

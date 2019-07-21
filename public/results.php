@@ -230,7 +230,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
       ?>
       <tr class="<?php if ($file['tag'] == 'delete') { echo 'deleterow'; } elseif ($file['tag'] == 'archive') { echo 'archiverow'; } elseif ($file['tag'] == 'keep') { echo 'keeprow'; }?>">
         <th scope="row" class="text-nowrap <?php if ($file['tag'] == 'delete') { echo 'deletehighlight_bg'; } elseif ($file['tag'] == 'archive') { echo 'archivehighlight_bg'; } elseif ($file['tag'] == 'keep') { echo 'keephighlight_bg'; }?>" style="color:#555;"><?php echo $i; ?></th>
-        <td class="path highlight">
+        <td class="path">
             <?php
             // set fullpath, parentpath and filename vars and check for root /
             if ($file['path_parent'] === "/" && $file['filename'] === "") {  // / root
@@ -247,15 +247,25 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                 $filename = $file['filename'];
             }
             ?>
-            <?php if ($result['_type'] == 'directory') { ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1"><?php if ($s3_index && $file['path_parent'] == '/') { ?><i class="glyphicon glyphicon-cloud" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else if ($s3_index && $file['path_parent'] == '/s3') { ?><i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php } else { ?><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i><?php } ?> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><button class="btn btn-default btn-xs" type="button" style="color:gray;font-size:11px;margin-left:3px;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></button></a><?php } else { ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php } ?>
+            <?php if ($result['_type'] == 'directory') {
+                ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1" class="highlight"><?php if ($s3_index && $file['path_parent'] == '/') {
+                    ?><i class="glyphicon glyphicon-cloud" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php
+                } elseif ($s3_index && $file['path_parent'] == '/s3') {
+                    ?><i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php
+                } else { 
+                    ?><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i><?php
+                } ?> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><button class="btn btn-default btn-xs" type="button" style="color:gray;font-size:11px;margin-left:3px;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></button></a><?php
+            } else {
+                    ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>" class="highlight"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php
+                } ?>
             <!-- socket commands dropdown -->
             <?php if ($socketlistening) {
             if ($result['_type'] == 'directory') { ?>
             <div class="dropdown pathdropdown" style="display:inline-block;">
                 <?php if ($file['path_parent'] . '/' . $file['filename'] !== $_SESSION['rootpath']) { ?>
-                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs run-btn file-cmd-btns" type="button" data-toggle="dropdown">
+                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs file-cmd-btns" type="button" data-toggle="dropdown">
                 <?php } else { ?>
-                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs run-btn file-cmd-btn-root" type="button" data-toggle="dropdown">
+                <button title="socket server commands" class="btn btn-default dropdown-toggle btn-xs file-cmd-btn-root" type="button" data-toggle="dropdown">
                 <?php } ?>
                 <i class="glyphicon glyphicon-tasks"></i>
                     <span class="caret"></span></button>
@@ -272,7 +282,7 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
                         <li class="small"><?php $cmd = "{\"action\": \"hotdirs\", \"index\": \"".$esIndex."\", \"index2\": \"".$esIndex2."\"}"; ?><a onclick='runCommand(<?php echo $cmd; ?>);' href="#_self"><i class="glyphicon glyphicon-fire"></i> find hotdirs</a></li>
                         <?php } ?>
                         <?php } ?>
-                </ul>
+                    </ul>
             </div>
             <!-- end socket command dropdown -->
             <?php } } ?>
