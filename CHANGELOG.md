@@ -4,6 +4,7 @@
 ### fixed
 - directory command button drop down menu overlay issue when search results row tagged
 - overylay issue with mouse over tool tip for anaytics pages
+- top 50 analytics page percent of total file size percent showing incorrect values/bar sizes
 
 # [1.5.0.2] - 2019-07-03
 ### fixed
