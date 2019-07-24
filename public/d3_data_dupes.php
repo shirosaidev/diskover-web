@@ -13,6 +13,9 @@ require "d3_inc.php";
 
 $mindupes = $_GET['mindupes'];
 
+// get mtime in ES format
+$mtime = getmtime($mtime);
+
 // Get search results from Elasticsearch for duplicate files
 
 // find all the files with dupe_md5 values that are not empty ""

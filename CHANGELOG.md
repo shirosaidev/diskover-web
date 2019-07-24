@@ -1,5 +1,9 @@
 # Diskover Web Change Log
 
+# [1.5.0.4] - 2019-07-24
+### fixed
+- setting mtime filter on filetree page would cause error loading dupes, hardlinks or time change analytics pages
+
 # [1.5.0.3] - 2019-07-20
 ### fixed
 - directory command button drop down menu overlay issue when search results row tagged

@@ -15,6 +15,9 @@ require "d3_inc.php";
 // escape characters in path
 $path_escaped = escape_chars($path);
 
+// get mtime in ES format
+$mtime = getmtime($mtime);
+
 $monthrangeDays = [
              [ 'from' => 'now-1d/d', 'to' => 'now/d' ],
              [ 'from' => 'now-2d/d', 'to' => 'now-1d/d' ],

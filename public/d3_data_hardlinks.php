@@ -14,6 +14,9 @@ require "d3_inc.php";
 
 $minhardlinks = $_GET['minhardlinks'];
 
+// get mtime in ES format
+$mtime = getmtime($mtime);
+
 // Get search results from Elasticsearch for harlinks
 
 // find all the files with hardlinks >= minhardlinks
