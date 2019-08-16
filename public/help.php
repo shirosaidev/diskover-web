@@ -102,6 +102,7 @@ require "../src/diskover/Diskover.php";
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/dupessize</code></p>
 					<p>Search index using ES query syntax:<br />
 					<code>GET http://localhost:8000/api.php/diskover-2018.01.17/search?query=extension:png%20AND%20_type:file%20AND%20filesize:>1048576</code></p>
+					<p><strong>For "tags" and "dupes" endpoints, you can set the page number and result size with ex. &page=1 and &size=100. Default is page 1 and size 1000.</strong></p>
 					<br>
 					<h4>Update (with JSON object)</h4>
 					<p>Updating file/directory tags is done with the PUT method. You can send a JSON object in the body. The call returns the number of items affected.<br />
