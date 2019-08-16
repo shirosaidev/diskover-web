@@ -329,42 +329,16 @@ function get($endpoint, $query) {
 
 		case $endpoint[1] == 'tagcount':
 
-            if (isset($output['tag']) || isset($output['tag_custom'])) {
-    			// custom tag only
-    			if ($output['tag_custom'] && !isset($output['tag'])) {
-    				$searchParams['body'] = [
-    					'size' => 0,
-    					'query' => [
-    						'match' => [
-    							'tag_custom' => $output['tag_custom']
-    						]
-    					]
-    				];
-                // tag only
-                } elseif (($output['tag'] || empty($output['tag'])) && !isset($output['tag_custom'])) {
-                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
-                    $searchParams['body'] = [
-                        'size' => 0,
-                        'query' => [
-                            'match' => [
-                                'tag' => $t
-                            ]
-                        ]
-                    ];
-                // tag and custom tag
-                } elseif (($output['tag'] || empty($output['tag'])) && $output['tag_custom']) {
-                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
-    				$searchParams['body'] = [
-    					'size' => 0,
-    					'query' => [
-    						'query_string' => [
-    							'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
-    						]
-    					]
-    				];
-    			} else {
-                    error('missing tag');
-                }
+			if (isset($output['tag']) || isset($output['tag'])) {
+				($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+				$searchParams['body'] = [
+					'size' => 0,
+					'query' => [
+						'query_string' => [
+							'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+						]
+					]
+				];
 
     			// Get search results from Elasticsearch for tag
     			$tagCount = 0;
@@ -384,7 +358,8 @@ function get($endpoint, $query) {
     			// print results
     			header('Content-Type: application/json');
     			echo json_encode($tagCount, JSON_PRETTY_PRINT);
-    			break;
+				break;
+				
             } else {
                 // Get search results from Elasticsearch for tags
     			$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
