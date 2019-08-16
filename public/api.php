@@ -558,7 +558,7 @@ function get($endpoint, $query) {
 			// scroll size
 			$searchParams['size'] = 1000;
 
-			if (!isset($output['tag']) && !isset($output['tag_custom'])) {
+			if (empty($output['tag']) && emtpy($output['tag_custom'])) {
 				$searchParams['body'] = [
 					'query' => [
 						'query_string' => [
