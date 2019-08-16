@@ -330,12 +330,12 @@ function get($endpoint, $query) {
 		case $endpoint[1] == 'tagcount':
 
 			if (isset($output['tag']) || isset($output['tag'])) {
-				($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+				($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
 				$searchParams['body'] = [
 					'size' => 0,
 					'query' => [
 						'query_string' => [
-							'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+							'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $output['tag_custom'] . '"'
 						]
 					]
 				];
@@ -365,12 +365,12 @@ function get($endpoint, $query) {
     			$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
                 foreach ($tagCounts as $tag => $value) {
-                    ($tag === "untagged") ? $t = "" : $t = $tag;
+                    ($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
     				$searchParams['body'] = [
     					'size' => 0,
     				 	'query' => [
     				   		'match' => [
-    					 		'tag' => $t
+    					 		'tag' => $tag
     				   		]
     				 	]
     			  	];
@@ -431,62 +431,22 @@ function get($endpoint, $query) {
 		case $endpoint[1] == 'tagsize':
 
             if (isset($output['tag']) || isset($output['tag_custom'])) {
-                // custom tag only
-                if ($output['tag_custom'] && !isset($output['tag'])) {
-                    $searchParams['body'] = [
-                        'size' => 0,
-                        'query' => [
-                            'match' => [
-                            'tag_custom' => $output['tag_custom']
-                            ]
-                        ],
-                        'aggs' => [
-                            'total_size' => [
-                                'sum' => [
-                                    'field' => 'filesize'
-                                ]
-                            ]
-                        ]
-                    ];
-                // tag only
-                } elseif (($output['tag'] || empty($output['tag'])) && !isset($output['tag_custom'])) {
-                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
-                    $searchParams['body'] = [
-                        'size' => 0,
-                        'query' => [
-                            'match' => [
-                            'tag' => $t
-                            ]
-                        ],
-                        'aggs' => [
-                            'total_size' => [
-                                'sum' => [
-                                    'field' => 'filesize'
-                                ]
-                            ]
-                        ]
-                    ];
-                // tag and custom tag
-                } elseif (($output['tag'] || empty($output['tag'])) && $output['tag_custom']) {
-                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
-                    $searchParams['body'] = [
-                        'size' => 0,
-                        'query' => [
-                            'query_string' => [
-                            'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
-                            ]
-                        ],
-                        'aggs' => [
-                            'total_size' => [
-                                'sum' => [
-                                    'field' => 'filesize'
-                                ]
-                            ]
-                        ]
-                    ];
-                } else {
-                    error('missing tag');
-                }
+				($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
+				$searchParams['body'] = [
+					'size' => 0,
+					'query' => [
+						'query_string' => [
+						'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+						]
+					],
+					'aggs' => [
+						'total_size' => [
+							'sum' => [
+								'field' => 'filesize'
+							]
+						]
+					]
+				];
 
                 // Get search results from Elasticsearch for tag
                 $tagSize = 0;
@@ -506,18 +466,19 @@ function get($endpoint, $query) {
                 // print results
                 header('Content-Type: application/json');
                 echo json_encode($tagSize, JSON_PRETTY_PRINT);
-                break;
+				break;
+				
             } else {
                 // Get search results from Elasticsearch for tags
                 $tagSizes = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
                 foreach ($tagSizes as $tag => $value) {
-                    ($tag === "untagged") ? $t = "" : $t = $tag;
+                    ($tag === "untagged") ? $tag = "" : $tag;
                     $searchParams['body'] = [
     					'size' => 0,
     					'query' => [
     				   		'match' => [
-    						'tag' => $t
+    						'tag' => $tag
     				  		]
     					],
     				  	'aggs' => [
@@ -597,12 +558,12 @@ function get($endpoint, $query) {
 			// scroll size
 			$searchParams['size'] = 1000;
 
-			($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+			($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
 
 			$searchParams['body'] = [
 				'query' => [
 					'query_string' => [
-						'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+						'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $output['tag_custom'] . '"'
 					]
 				]
 			];
@@ -647,7 +608,7 @@ function get($endpoint, $query) {
 			if ($results) {
 				echo json_encode($results, JSON_PRETTY_PRINT);
 			} else {
-				error('no files found', 'message');
+				error('no files found');
 			}
 			break;
 
