@@ -560,10 +560,10 @@ function get($endpoint, $query) {
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
-			$searchParams['size'] = (isset($ouput['size']) ? $ouput['size'] : 1000);
+			$searchParams['size'] = (isset($output['size']) ? $output['size'] : 1000);
 
 			// page number of results to print
-			$page = (isset($ouput['page']) ? $ouput['page'] : 1);
+			$page = (isset($output['page']) ? $output['page'] : 1);
 
 			if ((!isset($output['tag']) || empty($output['tag'])) && (!isset($output['tag_custom']) || empty($output['tag_custom']))) {
 				$searchParams['body'] = [
@@ -641,10 +641,10 @@ function get($endpoint, $query) {
             $searchParams['type'] = "file";
 
 			// scroll size
-			$searchParams['size'] = (isset($ouput['size']) ? $ouput['size'] : 1000);
+			$searchParams['size'] = (isset($output['size']) ? $output['size'] : 1000);
 
 			// page number of results to print
-			$page = (isset($ouput['page']) ? $ouput['page'] : 1);
+			$page = (isset($output['page']) ? $output['page'] : 1);
 
 			$searchParams['body'] = [
 					'query' => [
