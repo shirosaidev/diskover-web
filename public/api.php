@@ -558,20 +558,20 @@ function get($endpoint, $query) {
 			// scroll size
 			$searchParams['size'] = 1000;
 
-			if (isset($output['tag']) || isset($output['tag_custom'])) {
+			if (!isset($output['tag']) && !isset($output['tag_custom'])) {
+				$searchParams['body'] = [
+					'query' => [
+						'query_string' => [
+							'query' => 'tag:"" AND tag_custom:""'
+						]
+					]
+				];
+			} else {
 				($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
 				$searchParams['body'] = [
 					'query' => [
 						'query_string' => [
 							'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $output['tag_custom'] . '"'
-						]
-					]
-				];
-			} elseif (!isset($output['tag']) && !isset($output['tag_custom'])) {
-				$searchParams['body'] = [
-					'query' => [
-						'query_string' => [
-							'query' => 'tag:"" AND tag_custom:""'
 						]
 					]
 				];
