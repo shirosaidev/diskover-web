@@ -365,12 +365,12 @@ function get($endpoint, $query) {
     			$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
                 foreach ($tagCounts as $tag => $value) {
-                    ($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
+                    ($tag === "untagged") ? $t = "" : $t = $tag;
     				$searchParams['body'] = [
     					'size' => 0,
     				 	'query' => [
     				   		'match' => [
-    					 		'tag' => $tag
+    					 		'tag' => $t
     				   		]
     				 	]
     			  	];
@@ -473,12 +473,12 @@ function get($endpoint, $query) {
                 $tagSizes = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
                 foreach ($tagSizes as $tag => $value) {
-                    ($tag === "untagged") ? $tag = "" : $tag;
+                    ($tag === "untagged") ? $t = "" : $t = $tag;
                     $searchParams['body'] = [
     					'size' => 0,
     					'query' => [
     				   		'match' => [
-    						'tag' => $tag
+    						'tag' => $t
     				  		]
     					],
     				  	'aggs' => [
@@ -558,7 +558,7 @@ function get($endpoint, $query) {
 			// scroll size
 			$searchParams['size'] = 1000;
 
-			if (empty($output['tag']) && empty($output['tag_custom'])) {
+			if (!isset($output['tag']) && !isset($output['tag_custom'])) {
 				$searchParams['body'] = [
 					'query' => [
 						'query_string' => [
