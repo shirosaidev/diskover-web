@@ -33,7 +33,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                             <a href="#">Files</a>
                             <ul class="dropdown-menu">
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;doctype=file">Untagged</a></li>
-                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;tag_custom=&quot;&quot;">Untagged + no custom tag</a></li>
+                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;tag_custom=&quot;&quot;&amp;doctype=file">Untagged + no custom tag</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=delete&amp;doctype=file">Tagged delete</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=archive&amp;doctype=file">Tagged archive</a></li>
 						<li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=keep&amp;doctype=file">Tagged keep</a></li>
@@ -67,7 +67,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                     <a tabindex="-1" href="#">Directories</a>
                     <ul class="dropdown-menu">
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;doctype=directory"">Untagged</a></li>
-                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;tag_custom=&quot;&quot;">Untagged + no custom tag</a></li>
+                        <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=&quot;&quot;&amp;tag_custom=&quot;&quot;&amp;doctype=directory">Untagged + no custom tag</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=delete&amp;doctype=directory">Tagged delete</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=archive&amp;doctype=directory">Tagged archive</a></li>
                         <li><a href="advanced.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;submitted=true&amp;p=1&amp;tag=keep&amp;doctype=directory">Tagged keep</a></li>

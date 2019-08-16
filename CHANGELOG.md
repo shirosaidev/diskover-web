@@ -1,5 +1,10 @@
 # Diskover Web Change Log
 
+# [1.5.0.5] - 2019-08-16
+### fixed
+- quick search in nav bar for "Untagged + no custom tag" searches
+- api call for endpoint "tags" when searching for untagged and no custom tag
+
 # [1.5.0.4] - 2019-07-24
 ### fixed
 - setting mtime filter on filetree page would cause error loading dupes, hardlinks or time change analytics pages

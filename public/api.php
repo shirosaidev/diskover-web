@@ -622,42 +622,15 @@ function get($endpoint, $query) {
 			// scroll size
 			$searchParams['size'] = 1000;
 
-            if (isset($output['tag']) || isset($output['tag_custom'])) {
-                // custom tag only
-                if ($output['tag_custom'] && !isset($output['tag'])) {
-                    $searchParams['body'] = [
-                        'query' => [
-                            'match' => [
-                            'tag_custom' => $output['tag_custom']
-                            ]
-                        ]
-                    ];
-                // tag only
-                } elseif (($output['tag'] || empty($output['tag'])) && !isset($output['tag_custom'])) {
-                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
-                    $searchParams['body'] = [
-                        'query' => [
-                            'match' => [
-                            'tag' => $t
-                            ]
-                        ]
-                    ];
-                // tag and custom tag
-                } elseif (($output['tag'] || empty($output['tag'])) && $output['tag_custom']) {
-                    ($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
-                    $searchParams['body'] = [
-                        'query' => [
-                            'query_string' => [
-                                'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
-                            ]
-                        ]
-                    ];
-                } else {
-                    error('missing tag');
-                }
-            } else {
-                error('missing tag');
-            }
+			($output['tag'] === "untagged") ? $t = "" : $t = $output['tag'];
+
+			$searchParams['body'] = [
+				'query' => [
+					'query_string' => [
+						'query' => 'tag:"' . $t . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+					]
+				]
+			];
 
 			// Send search query to Elasticsearch and get scroll id and first page of results
 			try {
