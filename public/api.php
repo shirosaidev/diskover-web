@@ -565,7 +565,7 @@ function get($endpoint, $query) {
 			// page number of results to print
 			$page = (isset($output['page']) ? $output['page'] : 1);
 
-			if ((!isset($output['tag']) || empty($output['tag'])) && (!isset($output['tag_custom']) || empty($output['tag_custom']))) {
+			if (empty($output['tag']) && empty($output['tag_custom'])) {
 				$searchParams['body'] = [
 					'query' => [
 						'query_string' => [
