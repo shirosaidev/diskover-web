@@ -329,13 +329,15 @@ function get($endpoint, $query) {
 
 		case $endpoint[1] == 'tagcount':
 
-			if (isset($output['tag']) || isset($output['tag'])) {
-				($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
+			if (isset($output['tag']) || isset($output['tag_custom'])) {
+				$tag = (isset($output['tag'])) ? $output['tag'] : "";
+				($tag === "untagged") ? $tag = "" : $tag;
+				$tag_custom = (isset($output['tag_custom'])) ? $output['tag_custom'] : "";
 				$searchParams['body'] = [
 					'size' => 0,
 					'query' => [
 						'query_string' => [
-							'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+							'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $tag_custom . '"'
 						]
 					]
 				];
@@ -365,7 +367,7 @@ function get($endpoint, $query) {
     			$tagCounts = ['untagged' => 0, 'delete' => 0, 'archive' => 0, 'keep' => 0];
 
                 foreach ($tagCounts as $tag => $value) {
-                    ($tag === "untagged") ? $t = "" : $t = $tag;
+                    $t = ($tag === "untagged") ? "" : $tag;
     				$searchParams['body'] = [
     					'size' => 0,
     				 	'query' => [
@@ -431,12 +433,14 @@ function get($endpoint, $query) {
 		case $endpoint[1] == 'tagsize':
 
             if (isset($output['tag']) || isset($output['tag_custom'])) {
-				($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
+				$tag = (isset($output['tag'])) ? $output['tag'] : "";
+				($tag === "untagged") ? $tag = "" : $tag;
+				$tag_custom = (isset($output['tag_custom'])) ? $output['tag_custom'] : "";
 				$searchParams['body'] = [
 					'size' => 0,
 					'query' => [
 						'query_string' => [
-						'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+						'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $tag_custom . '"'
 						]
 					],
 					'aggs' => [
@@ -556,9 +560,12 @@ function get($endpoint, $query) {
 			$searchParams['scroll'] = "1m";
 
 			// scroll size
-			$searchParams['size'] = 1000;
+			$searchParams['size'] = (isset($ouput['size']) ? $ouput['size'] : 1000);
 
-			if (!isset($output['tag']) && !isset($output['tag_custom'])) {
+			// page number of results to print
+			$page = (isset($ouput['page']) ? $ouput['page'] : 1);
+
+			if ((!isset($output['tag']) || empty($output['tag'])) && (!isset($output['tag_custom']) || empty($output['tag_custom']))) {
 				$searchParams['body'] = [
 					'query' => [
 						'query_string' => [
@@ -567,11 +574,13 @@ function get($endpoint, $query) {
 					]
 				];
 			} else {
-				($output['tag'] === "untagged") ? $tag = "" : $tag = $output['tag'];
+				$tag = (isset($output['tag'])) ? $output['tag'] : "";
+				($tag === "untagged") ? $tag = "" : $tag;
+				$tag_custom = (isset($output['tag_custom'])) ? $output['tag_custom'] : "";
 				$searchParams['body'] = [
 					'query' => [
 						'query_string' => [
-							'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $output['tag_custom'] . '"'
+							'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $tag_custom . '"'
 						]
 					]
 				];
@@ -596,10 +605,13 @@ function get($endpoint, $query) {
 			$results = [];
 			// Loop through all the pages of results
 			while ($i <= ceil($total/$searchParams['size'])) {
-				// Get files for tag
-                foreach ($queryResponse['hits']['hits'] as $hit) {
-                    $results[] = $hit;
-                }
+				// check if we have the results for the page we are on
+				if ($i == $page) {
+					// Get files for tag
+					$results[$i] = $queryResponse['hits']['hits'];
+					// end loop
+					break;
+				}
 
 				// Execute a Scroll request and repeat
 				$queryResponse = $client->scroll([
@@ -614,8 +626,8 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
-			if ($results) {
-				echo json_encode($results, JSON_PRETTY_PRINT);
+			if ($results[$page]) {
+				echo json_encode($results[$page], JSON_PRETTY_PRINT);
 			} else {
 				error('no files found');
 			}
@@ -629,7 +641,10 @@ function get($endpoint, $query) {
             $searchParams['type'] = "file";
 
 			// scroll size
-			$searchParams['size'] = 1000;
+			$searchParams['size'] = (isset($ouput['size']) ? $ouput['size'] : 1000);
+
+			// page number of results to print
+			$page = (isset($ouput['page']) ? $ouput['page'] : 1);
 
 			$searchParams['body'] = [
 					'query' => [
@@ -662,10 +677,13 @@ function get($endpoint, $query) {
 			$results = [];
 			// Loop through all the pages of results
 			while ($i <= ceil($total/$searchParams['size'])) {
-				// Get files for tag
-                foreach ($queryResponse['hits']['hits'] as $hit) {
-                    $results[] = $hit;
-                }
+				// check if we have the results for the page we are on
+				if ($i == $page) {
+					// Get files for tag
+					$results[$i] = $queryResponse['hits']['hits'];
+					// end loop
+					break;
+				}
 
 				// Execute a Scroll request and repeat
 				$queryResponse = $client->scroll([
@@ -680,8 +698,8 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
-			if ($results) {
-				echo json_encode($results, JSON_PRETTY_PRINT);
+			if ($results[$page]) {
+				echo json_encode($results[$page], JSON_PRETTY_PRINT);
 			} else {
 				error('no files found');
 			}

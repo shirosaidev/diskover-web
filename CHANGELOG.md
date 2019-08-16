@@ -4,6 +4,8 @@
 ### fixed
 - quick search in nav bar for "Untagged + no custom tag" searches
 - api call for endpoint "tags" when searching for untagged and no custom tag
+- cleaned up and improved api.php code
+- added pageination to api.php for "tags" and "dupes" endpoints, ex. use &page=1&size=100
 
 # [1.5.0.4] - 2019-07-24
 ### fixed
