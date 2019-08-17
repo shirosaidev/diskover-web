@@ -63,7 +63,14 @@ function put($endpoint, $input) {
 	$tag = $input['tag'];
 	$tag_custom = $input['tag_custom'];
     $recursive = $input['recursive'];
-    $tagfiles = $input['tagfiles'];
+	$tagfiles = $input['tagfiles'];
+	
+	// check if we are trying to set tag to something invalid
+	if (!in_array(['', 'delete', 'keep', 'archive'], $tag)) {
+		error('Invalid tag, must be delete, keep, archive');
+		echo "0\r\n";
+		die();
+	}
 
 	switch ($endpoint) {
 		// tag directory doc and items in directory
