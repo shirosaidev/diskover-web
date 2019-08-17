@@ -67,7 +67,7 @@ function put($endpoint, $input) {
 	
 	// check if we are trying to set tag to something invalid
 	if (!in_array($tag, [NULL, '', 'delete', 'keep', 'archive'])) {
-		echo "Invalid tag, must be delete, keep, or archive.\r\n";
+		echo "Invalid tag, must be \"\", \"delete\", \"keep\", or \"archive\".\r\n";
 		echo "0\r\n";
 		die();
 	}
