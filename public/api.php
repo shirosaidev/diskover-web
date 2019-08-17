@@ -66,8 +66,8 @@ function put($endpoint, $input) {
 	$tagfiles = $input['tagfiles'];
 	
 	// check if we are trying to set tag to something invalid
-	if (!in_array(['', 'delete', 'keep', 'archive'], $tag)) {
-		error('Invalid tag, must be delete, keep, archive');
+	if (!empty($tag) && !in_array(['delete', 'keep', 'archive'], $tag)) {
+		echo('Invalid tag, must be delete, keep, archive\r\n');
 		echo "0\r\n";
 		die();
 	}
@@ -230,12 +230,8 @@ function put($endpoint, $input) {
 					}
 				}
 
-				if (isset($tag_custom)) {
-					$queryResponse['_source']['tag_custom'] = $tag_custom;
-				}
-                if (isset($tag)) {
-					$queryResponse['_source']['tag'] = $tag;
-				}
+				$queryResponse['_source']['tag_custom'] = $tag_custom;
+				$queryResponse['_source']['tag'] = $tag;
 
 				$searchParams['body']['doc'] = $queryResponse['_source'];
 
