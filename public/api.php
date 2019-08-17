@@ -465,7 +465,7 @@ function get($endpoint, $query) {
 
     			// print results
 				header('Content-Type: application/json');
-				if ($ouput['debug']) {
+				if ($output['debug']) {
 					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
 				}
                 echo json_encode($tagCountsAll, JSON_PRETTY_PRINT);
@@ -511,7 +511,7 @@ function get($endpoint, $query) {
 
                 // print results
 				header('Content-Type: application/json');
-				if ($ouput['debug']) {
+				if ($output['debug']) {
 					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
 				}
                 echo json_encode($tagSize, JSON_PRETTY_PRINT);
@@ -545,7 +545,10 @@ function get($endpoint, $query) {
                     }
 
                     catch (Exception $e) {
-                        error('Message: ' . $e);
+						error('Message: ' . $e);
+						if ($output['debug']) {
+							echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+						}
                     }
 
                     // Get total size of all files with tag
@@ -582,7 +585,10 @@ function get($endpoint, $query) {
                     }
 
                     catch (Exception $e) {
-                        error('Message: ' . $e);
+						error('Message: ' . $e);
+						if ($output['debug']) {
+							echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+						}
                     }
 
                     // Get total size of all files with tag
@@ -595,7 +601,7 @@ function get($endpoint, $query) {
 
                 // print results
 				header('Content-Type: application/json');
-				if ($ouput['debug']) {
+				if ($output['debug']) {
 					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
 				}
                 echo json_encode($tagSizesAll, JSON_PRETTY_PRINT);
@@ -641,6 +647,9 @@ function get($endpoint, $query) {
 			}
 			catch (Exception $e) {
 				error('Message: ' . $e);
+				if ($output['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
 			}
 
 			// set total hits
@@ -674,7 +683,7 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
-			if ($ouput['debug']) {
+			if ($output['debug']) {
 				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
 			}
 			if ($results[$page]) {
@@ -716,6 +725,9 @@ function get($endpoint, $query) {
 
 			catch (Exception $e) {
 				error('Message: ' . $e);
+				if ($output['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
 			}
 
 			// set total hits
@@ -749,7 +761,7 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
-			if ($ouput['debug']) {
+			if ($output['debug']) {
 				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
 			}
 			if ($results[$page]) {
@@ -785,6 +797,9 @@ function get($endpoint, $query) {
 
 			catch (Exception $e) {
 				error('Message: ' . $e);
+				if ($output['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
 			}
 
 			// Get total size of all files with tag
@@ -792,6 +807,9 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
+			if ($output['debug']) {
+				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+			}
 			echo json_encode($totalFilesize, JSON_PRETTY_PRINT);
 			break;
 
@@ -978,6 +996,9 @@ function get($endpoint, $query) {
 
 			catch (Exception $e) {
 				error('Message: ' . $e);
+				if ($output['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
 			}
 
 			// set total hits
@@ -1007,6 +1028,9 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
+			if ($output['debug']) {
+				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+			}
 			if ($results) {
 				echo json_encode($results, JSON_PRETTY_PRINT);
 			} else {
