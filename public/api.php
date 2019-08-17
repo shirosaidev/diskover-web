@@ -99,11 +99,17 @@ function put($endpoint, $input) {
 			catch (Exception $e) {
 				error('Message: ' . $e);
 				echo "0\r\n";
+				if ($input['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
 			}
 
 			// check if directory found
 			if (!$queryResponse['hits']['hits']) {
 				echo "path_parent not found: " . $path_parent . "\r\n";
+				if ($input['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
 				die();
 			}
 
@@ -158,7 +164,10 @@ function put($endpoint, $input) {
     			}
     			catch (Exception $e) {
     				error('Message: ' . $e);
-    				echo "0\r\n";
+					echo "0\r\n";
+					if ($input['debug']) {
+						echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+					}
     			}
 
     			// set total hits
@@ -209,6 +218,9 @@ function put($endpoint, $input) {
 				catch (Exception $e) {
 					error('Message: ' . $e);
 					echo "0\r\n";
+					if ($input['debug']) {
+						echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+					}
 				}
 
 				if (isset($tag_custom)) {
@@ -233,6 +245,9 @@ function put($endpoint, $input) {
 		  	}
 			// print number of docs updated
 			echo $numitems . "\r\n";
+			if ($input['debug']) {
+				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+			}
 			break;
 
 		// tag files
@@ -261,6 +276,9 @@ function put($endpoint, $input) {
 				catch (Exception $e) {
 					error('Message: ' . $e);
 					echo "0\r\n";
+					if ($input['debug']) {
+						echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+					}
 				}
 
 				// check if any files found
@@ -284,6 +302,9 @@ function put($endpoint, $input) {
 				catch (Exception $e) {
 					error('Message: ' . $e);
 					echo "0\r\n";
+					if ($input['debug']) {
+						echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+					}
 				}
 
 				if (isset($tag_custom)) {
@@ -308,10 +329,16 @@ function put($endpoint, $input) {
 		  	}
 			// print number of files updated
 			echo $numfiles . "\r\n";
+			if ($input['debug']) {
+				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+			}
 			break;
 
 		default:
 			echo "0\r\n";
+			if ($input['debug']) {
+				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+			}
 	}
 }
 
@@ -358,7 +385,10 @@ function get($endpoint, $query) {
     			$tagCount = $queryResponse['hits']['total'];
 
     			// print results
-    			header('Content-Type: application/json');
+				header('Content-Type: application/json');
+				if ($ouput['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
     			echo json_encode($tagCount, JSON_PRETTY_PRINT);
 				break;
 				
@@ -425,7 +455,10 @@ function get($endpoint, $query) {
                 $tagCountsAll['tag_custom'] = $tagCountsCustom;
 
     			// print results
-    			header('Content-Type: application/json');
+				header('Content-Type: application/json');
+				if ($ouput['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
                 echo json_encode($tagCountsAll, JSON_PRETTY_PRINT);
     			break;
             }
@@ -468,7 +501,10 @@ function get($endpoint, $query) {
                 $tagSize = $queryResponse['aggregations']['total_size']['value'];
 
                 // print results
-                header('Content-Type: application/json');
+				header('Content-Type: application/json');
+				if ($ouput['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
                 echo json_encode($tagSize, JSON_PRETTY_PRINT);
 				break;
 				
@@ -549,7 +585,10 @@ function get($endpoint, $query) {
                 $tagSizesAll['tag_custom'] = $tagSizesCustom;
 
                 // print results
-                header('Content-Type: application/json');
+				header('Content-Type: application/json');
+				if ($ouput['debug']) {
+					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+				}
                 echo json_encode($tagSizesAll, JSON_PRETTY_PRINT);
                 break;
             }
@@ -626,6 +665,9 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
+			if ($ouput['debug']) {
+				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+			}
 			if ($results[$page]) {
 				echo json_encode($results[$page], JSON_PRETTY_PRINT);
 			} else {
@@ -698,6 +740,9 @@ function get($endpoint, $query) {
 
 			// print results
 			header('Content-Type: application/json');
+			if ($ouput['debug']) {
+				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+			}
 			if ($results[$page]) {
 				echo json_encode($results[$page], JSON_PRETTY_PRINT);
 			} else {
