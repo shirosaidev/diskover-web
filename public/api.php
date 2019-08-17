@@ -378,7 +378,10 @@ function get($endpoint, $query) {
     			}
 
     			catch (Exception $e) {
-    				error('Message: ' . $e);
+					error('Message: ' . $e);
+					if ($output['debug']) {
+						echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+					}
     			}
 
     			// Get total for tag
@@ -386,7 +389,7 @@ function get($endpoint, $query) {
 
     			// print results
 				header('Content-Type: application/json');
-				if ($ouput['debug']) {
+				if ($output['debug']) {
 					echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
 				}
     			echo json_encode($tagCount, JSON_PRETTY_PRINT);
@@ -413,7 +416,10 @@ function get($endpoint, $query) {
     				}
 
     				catch (Exception $e) {
-    					error('Message: ' . $e);
+						error('Message: ' . $e);
+						if ($output['debug']) {
+							echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+						}
     				}
 
     			  	// Get total for tag
@@ -443,7 +449,10 @@ function get($endpoint, $query) {
     				}
 
     				catch (Exception $e) {
-    					error('Message: ' . $e);
+						error('Message: ' . $e);
+						if ($output['debug']) {
+							echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
+						}
     				}
 
     			  	// Get total for tag
