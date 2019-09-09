@@ -1,5 +1,11 @@
 # Diskover Web Change Log
 
+# [1.5.0.6] - 2019-09-09
+### added
+- page and size url vars for "search" api endpoint
+### fixed
+- bug with api query when searching for custom tags
+
 # [1.5.0.5] - 2019-08-16
 ### fixed
 - quick search in nav bar for "Untagged + no custom tag" searches

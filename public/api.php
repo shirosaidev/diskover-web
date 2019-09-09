@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -634,10 +634,19 @@ function get($endpoint, $query) {
 				$tag = (isset($output['tag'])) ? $output['tag'] : "";
 				($tag === "untagged") ? $tag = "" : $tag;
 				$tag_custom = (isset($output['tag_custom'])) ? $output['tag_custom'] : "";
+				if ($tag_custom !== "" && isset($output['tag'])) {
+					$q = 'tag:"' . $tag . '" AND tag_custom:"' . $tag_custom . '"';
+				} elseif (!isset($output['tag'])) {
+					$q = 'tag_custom:"' . $tag_custom . '"';
+				} elseif (!isset($output['tag_custom'])) {
+					$q = 'tag:"' . $tag . '"';
+				} else {
+					$q = 'tag:"' . $tag . '" AND tag_custom:""';
+				}
 				$searchParams['body'] = [
 					'query' => [
 						'query_string' => [
-							'query' => 'tag:"' . $tag . '" AND tag_custom:"' . $tag_custom . '"'
+							'query' => $q
 						]
 					]
 				];
@@ -977,10 +986,11 @@ function get($endpoint, $query) {
 			// Scroll parameter alive time
 			$searchParams['scroll'] = "1m";
 
-			//$searchParams['type'] = "file,directory";
-
 			// scroll size
-			$searchParams['size'] = 1000;
+			$searchParams['size'] = (isset($output['size']) ? $output['size'] : 1000);
+
+			// page number of results to print
+			$page = (isset($output['page']) ? $output['page'] : 1);
 
 			$searchParams['body'] = [
 					'query' => [
@@ -1014,8 +1024,12 @@ function get($endpoint, $query) {
 			$results = [];
 			// Loop through all the pages of results and store in results array
 			while ($i <= ceil($total/$searchParams['size'])) {
-				foreach ($queryResponse['hits']['hits'] as $hit) {
-					$results[] = $hit;
+				// check if we have the results for the page we are on
+				if ($i == $page) {
+					// Get files for tag
+					$results[$i] = $queryResponse['hits']['hits'];
+					// end loop
+					break;
 				}
 
 				// Execute a Scroll request and repeat
@@ -1034,8 +1048,8 @@ function get($endpoint, $query) {
 			if ($output['debug']) {
 				echo json_encode($searchParams['body'], JSON_PRETTY_PRINT);
 			}
-			if ($results) {
-				echo json_encode($results, JSON_PRETTY_PRINT);
+			if ($results[$page]) {
+				echo json_encode($results[$page], JSON_PRETTY_PRINT);
 			} else {
 				error('no docs found');
 			}
