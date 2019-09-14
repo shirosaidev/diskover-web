@@ -1,8 +1,9 @@
 # Diskover Web Change Log
 
-# [1.5.0.6] - 2019-09-09
+# [1.5.0.6] - 2019-09-13
 ### added
 - page and size url vars for "search" api endpoint
+- can now set ES_HOST using env var APP_ES_HOST
 ### fixed
 - bug with api query when searching for custom tags
 
