@@ -19,6 +19,8 @@ function connectES() {
     // Connect to Elasticsearch node
     $esHost = getenv('APP_ES_HOST') ?: Constants::ES_HOST;
     $esPort = getenv('APP_ES_PORT') ?: Constants::ES_PORT;
+    $esUser = getenv('APP_ES_USER') ?: Constants::ES_USER;
+    $esPass = getenv('APP_ES_PASS') ?: Constants::ES_PASS;
     $esIndex = getenv('APP_ES_INDEX') ?: getCookie('index');
     $esIndex2 = getenv('APP_ES_INDEX2') ?: getCookie('index2');
     if (Constants::AWS) {
@@ -34,7 +36,7 @@ function connectES() {
     } else {
         $hosts = [
             [ 'host' => $esHost, 'port' => $esPort, 
-            'user' => $esHost, 'pass' => Constants::ES_PASS ]
+            'user' => $esUser, 'pass' => $esPass ]
             ];
     }
 

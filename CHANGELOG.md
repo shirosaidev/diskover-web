@@ -3,7 +3,7 @@
 # [1.5.0.6] - 2019-09-13
 ### added
 - page and size url vars for "search" api endpoint
-- can now set ES_HOST using env var APP_ES_HOST
+- can now set ES_HOST, ES_USER, ES_PASS using env var APP_ES_HOST, APP_ES_USER, APP_ES_POST (overrides Constants.php diskover-web config)
 ### fixed
 - bug with api query when searching for custom tags
 
