@@ -200,31 +200,6 @@ if (!empty($_REQUEST['submitted'])) {
         $q[] = "dupe_md5:" . $_REQUEST['dupe_md5'];
     }
 
-    // s3 fields
-    if ($s3_index) {
-        if (!empty($_REQUEST['s3_bucket'])) {
-            $q[] = "s3_bucket:" . $_REQUEST['s3_bucket'];
-        }
-        if (!empty($_REQUEST['s3_key'])) {
-            $q[] = "s3_key:" . $_REQUEST['s3_key'];
-        }
-        if (!empty($_REQUEST['s3_storage_class'])) {
-            $q[] = "s3_storage_class:" . $_REQUEST['s3_storage_class'];
-        }
-        if (!empty($_REQUEST['s3_etag'])) {
-            $q[] = "s3_etag:" . $_REQUEST['s3_etag'];
-        }
-        if (!empty($_REQUEST['s3_multipart_upload'])) {
-            $q[] = "s3_multipart_upload:" . $_REQUEST['s3_multipart_upload'];
-        }
-        if (!empty($_REQUEST['s3_replication_status'])) {
-            $q[] = "s3_replication_status:" . $_REQUEST['s3_replication_status'];
-        }
-        if (!empty($_REQUEST['s3_encryption_status'])) {
-            $q[] = "s3_encryption_status:" . $_REQUEST['s3_encryption_status'];
-        }
-    }
-
     // Build complete search request body
     if (count($q) == 1) {
         $querystring = $q[0];
@@ -344,16 +319,6 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		<label for="filehash">Filehash is...</label>
 		<input name="filehash" value="" placeholder="hash" class="form-control" />
 	  </div>
-      <?php if (!$s3_index) { ?>
-      <div class="col-xs-2">
-		<label for="filehash">Dupe MD5 Sum is...</label>
-		<input name="dupe_md5" value="" placeholder="md5 sum" class="form-control" />
-	  </div>
-	  <div class="col-xs-2">
-		<label for="inode">Inode is...</label>
-		<input name="inode" value="" placeholder="inode num" type="number" class="form-control" />
-	  </div>
-      <?php } ?>
 	</div>
   </div>
   <div class="form-group">
@@ -388,42 +353,16 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="GB">GB</option>
 		</select>
 	  </div>
-      <?php if (!$s3_index) { ?>
-	  <div class="col-xs-2">
-		<label for="hardlinks_low">Hardlinks is between...</label>
-		<input name="hardlinks_low" value="" type="number" placeholder="2" class="form-control" />
-		<label for="hardlinks_high">and</label>
-		<input name="hardlinks_high" value="" type="number" placeholder="10" class="form-control" />
-	  </div>
-      <?php } ?>
 	  <div class="col-xs-3">
 		<label for="last_mod_time_low">Last modified time (utc) is between...</label>
 		<input name="last_mod_time_low" value="" type="string" placeholder="2015-03-06T00:00:00 or 2016-01-22" class="form-control" />
 		<label for="last_mod_time_high">and</label>
 		<input name="last_mod_time_high" value="" type="string" placeholder="2017-03-06T00:00:00 or now-6M/d" class="form-control" />
 	  </div>
-      <?php if (!$s3_index) { ?>
-	  <div class="col-xs-3">
-		<label for="last_access_time_low">Last access time (utc) is between...</label>
-		<input name="last_access_time_low" value="" type="string" placeholder="2015-03-06T00:00:00 or now-2w" class="form-control" />
-		<label for="last_access_time_high">and</label>
-		<input name="last_access_time_high" value="" type="string" placeholder="2017-03-06T00:00:00 or now-1y" class="form-control" />
-	  </div>
-      <?php } ?>
 	</div>
   </div>
   <div class="form-group">
 	<div class="row">
-      <?php if (!$s3_index) { ?>
-	  <div class="col-xs-2">
-		<label for="owner">Owner is...  </label>
-		<input name="owner" value="" placeholder="shirosai or (NOT root)" class="form-control" />
-	  </div>
-	  <div class="col-xs-2">
-		<label for="group">Group is...  </label>
-		<input name="group" value="" placeholder="staff" class="form-control" />
-	  </div>
-      <?php } ?>
 	  <div class="col-xs-2">
 		<label for="extension">Extension is...</label>
 		<input name="extension" value="" type="string" placeholder="zip or (tmp OR cache)" class="form-control" />
@@ -472,15 +411,6 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="tag_custom" <?php echo (getCookie('sort') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
           <option value="change_percent_filesize" <?php echo (getCookie('sort') === 'change_percent_filesize') ? 'selected' : ''; ?>>change_percent_filesize</option>
           <option value="change_percent_items" <?php echo (getCookie('sort') === 'change_percent_items') ? 'selected' : ''; ?>>change_percent_items</option>
-          <?php if ($s3_index) { ?>
-          <option value="s3_bucket" <?php echo (getCookie('sort') === 's3_bucket') ? 'selected' : ''; ?>>s3_bucket</option>
-          <option value="s3_key" <?php echo (getCookie('sort') === 's3_bucket') ? 'selected' : ''; ?>>s3_key</option>
-          <option value="s3_storage_class" <?php echo (getCookie('sort') === 's3_storage_class') ? 'selected' : ''; ?>>s3_storage_class</option>
-          <option value="s3_etag" <?php echo (getCookie('sort') === 's3_etag') ? 'selected' : ''; ?>>s3_etag</option>
-          <option value="s3_multipart_upload" <?php echo (getCookie('sort') === 's3_multipart_upload') ? 'selected' : ''; ?>>s3_multipart_upload</option>
-          <option value="s3_replication_status" <?php echo (getCookie('sort') === 's3_replication_status') ? 'selected' : ''; ?>>s3_replication_status</option>
-          <option value="s3_encryption_status" <?php echo (getCookie('sort') === 's3_encryption_status') ? 'selected' : ''; ?>>s3_encryption_status</option>
-          <?php } ?>
 		</select>
 	  </div>
 	  <div class="col-xs-2">
@@ -509,15 +439,6 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="tag_custom" <?php echo (getCookie('sort2') === 'tag_custom') ? 'selected' : ''; ?>>tag_custom</option>
           <option value="change_percent_filesize" <?php echo (getCookie('sort2') === 'change_percent_filesize') ? 'selected' : ''; ?>>change_percent_filesize</option>
           <option value="change_percent_items" <?php echo (getCookie('sort2') === 'change_percent_items') ? 'selected' : ''; ?>>change_percent_items</option>
-          <?php if ($s3_index) { ?>
-          <option value="s3_bucket" <?php echo (getCookie('sort2') === 's3_bucket') ? 'selected' : ''; ?>>s3_bucket</option>
-          <option value="s3_key" <?php echo (getCookie('sort2') === 's3_bucket') ? 'selected' : ''; ?>>s3_key</option>
-          <option value="s3_storage_class" <?php echo (getCookie('sort2') === 's3_storage_class') ? 'selected' : ''; ?>>s3_storage_class</option>
-          <option value="s3_etag" <?php echo (getCookie('sort2') === 's3_etag') ? 'selected' : ''; ?>>s3_etag</option>
-          <option value="s3_multipart_upload" <?php echo (getCookie('sort2') === 's3_multipart_upload') ? 'selected' : ''; ?>>s3_multipart_upload</option>
-          <option value="s3_replication_status" <?php echo (getCookie('sort2') === 's3_replication_status') ? 'selected' : ''; ?>>s3_replication_status</option>
-          <option value="s3_encryption_status" <?php echo (getCookie('sort2') === 's3_encryption_status') ? 'selected' : ''; ?>>s3_encryption_status</option>
-          <?php } ?>
 		</select>
 	  </div>
 	  <div class="col-xs-2">
@@ -530,58 +451,6 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	  </div>
 	</div>
     </div>
-    <?php if ($s3_index) { ?>
-    <div class="form-group">
-    <div class="row">
-      <div class="col-xs-4">
-        <label for="s3_bucket"><span style="color:#FD9827;">S3 Bucket...</span>  </label>
-        <input name="s3_bucket" value="" placeholder="s3 bucket name" class="form-control" />
-      </div>
-      <div class="col-xs-4">
-        <label for="s3_key"><span style="color:#FD9827;">S3 Key is...</span>  </label>
-        <input name="s3_key" value="" placeholder="s3 key" class="form-control" />
-      </div>
-      <div class="col-xs-4">
-        <label for="s3_storage_class"><span style="color:#FD9827;">S3 Storage class is...</span></label>
-        <select class="form-control" name="s3_storage_class">
-          <option value="" selected></option>
-          <option value="STANDARD">Standard</option>
-          <option value="RRS">Reduced Redundancy Storage (RRS)</option>
-          <option value="IA">Standard Infrequent Access (IA)</option>
-          <option value="Z-IA">One-Zone Infrequent Access (Z-IA)</option>
-          <option value="GLACIER">Glacier</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-xs-4">
-        <label for="s3_etag"><span style="color:#FD9827;">S3 Etag...</span>  </label>
-        <input name="s3_etag" value="" placeholder="s3 etag" class="form-control" />
-      </div>
-      <div class="col-xs-2">
-        <label for="s3_multipart_upload"><span style="color:#FD9827;">S3 Multipart upload is...</span></label>
-        <select class="form-control" name="s3_multipart_upload">
-          <option value="" selected></option>
-          <option value="true">true</option>
-          <option value="false">false</option>
-        </select>
-      </div>
-      <div class="col-xs-3">
-        <label for="s3_replication_status"><span style="color:#FD9827;">S3 Replication status...</span>  </label>
-        <input name="s3_replication_status" value="" placeholder="s3 replication status" class="form-control" />
-      </div>
-      <div class="col-xs-3">
-        <label for="s3_encryption_status"><span style="color:#FD9827;">S3 Encryption status is...</span></label>
-        <select class="form-control" name="s3_encryption_status">
-          <option value="" selected></option>
-          <option value="NOT-SSE">Unencrypted (NOT-SSE)</option>
-          <option value="SSE-S3">S3-managed keys (SSE-S3)</option>
-          <option value="SSE-KMS">KMS-managed keys (SSE-KMS)</option>
-        </select>
-      </div>
-    </div>
-  </div>
-    <?php } ?>
     <div class="form-group">
     <div class="row">
         <div class="col-xs-2">

@@ -867,14 +867,6 @@ if (isset($_GET['index'])) {
 }
 
 if (basename($_SERVER['PHP_SELF']) !== 'selectindices.php') {
-    // check for AWS S3 index
-    if (strpos($esIndex, 'diskover_s3-') !== false) {
-        createCookie('s3', 1);
-        $s3_index = 1;
-    } else {
-        createCookie('s3', 0);
-        $s3_index = 0;
-    }
     // check for index2 in url
     if (isset($_GET['index2'])) {
         $esIndex2 = $_GET['index2'];

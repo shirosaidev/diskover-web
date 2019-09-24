@@ -400,113 +400,6 @@ if ($esIndex2 != "") {
     $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 }
 
-if (!$s3_index) {
-    // Get recommended file delete size/count/cost
-    $file_recommended_delete_size = 0;
-    $file_recommended_delete_count = 0;
-    $file_recommended_delete_cost = 0;
-
-    $results = [];
-    $searchParams = [];
-
-    // Setup search query
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = "file";
-
-    $searchParams['body'] = [
-       'size' => 0,
-        'aggs' => [
-          'total_size' => [
-            'sum' => [
-              'field' => 'filesize'
-            ]
-            ],
-            'total_cost' => [
-                'sum' => [
-                  'field' => 'costpergb'
-                ]
-              ]
-        ],
-        'query' => [
-          'query_string' => [
-            'query' => 'last_modified:{* TO now-6M} AND last_access:{* TO now-6M}'
-          ]
-        ]
-    ];
-    $queryResponse = $client->search($searchParams);
-
-    // Get total count of recommended files to remove
-    $file_recommended_delete_count = $queryResponse['hits']['total'];
-
-    // Get total size of all recommended files to remove
-    $file_recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
-
-    // Get total cost of all recommended files to remove
-    $file_recommended_delete_cost = $queryResponse['aggregations']['total_cost']['value'];
-}
-
-// Get search results from Elasticsearch for cost per gb
-if (!$s3_index) {
-    $results = [];
-    $searchParams = [];
-
-    // Setup search query
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = 'file';
-
-    $searchParams['body'] = [
-        'size' => 0,
-        'query' => [
-            'match_all' => (object) []
-        ],
-        'aggs' => [
-            'avg_cost_per_gb' => [
-                'avg' => [
-                    'field' => 'costpergb'
-                ]
-            ],
-            'cost_per_gb' => [
-                'sum' => [
-                    'field' => 'costpergb'
-                ]
-            ]
-        ]
-    ];
-    $queryResponse = $client->search($searchParams);
-
-    $costpergb = $queryResponse['aggregations']['cost_per_gb']['value'];
-    $avgcostpergb = $queryResponse['aggregations']['avg_cost_per_gb']['value'];
-
-    createCookie('costpergb', $costpergb);
-}
-
-// Get s3 bucket names
-if ($s3_index) {
-    $buckets = [];
-
-    $results = [];
-    $searchParams = [];
-
-    // Setup search query
-    $searchParams['index'] = $esIndex;
-    $searchParams['type']  = "directory";
-
-    $searchParams['body'] = [
-       'size' => 100,
-        'query' => [
-          'query_string' => [
-            'query' => 'path_parent:\/s3'
-          ]
-        ]
-    ];
-    $queryResponse = $client->search($searchParams);
-
-    // Get total count of buckets
-    $bucketcount = $queryResponse['hits']['total'];
-
-    $buckets = $queryResponse['hits']['hits'];
-}
-
 $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
 
 ?>
@@ -629,11 +522,10 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
       <div class="jumbotron">
         <h1><i class="glyphicon glyphicon-hdd"></i> Space Savings</h1>
         <p>You could free up <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span> if you delete or archive all your files. 
-<?php if (!$s3_index) { ?>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <?php if (!$s3_index && $costpergb > 0) { echo "($ " . number_format($file_recommended_delete_cost, 2) . ")"; } ?> <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.</p>
-                <?php if (!$s3_index && $costpergb > 0) { ?><?php echo '<p>Cost per GB: $ ' . number_format(round($costpergb, 2), 2) . ' total cost, $ ' . number_format(round($avgcostpergb, 2), 2) , ' average per file.</p>'; } ?>
-                <p><span style="font-size:12px;color:#666;"><i class="glyphicon glyphicon-info-sign"></i> Does not account for hardlink sizes. Recommended files is based on >6M mtime &amp; atime.</span><?php } ?></p>
+        <p>diskover found <span style="font-weight:bold;color:#D20915;"><?php echo number_format($file_recommended_delete_count) ?></span> (<span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file_recommended_delete_size) ?></span>) <a href="advanced.php?index=<?php echo $esIndex ?>&amp;index2=<?php echo $esIndex2 ?>&amp;submitted=true&amp;p=1&amp;last_mod_time_high=now-6M&amp;last_access_time_high=now-6M&amp;doctype=file">recommended files</a> to remove.</p>
+        <p><span style="font-size:12px;color:#666;"><i class="glyphicon glyphicon-info-sign"></i> Does not account for hardlink sizes. Recommended files is based on >6M mtime &amp; atime.</span></p>
         <p><span class="label label-default"><i class="glyphicon glyphicon-file" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Files</span> <?php echo number_format($totalfiles); ?></span> &nbsp; <span class="label label-default"><i class="glyphicon glyphicon-folder-close" style="color:skyblue;font-weight:bold;"></i> <span style="color:lightgray">Directories</span> <?php echo number_format($totaldirs); ?></span> &nbsp;
-            <?php if (!$s3_index) { ?><span class="label label-default"><i class="glyphicon glyphicon-duplicate" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Dupes</span> <?php echo number_format($totalDupes); ?> (<?php echo formatBytes($totalFilesizeDupes); ?>)</span> &nbsp; <span class="label label-default"><i class="glyphicon glyphicon-link" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Hardlink files</span> <?php echo number_format($totalHardlinkFiles); ?> (<?php echo formatBytes($totalFilesizeHardlinkFiles); ?>)</span><?php } ?></p>
+        <span class="label label-default"><i class="glyphicon glyphicon-duplicate" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Dupes</span> <?php echo number_format($totalDupes); ?> (<?php echo formatBytes($totalFilesizeDupes); ?>)</span> &nbsp; <span class="label label-default"><i class="glyphicon glyphicon-link" style="color:#738291;font-weight:bold;"></i> <span style="color:lightgray">Hardlink files</span> <?php echo number_format($totalHardlinkFiles); ?> (<?php echo formatBytes($totalFilesizeHardlinkFiles); ?>)</span></p>
       </div>
       <div class="panel panel-default chartbox">
         <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-dashboard"></i> Crawl Stats</h3><small>&nbsp;&nbsp;&nbsp;&nbsp;<a href="crawlstats.php?<?php echo $_SERVER['QUERY_STRING']; ?>">View more</a></small></div>
@@ -686,7 +578,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
       </div>
     </div>
       <?php
-      if ($totalDupes === 0 && $s3_index != '1') {
+      if ($totalDupes === 0) {
       ?>
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -697,7 +589,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
       }
       ?>
       <?php
-      if ($totalDupes > 0 && $s3_index != '1') {
+      if ($totalDupes > 0) {
       ?>
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -731,14 +623,6 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
     </div>
     <div class="col-xs-6">
         <div class="panel panel-default">
-          <?php if ($s3_index) { ?>
-          <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-cloud" style="color:#FD9827;"></i> S3 Overview</h3></div>
-          <div class="panel-body">
-            <p>Buckets: <span class="text-success"><strong><?php $i = 0; while ( $i < sizeof($buckets) ) { { echo '<i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;"></i> ' . $buckets[$i]['_source']['filename']; if ($i<sizeof($buckets)-1) { echo '&nbsp; '; }; $i++; } } ?></strong></span><br />
-            Bucket Count: <span class="text-success"><strong><?php echo $bucketcount; ?></strong></span><br />
-            diskover S3 root path: <span class="text-success"><strong><?php echo $diskspace_path; ?></strong></span><br />
-            Total Buckets Size: <span style="font-weight:bold;color:#D20915;"><?php echo formatBytes($totalFilesizeAll); ?></span></p>
-          <?php } else { ?>
           <div class="panel-heading"><h3 class="panel-title" style="display:inline;"><i class="glyphicon glyphicon-eye-open"></i> Disk Space Overview</h3></div>
           <div class="panel-body">
           <p>Path: <span style class="text-success"><strong><?php echo $diskspace_path; ?></strong></span></p>
@@ -760,7 +644,6 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
             <?php } else if ((($diskspace_used / $diskspace_total) * 100) >= 90) { ?>
             <br /><span class="label label-danger"><i class="glyphicon glyphicon-warning-sign"></i> Used disk space is above 90%</span>
             <?php } ?>
-        <?php } ?>
         </div>
         </div>
         <div class="row">

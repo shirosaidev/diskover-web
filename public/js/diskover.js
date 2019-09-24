@@ -30,9 +30,6 @@ if (use_count === '') var use_count = USE_COUNT;
 var show_files = ($_GET('show_files')) ? parseInt($_GET('show_files')) : parseInt(getCookie('show_files'));
 if (show_files === '') var show_files = SHOW_FILES;
 
-// check if using aws s3 index
-var s3_index = (index.includes('s3')) ? 1 : 0;
-
 var xhr = new XMLHttpRequest();
 var changeTagCount = 0;
 

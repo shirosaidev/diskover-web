@@ -268,8 +268,6 @@ $extrafieldstext = file_get_contents($file_extrafields);
                 <label class="form-check-label" for="hidefield_rating">Rating</label>
                 <input type="checkbox" class="form-check-input" id="hidefield_accessed" onclick="setHideFields('accessed');" <?php echo getCookie('hidefield_accessed') == "1" ? "checked" : ""; ?>>
                 <label class="form-check-label" for="hidefield_accessed">Accessed</label>
-                <input type="checkbox" class="form-check-input" id="hidefield_cost" onclick="setHideFields('cost');" <?php echo getCookie('hidefield_cost') == "1" ? "checked" : ""; ?>>
-                <label class="form-check-label" for="hidefield_cost">Cost</label>
                 <input type="checkbox" class="form-check-input" id="hidefield_created" onclick="setHideFields('created');" <?php echo getCookie('hidefield_created') == "1" ? "checked" : ""; ?>>
                 <label class="form-check-label" for="hidefield_created">Created</label>
                 <input type="checkbox" class="form-check-input" id="hidefield_change" onclick="setHideFields('change');" <?php echo getCookie('hidefield_change') == "1" ? "checked" : ""; ?>>
@@ -585,11 +583,11 @@ function clearCache() {
 	console.log("purging cookies/cache");
     cookies = ['filter', 'mtime', 'maxdepth', 'hide_thresh', 'path', 'use_count', 'show_files', 'sort', 'sortorder',
                 'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
-                'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 's3', 'minhardlinks', 
+                'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'minhardlinks', 
                 'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'sendstats', 'support', 'sponsoring',
-                'crawlfinished', 'costpergb', 'filesizebase10', 'filesizedec', 'hidefield_sizep', 'hidefield_items',
+                'crawlfinished', 'filesizebase10', 'filesizedec', 'hidefield_sizep', 'hidefield_items',
                 'hidefield_itemsfiles', 'hidefield_itemssubdirs', 'hidefield_owner', 'hidefield_group',
-                'hidefield_modified', 'hidefield_rating', 'hidefield_accessed', 'hidefield_cost', 'hidefield_created',
+                'hidefield_modified', 'hidefield_rating', 'hidefield_accessed', 'hidefield_created',
                 'hidefield_change'];
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
