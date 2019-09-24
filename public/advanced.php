@@ -318,6 +318,14 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 	  <div class="col-xs-2">
 		<label for="filehash">Filehash is...</label>
 		<input name="filehash" value="" placeholder="hash" class="form-control" />
+      </div>
+      <div class="col-xs-2">
+		<label for="filehash">Dupe MD5 Sum is...</label>
+		<input name="dupe_md5" value="" placeholder="md5 sum" class="form-control" />
+	  </div>
+	  <div class="col-xs-2">
+		<label for="inode">Inode is...</label>
+		<input name="inode" value="" placeholder="inode num" type="number" class="form-control" />
 	  </div>
 	</div>
   </div>
@@ -352,17 +360,37 @@ $resultSize = getCookie('resultsize') != "" ? getCookie('resultsize') : Constant
 		  <option value="MB">MB</option>
 		  <option value="GB">GB</option>
 		</select>
+      </div>
+      <div class="col-xs-2">
+		<label for="hardlinks_low">Hardlinks is between...</label>
+		<input name="hardlinks_low" value="" type="number" placeholder="2" class="form-control" />
+		<label for="hardlinks_high">and</label>
+		<input name="hardlinks_high" value="" type="number" placeholder="10" class="form-control" />
 	  </div>
 	  <div class="col-xs-3">
 		<label for="last_mod_time_low">Last modified time (utc) is between...</label>
 		<input name="last_mod_time_low" value="" type="string" placeholder="2015-03-06T00:00:00 or 2016-01-22" class="form-control" />
 		<label for="last_mod_time_high">and</label>
 		<input name="last_mod_time_high" value="" type="string" placeholder="2017-03-06T00:00:00 or now-6M/d" class="form-control" />
+      </div>
+      <div class="col-xs-3">
+		<label for="last_access_time_low">Last access time (utc) is between...</label>
+		<input name="last_access_time_low" value="" type="string" placeholder="2015-03-06T00:00:00 or now-2w" class="form-control" />
+		<label for="last_access_time_high">and</label>
+		<input name="last_access_time_high" value="" type="string" placeholder="2017-03-06T00:00:00 or now-1y" class="form-control" />
 	  </div>
 	</div>
   </div>
   <div class="form-group">
 	<div class="row">
+    <div class="col-xs-2">
+		<label for="owner">Owner is...  </label>
+		<input name="owner" value="" placeholder="shirosai or (NOT root)" class="form-control" />
+	  </div>
+	  <div class="col-xs-2">
+		<label for="group">Group is...  </label>
+		<input name="group" value="" placeholder="staff" class="form-control" />
+	  </div>
 	  <div class="col-xs-2">
 		<label for="extension">Extension is...</label>
 		<input name="extension" value="" type="string" placeholder="zip or (tmp OR cache)" class="form-control" />
