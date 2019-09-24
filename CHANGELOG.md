@@ -1,5 +1,10 @@
 # Diskover Web Change Log
 
+# [1.5.0.7] - 2019-09-24
+### changed
+- removed s3 inventory index support (enterprise ver only feature)
+- removed cost per gb (storage costs) index support (enterprise ver only feature)
+
 # [1.5.0.6] - 2019-09-13
 ### added
 - page and size url vars for "search" api endpoint
