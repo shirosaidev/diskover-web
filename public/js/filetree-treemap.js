@@ -351,18 +351,7 @@ function updateTree(data, parent) {
 
 	//add icons for folder for file
 	entered.append("span").attr("class", function (d) {
-        if (s3_index) {
-            if (d.name === '/s3') {
-                var foldericon = "glyphicon-cloud";
-            } else if ((d.parent && d.parent.name === '/s3') || (d.name.split('/').length == 3)) {
-                var foldericon = "glyphicon-cloud-upload";
-            } else {
-                var foldericon = "glyphicon-folder-close";
-            }
-        } else {
-            var foldericon = "glyphicon-folder-close";
-        }
-        var icon = (d.count > 0 || d.type === 'directory') ? foldericon : "glyphicon-file";
+        var icon = (d.count > 0 || d.type === 'directory') ? "glyphicon-folder-close" : "glyphicon-file";
         return "glyphicon " + icon;
 	})
     .style('cursor', 'pointer')
