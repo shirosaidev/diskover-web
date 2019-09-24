@@ -268,8 +268,6 @@ $extrafieldstext = file_get_contents($file_extrafields);
                 <label class="form-check-label" for="hidefield_rating">Rating</label>
                 <input type="checkbox" class="form-check-input" id="hidefield_accessed" onclick="setHideFields('accessed');" <?php echo getCookie('hidefield_accessed') == "1" ? "checked" : ""; ?>>
                 <label class="form-check-label" for="hidefield_accessed">Accessed</label>
-                <input type="checkbox" class="form-check-input" id="hidefield_created" onclick="setHideFields('created');" <?php echo getCookie('hidefield_created') == "1" ? "checked" : ""; ?>>
-                <label class="form-check-label" for="hidefield_created">Created</label>
                 <input type="checkbox" class="form-check-input" id="hidefield_change" onclick="setHideFields('change');" <?php echo getCookie('hidefield_change') == "1" ? "checked" : ""; ?>>
                 <label class="form-check-label" for="hidefield_change">Change %</label><br />
                 <span class="small"><i class="glyphicon glyphicon-info-sign"></i> Not hidden on file/dir info page</span>
@@ -587,8 +585,7 @@ function clearCache() {
                 'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'sendstats', 'support', 'sponsoring',
                 'crawlfinished', 'filesizebase10', 'filesizedec', 'hidefield_sizep', 'hidefield_items',
                 'hidefield_itemsfiles', 'hidefield_itemssubdirs', 'hidefield_owner', 'hidefield_group',
-                'hidefield_modified', 'hidefield_rating', 'hidefield_accessed', 'hidefield_created',
-                'hidefield_change'];
+                'hidefield_modified', 'hidefield_rating', 'hidefield_accessed', 'hidefield_change'];
     for (var i = 0; i < cookies.length; i++) {
         deleteCookie(cookies[i]);
     }
