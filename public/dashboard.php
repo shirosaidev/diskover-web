@@ -406,6 +406,15 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148814293-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-148814293-1');
+</script>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1253,19 +1262,15 @@ echo "ES Process Time: {$estime}, Process Time: {$time}";
 ?>
 </p>
 
-<div id="statsModal" class="modal fade" role="dialog">
+<div id="entModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Send anonymous stats to the diskover developer</h4>
+        <h4 class="modal-title">Are you a business? Consider using diskover enterprise.</h4>
       </div>
       <div class="modal-body">
-        <p>Allow usage statistics to be sent to the diskover developer to help improve the product. You can change this later from admin page.</p>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="sendstats" onclick="sendStats();">
-            <label class="form-check-label" for="sendstats">Allow limited anonymous usage stats</label>
-        </div>
+        <p>If you are a business and looking for more advanced features, please consider purchasing diskover enterprise. You can find out more information at <a target="_blank" href="https://diskoverspace.com">https://diskoverspace.com</a>.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -1283,7 +1288,7 @@ echo "ES Process Time: {$estime}, Process Time: {$time}";
         <h4 class="modal-title">Support the development of diskover</h4>
       </div>
       <div class="modal-body">
-        <p><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! If you are using diskover in a commercial environment or just want to help advance the software, please become a patron on <a target="_blank" href="https://www.patreon.com/shirosaidev">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></p>
+        <p><i class="glyphicon glyphicon-bullhorn"></i> Welcome to diskover-web! To help us keep developing and improving diskover, please consider becoming a Patron on <a target="_blank" href="https://www.patreon.com/shirosaidev">Patreon</a> or donate on <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72" target="_blank">PayPal</a>. <span style="color:#D01020;"><i class="glyphicon glyphicon-heart-empty"></i></span></p>
         <div class="form-check">
             <input type="checkbox" class="form-check-input" id="sponsoring" onclick="sponsoring();">
             <label class="form-check-label" for="sponsor">I'm already supporting</label>
@@ -1298,14 +1303,6 @@ echo "ES Process Time: {$estime}, Process Time: {$time}";
 </div>
 
 <script>
-// set cookie for sending anonymous stats
-function sendStats() {
-    if (document.getElementById('sendstats').checked) {
-        setCookie('sendstats', 1);
-    } else {
-        setCookie('sendstats', 0);
-    }
-}
 // set cookie for sponsoring
 function sponsoring() {
     if (document.getElementById('sponsoring').checked) {
@@ -1315,10 +1312,9 @@ function sponsoring() {
     }
 }
 $(window).on('load',function(){
-    if (getCookie('sendstats') == '') {
-      setCookie('sendstats', 1);
-      document.getElementById('sendstats').checked = true;
-      $('#statsModal').modal('show');
+    if (getCookie('enterprise') == '') {
+      setCookie('enterprise', 1, 7);
+      $('#entModal').modal('show');
     }
     if (getCookie('support') == '' && getCookie('sponsoring') != 1) {
       setCookie('support', 1, 7);
@@ -1326,8 +1322,6 @@ $(window).on('load',function(){
     }
 });
 </script>
-
-<?php require "logform.php"; ?>
 
 </body>
 </html>

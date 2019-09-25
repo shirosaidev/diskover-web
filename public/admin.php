@@ -66,6 +66,15 @@ function curl_es($url, $request=null, $return_json=true) {
 <html lang="en">
 
 <head>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148814293-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-148814293-1');
+</script>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -555,18 +564,6 @@ $tagtext = file_get_contents($file_customtags);
     </form>
     </div>
 </div>
-<div class="row">
-    <div class="col-xs-12">
-        <hr />
-        <h5>Send anonymous stats to the diskover developer</h5>
-        <p>Allow usage statistics to be sent to the diskover developer to help improve the product.</p>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="sendstats" onclick="sendStats();">
-            <label class="form-check-label" for="sendstats">Allow limited anonymous usage stats</label>
-        </div>
-        <br />
-    </div>
-</div>
 <div class="alert alert-dismissible alert-danger" id="errormsg-container">
     <button type="button" class="close" data-dismiss="alert">&times;</button><strong><span id="errormsg"></span></strong>
 </div>
@@ -582,7 +579,7 @@ function clearCache() {
     cookies = ['filter', 'mtime', 'maxdepth', 'hide_thresh', 'path', 'use_count', 'show_files', 'sort', 'sortorder',
                 'sort2', 'sortorder2', 'resultsize', 'index', 'index2', 'running_task_id', 'tagsshowuntagged', 
                 'tagsshowfiles', 'tagsshowdirectories', 'tagsshowall', 'showotherfiles', 'minhardlinks', 
-                'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'sendstats', 'support', 'sponsoring',
+                'mindupes', 'min_change_percent', 'show_new_dirs', 'PHPSESSID', 'support', 'sponsoring', 'enterprise', 
                 'crawlfinished', 'filesizebase10', 'filesizedec', 'hidefield_sizep', 'hidefield_items',
                 'hidefield_itemsfiles', 'hidefield_itemssubdirs', 'hidefield_owner', 'hidefield_group',
                 'hidefield_modified', 'hidefield_rating', 'hidefield_accessed', 'hidefield_change'];
@@ -623,15 +620,6 @@ function setFileSizeDisplayDec() {
     alert("file size decimals set to " + d);
 }
 
-// send anonymous stats
-function sendStats() {
-    if (document.getElementById('sendstats').checked) {
-        setCookie('sendstats', 1);
-    } else {
-        setCookie('sendstats', 0);
-    }
-}
-
 // del index check
 function delIndex() {
 	var indices = document.getElementById('delindices').value;
@@ -655,13 +643,6 @@ listenSocketServer();
 // set es health heart color at top of page
 var color = document.getElementById('eshealth').value;
 document.getElementById('eshealthheart').style.color=color;
-
-// set sendstats checkbox
-if (getCookie('sendstats') == 1) {
-    document.getElementById('sendstats').checked = true;
-} else {
-    document.getElementById('sendstats').checked = false;
-}
 
 // set file size display checkbox
 if (getCookie('filesizebase10') == 1) {
