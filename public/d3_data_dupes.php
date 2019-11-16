@@ -12,6 +12,9 @@ require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
 $mindupes = $_GET['mindupes'];
+if (!isset($mindupes)) {
+    $mindupes = 1;
+}
 
 // get mtime in ES format
 $mtime = getmtime($mtime);
@@ -55,7 +58,7 @@ $searchParams['body'] = [
           'top_dupes' => [
               'terms' => [
                   'field' => 'dupe_md5',
-                  'size' => 100
+                  'size' => 50
               ]
           ]
       ]
@@ -86,7 +89,7 @@ $searchParams['type']  = 'file';
 
 foreach ($md5s_unique as $key => $value) {
     $searchParams['body'] = [
-        'size' => 100,
+        'size' => 50,
         '_source' => ['filename', 'path_parent'],
             'query' => [
               'bool' => [

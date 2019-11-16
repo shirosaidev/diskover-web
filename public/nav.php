@@ -139,8 +139,8 @@ error_reporting(E_ALL ^ E_NOTICE);
                         <li><a href="heatmap.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Heatmap</a></li>
                         <li><a href="hotdirs.php?<?php echo $urlvars; ?>&amp;maxdepth=<?php echo $maxdepth; ?>">Hot Dirs</a></li>
                         <li><a href="top50.php?<?php echo $urlvars; ?>">Top 50</a></li>
-                        <?php if (!$s3_index) { ?><li><a href="dupes.php?<?php echo $urlvars; ?>">Dupes</a></li><?php } ?>
-                        <?php if (!$s3_index) { ?><li><a href="hardlinks.php?<?php echo $urlvars; ?>">Hardlinks</a></li><?php } ?>
+                        <?php if (!$s3_index) { ?><li><a href="dupes.php?<?php echo $urlvars . '&mindupes=' . $mindupes; ?>">Dupes</a></li><?php } ?>
+                        <?php if (!$s3_index) { ?><li><a href="hardlinks.php?<?php echo $urlvars . '&minhardlinks=' . $minhardlinks; ; ?>">Hardlinks</a></li><?php } ?>
                         <li><a href="tags.php?<?php echo $urlvars; ?>">Tags</a></li>
                         <li><a href="timechange.php?<?php echo $urlvars; ?>">Time Change</a></li>
                         <li class="divider"></li>

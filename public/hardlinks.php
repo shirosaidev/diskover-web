@@ -82,11 +82,11 @@ if ($minhardlinks === "" || $minhardlinks === 0) {
                     </div>
                 </div>
                 <div class="row" style="margin-top:10px;">
-                    <div class="col-xs-4">
-                        <div id="hardlinkscountbarchart" class="hardlinkscountbarchart text-center"></div>
+                    <div class="col-xs-6">
+                        <div id="filesizechart" class="text-center"></div>
                     </div>
-                    <div class="col-xs-8">
-                        <div id="hardlinkscountgraph" class="hardlinkscountgraph text-center"></div>
+                    <div class="col-xs-6">
+                        <div id="hardlinkscountchart" class="text-center"></div>
                     </div>
                 </div>
             </div>

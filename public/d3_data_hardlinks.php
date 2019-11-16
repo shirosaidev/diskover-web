@@ -13,6 +13,9 @@ require "d3_inc.php";
 
 
 $minhardlinks = $_GET['minhardlinks'];
+if (!isset($minhardlinks) || $minhardlinks === 1) {
+    $minhardlinks = 2;
+}
 
 // get mtime in ES format
 $mtime = getmtime($mtime);
@@ -59,7 +62,7 @@ $searchParams['body'] = [
           'top_hardlinks' => [
               'terms' => [
                   'field' => 'inode',
-                  'size' => 100
+                  'size' => 50
               ]
           ]
       ]
@@ -82,7 +85,6 @@ if (sizeof($inodes_unique) === 0) {
 
 // find files that match each inode
 $inodes_files = [];
-$inodes_sizes = [];
 $inodes_paths = [];
 $results = [];
 $searchParams = [];
@@ -91,16 +93,38 @@ $searchParams['type']  = 'file';
 
 foreach ($inodes_unique as $key => $value) {
     $searchParams['body'] = [
-        'size' => 100,
-        '_source' => ['filename', 'path_parent', 'filesize'],
+        'size' => 50,
+        '_source' => ['filename', 'path_parent'],
             'query' => [
-                'match' => [
-                'inode' => $value
-            ]
-        ]
+              'bool' => [
+                'must' => [
+                      'match' => [ 'inode' => $value ]
+                  ],
+                  'filter' => [
+                      'range' => [
+                          'filesize' => [
+                                'gte' => $filter
+                          ]
+                      ]
+                  ],
+                  'should' => [
+                      'range' => [
+                          'last_modified' => [
+                              'lte' => $mtime
+                          ]
+                      ]
+                  ]
+              ]
+          ]
     ];
     $queryResponse = $client->search($searchParams);
     $results = $queryResponse['hits']['hits'];
+
+    // remove key and continue if count of results < min dupes
+    if (sizeof($results) < $minhardlinks) {
+        unset($inodes_unique[$key]);
+        continue;
+    }
 
     $inodes_files[$value] = [];
     foreach($results as $k => $v) {
@@ -111,19 +135,57 @@ foreach ($inodes_unique as $key => $value) {
             $inodes_paths[] = '/'.implode('/',$arr);
         };
     }
-    $inodes_sizes[$value] = $v['_source']['filesize'];
 }
 
 // just get unique paths
 $inodes_paths_unique = array_unique($inodes_paths);
 
+
+// get total file sizes for each inode
+$results = [];
+$searchParams = [];
+$inode_counts = [];
+$totalFilesize = 0;
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = 'file';
+
+// Execute the search
+foreach ($inodes_unique as $key => $value) {
+    $searchParams['body'] = [
+       'size' => 0,
+       'query' => [
+         'match' => [
+           'inode' => $value
+         ]
+     ],
+      'aggs' => [
+        'total_size' => [
+          'sum' => [
+            'field' => 'filesize'
+          ]
+        ]
+      ]
+    ];
+
+    // Send search query to Elasticsearch
+    $queryResponse = $client->search($searchParams);
+
+    // Get total count of files for inode
+    $inode_counts[$value] = $queryResponse['hits']['total'];
+    $inode_sizes[$value] = $queryResponse['aggregations']['total_size']['value'];
+    $totalFilesize += $inode_sizes[$value];
+}
+
+
 // build data array for d3
 foreach($inodes_unique as $key => $value) {
     $data[0][] = [
         "label" => $value,
-        "count" => sizeof($inodes_files[$value]),
+        "count" => $inode_counts[$value],
         "files" => $inodes_files[$value],
-        "size" => $inodes_sizes[$value]
+        "size" => $inode_sizes[$value]
     ];
 }
 
@@ -133,7 +195,7 @@ foreach($inodes_files as $key => $value) {
           "source" => $v,
           "target" => dirname($v),
           "inode" => $key,
-          "count" => sizeof($value)
+          "count" => $inode_counts[$key]
       ];
     }
 }

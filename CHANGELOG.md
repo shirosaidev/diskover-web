@@ -1,5 +1,11 @@
 # Diskover Web Change Log
 
+# [1.5.0.8] - 2019-11-15
+### changed
+- improved dupes and hardlinks analytics pages
+### fixed
+- dupes and hardlinks analytics pages not using cache
+
 # [1.5.0.7] - 2019-09-24
 ### changed
 - removed s3 inventory index support (enterprise ver only feature)

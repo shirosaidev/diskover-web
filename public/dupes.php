@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -90,13 +90,12 @@ if ($mindupes === "" || $mindupes === 0) {
                     </div>
                 </div>
                 <div class="row" style="margin-top:10px;">
-                    <div class="col-xs-4">
-                          <div id="dupescountchart" class="text-center"></div><br />
+                    <div class="col-xs-6">
                           <div id="filesizechart" class="text-center"></div>
                       </div>
-                    <div class="col-xs-8">
-                        <div id="dupescloudgraph" class="text-center"></div>
-                	</div>
+                      <div class="col-xs-6">
+                          <div id="dupescountchart" class="text-center"></div>
+                      </div>
     			</div>
             </div>
 			</div>
