@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -11,11 +11,6 @@ error_reporting(E_ALL ^ E_NOTICE);
 require "../src/diskover/Auth.php";
 require "../src/diskover/Diskover.php";
 require "d3_inc.php";
-
-$minhardlinks = (int)getCookie('minhardlinks');
-if ($minhardlinks === "" || $minhardlinks === 0) {
-    $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
-}
 
 ?>
 

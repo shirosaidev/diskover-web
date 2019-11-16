@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -13,9 +13,6 @@ require "d3_inc.php";
 
 
 $minhardlinks = $_GET['minhardlinks'];
-if (!isset($minhardlinks) || $minhardlinks === 1) {
-    $minhardlinks = 2;
-}
 
 // get mtime in ES format
 $mtime = getmtime($mtime);
@@ -120,7 +117,7 @@ foreach ($inodes_unique as $key => $value) {
     $queryResponse = $client->search($searchParams);
     $results = $queryResponse['hits']['hits'];
 
-    // remove key and continue if count of results < min dupes
+    // remove key and continue if count of results < min hardlinks
     if (sizeof($results) < $minhardlinks) {
         unset($inodes_unique[$key]);
         continue;

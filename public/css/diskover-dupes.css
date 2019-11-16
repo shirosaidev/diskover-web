@@ -1,5 +1,5 @@
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -7,16 +7,12 @@ LICENSE for the full license text.
 /* d3 dupes */
 
 #filesizechart {
-    height: 300px;
+    height: 400px;
     position: absolute;
 }
 #dupescountchart svg {
-    height: 300px;
-    width: 400px;
-}
-#dupescloudgraph svg {
-    height: 600px;
-    width: 960px;
+    height: 400px;
+    width: 500px;
 }
 .bars rect {
     fill: none;
@@ -32,14 +28,14 @@ LICENSE for the full license text.
 
 .barlabel text {
     fill: gray;
-    font-size: 9px;
+    font-size: 11px;
     text-anchor: end;
     pointer-events: none;
 }
 
 .barvaluelabel text {
     fill: lightgray;
-    font-size: 9px;
+    font-size: 11px;
     text-anchor: start;
     pointer-events: none;
 }
@@ -58,7 +54,7 @@ path:hover {
 }
 text {
     fill: black;
-    font-size: 10px;
+    font-size: 11px;
     pointer-events: none;
 }
 .d3-tip {
@@ -72,6 +68,7 @@ text {
     pointer-events: none !important;
     word-break: break-all;
     word-wrap: break-word;
+    max-width: 700px;
 }
 
 .node {

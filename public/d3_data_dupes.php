@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -12,9 +12,6 @@ require "../src/diskover/Diskover.php";
 require "d3_inc.php";
 
 $mindupes = $_GET['mindupes'];
-if (!isset($mindupes)) {
-    $mindupes = 1;
-}
 
 // get mtime in ES format
 $mtime = getmtime($mtime);

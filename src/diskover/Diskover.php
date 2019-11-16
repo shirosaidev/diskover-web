@@ -919,4 +919,14 @@ if (basename($_SERVER['PHP_SELF']) !== 'selectindices.php') {
         $maxdepth = Constants::MAXDEPTH;
         createCookie('maxdepth', $maxdepth);
     }
+    $minhardlinks = (isset($_GET['minhardlinks'])) ? (int) $_GET['minhardlinks'] : getCookie('minhardlinks'); // min hard links
+    if ($minhardlinks === "" || $minhardlinks === 0) {
+        $minhardlinks = getAvgHardlinks($client, $esIndex, $path, $filter, $mtime);
+        createCookie('minhardlinks', $minhardlinks);
+    }
+    $mindupes = (isset($_GET['mindupes'])) ? (int) $_GET['mindupes'] : getCookie('mindupes'); // min dupes
+    if ($mindupes === "" || $mindupes === 0) {
+        $mindupes = getAvgDupes($client, $esIndex, $path, $filter, $mtime);
+        createCookie('mindupes', $mindupes);
+    }
 }

@@ -1,21 +1,19 @@
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
 
 /* d3 hardlinks */
 
-#hardlinkscountbarchart svg {
-    height: 600px;
-    width: 600px;
+#filesizechart {
+    height: 400px;
+    position: absolute;
 }
-
-#hardlinkscountgraph svg {
-    height: 600px;
-    width: 960px;
+#hardlinkscountchart svg {
+    height: 400px;
+    width: 500px;
 }
-
 .bars rect {
     fill: none;
     stroke: black;
@@ -29,16 +27,34 @@ LICENSE for the full license text.
 }
 
 .barlabel text {
-    fill: darkgray;
-    font-size: 10px;
+    fill: gray;
+    font-size: 11px;
     text-anchor: end;
     pointer-events: none;
 }
 
 .barvaluelabel text {
-    fill: gray;
-    font-size: 9px;
+    fill: lightgray;
+    font-size: 11px;
     text-anchor: start;
+    pointer-events: none;
+}
+
+path {
+    stroke-width: 1px;
+    stroke: #272B30;
+    fill-rule: evenodd;
+    cursor: pointer;
+    opacity: .9;
+}
+path:hover {
+    stroke: black;
+    opacity: .7;
+    cursor: pointer;
+}
+text {
+    fill: black;
+    font-size: 11px;
     pointer-events: none;
 }
 .d3-tip {
@@ -46,7 +62,7 @@ LICENSE for the full license text.
     line-height: 1;
     font-weight: bold;
     padding: 12px;
-    background: rgba(50, 50, 50, 0.4);
+    background: rgba(50, 50, 50, 0.5);
     color: #fff;
     border-radius: 2px;
     pointer-events: none !important;
