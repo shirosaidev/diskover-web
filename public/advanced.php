@@ -246,7 +246,7 @@ if (!empty($_REQUEST['submitted'])) {
             // Get results
             $results[$i] = $queryResponse['hits']['hits'];
             // Add to total filesize
-            for ($x=0; $x<=count($results[$i]); $x++) {
+            for ($x=0; $x<count($results[$i]); $x++) {
                 $total_size += (int)$results[$i][$x]['_source']['filesize'];
                 // store the id and doctype in ids_onpage array
                 $ids_onpage[$x]['id'] = $results[$i][$x]['_id'];

@@ -18,6 +18,7 @@ function get_all_docs($client, $index, $path, $doctype, $recursive) {
     $searchParams['body'] = [];
     $searchParams['index'] = $index;
     $searchParams['size'] = 1000;
+    $searchParams['type'] = $doctype;
     // Scroll parameter alive time
     $searchParams['scroll'] = "1m";
     // diff query if root path /
@@ -35,7 +36,7 @@ function get_all_docs($client, $index, $path, $doctype, $recursive) {
     $searchParams['body'] = [
         'query' => [
             'query_string' => [
-            'query' => $query . ' AND type:' . $doctype,
+            'query' => $query,
             'analyze_wildcard' => true
             ]
         ]
@@ -43,7 +44,7 @@ function get_all_docs($client, $index, $path, $doctype, $recursive) {
     $queryResponse = $client->search($searchParams);
 
     // set total hits
-    $total = $queryResponse['hits']['total']['value'];
+    $total = $queryResponse['hits']['total'];
 
     // Get the first scroll_id
     $scroll_id = $queryResponse['_scroll_id'];
@@ -72,20 +73,13 @@ function get_all_docs($client, $index, $path, $doctype, $recursive) {
     return $docs;
 }
 
-// submit form data
-
-// Connect to Elasticsearch
-$client = connectES();
-
 
 function multi_tag($client, $result, $doctype, $recursive) {
     $docsupdated = 0;
     $path = $result['_source']['path_parent'] . '/' . $result['_source']['filename'];
     if ($path === "//") { $path = "/"; }  // root
     $tag = $result['_source']['tag'];
-    $tag_custom1 = $result['_source']['tag_custom1'];
-    $tag_custom2 = $result['_source']['tag_custom2'];
-    $tag_custom3 = $result['_source']['tag_custom3'];
+    $tag_custom = $result['_source']['tag_custom'];
     $docs = get_all_docs($client, $_POST['docindex'], $path, $doctype, $recursive);
     // update tags for all matching docs (bulk update)
     $multi_params = ['body' => []];
@@ -100,56 +94,7 @@ function multi_tag($client, $result, $doctype, $recursive) {
             ]
         ];
         $doc['_source']['tag'] = $tag;
-        $doc['_source']['tag_custom1'] = $tag_custom1;
-        $doc['_source']['tag_custom2'] = $tag_custom2;
-        $doc['_source']['tag_custom3'] = $tag_custom3;
-        $multi_params['body'][] = [
-            'doc' => $doc['_source']
-        ];
-        
-        $docsupdated += 1;
-        
-        // stop and make api call every 1000 docs
-        if ($docsupdated % 1000 == 0) {
-            $result = $client->bulk($multi_params);
-            unset($result);
-            unset($multi_params);
-            $multi_params = ['body' => []];
-        }
-
-    }
-    // update any remaining docs
-    $result = $client->bulk($multi_params);
-
-    return $docsupdated;
-}
-
-
-function multi_tag($client, $result, $doctype, $recursive) {
-    $docsupdated = 0;
-    $path = $result['_source']['path_parent'] . '/' . $result['_source']['filename'];
-    if ($path === "//") { $path = "/"; }  // root
-    $tag = $result['_source']['tag'];
-    $tag_custom1 = $result['_source']['tag_custom1'];
-    $tag_custom2 = $result['_source']['tag_custom2'];
-    $tag_custom3 = $result['_source']['tag_custom3'];
-    $docs = get_all_docs($client, $_POST['docindex'], $path, $doctype, $recursive);
-    // update tags for all matching docs (bulk update)
-    $multi_params = ['body' => []];
-    // refresh index so we see results right away when page reloads
-    $multi_params['refresh'] = true;
-    foreach ($docs as $doc) {
-        $multi_params['body'][] = [
-            'update' => [
-                '_index' => $doc['_index'],
-                '_type' => '_doc',
-                '_id' => $doc['_id']
-            ]
-        ];
-        $doc['_source']['tag'] = $tag;
-        $doc['_source']['tag_custom1'] = $tag_custom1;
-        $doc['_source']['tag_custom2'] = $tag_custom2;
-        $doc['_source']['tag_custom3'] = $tag_custom3;
+        $doc['_source']['tag_custom'] = $tag_custom;
         $multi_params['body'][] = [
             'doc' => $doc['_source']
         ];
@@ -212,16 +157,17 @@ if (isset($_POST)) {
             foreach ($ids as $id) {
                 $params = [];
                 $params['id'] = $id['id'];
-                $params['index'] = $id['index'];
+                $params['index'] = $esIndex;
+                $params['type'] = $id['type'];
                 $result = $client->get($params);
                 unset($params);
                 $result['_source']['tag'] = $tag;
                 $result['_source']['tag_custom'] = $tag_custom;
                 $multi_params['body'][] = [
                     'update' => [
-                        '_index' => $result['_index'],
-                        '_type' => $result['_type'],
-                        '_id' => $result['_id']
+                        '_index' => $esIndex,
+                        '_type' => $id['type'],
+                        '_id' => $id['id']
                     ]
                 ];
                 $multi_params['body'][] = [
