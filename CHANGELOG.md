@@ -1,6 +1,9 @@
 # Diskover Web Change Log
 
-# [1.5.0.8] - 2019-11-15
+# [1.5.0.8] - 2019-11-16
+### added
+- reduced time to do recursive multi-tagging (bulk updates)
+- non-recursive options to tag button menu
 ### changed
 - improved dupes and hardlinks analytics pages
 ### fixed

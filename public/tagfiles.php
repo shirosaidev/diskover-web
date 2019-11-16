@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017
+Copyright (C) Chris Park 2017-2019
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -13,12 +13,10 @@ require "../src/diskover/Diskover.php";
 
 $docsupdated = 0;
 
-function tagall_docs($client, $index, $path, $tag, $tag_custom, $doctype, $recursive) {
-    $doc_ids = [];
-    $results = [];
+function get_all_docs($client, $index, $path, $doctype, $recursive) {
+    $docs = [];
     $searchParams['body'] = [];
     $searchParams['index'] = $index;
-    $searchParams['type']  = $doctype;
     $searchParams['size'] = 1000;
     // Scroll parameter alive time
     $searchParams['scroll'] = "1m";
@@ -27,25 +25,25 @@ function tagall_docs($client, $index, $path, $tag, $tag_custom, $doctype, $recur
         $query = 'path_parent: \/ OR path_parent: \/*\/*';
     } else {
         // escape special characters
-        $path = addcslashes($path, '+-&|!(){}[]^"~*?:\/ ');
+        $path = escape_chars($path);
         if ($recursive) {
-            $query = 'path_parent: ' . $path . ' OR path_parent: ' . $path . '\/*';
+            $query = '(path_parent:' . $path . ' OR path_parent:' . $path . '\/*)';
         } else {
-            $query = 'path_parent: ' . $path . ' NOT path_parent: ' . $path . '\/*';
+            $query = '(path_parent:' . $path . ' AND NOT path_parent:' . $path . '\/*)';
         }
     }
     $searchParams['body'] = [
-        '_source' => [],
-            'query' => [
-                'query_string' => [
-                'query' => $query
+        'query' => [
+            'query_string' => [
+            'query' => $query . ' AND type:' . $doctype,
+            'analyze_wildcard' => true
             ]
         ]
     ];
     $queryResponse = $client->search($searchParams);
 
     // set total hits
-    $total = $queryResponse['hits']['total'];
+    $total = $queryResponse['hits']['total']['value'];
 
     // Get the first scroll_id
     $scroll_id = $queryResponse['_scroll_id'];
@@ -55,7 +53,7 @@ function tagall_docs($client, $index, $path, $tag, $tag_custom, $doctype, $recur
     while ($i <= ceil($total/$searchParams['size'])) {
         // Get results
         foreach ($queryResponse['hits']['hits'] as $hit) {
-            $results[] = $hit;
+            $docs[] = $hit;
         }
 
         // Execute a Scroll request and repeat
@@ -71,11 +69,106 @@ function tagall_docs($client, $index, $path, $tag, $tag_custom, $doctype, $recur
         $i += 1;
     }
 
-    // grab the es doc id's and put into dir_ids
-    foreach ($results as $arr) {
-        $doc_ids[] = $arr['_id'];
+    return $docs;
+}
+
+// submit form data
+
+// Connect to Elasticsearch
+$client = connectES();
+
+
+function multi_tag($client, $result, $doctype, $recursive) {
+    $docsupdated = 0;
+    $path = $result['_source']['path_parent'] . '/' . $result['_source']['filename'];
+    if ($path === "//") { $path = "/"; }  // root
+    $tag = $result['_source']['tag'];
+    $tag_custom1 = $result['_source']['tag_custom1'];
+    $tag_custom2 = $result['_source']['tag_custom2'];
+    $tag_custom3 = $result['_source']['tag_custom3'];
+    $docs = get_all_docs($client, $_POST['docindex'], $path, $doctype, $recursive);
+    // update tags for all matching docs (bulk update)
+    $multi_params = ['body' => []];
+    // refresh index so we see results right away when page reloads
+    $multi_params['refresh'] = true;
+    foreach ($docs as $doc) {
+        $multi_params['body'][] = [
+            'update' => [
+                '_index' => $doc['_index'],
+                '_type' => $doc['_type'],
+                '_id' => $doc['_id']
+            ]
+        ];
+        $doc['_source']['tag'] = $tag;
+        $doc['_source']['tag_custom1'] = $tag_custom1;
+        $doc['_source']['tag_custom2'] = $tag_custom2;
+        $doc['_source']['tag_custom3'] = $tag_custom3;
+        $multi_params['body'][] = [
+            'doc' => $doc['_source']
+        ];
+        
+        $docsupdated += 1;
+        
+        // stop and make api call every 1000 docs
+        if ($docsupdated % 1000 == 0) {
+            $result = $client->bulk($multi_params);
+            unset($result);
+            unset($multi_params);
+            $multi_params = ['body' => []];
+        }
+
     }
-    return $doc_ids;
+    // update any remaining docs
+    $result = $client->bulk($multi_params);
+
+    return $docsupdated;
+}
+
+
+function multi_tag($client, $result, $doctype, $recursive) {
+    $docsupdated = 0;
+    $path = $result['_source']['path_parent'] . '/' . $result['_source']['filename'];
+    if ($path === "//") { $path = "/"; }  // root
+    $tag = $result['_source']['tag'];
+    $tag_custom1 = $result['_source']['tag_custom1'];
+    $tag_custom2 = $result['_source']['tag_custom2'];
+    $tag_custom3 = $result['_source']['tag_custom3'];
+    $docs = get_all_docs($client, $_POST['docindex'], $path, $doctype, $recursive);
+    // update tags for all matching docs (bulk update)
+    $multi_params = ['body' => []];
+    // refresh index so we see results right away when page reloads
+    $multi_params['refresh'] = true;
+    foreach ($docs as $doc) {
+        $multi_params['body'][] = [
+            'update' => [
+                '_index' => $doc['_index'],
+                '_type' => '_doc',
+                '_id' => $doc['_id']
+            ]
+        ];
+        $doc['_source']['tag'] = $tag;
+        $doc['_source']['tag_custom1'] = $tag_custom1;
+        $doc['_source']['tag_custom2'] = $tag_custom2;
+        $doc['_source']['tag_custom3'] = $tag_custom3;
+        $multi_params['body'][] = [
+            'doc' => $doc['_source']
+        ];
+        
+        $docsupdated += 1;
+        
+        // stop and make api call every 1000 docs
+        if ($docsupdated % 1000 == 0) {
+            $result = $client->bulk($multi_params);
+            unset($result);
+            unset($multi_params);
+            $multi_params = ['body' => []];
+        }
+
+    }
+    // update any remaining docs
+    $result = $client->bulk($multi_params);
+
+    return $docsupdated;
 }
 
 // submit form data
@@ -102,72 +195,51 @@ if (isset($_POST)) {
             $result = $client->update($params);
             $docsupdated += 1;
         } elseif ($_POST['tag'] === "tagall_subdirs_recurs") {
-            // apply tag and tag_custom to all subdirs recursively
-            $path = $result['_source']['path_parent'] . '/' . $result['_source']['filename'];
-            if ($path === "//") { $path = "/"; }  // root
-            $tag = $result['_source']['tag'];
-            $tag_custom = $result['_source']['tag_custom'];
-            // tag all subdirs in ES index
-            $dir_ids = tagall_docs($client, $esIndex, $path, $tag, $tag_custom, 'directory', true);
-            // update tags for all matching id's
-            foreach ($dir_ids as $id) {
-                $params = array();
-                // refresh index so we see results right away when page reloads
-                $params['refresh'] = true;
-                $params['id'] = $id;
-                $params['index'] = $esIndex;
-                $params['type'] = 'directory';
-                $result = $client->get($params);
-                $result['_source']['tag'] = $tag;
-                $result['_source']['tag_custom'] = $tag_custom;
-                $params['body']['doc'] = $result['_source'];
-                $result = $client->update($params);
-                $docsupdated += 1;
-            }
+            $docsupdated = multi_tag($client, $result, 'directory', true);
         } elseif ($_POST['tag'] === "tagall_files_recurs") {
-            // apply tag and tag_custom to all files recursively
-            $path = $result['_source']['path_parent'] . '/' . $result['_source']['filename'];
-            if ($path === "//") { $path = "/"; }  // root
-            $tag = $result['_source']['tag'];
-            $tag_custom = $result['_source']['tag_custom'];
-            // tag all subdirs in ES index
-            $file_ids = tagall_docs($client, $esIndex, $path, $tag, $tag_custom, 'file', true);
-            // update tags for all matching id's
-            foreach ($file_ids as $id) {
-                $params = array();
-                // refresh index so we see results right away when page reloads
-                $params['refresh'] = true;
-                $params['id'] = $id;
-                $params['index'] = $esIndex;
-                $params['type'] = 'file';
-                $result = $client->get($params);
-                $result['_source']['tag'] = $tag;
-                $result['_source']['tag_custom'] = $tag_custom;
-                $params['body']['doc'] = $result['_source'];
-                $result = $client->update($params);
-                $docsupdated += 1;
-            }
+            $docsupdated = multi_tag($client, $result, 'file', true);
+        } elseif ($_POST['tag'] === "tagall_subdirs_norecurs") {
+            $docsupdated = multi_tag($client, $result, 'directory', false);
+        } elseif ($_POST['tag'] === "tagall_files_norecurs") {
+            $docsupdated = multi_tag($client, $result, 'file', false);
         } elseif ($_POST['tag'] === "tagall_ids_onpage") {
             // copy tag and tag_custom to all ids on page
             $tag = $result['_source']['tag'];
             $tag_custom = $result['_source']['tag_custom'];
-            // tag all ids on page in ES index
             $ids = $_POST['idsonpage'];
-            // update tags for all matching id's
+            $multi_params = ['body' => []];
+            $multi_params['refresh'] = true;
             foreach ($ids as $id) {
-                $params = array();
-                // refresh index so we see results right away when page reloads
-                $params['refresh'] = true;
+                $params = [];
                 $params['id'] = $id['id'];
-                $params['index'] = $esIndex;
-                $params['type'] = $id['type'];
+                $params['index'] = $id['index'];
                 $result = $client->get($params);
+                unset($params);
                 $result['_source']['tag'] = $tag;
                 $result['_source']['tag_custom'] = $tag_custom;
-                $params['body']['doc'] = $result['_source'];
-                $result = $client->update($params);
+                $multi_params['body'][] = [
+                    'update' => [
+                        '_index' => $result['_index'],
+                        '_type' => $result['_type'],
+                        '_id' => $result['_id']
+                    ]
+                ];
+                $multi_params['body'][] = [
+                    'doc' => $result['_source']
+                ];
+
                 $docsupdated += 1;
+
+                // stop and make api call every 1000 docs
+                if ($docsupdated % 1000 == 0) {
+                    $result = $client->bulk($multi_params);
+                    unset($result);
+                    unset($multi_params);
+                    $multi_params = ['body' => []];
+                }
             }
+            // update any remaining docs
+            $result = $client->bulk($multi_params);
         } else {
             $result['_source']['tag'] = $_POST['tag'];
             $params['body']['doc'] = $result['_source'];
