@@ -150,7 +150,7 @@ exit();
                           <span style="margin:0px;padding:0px;margin-left:22px;font-size:11px;color:#666;">tag name|#hexcolor</span>
                   </li>
                   <li class="divider"></li>
-                  <?php if ($result['_type'] == 'directory') { ?>
+                  <?php if ($_REQUEST['doctype'] == 'directory') { ?>
                   <li onclick="$('#tag').val('tagall_subdirs_norecurs'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-folder-open" style="color:gray"></i> <span style="color:gray">Apply tags to subdirs (non-recursive)</span></a></li>
                   <li onclick="$('#tag').val('tagall_files_norecurs'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-file" style="color:gray"></i> <span style="color:gray">Apply tags to files (non-recursive)</span></a></li>
                   <li onclick="$('#tag').val('tagall_subdirs_recurs'); document.getElementById('loading').style.display='block'; $.ajax({type:'POST',url:'tagfiles.php',data: $('#changetag').serialize(),success: function() { location.reload(); } }); return false;"><a href="#"><i class="glyphicon glyphicon-folder-open" style="color:gray"></i> <span style="color:gray">Apply tags to subdirs (recursive)</span></a></li>

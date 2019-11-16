@@ -8,6 +8,7 @@
 - improved dupes and hardlinks analytics pages
 ### fixed
 - dupes and hardlinks analytics pages not using cache
+- multi-tag options not displaying for directories on view info page
 
 # [1.5.0.7] - 2019-09-24
 ### changed
