@@ -65,6 +65,7 @@ Read [getting started](https://github.com/shirosaidev/diskover-web/wiki/Getting-
 You can set up diskover and diskover-web in docker, there are a few choices for easily running diskover in docker using pre-built images/compose files.
 
 [linuxserver.io](https://linuxserver.io) Docker hub image: https://hub.docker.com/r/linuxserver/diskover/
+https://blog.linuxserver.io/2019/06/28/getting-started-with-diskover-in-docker/
 
 ## Installation Guide - Using docker compose
 
