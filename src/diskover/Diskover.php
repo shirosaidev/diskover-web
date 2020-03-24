@@ -315,7 +315,7 @@ function sortURL($sort) {
 
 // escape special characters
 function escape_chars($text) {
-   $chr = '<>+-&|!(){}[]^"~*?:/= @\'$.#\\';
+   $chr = '<>+-&|!(){}[]^"~*?:/= @\'$.#\\　';
    return addcslashes($text, $chr);
 }
 
