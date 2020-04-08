@@ -12,7 +12,7 @@ use Elasticsearch\ClientBuilder;
 error_reporting(E_ALL ^ E_NOTICE);
 
 // diskover-web version
-$VERSION = '1.5.0.8';
+$VERSION = '1.5.0.9';
 
 
 function connectES() {
@@ -510,15 +510,13 @@ function predict_search($q) {
         } else {
             $request = escape_chars($q);
         }
-        if (preg_match('/\.(\w)$|\.(\w){1,4}$/', $request)) {
-            $request = rtrim($request, '\\');
-            $filearr = explode('.', basename($request));
-            $request = 'path_parent:' . dirname($request) . ' AND filename:' . basename($request) . '* AND extension:' . end($filearr) . '*';
-        } elseif (preg_match('/\*$/', $request)) {
+        if (preg_match('/\*$/', $request)) {
             $request = 'path_parent:' . rtrim($request, '\*') . ' OR path_parent:' . rtrim($request, '\*') . '\/*';
         } else {
             $request = rtrim($request, '\/*');
-            $request = 'path_parent:' . $request . '* NOT path_parent:' . $request . '\/*';
+            $req_file = basename($request);
+            $req_parentdir = rtrim(dirname($request), '\/');
+            $request = '(path_parent:' . $request . ' OR (path_parent:' . $req_parentdir . ' AND filename:' . $req_file . '*)) AND NOT path_parent:' . $request . '\/*';
         }
     } elseif (strpos($q, '*') === 0) {  # wildcard search keyword
         $request = $q;

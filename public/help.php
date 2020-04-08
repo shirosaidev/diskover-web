@@ -155,6 +155,8 @@ require "../src/diskover/Diskover.php";
 						<strong>/Users/shirosai/Downloads</strong><br />
 					<p>all files in directory and all subdirs:<br>
 						<strong>/Users/shirosai/Downloads*</strong><br />
+					<p>full path to file:<br>
+						<strong>/Users/shirosai/Downloads/image.png</strong><br />
 					<p>image files:<br>
 						<strong>!img</strong><br />
 					<p>audio files:<br>
