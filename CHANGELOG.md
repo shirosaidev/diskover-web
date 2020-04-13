@@ -1,8 +1,12 @@
 # Diskover Web Change Log
 
-# [1.5.0.9] - 2020-04-07
+# [1.5.0.9] - 2020-04-12
+### added
+- notification on dashboard if two indexes are loaded but hotdirs has not been run to find % changes
 ### changed
 - improved handling of directory/file paths in auto-predictive search
+- improved search results table view
+
 
 # [1.5.0.8] - 2019-11-16
 ### added

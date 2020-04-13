@@ -167,7 +167,7 @@ require "../src/diskover/Diskover.php";
 						<strong>!doc</strong><br />
 					<p>temp files:<br>
 						<strong>!tmp</strong><br />
-					<p>comcodessed files:<br>
+					<p>compressed files:<br>
 						<strong>!comcodess</strong><br />
                     <p>database files:<br>
 						<strong>!datab</strong><br />
@@ -199,7 +199,7 @@ require "../src/diskover/Diskover.php";
 						<strong>extension:(asf OR avi OR flv OR m4v OR mov OR mp4 OR mpg OR rm OR vob OR wmv)</strong><br />
 					<p>temp files:<br>
 						<strong>extension:(cache OR tmp OR temp OR bak OR old)</strong><br />
-					<p>comcodessed files:<br>
+					<p>compressed files:<br>
 						<strong>extension:(7z OR deb OR gz OR pkg OR rar OR rpm OR tar OR zip OR zipx)</strong><br />
 					<p>image sequence img001.dpx, img002.dpx, im003.dpx:<br>
 						<strong>filename:img*.dpx</strong><br />

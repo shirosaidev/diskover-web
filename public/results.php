@@ -148,9 +148,9 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
       <thead>
         <tr>
           <th class="text-nowrap">#</th>
-          <th class="text-nowrap" width="20%">Name <?php echo sortURL('filename'); ?></th>
+          <th class="text-nowrap">Name <?php echo sortURL('filename'); ?></th>
           <th class="text-nowrap">Tags <?php echo sortURL('tag'); ?></th>
-          <th class="text-nowrap" width="20%">Path <?php echo sortURL('path_parent'); ?></th>
+          <th class="text-nowrap">Path <?php echo sortURL('path_parent'); ?></th>
 		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
           <?php if (getCookie('hidefield_sizep') != "1") { ?><th class="text-nowrap" width="10%">% <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php } else { $hiddencol[] = 'sizep'; } ?>

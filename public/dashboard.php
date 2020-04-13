@@ -400,6 +400,13 @@ if ($esIndex2 != "") {
     $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 }
 
+// Check to show change percent notification
+if ($esIndex2 !== "") {
+    $show_change_percent_notify = showChangePercent($client, $esIndex, $esIndex2);
+} else {
+    $show_change_percent_notify = false;
+}
+
 $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
 
 ?>
@@ -625,6 +632,17 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <i class="glyphicon glyphicon-thumbs-up"></i> <strong>Good job!</strong> It looks like all files have been tagged.
+      </div>
+      <?php
+      }
+      ?>
+      <?php
+      if (!$show_change_percent_notify) {
+      ?>
+      <div class="alert alert-dismissible alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4><i class="glyphicon glyphicon-info-sign"></i> No change percents.</h4>
+        <p>Run diskover with the --hotdirs flag to compare the indices to show change percents in search results and "Hot Dirs" analytics.</p>
       </div>
       <?php
       }

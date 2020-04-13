@@ -197,11 +197,22 @@ function renderDupesCharts(data) {
               .style("stroke", "black");
          })
          .on('mousemove', function() {
-             return tip
-                 .style("top", (d3.event.pageY - 10) + "px")
-                 .style("left", (d3.event.pageX + 10) + "px");
-         });
-
+            if (d3.event.pageY > window.innerHeight - 50) {
+                // change tip for bottom of screen
+                return tip
+                    .style("top", (d3.event.pageY - 40) + "px")
+                    .style("left", (d3.event.pageX + 10) + "px");
+            } else if (d3.event.pageX > window.innerWidth - 350) {
+                // change tip for right side of screen
+                return tip
+                    .style("top", (d3.event.pageY + 10) + "px")
+                    .style("left", (d3.event.pageX - 350) + "px");
+            } else {
+                return tip
+                    .style("top", (d3.event.pageY - 10) + "px")
+                    .style("left", (d3.event.pageX + 10) + "px");
+            }
+        });
 
      // Bar chart (dupes size)
 
