@@ -637,7 +637,7 @@ $estime = number_format(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 4);
       }
       ?>
       <?php
-      if (!$show_change_percent_notify) {
+      if ($show_change_percent_notify) {
       ?>
       <div class="alert alert-dismissible alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
