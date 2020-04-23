@@ -401,8 +401,13 @@ if ($esIndex2 != "") {
 }
 
 // Check to show change percent notification
-if ($esIndex2 !== "") {
-    $show_change_percent_notify = showChangePercent($client, $esIndex, $esIndex2);
+if ($esIndex2 != "") {
+    $show_change_percent = showChangePercent($client, $esIndex, $esIndex2);
+    if ($show_change_percent) {
+        $show_change_percent_notify = false;
+    } else {
+        $show_change_percent_notify = true;
+    }
 } else {
     $show_change_percent_notify = false;
 }

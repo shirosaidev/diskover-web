@@ -623,9 +623,9 @@ function showChangePercent($client, $index, $index2) {
     $queryResponse = $client->search($searchParams);
     $result_source = $queryResponse['hits']['hits'][0]['_source'];
     if ($result_source['change_percent_filesize'] >= 0 && $result_source['change_percent_filesize'] !== "") {
-        return false;
-    } else {
         return true;
+    } else {
+        return false;
     }
 }
 
