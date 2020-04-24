@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2020
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -399,6 +399,41 @@ if ($esIndex2 != "") {
     $diskspace2_used = $queryResponse['hits']['hits'][0]['_source']['used'];
     $diskspace2_date = $queryResponse['hits']['hits'][0]['_source']['indexing_date'];
 }
+
+// Get recommended file delete size/count/cost
+$file_recommended_delete_size = 0;
+$file_recommended_delete_count = 0;
+
+$results = [];
+$searchParams = [];
+
+// Setup search query
+$searchParams['index'] = $esIndex;
+$searchParams['type']  = "file";
+
+$searchParams['body'] = [
+    'size' => 0,
+    'aggs' => [
+        'total_size' => [
+        'sum' => [
+            'field' => 'filesize'
+        ]
+        ]
+    ],
+    'query' => [
+        'query_string' => [
+        'query' => 'last_modified:{* TO now-6M} AND last_access:{* TO now-6M}'
+        ]
+    ]
+];
+$queryResponse = $client->search($searchParams);
+
+// Get total count of recommended files to remove
+$file_recommended_delete_count = $queryResponse['hits']['total'];
+
+// Get total size of all recommended files to remove
+$file_recommended_delete_size = $queryResponse['aggregations']['total_size']['value'];
+
 
 // Check to show change percent notification
 if ($esIndex2 != "") {
