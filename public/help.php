@@ -168,7 +168,7 @@ require "../src/diskover/Diskover.php";
 					<p>temp files:<br>
 						<strong>!tmp</strong><br />
 					<p>compressed files:<br>
-						<strong>!comcodess</strong><br />
+						<strong>!compress</strong><br />
                     <p>database files:<br>
 						<strong>!datab</strong><br />
                     <p>disc image files:<br>

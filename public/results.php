@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2020
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
@@ -154,10 +154,6 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
 		  <th class="text-nowrap">File Size <?php echo sortURL('filesize'); ?></th>
           <?php if (getCookie('hidefield_sizep') != "1") { ?><th class="text-nowrap" width="10%">% <span style="color:darkgray;font-size: 11px;"><i title="Percentage of total file size this page" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php } else { $hiddencol[] = 'sizep'; } ?>
-          <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
-          <?php if (getCookie('hidefield_cost') != "1") { ?><th class="text-nowrap">Cost per GB <?php echo sortURL('costpergb'); ?></th>
-          <?php } else { $hiddencol[] = 'cost'; } ?>
-          <?php $numofcol+=1; } ?>
           <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
           <?php if ($show_change_percent && getCookie('hidefield_change') != "1") { ?>
           <th class="text-nowrap">Change % <?php echo sortURL('change_percent_filesize'); ?></th>
@@ -172,24 +168,16 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           <?php if (getCookie('hidefield_itemssubdirs') != "1") { ?><th class="text-nowrap">Items (subdirs) <?php echo sortURL('items_subdirs'); ?></th>
           <?php } else { $hiddencol[] = 'itemssubdirs'; } ?>
           <?php $numofcol+=3; } ?>
-          <?php if ($s3_index) { ?>
-          <th class="text-nowrap">Bucket <?php echo sortURL('s3_bucket'); ?></th>
-          <th class="text-nowrap">Key <?php echo sortURL('s3_key'); ?></th>
-          <th class="text-nowrap">Storage class <?php echo sortURL('s3_storage_class'); ?></th>
-          <?php } else { ?>
           <?php if (getCookie('hidefield_owner') != "1") { ?><th class="text-nowrap">Owner <?php echo sortURL('owner'); ?></th>
           <?php } else { $hiddencol[] = 'owner'; } ?>
           <?php if (getCookie('hidefield_group') != "1") { ?><th class="text-nowrap">Group <?php echo sortURL('group'); ?></th>
           <?php } else { $hiddencol[] = 'group'; } ?>
-          <?php } ?>
           <?php if (getCookie('hidefield_modified') != "1") { ?><th class="text-nowrap">Modified (utc) <?php echo sortURL('last_modified'); ?></th>
           <?php } else { $hiddencol[] = 'modified'; } ?>
           <?php if (getCookie('hidefield_rating') != "1") { ?><th class="text-nowrap">Rating <span style="color:darkgray;font-size: 11px;"><i title="Rating is based on last modified time, older is higher rating" class="glyphicon glyphicon-question-sign"></i></span></th>
           <?php } else { $hiddencol[] = 'rating'; } ?>
-          <?php if ($s3_index != '1') { ?>
           <?php if (getCookie('hidefield_accessed') != "1") { ?><th class="text-nowrap">Accessed (utc) <?php echo sortURL('last_access'); ?></th>
           <?php } else { $hiddencol[] = 'accessed'; } ?>
-          <?php } ?>
           <?php
           if (count($extra_fields) > 0) {
             foreach ($extra_fields as $key => $value) { ?>
@@ -248,13 +236,9 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
             }
             ?>
             <?php if ($result['_type'] == 'directory') {
-                ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1" class="highlight"><?php if ($s3_index && $file['path_parent'] == '/') {
-                    ?><i class="glyphicon glyphicon-cloud" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php
-                } elseif ($s3_index && $file['path_parent'] == '/s3') {
-                    ?><i class="glyphicon glyphicon-cloud-upload" style="color:#FD9827;font-size:13px;padding-right:3px;"></i><?php
-                } else { 
-                    ?><i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i><?php
-                } ?> <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><button class="btn btn-default btn-xs" type="button" style="color:gray;font-size:11px;margin-left:3px;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></button></a><?php
+                ?> <a href="simple.php?index=<?php echo $esIndex; ?>&amp;index2=<?php echo $esIndex2; ?>&amp;q=path_parent:<?php echo rawurlencode(escape_chars($fullpath)); ?>&amp;submitted=true&amp;p=1" class="highlight">
+                    <i class="glyphicon glyphicon-folder-close" style="color:#8ACEE9;font-size:13px;padding-right:3px;"></i>
+                <?php echo $filename; ?></a> <a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>"><button class="btn btn-default btn-xs" type="button" style="color:gray;font-size:11px;margin-left:3px;"><i title="directory info" class="glyphicon glyphicon-info-sign"></i></button></a><?php
             } else {
                     ?><a href="view.php?id=<?php echo $result['_id'] . '&amp;index=' . $result['_index'] . '&amp;doctype=' . $result['_type']; ?>" class="highlight"><i class="glyphicon glyphicon-file" style="color:#738291;font-size:13px;padding-right:3px;"></i> <?php echo $filename; ?></a><?php
                 } ?>
@@ -379,9 +363,6 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
           </td>
         <td class="text-nowrap highlight" style="font-weight:bold;color:#D20915;"><?php echo formatBytes($file['filesize']); ?></td>
         <?php if (!in_array('sizep', $hiddencol)) { ?><td class="highlight"><div class="text-right percent" style="max-width:100%; width:<?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%;"></div>&nbsp;<span style="color:gray;"><small><?php echo ($total_size > 0) ? number_format(($file['filesize'] / $total_size) * 100, 2) : number_format(0, 2); ?>%</small></span></td><?php } ?>
-        <?php if ($s3_index != '1' && getCookie('costpergb') > 0) { ?>
-        <?php if (!in_array('cost', $hiddencol)) { ?><td class="text-nowrap highlight">$ <?php echo number_format(round($file['costpergb'], 2), 2); ?></td><?php } ?>
-        <?php } ?>
         <?php if ($_GET['doctype'] == 'directory' || $_GET['doctype'] == '') { ?>
         <!-- show comparison file size -->
         <?php if ($show_change_percent && getCookie('hidefield_change') != "1") { $filesize_change = 0; ?>
@@ -421,19 +402,11 @@ if (!empty($results[$p]) && count($results[$p]) > 0) {
     <!-- end show comparison items -->
     </td>
         <?php } ?>
-        <?php if ($s3_index) { ?>
-        <td class="highlight"><?php echo $file['s3_bucket']; ?></td>
-        <td class="path highlight"><?php echo $file['s3_key']; ?></td>
-        <td class="highlight"><?php echo $file['s3_storage_class']; ?></td>
-        <?php } else { ?>
         <?php if (!in_array('owner', $hiddencol)) { ?><td class="highlight"><?php echo $file['owner']; ?></td><?php } ?>
         <?php if (!in_array('group', $hiddencol)) { ?><td class="highlight"><?php echo $file['group']; ?></td><?php } ?>
-        <?php } ?>
         <?php if (!in_array('modified', $hiddencol)) { ?><td class="highlight modified"><?php echo $file['last_modified']; ?></td><?php } ?>
         <?php if (!in_array('rating', $hiddencol)) { ?><td class="highlight rating"><?php for ($n = 0; $n < $file_rating; $n++) { echo "<i class=\"glyphicon glyphicon-remove\"></i>"; } ?></td><?php } ?>
-        <?php if (!$s3_index) { ?>
         <?php if (!in_array('accessed', $hiddencol)) { ?><td class="highlight"><?php echo $file['last_access']; ?></td><?php } ?>
-        <?php } ?>
         <?php
         if (count($extra_fields) > 0) {
           foreach ($extra_fields as $key => $value) { ?>

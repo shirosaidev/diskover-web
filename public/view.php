@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) Chris Park 2017-2018
+Copyright (C) Chris Park 2017-2020
 diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
  */
