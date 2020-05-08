@@ -53,12 +53,12 @@ https://engineerworkshop.com/2020/02/04/how-to-monitor-disk-usage-and-growth-wit
 
 ### Requirements
 
-* `Linux or OS X/MacOS` (tested on Ubuntu 16.04/18.04, OS X 10.11.6)
+* `Linux, OS X/MacOS, or Windows` (tested on Ubuntu 16.04/18.04, OS X 10.11.6)
 * `PHP 7` (tested on PHP 7.1.10, 7.2.5)
 * `Composer Dependency Manager for PHP` (install composer with apt or yum)
 * `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.3.2, installed when running composer install)
 * `php-curl` (install with apt or yum, if you are running php7.1 or php7.2 install php7.x-curl)
-* `Elasticsearch 5` (tested on Elasticsearch 5.6.9) Elasticsearch 6 not supported yet.
+* `Elasticsearch 5` (tested on Elasticsearch 5.6.16)
 * `Apache or Nginx` (recommended over PHP built-in web server)
 * `php-fpm (fastcgi)` (recommended to speed up php)
 * `diskover` (Elasticsearch index created by diskover)
@@ -71,38 +71,6 @@ https://engineerworkshop.com/2020/02/04/how-to-monitor-disk-usage-and-growth-wit
 ### Set up
 
 Read [getting started](https://github.com/shirosaidev/diskover-web/wiki/Getting-Started) in the wiki.
-
-## Docker hub image
-
-You can set up diskover and diskover-web in docker, there are a few choices for easily running diskover in docker using pre-built images/compose files.
-
-[linuxserver.io](https://linuxserver.io) Docker hub image: https://hub.docker.com/r/linuxserver/diskover/
-https://blog.linuxserver.io/2019/06/28/getting-started-with-diskover-in-docker/
-
-## Installation Guide - Using docker compose
-
-You can use docker-compose to test and run diskover-web. In the docker-compose it is also included Elasticsearch and Redis so that it is possible to create a full test environment for diskover.
-
-The following schema uses Apache2 as webserver. This allows diskover-web to receive more requests in parallel than using the development PHP server.
-
-### Requirements
-
-* Docker 1.13+
-* Docker-compose 1.16.1+
-
-### Running
-
-```
-$ docker-compose build && docker-compose up
-```
-
-The services will be exposed in the following port on localhost:
-
-| Service       | Port |
-| ------------- | ---- |
-| Elasticsearch | 9200 |
-| Redis         | 6379 |
-| Diskover Web  | 8080 |
 
 ## User Guide
 
