@@ -27,6 +27,12 @@ If you are a fan of the project or you are using diskover and it's helping you s
 
 For discussions or support for diskover join the [diskover Slack workspace](https://join.slack.com/t/diskoverworkspace/shared_invite/enQtNzQ0NjE1Njk5MjIyLWI4NWQ0MjFhYzQyMTRhMzk4NTQ3YjBlYjJiMDk1YWUzMTZmZjI1MTdhYTA3NzAzNTU0MDc5NDA2ZDI4OWRiMjM).
 
+## Web articles
+
+https://blog.linuxserver.io/2019/06/28/getting-started-with-diskover-in-docker/
+
+https://engineerworkshop.com/2020/02/04/how-to-monitor-disk-usage-and-growth-with-diskover/
+
 ## Screenshots
 
 <img src="docs/diskover-web-dashboard-screenshot.png?raw=true" alt="diskover-web dashboard" width="400" align="left">
