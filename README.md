@@ -52,7 +52,7 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 
 ### Download
 
-<h4>*** To get access to download diskover, please email <a href="mailto:info@diskoverspace.com">info@diskoverspace.com</a> ***</h4>
+<h4>*** To get access to download diskover-web, please email <a href="mailto:info@diskoverspace.com">info@diskoverspace.com</a> ***</h4>
 
 ### Set up
 
