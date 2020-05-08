@@ -19,6 +19,14 @@ diskover-web allows exporting of file lists to json/csv, also the diskover-web R
 
 <h4>If you are a business and would like to inquire about diskover enterprise, please visit <a href="https://diskoverspace.com">https://diskoverspace.com</a> to learn more and to contact us.</h4>
 
+## Become a Patron & support shedding light on data darkness
+
+If you are a fan of the project or you are using diskover and it's helping you save storage space, please consider supporting the project on [Patreon](https://www.patreon.com/shirosaidev) or [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72). Thank you so much to all the fans and supporters!
+
+## Discussions/Support
+
+For discussions or support for diskover join the [diskover Slack workspace](https://join.slack.com/t/diskoverworkspace/shared_invite/enQtNzQ0NjE1Njk5MjIyLWI4NWQ0MjFhYzQyMTRhMzk4NTQ3YjBlYjJiMDk1YWUzMTZmZjI1MTdhYTA3NzAzNTU0MDc5NDA2ZDI4OWRiMjM).
+
 ## Screenshots
 
 <img src="docs/diskover-web-dashboard-screenshot.png?raw=true" alt="diskover-web dashboard" width="400" align="left">
