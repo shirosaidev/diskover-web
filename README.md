@@ -15,9 +15,9 @@ With "smartsearches" in diskover-web, you can create any ES query and visualize 
 
 diskover-web allows exporting of file lists to json/csv, also the diskover-web REST API can be integrated into your pipeline and used to view or update data, such as tags, in your diskover indices.
 
-It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](http://getbootstrap.com/) and [D3.js](https://d3js.org).
-
 <h4>*** To get access to download diskover-web, please email <a href="mailto:info@diskoverspace.com">info@diskoverspace.com</a> ***</h4>
+
+<h4>If you are a business and would like to inquire about diskover enterprise, please visit <a href="https://diskoverspace.com">https://diskoverspace.com</a> to learn more and to contact us.</h4>
 
 ## Screenshots
 
