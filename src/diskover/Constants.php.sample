@@ -1,0 +1,44 @@
+<?php
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
+namespace diskover;
+
+class Constants {
+    // set to your Elasticsearch host or ip, if you are using AWS set to your endpoint without http:// or https://
+    const ES_HOST = 'localhost';
+    // set to your Elasticsearch port, default 9200, if you are using AWS set to 443 or 80
+    const ES_PORT = 9200;
+    // set to TRUE if using AWS ES
+    const AWS = FALSE;
+    // set to TRUE if using AWS ES and HTTPS, FALSE FOR HTTP
+    const AWS_HTTPS = TRUE;
+    // set following two lines if using X-Pack http-auth
+    const ES_USER = '';
+    const ES_PASS = '';
+    // login auth for diskover-web
+    const LOGIN_REQUIRED = FALSE;
+    const DISKOVER_USER = 'diskover';
+    const DISKOVER_PASS = 'darkdata';
+    // diskover.py socket listener server
+    const ENABLE_SOCKET_CLIENT = FALSE;
+    const SOCKET_LISTENER_HOST = '127.0.0.1';
+    const SOCKET_LISTENER_PORT = 9999;
+    // default min file size (bytes) filter
+    const FILTER = 1;
+    // default mtime filter
+    const MTIME = 0;
+    // default maxdepth filter
+    const MAXDEPTH = 2;
+    // default don't use count (use size)
+    const USE_COUNT = 0;
+    // default show files on analytics pages
+    const SHOW_FILES = 1;
+    // default hide threshhold filter
+    const HIDE_THRESH = 0.9;
+    // default results per search page
+    const SEARCH_RESULTS = 50;
+}

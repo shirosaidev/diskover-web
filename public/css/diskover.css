@@ -1,0 +1,399 @@
+/*
+Copyright (C) Chris Park 2017
+diskover is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+ */
+
+/* diskover style sheet */
+
+body::-webkit-scrollbar-track
+{
+	background-color: #060606;
+}
+
+body::-webkit-scrollbar-corner
+{
+	background-color: #060606;
+}
+
+body::-webkit-scrollbar
+{
+	width: 10px;
+    height: 8px;
+	background-color: #060606;
+}
+
+body::-webkit-scrollbar-thumb
+{
+	background-color: #31363A;
+    border-radius: 5px;
+}
+
+.keephighlight_bg {
+    background-color: #52A3BB;
+}
+
+.archivehighlight_bg {
+    background-color: #65C165;
+}
+
+.deletehighlight_bg {
+    background-color: #F69327;
+}
+
+.keeprow .highlight {
+    color: #52A3BB !important;
+    opacity: .8;
+}
+
+.keeprow .highlight a {
+    color: #52A3BB !important;
+}
+
+.archiverow .highlight {
+    color: #65C165 !important;
+    opacity: .8;
+}
+
+.archiverow .highlight a {
+    color: #65C165 !important;
+}
+
+.deleterow .highlight {
+    color: #F69327 !important;
+    opacity: .8;
+}
+
+.deleterow .highlight a {
+    color: #F69327 !important;
+}
+
+.tagdropdown {
+    opacity: 1 !important;
+}
+
+.tagdropdown a:link {
+    text-decoration: none !important;
+}
+
+.tagdropdown a:visited {
+    text-decoration: none !important;
+}
+
+.path {
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.pathdark {
+    color: #808080 !important;
+}
+
+.pathdark:hover {
+    color: #808080 !important;
+}
+
+.pathdropdown a:link {
+    color: lightgray !important;
+    text-decoration: none !important;
+}
+
+.pathdropdown a:visited {
+    color: lightgray !important;
+    text-decoration: none !important;
+}
+
+.searchresults {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.results {
+    word-wrap: break-word;
+    word-break: break-all;
+    font-size: 13px;
+    color: gray;
+}
+
+.results tr[visible='false'], .no-result {
+    display: none;
+}
+
+.results tr[visible='true'] {
+    display: table-row;
+}
+
+.counter {
+    padding: 8px;
+    color: #ccc;
+}
+
+thead, tfoot {
+    color: #FFF;
+    font-weight: bold;
+}
+
+.button-tagfiles {
+    color: red;
+}
+
+.sortarrow-container {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.sortarrow-asc {
+    position: relative;
+    top: -3px;
+    left: 4px;
+    color: #333;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.sortarrow-desc {
+    position: absolute;
+    top: 7px;
+    left: 4px;
+    color: #333;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.sortarrow-asc:hover {
+    color: #33A0D4;
+    font-weight: bold;
+}
+
+.sortarrow-desc:hover {
+    color: #33A0D4;
+    font-weight: bold;
+}
+
+.sortarrow-asc-active {
+    color: #33A0D4;
+    font-weight: bold;
+}
+
+.sortarrow-desc-active {
+    color: #33A0D4;
+    font-weight: bold;
+}
+
+.customtag {
+    width: 200px;
+}
+
+textarea, select, input {
+    background-color: #1C1E22!important;
+    color: white!important;
+}
+
+.file-btns {
+    color: #CB77DF;
+}
+
+.file-cmd-btns {
+    color: #73C990;
+}
+
+.file-cmd-btn-root {
+    color: #FD9827;
+}
+
+tbody a {
+    color: white!important;
+    text-decoration: none!important;
+}
+
+tbody a:hover {
+    color: white!important;
+    text-decoration: underline!important;
+}
+
+.chartbox a {
+    color: white!important;
+    text-decoration: none!important;
+}
+
+.chartbox a:hover {
+    color: white!important;
+    text-decoration: underline!important;
+}
+
+.delete {
+    color: #F69327;
+}
+
+.archive {
+    color: #65C165;
+}
+
+.keep {
+    color: #52A3BB;
+}
+
+.untagged {
+    color: #666666;
+}
+
+#loading {
+   width: 100%;
+   height: 100%;
+   top: 0;
+   left: 0;
+   position: fixed;
+   display: block;
+   opacity: 0.7;
+   background-color: #000;
+   z-index: 99;
+   text-align: center;
+   display: none;
+}
+
+#loading-image {
+  position: absolute;
+  top: 49%;
+  left: 49%;
+  z-index: 100;
+}
+
+#loading-text {
+  position: absolute;
+  top: 54%;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  text-align: center;
+  z-index: 100;
+  color: white;
+  font-weight: bold;
+}
+
+#errormsg-container {
+    display: none;
+    position: fixed;
+    width: 500px;
+    left: 50px;
+    bottom: 20px;
+    z-index: 2;
+}
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+    border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+    float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+}
+
+.essearchreply {
+    display: none;
+    position: absolute;
+    height: 400px;
+    z-index: 99;
+    background-color: #1C1E22;
+    opacity: .9;
+    width: 100%;
+    overflow: hidden;
+    margin-top: 10px;
+    border: 1px solid #555;
+}
+
+.essearchreply-text {
+    display: block;
+    position: relative;
+    padding: 15px;
+    font-size: 14px;
+    text-align: left;
+    line-height: 1.9em;
+    height: 400px;
+    width: 100%;
+    overflow: hidden;
+    color: white;
+    font-weight: bold;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.essearchreply-text a {
+    color: white!important;
+}
+
+.searchpath {
+    color:gray!important;
+    font-size:10px;
+    line-height:0.1em!important;
+}
+
+.searchpath a {
+    color:gray!important;
+    font-size:10px;
+    line-height:0.1em!important;
+}
+
+.percent {
+    background-color: #D20915;
+    opacity: .9;
+    border: 1px solid black;
+    display: inline-block;
+    height: 14px;
+    left: 0px;
+    bottom: -2px;
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.modified {
+    color:#6D5293;
+    font-weight:bold;
+}
+
+.rating {
+    font-size:13px;
+    color:#6E5396;
+    font-weight:bold;
+    letter-spacing:-2px;
+}
