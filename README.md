@@ -1,7 +1,6 @@
 # diskover-web - diskover's web file manager, storage analytics and file search engine
 
 [![License](https://img.shields.io/github/license/shirosaidev/diskover-web.svg?label=License&maxAge=86400)](./LICENSE.txt)
-[![Release](https://img.shields.io/github/release/shirosaidev/diskover-web.svg?label=Release&maxAge=60)](https://github.com/shirosaidev/diskover-web/releases/latest)
 [![Sponsor Patreon](https://img.shields.io/badge/Sponsor%20%24-Patreon-brightgreen.svg)](https://www.patreon.com/diskover)
 [![Donate PayPal](https://img.shields.io/badge/Donate%20%24-PayPal-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72)
 
@@ -33,64 +32,26 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 <img src="docs/diskover-web-adminpanel-screenshot.png?raw=true" alt="diskover-web admin panel" width="400">
 
 
-## Installation Guide - Local
-
 ### Requirements
 
-* `Linux or OS X/MacOS` (tested on Ubuntu 16.04/18.04, OS X 10.11.6)
-* `PHP 7` (tested on PHP 7.1.10, 7.2.5)
-* `Composer Dependency Manager for PHP` (install composer with apt or yum)
-* `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php), tested on 5.3.2, installed when running composer install)
-* `php-curl` (install with apt or yum, if you are running php7.1 or php7.2 install php7.x-curl)
-* `Elasticsearch 5` (tested on Elasticsearch 5.6.9) Elasticsearch 6 not supported yet.
-* `Apache or Nginx` (recommended over PHP built-in web server)
-* `php-fpm (fastcgi)` (recommended to speed up php)
+* `Linux or OS X/MacOS`
+* `PHP 7`
+* `Composer Dependency Manager for PHP`
+* `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php))
+* `php-curl`
+* `Elasticsearch 5`
+* `Nginx`
+* `php-fpm (fastcgi)`
 * `diskover` (Elasticsearch index created by diskover)
-* `Chrome or Safari` (cookies are required for diskover-web, Chrome recommended)
 
 ### Download
 
-```sh
-$ git clone https://github.com/shirosaidev/diskover-web.git
-$ cd diskover-web
-```
-[Download latest version](https://github.com/shirosaidev/diskover-web/releases/latest)
+To download diskover-web, please sign up at https://diskoverspace.com/diskover/
 
 ### Set up
 
 Read [getting started](https://github.com/shirosaidev/diskover-web/wiki/Getting-Started) in the wiki.
 
-## Docker hub image
-
-You can set up diskover and diskover-web in docker, there are a few choices for easily running diskover in docker using pre-built images/compose files.
-
-[linuxserver.io](https://linuxserver.io) Docker hub image: https://hub.docker.com/r/linuxserver/diskover/
-https://blog.linuxserver.io/2019/06/28/getting-started-with-diskover-in-docker/
-
-## Installation Guide - Using docker compose
-
-You can use docker-compose to test and run diskover-web. In the docker-compose it is also included Elasticsearch and Redis so that it is possible to create a full test environment for diskover.
-
-The following schema uses Apache2 as webserver. This allows diskover-web to receive more requests in parallel than using the development PHP server.
-
-### Requirements
-
-* Docker 1.13+
-* Docker-compose 1.16.1+
-
-### Running
-
-```
-$ docker-compose build && docker-compose up
-```
-
-The services will be exposed in the following port on localhost:
-
-| Service       | Port |
-| ------------- | ---- |
-| Elasticsearch | 9200 |
-| Redis         | 6379 |
-| Diskover Web  | 8080 |
 
 ## User Guide
 
