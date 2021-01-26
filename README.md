@@ -16,7 +16,10 @@ diskover-web allows exporting of file lists to json/csv, also the diskover-web R
 
 It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](http://getbootstrap.com/) and [D3.js](https://d3js.org).
 
-## Screenshots
+## News/ Updates
+diskover v2 will be released soon (Q1 2021), please sign up and register at https://diskoverspace.com/diskover/ for updates and join diskover Slack. **v1 will be discontinued soon and no longer supported.**
+
+## Screenshots (v1)
 
 <img src="docs/diskover-web-dashboard-screenshot.png?raw=true" alt="diskover-web dashboard" width="400" align="left">
 <img src="docs/diskover-web-filetree-screenshot.png?raw=true" alt="diskover-web file tree" width="400">
@@ -32,23 +35,18 @@ It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [B
 <img src="docs/diskover-web-adminpanel-screenshot.png?raw=true" alt="diskover-web admin panel" width="400">
 
 
-### Requirements
+### Requirements (v1)
 
-* `Linux or OS X/MacOS`
-* `PHP 7`
-* `Composer Dependency Manager for PHP`
-* `PHP client for Elasticsearch` ([elasticsearch-php](https://github.com/elastic/elasticsearch-php))
-* `php-curl`
-* `Elasticsearch 5`
-* `Nginx`
-* `php-fpm (fastcgi)`
-* `diskover` (Elasticsearch index created by diskover)
+* `Linux, MacOS, Windows 10`
+* `PHP 7.x + php-fpm`
+* `Elasticsearch 5` **Elasticsearch 7.x in enterprise and v2**
+* `Nginx or Apache`
 
 ### Download
 
 To download diskover-web, please sign up at https://diskoverspace.com/diskover/
 
-### Set up
+### Set up (v1)
 
 Read [getting started](https://github.com/shirosaidev/diskover-web/wiki/Getting-Started) in the wiki.
 
