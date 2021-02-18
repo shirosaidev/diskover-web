@@ -1,8 +1,6 @@
 # diskover-web - diskover's web file manager, storage analytics and file search engine
 
 [![License](https://img.shields.io/github/license/shirosaidev/diskover-web.svg?label=License&maxAge=86400)](./LICENSE.txt)
-[![Sponsor Patreon](https://img.shields.io/badge/Sponsor%20%24-Patreon-brightgreen.svg)](https://www.patreon.com/diskover)
-[![Donate PayPal](https://img.shields.io/badge/Donate%20%24-PayPal-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLF223XAS4W72)
 
 <img align="left" width="249" height="189" src="https://github.com/shirosaidev/diskover/blob/master/docs/diskover.png?raw=true" hspace="5" vspace="5" alt="diskover">
 
@@ -17,7 +15,7 @@ diskover-web allows exporting of file lists to json/csv, also the diskover-web R
 It is written in HTML5, CSS3, PHP, Javascript, [jQuery](https://jquery.com/), [Bootstrap](http://getbootstrap.com/) and [D3.js](https://d3js.org).
 
 ## News/ Updates
-diskover v2 will be released soon (Q1 2021), please sign up and register at https://diskoverspace.com/diskover/ for updates and join diskover Slack. **v1 will be discontinued soon and no longer supported.**
+diskover v2 will be released soon (Q1 2021), please sign up and register at https://diskoverdata.com/diskover/ for updates and join diskover Slack. **v1 will be discontinued soon and no longer supported.**
 
 ## Screenshots (v1)
 
@@ -44,7 +42,7 @@ diskover v2 will be released soon (Q1 2021), please sign up and register at http
 
 ### Download
 
-To download diskover-web, please sign up at https://diskoverspace.com/diskover/
+To download diskover-web, please sign up at https://diskoverdata.com/diskover/
 
 ### Set up (v1)
 
